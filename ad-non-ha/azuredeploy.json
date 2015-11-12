@@ -238,7 +238,7 @@
       "type": "Microsoft.Network/loadBalancers",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[variables('virtualNetworkName')]"
+        "[variables('publicIPAddressName')]"
       ],
       "properties": {
         "frontendIPConfigurations": [

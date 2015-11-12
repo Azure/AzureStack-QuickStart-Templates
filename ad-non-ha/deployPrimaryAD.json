@@ -31,7 +31,8 @@
         "Southeast Asia",
         "Japan East",
         "Japan West",
-        "Southeast Asia"
+        "Southeast Asia",
+        "local"
       ],
       "metadata": {
         "description": "The region to deploy the resources into"

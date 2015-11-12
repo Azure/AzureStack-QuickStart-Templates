@@ -22,10 +22,6 @@
     },
     "adminPassword": {
       "value": "!!123abcA"
-    },
-
-    "adImagePath": {
-      "value": ""
     }
   }
 }
