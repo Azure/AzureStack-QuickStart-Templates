@@ -137,13 +137,6 @@
       "defaultValue": "10.0.0.0/16"
     },
 
-    "sqlSubnet": {
-      "type": "string",
-      "metadata": {
-        "description": "The address range of the SQL subnet created in the new VNET"
-      },
-      "defaultValue": "10.0.1.0/24"
-    },
     "primaryAdIpAddress": {
       "type": "string",
       "metadata": {
@@ -204,33 +197,11 @@
       "metadata": {
         "description": "The region to deploy the resources into"
       }
-    },
-
-    "sqlLBIPAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The address of secondary AD"
-      },
-      "defaultValue": "10.0.0.6"
     }
   },
 
   "variables": {
     "staticSubnetName": "ADStaticSubnet",
-    "subnets": [
-      {
-        "name": "[variables('staticSubnetName')]",
-        "properties": {
-          "addressPrefix": "[parameters('vmNetworkSubnet')]"
-        }
-      },
-      {
-        "name": "[variables('sqlSubnetName')]",
-        "properties": {
-          "addressPrefix": "[parameters('sqlSubnet')]"
-        }
-      }
-    ],
     "virtualNetworkName": "WorkloadVNET",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
@@ -244,8 +215,6 @@
     "deployPrimaryAd": "deployPrimaryAd",
     "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",
 
-    "sqlSubnetName": "sqlSubnet",
-    "sqlSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('sqlSubnetName'))]",
     "sqlStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'sqlsa')]",
     "sqlClusterTemplateURL": "[concat(parameters('assetLocation'),'/sqlVmTemplate.json')]",
     "deploySqlClusterVms": "deploySqlClusterVms",
@@ -257,7 +226,7 @@
     "updateVNetDNS1": "updateVNetDNS1",
     "updateVNetDNS1Id": "[concat('Microsoft.Resources/deployments/', variables('updateVNetDNS1'))]",
 
-    "sqlClusterVmNamePrefix":  "[concat(parameters('vmNamePrefix'),'-sql-')]",
+    "sqlClusterVmNamePrefix": "[concat(parameters('vmNamePrefix'),'-sql-')]",
 
     "updateSQLCNic1": "updateSQLCNic1",
     "updateSQLCNic1Id": "[concat('Microsoft.Resources/deployments/', variables('updateSQLCNic1'))]",
@@ -265,7 +234,7 @@
     "nicTemplateURL": "[concat(parameters('adAssetLocation'),'/nic.json')]",
 
     "deploySqlStandalone": "deploySqlStandalone",
-    "deploySqlStandaloneTemplateUrl" : "[concat(parameters('assetLocation'),'/deploySqlStandalone.json')]",
+    "deploySqlStandaloneTemplateUrl": "[concat(parameters('assetLocation'),'/deploySqlStandalone.json')]",
     "sqlLBName": "sqlLoadBalancer",
 
     "publicLBName": "ADPublicLoadBalancer",
@@ -277,23 +246,76 @@
     "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
     "rdpPort": 3389,
     "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
-    "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]"
-    
+    "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
+
+    "nsgName": "sqlNsg",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+
+    "subnets" :  [
+          {
+            "name": "[variables('staticSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vmNetworkSubnet')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgID')]"
+              }
+            }
+          }
+        ]
   },
 
   "resources": [
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "rule1",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
     {
       "name": "[variables('virtualNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[parameters('location')]",
       "apiVersion": "2015-05-01-preview",
+      "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
             "[parameters('virtualNetworkAddressRange')]"
           ]
         },
-        "subnets": "[variables('subnets')]"
+        "subnets": [
+          {
+            "name": "[variables('staticSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vmNetworkSubnet')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgID')]"
+              }
+            }
+          }
+        ],
+        "dhcpOptions": {
+          "dnsServers": [ "192.168.100.2" ]
+        }
       }
     },
 
@@ -306,10 +328,7 @@
         "[variables('virtualNetworkName')]"
       ],
       "properties": {
-        "publicIPAllocationMethod": "Dynamic",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsPrefix')]"
-        }
+        "publicIPAllocationMethod": "Dynamic"
       }
     },
 
@@ -319,7 +338,7 @@
       "type": "Microsoft.Network/loadBalancers",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[variables('virtualNetworkName')]"
+        "[variables('publicIPAddressName')]"
       ],
       "properties": {
         "frontendIPConfigurations": [
@@ -330,11 +349,6 @@
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
               }
             }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "[variables('lbBE')]"
           }
         ],
         "inboundNatRules": [
@@ -353,7 +367,6 @@
         ]
       }
     },
-
     {
       "name": "[variables('adVmDepoyment')]",
       "type": "Microsoft.Resources/deployments",
@@ -388,7 +401,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[variables('virtualNetworkName')]"
+        "[variables('virtualNetworkName')]",
+        "[variables('adVmDepoyment')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -401,10 +415,8 @@
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "storageAccount": { "value": "[variables('SqlStorageName')]" },
-          "nicSubnetUri": { "value": "[variables('sqlSubnetRef')]" },
-          "lbSubnetUri": { "value": "[variables('staticSubnetRef')]" },
+          "subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
           "vmNamePrefix": { "value": "[variables('sqlClusterVmNamePrefix')]" },
-          "sqlLBIPAddress": { "value": "[parameters('sqlLBIPAddress')]" },
           "storageAccountType": { "value": "[parameters('storageAccountType')]" },
           "storageDomain": { "value": "[parameters('storageDomain')]" },
           "vmSize": { "value": "[parameters('sqlVMSize')]" }
@@ -484,7 +496,7 @@
                 "properties": {
                   "privateIPAllocationMethod": "Dynamic",
                   "subnet": {
-                    "id": "[variables('sqlSubnetRef')]"
+                    "id": "[variables('staticSubnetRef')]"
                   }
                 }
               }
@@ -497,8 +509,7 @@
         }
       }
     },
-    
-    
+
     {
       "name": "[variables('deploySqlStandalone')]",
       "type": "Microsoft.Resources/deployments",
@@ -516,7 +527,6 @@
           "sqlVMNamePrefix": { "value": "[variables('sqlClusterVmNamePrefix')]" },
           "domainName": { "value": "[parameters('domainName')]" },
           "sqlLBName": { "value": "[variables('sqlLBName')]" },
-          "sqlLBIPAddress": { "value": "[parameters('sqlLBIPAddress')]" },
           "dnsServerName": { "value": "[variables('adPDCVMName')]" },
           "location": { "value": "[parameters('location')]" },
           "sqlServerServiceAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },

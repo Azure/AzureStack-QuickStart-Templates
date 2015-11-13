@@ -161,7 +161,7 @@
     }
   },
   "variables": {
-    "windowsDiskSize": 128,
+    "windowsDiskSize": 2,
 
     "adDNicName": "ADMachine-Nic-",
     "vmContainerName": "vhds"
@@ -189,16 +189,10 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('primaryAdIpAddress')]",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[parameters('subnetResourceId')]"
               },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[parameters('publicBEAddressPoolID')]"
-                }
-              ],
               "loadBalancerInboundNatRules": [
                 {
                   "id": "[parameters('adRDPNATRuleID')]"

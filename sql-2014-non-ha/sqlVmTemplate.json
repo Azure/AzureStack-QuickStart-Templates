@@ -15,21 +15,21 @@
       "metadata": {
         "description": "The Publisher of Windows Image"
       },
-      "defaultValue": "MicrosoftSQLServer"
+      "defaultValue": "MicrosoftWindowsServer"
     },
     "windowsImageOffer": {
       "type": "string",
       "metadata": {
         "description": "The offer of Windows Image"
       },
-      "defaultValue": "SQL2014-WS2012R2"
+      "defaultValue": "WindowsServer"
     },
     "windowsImageSKU": {
       "type": "string",
       "metadata": {
         "description": "The SKU Name of Windows Image"
       },
-      "defaultValue": "Enterprise"
+      "defaultValue": "2012-R2-Datacenter"
     },
 
     "windowsImageVersion": {
@@ -51,7 +51,7 @@
       "type": "string",
       "defaultValue": "azurestack.local",
       "metadata": {
-        "description": "The address of Primary AD"
+        "description": "the storage domain"
       }
     },
 
@@ -65,15 +65,14 @@
       ],
       "metadata": {
         "description": "The type of the Storage Account created"
-      },
-      "defaultValue": "Standard_LRS"
+      }
     },
+
     "adminUsername": {
       "type": "string",
       "metadata": {
         "description": "The name of the Administrator of the new VMs and Domain"
-      },
-      "defaultValue": "sqlAdministrator"
+      }
     },
     "adminPassword": {
       "type": "securestring",
@@ -131,17 +130,11 @@
       },
       "defaultValue": "Standard_D1"
     },
-    "nicSubnetUri": {
-      "type": "string",
-      "metadata": {
-        "description": "the reference to the subnet of nics"
-      }
-    },
 
-    "lbSubnetUri": {
+    "subnetResourceId": {
       "type": "string",
       "metadata": {
-        "description": "the reference to the subnet for load balancer"
+        "description": "the resource id to the subnet"
       }
     },
 
@@ -150,30 +143,15 @@
       "metadata": {
         "description": "The address of Primary AD"
       },
-      "defaultValue": 1000
-    },
-
-    "sqlLBIPAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The address of secondary AD"
-      },
-      "defaultValue" : "10.0.0.200"
+      "defaultValue": 10
     }
+
   },
   "variables": {
-    "publicLBName": "sqlLoadBalancer",
-    "sqlAOListener":"SQLAlwaysOnEndPointListener",
-    "publicIPAddressName": "sqlPublicIp",
-    "lbFE": "SqlLBFE",
-    "lbBE": "SqlLBBE",
+    
     "sqlNicName": "SqlMachine-Nic-",
-    "vmContainerName": "vhds",
-    "sqllbID":"[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
-    "sqllbFEConfigID": "[concat(variables('sqllbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
-    "sqlBEAddressPoolID": "[concat(variables('sqllbID'),'/backendAddressPools/',variables('lbBE'))]",
-    "sqlAOProbe":"SQLAlwaysOnEndPointProbe",
-    "sqllbProbeID":"[concat(variables('sqllbID'),'/probes/',variables('sqlAOProbe'))]"
+    "vmContainerName": "vhds"
+    
   },
   "resources": [
     {
@@ -186,40 +164,11 @@
 			}
 		},
     {
-			"apiVersion": "2015-05-01-preview",
-			"name": "[variables('publicLBName')]",
-			"type": "Microsoft.Network/loadBalancers",
-			"location": "[parameters('location')]",
-			"dependsOn": [
-			],
-			"properties": {
-				"frontendIPConfigurations": [
-					{
-						"name": "[variables('lbFE')]",
-						"properties": {
-							"privateIPAllocationMethod": "Static",
-							"privateIPAddress" :"[parameters('sqlLBIPAddress')]",
-							"subnet": {
-								"id": "[parameters('lbSubnetUri')]"
-							}
-						}
-					}
-				],
-				"backendAddressPools": [
-					{
-						"name": "[variables('lbBE')]"
-					}
-				]				
-			}
-		},
-
-    {
 			"name": "[concat(variables('sqlNicName'), '0')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"location": "[parameters('location')]",
 			"apiVersion": "2015-05-01-preview",
 			"dependsOn": [
-				"[concat('Microsoft.Network/loadBalancers/',variables('publicLBName'))]"
 			],
 			"properties": {
 				"ipConfigurations": [
@@ -228,13 +177,8 @@
 						"properties": {
 							"privateIPAllocationMethod": "Dynamic",
 							"subnet": {
-								"id": "[parameters('nicSubnetUri')]"
-							},
-							"loadBalancerBackendAddressPools": [
-								{
-									"id":"[variables('sqlBEAddressPoolID')]"
-								}
-							]
+								"id": "[parameters('subnetResourceId')]"
+							}
 						}
 					}
 				]

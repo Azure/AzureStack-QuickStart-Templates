@@ -94,7 +94,7 @@
       },
       "defaultValue": "10.0.0.0/16"
     },
-   
+
     "primaryAdIpAddress": {
       "type": "string",
       "metadata": {
@@ -123,7 +123,7 @@
       "metadata": {
         "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
       },
-      "defaultValue": "https://raw.githubusercontent.com/honcao/Sample/master/ad"
+      "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha"
     },
 
     "location": {
@@ -156,7 +156,10 @@
       {
         "name": "[variables('staticSubnetName')]",
         "properties": {
-          "addressPrefix": "[parameters('vmNetworkSubnet')]"
+          "addressPrefix": "[parameters('vmNetworkSubnet')]",
+          "networkSecurityGroup": {
+            "id": "[variables('nsgID')]"
+          }
         }
       }
     ],
@@ -176,7 +179,7 @@
     "deploySecondaryAdName": "deploySecondaryAdName",
     "deploySecondaryAdNameId": "[concat('Microsoft.Resources/deployments/', variables('deploySecondaryAdName'))]",
 
-    
+
     "adVmNamePrefix": "[concat(parameters('vmNamePrefix'),'-AD-')]",
     "adPDCVMName": "[concat(variables('adVmNamePrefix'),'0')]",
     "vnetwithDNSTemplateUri": "[concat(parameters('assetLocation'),'/vnet-with-dns-server.json')]",
@@ -186,7 +189,7 @@
 
     "updateSQLCNic1": "updateSQLCNic1",
     "updateSQLCNic1Id": "[concat('Microsoft.Resources/deployments/', variables('updateSQLCNic1'))]",
-    
+
 
     "publicLBName": "ADPublicLoadBalancer",
     "publicIPAddressName": "lbPublikIP",
@@ -197,22 +200,62 @@
     "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
     "rdpPort": 3389,
     "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
-    "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]"
+    "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
+
+    "nsgName": "adNsg",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
   },
 
   "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "rule1",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "[variables('virtualNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[parameters('location')]",
       "apiVersion": "2015-05-01-preview",
+      "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
             "[parameters('virtualNetworkAddressRange')]"
           ]
         },
-        "subnets": "[variables('subnets')]"
+        "subnets": [
+          {
+            "name": "[variables('staticSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vmNetworkSubnet')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgID')]"
+              }
+            }
+          }
+        ],
+        "dhcpOptions": {
+          "dnsServers": ["192.168.100.2"]
+        } 
       }
     },
 
@@ -251,11 +294,7 @@
             }
           }
         ],
-        "backendAddressPools": [
-          {
-            "name": "[variables('lbBE')]"
-          }
-        ],
+
         "inboundNatRules": [
           {
             "name": "[variables('rpdNAT')]",

@@ -23,13 +23,6 @@
       }
     },
 
-    "sqlLBIPAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The VM name of Sql Witness server"
-      }
-    },
-
     "dnsServerName": {
       "type": "string",
       "metadata": {
@@ -52,7 +45,8 @@
         "Southeast Asia",
         "Japan East",
         "Japan West",
-        "Southeast Asia"
+        "Southeast Asia",
+        "local"
       ],
       "metadata": {
         "description": "The region to deploy the resources into"
