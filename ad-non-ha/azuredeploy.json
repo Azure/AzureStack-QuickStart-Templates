@@ -123,7 +123,7 @@
       "metadata": {
         "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
       },
-      "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha"
+      "defaultValue": "https://azurestacktemplate.blob.core.windows.net/ad-non-ha"
     },
 
     "location": {
