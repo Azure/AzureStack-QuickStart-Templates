@@ -532,6 +532,7 @@
           "sqlServerServiceAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
           "sqlServerServiceAccountPassword": { "value": "[parameters('sqlServerServiceAccountPassword')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "primaryAdIpAddress": { "value": "[parameters('primaryAdIpAddress')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "assetLocation": { "value": "[parameters('assetLocation')]" }
         }
