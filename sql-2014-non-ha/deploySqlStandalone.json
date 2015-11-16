@@ -82,6 +82,13 @@
       }
     },
 
+    "primaryAdIpAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The address of Primary AD"
+      },
+      "defaultValue": "10.0.0.4"
+    },
     "assetLocation": {
       "type": "string",
       "metadata": {
@@ -110,6 +117,7 @@
           "configurationFunction": "[variables('deploySqlStandaloneConfigurationFunction')]",
           "properties": {
             "domainName": "[parameters('domainName')]",
+            "primaryAdIpAddress": "[parameters('primaryAdIpAddress')]",
             "adminCreds": {
               "userName": "[parameters('adminUserName')]",
               "password": "PrivateSettingsRef:adminPassword"

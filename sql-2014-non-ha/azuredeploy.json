@@ -248,6 +248,8 @@
     "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
     "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
 
+    "azureStackDNSIP" : "192.168.100.2",
+
     "nsgName": "sqlNsg",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
 
@@ -314,7 +316,7 @@
           }
         ],
         "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
+          "dnsServers": [ "[variables('azureStackDNSIP')]" ]
         }
       }
     },
@@ -464,7 +466,7 @@
           "virtualNetworkName": { "value": "[variables('virtualNetworkName')]" },
           "virtualNetworkAddressRange": { "value": "[parameters('virtualNetworkAddressRange')]" },
           "subnets": { "value": "[variables('subnets')]" },
-          "dnsServerAddress": { "value": [ "[parameters('primaryAdIpAddress')]" ] }
+          "dnsServerAddress": { "value": [ "[parameters('primaryAdIpAddress')]" , "[variables('azureStackDNSIP')]" ] }
         }
       }
     },
@@ -503,7 +505,7 @@
             ]
           },
           "dnsServers": {
-            "value": [ "[parameters('primaryAdIpAddress')]" ]
+            "value": [ "[parameters('primaryAdIpAddress')]" , "[variables('azureStackDNSIP')]" ]
           }
 
         }
@@ -532,6 +534,7 @@
           "sqlServerServiceAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
           "sqlServerServiceAccountPassword": { "value": "[parameters('sqlServerServiceAccountPassword')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "primaryAdIpAddress": { "value": "[parameters('primaryAdIpAddress')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "assetLocation": { "value": "[parameters('assetLocation')]" }
         }
