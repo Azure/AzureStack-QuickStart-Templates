@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newStorageAccountNamePrefix": {
+      "value": "sqlhcz"
+    },
+
+    "vmNamePrefix": {
+      "value": "vmhcz"
+    },
+
+     "domainName": {
+      "value": "contoso.com"
+    },
+
+    "dnsPrefix": {
+      "value": "vmhcz"
+    },
+    "location": {
+      "value": "local"
+    },
+    "adminPassword": {
+      "value": "!!123abcA"
+    },
+    "sqlServerServiceAccountPassword": {
+      "value": "!!123abcA"
+    }
+  }
+}
