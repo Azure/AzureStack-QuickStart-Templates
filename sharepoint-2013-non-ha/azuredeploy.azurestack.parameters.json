@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newStorageAccountNamePrefix": {
+      "value": "spsa"
+    },
+    "vmNamePrefix": {
+      "value": "spvm"
+    },
+     "domainName": {
+      "value": "contoso.com"
+    },
+    "dnsPrefix": {
+      "value": "spdns"
+    },
+    "location": {
+      "value": "local"
+    },
+    "adminPassword": {
+      "value": "!!123abcA"
+    },
+    "sqlServerServiceAccountPassword": {
+      "value": "!!123abcA"
+    },
+   "sharePointFarmAccountPassword": {
+      "value": "!!123abcA"
+    },
+    "sharePointFarmPassphrasePassword": {
+      "value": "!!123abcA"
+    }
+  }
+}
