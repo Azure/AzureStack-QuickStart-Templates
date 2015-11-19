@@ -110,6 +110,7 @@
       "allowedValues": [
         "Standard_D1",
         "Standard_A1",
+        "Standard_A2",
         "Standard_DS1",
         "Standard_D2",
         "Standard_DS2",
@@ -129,7 +130,7 @@
       "metadata": {
         "description": "The size of the AD VMs Created"
       },
-      "defaultValue": "Standard_D1"
+      "defaultValue": "Standard_A1"
     },
 
     "publicBEAddressPoolID": {
@@ -158,12 +159,23 @@
       "metadata": {
         "description": "The address of Primary AD"
       }
+    },
+    "dataDiskSize": {
+      "type": "int",
+      "metadata": {
+        "description": "Size of the VM data disk in GB"
+      },
+      "defaultValue": 2
+    },
+    "adDNicName": {
+      "type": "string",
+      "metadata": {
+        "description": "The address of Primary AD"
+      },
+      "defaultValue": "ADMachine-Nic-"
     }
   },
   "variables": {
-    "windowsDiskSize": 2,
-
-    "adDNicName": "ADMachine-Nic-",
     "vmContainerName": "vhds"
   },
   "resources": [
@@ -178,7 +190,7 @@
     },
     
     {
-      "name": "[concat(variables('adDNicName'), '0')]",
+      "name": "[concat(parameters('adDNicName'), '0')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('location')]",
       "dependsOn": [
@@ -210,7 +222,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccount'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('adDNicName'), '0'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('adDNicName'), '0'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -244,7 +256,7 @@
               "name": "[concat(parameters('vmNamePrefix'), '0','-data-disk1')]",
               "createOption": "empty",
               "caching": "None",
-              "diskSizeGB": "[variables('windowsDiskSize')]",
+              "diskSizeGB": "[parameters('dataDiskSize')]",
               "lun": 0
             }
           ]
@@ -252,7 +264,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('adDNicName'), '0'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('adDNicName'), '0'))]"
             }
           ]
         }

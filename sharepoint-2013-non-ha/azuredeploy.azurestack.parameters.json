@@ -3,19 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "newStorageAccountNamePrefix": {
-      "value": "sqlhcz"
+      "value": "spsa"
     },
-
     "vmNamePrefix": {
-      "value": "vmhcz"
+      "value": "spvm"
     },
-
      "domainName": {
       "value": "contoso.com"
     },
-
     "dnsPrefix": {
-      "value": "vmhcz"
+      "value": "spdns"
     },
     "location": {
       "value": "local"
@@ -24,6 +21,12 @@
       "value": "!!123abcA"
     },
     "sqlServerServiceAccountPassword": {
+      "value": "!!123abcA"
+    },
+   "sharePointFarmAccountPassword": {
+      "value": "!!123abcA"
+    },
+    "sharePointFarmPassphrasePassword": {
       "value": "!!123abcA"
     }
   }
