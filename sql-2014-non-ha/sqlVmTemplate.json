@@ -112,6 +112,8 @@
         "Standard_D2",
         "Standard_DS2",
         "Standard_D3",
+        "Standard_A1",
+        "Standard_A2",
         "Standard_A3",
         "Standard_DS3",
         "Standard_D4",
@@ -128,7 +130,7 @@
       "metadata": {
         "description": "The size of the AD VMs Created"
       },
-      "defaultValue": "Standard_D1"
+      "defaultValue": "Standard_A2"
     },
 
     "subnetResourceId": {
