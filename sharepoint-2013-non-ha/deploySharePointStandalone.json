@@ -76,7 +76,6 @@
             "name": "[concat(parameters('spVMName'),'/ConfigureSPServer')]",
             "apiVersion": "2015-06-15",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('spVMName'))]"
             ],
             "location": "[parameters('location')]",
             "properties": {
