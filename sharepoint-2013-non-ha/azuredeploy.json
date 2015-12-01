@@ -328,6 +328,7 @@
         "spRDPNATRuleID": "[concat(variables('sppubliclbID'),'/inboundNatRules/',variables('sprdpNAT'))]",
         "spSourceDrive": "C:",
         "spSourceFolder": "SharePoint2013",
+        "SPProductKey": "N3MDM-DXR3H-JD7QH-QKKCR-BY2Y7",
         "sharePointFarmAccountUserName": "sp_farm",
         "spconfigDatabaseName": "SP_Config",
         "spadministrationContentDatabaseName": "SP_AdminContent",
@@ -335,6 +336,7 @@
         "spSiteTemplateName": "STS#0",
         "sharepointFarmName": "spFarm",
         "sppublicIPFQDN": "local.cloudapp.azure.com",
+        "spFQDN":  "[concat(variables('spVmNamePrefix'),'0.',parameters('domainName'))]",
         "spnicname": "SPMachine-Nic-",
 
         "subnets": [
@@ -768,21 +770,22 @@
                     "location": { "value": "[parameters('location')]" },
                     "domainName": { "value": "[parameters('domainName')]" },
                     "adminUserName": { "value": "[parameters('adminUsername')]" },
-                    "sharePointSetupUserAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
-                    "sharePointFarmAccountUserName": { "value": "[variables('sharePointFarmAccountUserName')]" },
+                    "sharePointSetupUserAccountUserName": { "value": "[parameters('adminUsername')]" },
+                    "sharePointFarmAccountUserName": { "value": "[variables('sqlServerServiceAccountUserName')]" },
                     "configDatabaseName": { "value": "[variables('spconfigDatabaseName')]" },
                     "administrationContentDatabaseName": { "value": "[variables('spadministrationContentDatabaseName')]" },
                     "sqlVMName": { "value": "[concat(variables('sqlClusterVmNamePrefix'), '0')]" },
-                    "fqdn": { "value": "[variables('sppublicIPFQDN')]" },
+                    "fqdn": { "value": "[variables('spFQDN')]" },
                     "contentDatabaseName": { "value": "[variables('spcontentDatabaseName')]" },
                     "spSiteTemplateName": { "value": "[variables('spSiteTemplateName')]" },
                     "adminPassword": { "value": "[parameters('adminPassword')]" },
-                    "sharePointSetupUserAccountPassword": { "value": "[parameters('sqlServerServiceAccountPassword')]" },
-                    "sharePointFarmAccountPassword": { "value": "[parameters('sharePointFarmAccountPassword')]" },
+                    "sharePointSetupUserAccountPassword": { "value": "[parameters('adminPassword')]" },
+                    "sharePointFarmAccountPassword": { "value": "[parameters('sqlServerServiceAccountPassword')]" },
                     "sharePointFarmPassphrasePassword": { "value": "[parameters('sharePointFarmPassphrasePassword')]" },
                     "sharepointFarmName": { "value": "[variables('sharepointFarmName')]" },
                     "sharepointInstallSourceDrive": { "value": "[variables('spSourceDrive')]" },
                     "sharepointInstallSourceFolder": { "value": "[variables('spSourceFolder')]" },
+                    "ProductKey": { "value": "[variables('SPProductKey')]" },
                     "assetLocation": { "value": "[parameters('assetLocation')]" }
                 }
             }
