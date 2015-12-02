@@ -771,7 +771,7 @@
                     "domainName": { "value": "[parameters('domainName')]" },
                     "adminUserName": { "value": "[parameters('adminUsername')]" },
                     "sharePointSetupUserAccountUserName": { "value": "[parameters('adminUsername')]" },
-                    "sharePointFarmAccountUserName": { "value": "[variables('sqlServerServiceAccountUserName')]" },
+                    "sharePointFarmAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
                     "configDatabaseName": { "value": "[variables('spconfigDatabaseName')]" },
                     "administrationContentDatabaseName": { "value": "[variables('spadministrationContentDatabaseName')]" },
                     "sqlVMName": { "value": "[concat(variables('sqlClusterVmNamePrefix'), '0')]" },
