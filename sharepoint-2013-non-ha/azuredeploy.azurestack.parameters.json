@@ -18,16 +18,16 @@
       "value": "local"
     },
     "adminPassword": {
-      "value": "!!123abcA"
+      "value": "#####"
     },
     "sqlServerServiceAccountPassword": {
-      "value": "!!123abcA"
+      "value": "#####"
     },
    "sharePointFarmAccountPassword": {
-      "value": "!!123abcA"
+      "value": "#####"
     },
     "sharePointFarmPassphrasePassword": {
-      "value": "!!123abcA"
+      "value": "#####"
     }
   }
 }
