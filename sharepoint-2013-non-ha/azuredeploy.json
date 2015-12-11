@@ -247,6 +247,12 @@
             "metadata": {
                 "description": "The Sharepoint Farm Passphrase"
             }
+        },
+        "sharepoint2013SP1SourceDLLink": {
+            "type": "string",
+            "metadata": {
+                "description": "Direct download link for the SharePoint 2013 SP1 trial ISO"
+            }
         }
     },
 
@@ -786,7 +792,8 @@
                     "sharepointInstallSourceDrive": { "value": "[variables('spSourceDrive')]" },
                     "sharepointInstallSourceFolder": { "value": "[variables('spSourceFolder')]" },
                     "ProductKey": { "value": "[variables('SPProductKey')]" },
-                    "assetLocation": { "value": "[parameters('assetLocation')]" }
+                    "assetLocation": { "value": "[parameters('assetLocation')]" },
+                    "sharepoint2013SP1SourceDLLink": { "value": "[parameters('sharepoint2013SP1SourceDLLink')]" }
                 }
             }
         }

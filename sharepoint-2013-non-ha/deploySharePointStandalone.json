@@ -62,6 +62,12 @@
         "ProductKey": {
             "type": "string"
         },
+        "sharepoint2013SP1SourceDLLink": {
+            "type": "string",
+            "metadata": {
+                "description": "Direct download link for the SharePoint 2013 SP1 trial ISO"
+            }
+        },
         "assetLocation": {
             "type": "string",
             "metadata": {
@@ -112,7 +118,8 @@
                         "Configuration": "[concat('{\"roles\":[{\"type\":\"application\",\"properties\":{\"fqdn\":\"',parameters('fqdn'),'\",\"port\":8080}},{\"type\":\"web\",\"properties\":{\"webApp\":{\"name\":\"',parameters('sharepointFarmName'),'\",\"applicationPool\":\"',parameters('sharepointFarmName'),' AppPool\",\"applicationPoolAccount\":\"', parameters('sharePointFarmAccountUserName'),'\",\"url\":\"http://',parameters('fqdn'),'\",\"port\":80,\"hostHeader\":\"',parameters('fqdn'),'\",\"databaseName\":\"',parameters('contentDatabaseName'),'\"},\"site\":{\"name\":\"',parameters('sharepointFarmName'),'\",\"template\":\"',parameters('spSiteTemplateName'),'\",\"url\":\"http://',parameters('fqdn'),'\",\"ownerAliasDomain\":\"',parameters('domainName'),'\",\"ownerAliasUserName\":\"',parameters('sharePointFarmAccountUserName'),'\",\"secondaryOwnerAliasDomain\":\"',parameters('domainName'),'\",\"secondaryOwnerAliasUserName\":\"',parameters('adminUserName'),'\"}}}],\"configureForHa\":\"False\",\"loadBalancedSetProbePort\":0}')]",
                         "InstallSourceDrive": "[parameters('sharepointInstallSourceDrive')]",
                         "InstallSourceFolderName": "[parameters('sharepointInstallSourceFolder')]",
-                        "ProductKey": "[parameters('ProductKey')]"
+                        "ProductKey": "[parameters('ProductKey')]",
+                        "SPDLLink" :  "[parameters('sharepoint2013SP1SourceDLLink')]"
                     }
                 },
                 "protectedSettings": {
