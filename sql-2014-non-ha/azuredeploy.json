@@ -27,7 +27,7 @@
       "type": "string",
       "defaultValue": "azurestack.local",
       "metadata": {
-        "description": "The address of Primary AD"
+        "description": "the storage account domain. E.g. core.windows.net for Azure "
       }
     },
 
