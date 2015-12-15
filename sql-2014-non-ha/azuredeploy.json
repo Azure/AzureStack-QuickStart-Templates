@@ -103,7 +103,7 @@
     "domainName": {
       "type": "string",
       "metadata": {
-        "description": "The domain name"
+        "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
       }
     },
 
@@ -149,8 +149,7 @@
       "type": "string",
       "metadata": {
         "description": "The name of the Administrator of the new VMs and Domain"
-      },
-      "defaultValue": "sqlAdministrator"
+      }
     },
 
     "adminPassword": {
@@ -178,6 +177,7 @@
 
     "location": {
       "type": "string",
+      "defaultValue": "local",
       "allowedValues": [
         "West US",
         "East US",
