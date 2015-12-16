@@ -1,0 +1,33 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+        "value": "myVM001"
+    },
+    "osDiskUrlParam": {
+      "value": "https://mystorageacct001.blob.azurestack.local/mycontainer/osDiskName.vhd"
+    },
+    "dataDiskUrlParam": {
+      "value": "https://mystorageacct001.blob.azurestack.local/mycontainer/dataDiskName.vhd"
+    },
+    "dnsNameForPublicIP": {
+      "value": "mydns001"
+    },
+    "adminUsername": {
+      "value": "admin123"
+    },
+    "adminPassword": {
+      "value": "ADmin123_!"
+    },
+    "osType": {
+      "value": "windows"
+    },
+    "location": {
+      "value": "local"
+    },
+    "vmSize": {
+      "value": "Standard_A1"
+    }  
+  }
+}
