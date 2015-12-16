@@ -1,0 +1,18 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "blobStorageEndpoint": {
+      "value": "blob.azurestack.local"
+    },
+    "vmsuffix": {
+      "value": "myVM"
+    },
+    "deploymentLocation": {
+      "value": "local"
+    },
+    "windowsOSVersion": {
+      "value": "2012-R2-Datacenter"
+    }
+  }
+}
