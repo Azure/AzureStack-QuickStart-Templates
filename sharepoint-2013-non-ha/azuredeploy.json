@@ -195,7 +195,7 @@
             "metadata": {
                 "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://jesusatemplate.blob.core.windows.net/sharepoint-2013-non-ha"
+            "defaultValue": "https://azurestacktemplate.blob.core.windows.net/sharepoint-2013-non-ha"
         },
 
         "adAssetLocation": {
@@ -203,7 +203,7 @@
             "metadata": {
                 "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://jesusatemplate.blob.core.windows.net/ad-non-ha"
+            "defaultValue": "https://azurestacktemplate.blob.core.windows.net/ad-non-ha"
         },
 
         "sqlAssetLocation": {
@@ -211,7 +211,7 @@
             "metadata": {
                 "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://jesusatemplate.blob.core.windows.net/sql-2014-non-ha"
+            "defaultValue": "https://azurestacktemplate.blob.core.windows.net/sql-2014-non-ha"
         },
 
         "location": {
@@ -234,7 +234,8 @@
             ],
             "metadata": {
                 "description": "The region to deploy the resources into"
-            }
+            },
+            "defaultValue": "local"
         },
         "sharePointFarmAccountPassword": {
             "type": "securestring",
