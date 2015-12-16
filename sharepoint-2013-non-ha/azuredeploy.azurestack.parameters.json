@@ -28,6 +28,9 @@
     },
     "sharePointFarmPassphrasePassword": {
       "value": "#####"
+    },
+    "sharepoint2013SP1SourceDLLink":  {
+      "value": "####"
     }
   }
 }
