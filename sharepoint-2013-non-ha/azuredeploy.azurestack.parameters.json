@@ -17,6 +17,9 @@
     "location": {
       "value": "local"
     },
+    "adminUsername": {
+      "value": "Administrator"
+    },
     "adminPassword": {
       "value": "#####"
     },
