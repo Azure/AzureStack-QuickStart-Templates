@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Create a Virtual Network (only)",
+  "description": "Creates a Virtual Network only with variables (no parameters)",
+  "summary": "This template creates a Virtual Network (with DNS) only in the Azure Stack POC environment.",
+  "githubUsername": "charlesjoy",
+  "dateUpdated": "2015-12-16"
+}
