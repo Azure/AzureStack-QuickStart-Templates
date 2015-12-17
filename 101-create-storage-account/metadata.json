@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Create a Storage Account",
+  "description": "Creates a Storage Account with three paremeters: newStorageAccountName, storageAccountType, location",
+  "summary": "This template creates a Storage Account in the Azure Stack POC environment.",
+  "githubUsername": "charlesjoy",
+  "dateUpdated": "2015-12-16"
+}
