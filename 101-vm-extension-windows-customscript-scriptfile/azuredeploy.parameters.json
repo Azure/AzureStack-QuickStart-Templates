@@ -1,0 +1,15 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+        "value": "myVM001"
+    },
+    "scriptFile": {
+        "value": "https://mystorageacct001.blob.azurestack.local/mycontainer/scriptfile.ps1"
+    },  
+    "scriptName": {
+        "value": "scriptfile.ps1"
+    }  
+  }
+}
