@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Docker extension for existing Linux VM",
+  "description": "Deploys the Docker extension to an existing Linux VM",
+  "summary": "This template deploys the Docker extension to an existing VM in the Azure Stack POC environment.",
+  "githubUsername": "MatthewMcGlynn",
+  "dateUpdated": "2015-12-17"
+}
