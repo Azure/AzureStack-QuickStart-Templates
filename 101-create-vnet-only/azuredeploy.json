@@ -9,7 +9,8 @@
     "vnetName": "myVNet",
     "addressPrefix": "10.0.0.0/24",
     "subnetName": "Subnet-1",
-    "subnetPrefix": "10.0.0.0/24"
+    "subnetPrefix": "10.0.0.0/24",
+    "dnsServer": "192.168.100.2"
   },
   "resources": [
     {
@@ -32,7 +33,7 @@
           }
         ],
         "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
+          "dnsServers": [ "[variables('dnsServer')]" ]
         }
       }
     }
