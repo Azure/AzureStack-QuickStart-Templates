@@ -29,17 +29,21 @@
       }
     }
   },
-  "variables": {},
+  "variables": {
+    "apiVersion": {
+      "storage": { "storageAccounts": "2015-06-15" }
+    }
+  },
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('newStorageAccountName')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
       "location": "[parameters('location')]",
       "properties": {
         "accountType": "[parameters('storageAccountType')]"
       }
     }
   ],
-  "outputs": {}
+  "outputs": { }
 }
