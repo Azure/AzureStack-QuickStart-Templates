@@ -42,6 +42,12 @@
       },
       "insights": { "vmDiagnosticsSettings": "2015-06-15" }
     },
+        "storage": {
+      "storageAccounts": {
+        "name": "[replace(replace(tolower(concat('storage', uniquestring(resourceGroup().id))), '-',''),'.','')]",
+        "type": "Standard_LRS"
+      }
+    },
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
@@ -49,14 +55,12 @@
     "addressPrefix": "10.0.0.0/24",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
-    "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "[concat('myip', parameters('vmsuffix'))]",
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[concat('myvm', parameters('vmsuffix'))]",
     "vmSize": "Standard_A1",
     "dnsNameForPublicIP": "[concat('myvmdns', parameters('vmsuffix'))]",
-    "newStorageAccountName": "[concat('myvmstorage', parameters('vmsuffix'))]",
     "virtualNetworkName": "MyVNET",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
@@ -99,11 +103,11 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('newStorageAccountName')]",
+      "name": "[variables('storage').storageAccounts.name]",
       "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "accountType": "[variables('storageAccountType')]"
+        "accountType": "[variables('storage').storageAccounts.type]"
       }
     },
     {
@@ -180,7 +184,7 @@
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name)]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
@@ -218,7 +222,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('newStorageAccountName'),'.', parameters('blobStorageEndpoint'))]"
+            "storageUri": "[concat('http://',variables('storage').storageAccounts.name,'.', parameters('blobStorageEndpoint'))]"
           }
         }
       },
