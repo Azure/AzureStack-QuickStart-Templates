@@ -10,12 +10,17 @@
     }
   },
   "variables": {
+    "apiVersion": {
+      "compute": {
+        "virtualMachines": { "extensions": "2015-06-15" }
+      }
+    }
   },
   "resources": [
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmName'),'/BGInfo')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "[variables('apiVersion').compute.virtualMachines.extensions]",
       "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -28,5 +33,5 @@
       }
     }
   ],
-  "outputs": {}
+  "outputs": { }
 }
