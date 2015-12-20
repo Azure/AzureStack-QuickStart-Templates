@@ -3,6 +3,14 @@
   "contentVersion": "1.0.0.0",
   "parameters": { },
   "variables": {
+    "apiVersion": {
+      "network": {
+        "virtualNetworks": "2015-05-01-preview",
+        "publicIPAddresses": "2015-05-01-preview",
+        "networkSecurityGroups": "2015-05-01-preview",
+        "networkInterfaces": "2015-05-01-preview"
+      }
+    },
     "nicName": "myNic",
     "publicIPAddressName": "myPubIP",
     "vnetName": "myVNet",
@@ -19,7 +27,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
       "location": "[resourceGroup().location]",
@@ -42,7 +50,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[resourceGroup().location]",
@@ -51,7 +59,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.VirtualNetworks]",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetName')]",
       "location": "[resourceGroup().location]",
@@ -81,7 +89,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.networkInterfaces]",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('nicName'), copyindex())]",
       "location": "[resourceGroup().location]",
@@ -112,5 +120,5 @@
       }
     }
   ],
-  "outputs": {}
+  "outputs": { }
 }
