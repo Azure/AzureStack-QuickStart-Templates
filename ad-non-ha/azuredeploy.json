@@ -138,6 +138,15 @@
     }
   },
   "variables": {
+    "apiVersion": {
+      "resources": { "deployments": "2015-01-01" },
+      "network": {
+        "virtualNetworks": "2015-05-01-preview",
+        "loadBalancers": "2015-05-01-preview",
+        "publicIPAddresses": "2015-05-01-preview",
+        "networkSecurityGroups": "2015-05-01-preview"
+      }
+    },
     "staticSubnetName": "ADStaticSubnet",
     "subnets": [
       {
@@ -184,7 +193,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
       "location": "[parameters('location')]",
@@ -210,7 +219,7 @@
       "name": "[variables('virtualNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[parameters('location')]",
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
       "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
       "properties": {
         "addressSpace": {
@@ -235,7 +244,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[parameters('location')]",
@@ -250,7 +259,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.loadBalancers]",
       "name": "[variables('publiclbName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[parameters('location')]",
@@ -288,7 +297,7 @@
     {
       "name": "[variables('adVmDepoyment')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "[variables('apiVersion').resources.deployments]",
       "dependsOn": [
         "[variables('publiclbName')]"
       ],
@@ -317,7 +326,7 @@
     {
       "name": "[variables('deployPrimaryAd')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "[variables('apiVersion').resources.deployments]",
       "dependsOn": [
         "[variables('adVmDepoymentId')]"
       ],
@@ -340,7 +349,7 @@
     {
       "name": "[variables('updateVNetDNS1')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "[variables('apiVersion').resources.deployments]",
       "dependsOn": [
         "[variables('deployPrimaryAdId')]"
       ],
