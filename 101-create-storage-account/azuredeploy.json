@@ -17,16 +17,6 @@
       "metadata": {
         "description": "Storage Account type"
       }
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "local",
-      "allowedValues": [
-        "local"
-      ],
-      "metadata": {
-        "description": "Location of storage account"
-      }
     }
   },
   "variables": {
@@ -39,7 +29,7 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('newStorageAccountName')]",
       "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[parameters('storageAccountType')]"
       }
