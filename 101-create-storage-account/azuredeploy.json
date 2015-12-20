@@ -29,6 +29,7 @@
       }
     }
   },
+  "variables": {},
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
@@ -39,5 +40,6 @@
         "accountType": "[parameters('storageAccountType')]"
       }
     }
-  ]
+  ],
+  "outputs": {}
 }
