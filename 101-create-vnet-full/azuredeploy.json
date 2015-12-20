@@ -23,7 +23,8 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables ('subnetName'))]",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
-    "numberOfInstances": 1
+    "numberOfInstances": 1,
+    "dnsServer": "192.168.100.2"
   },
   "resources": [
     {
@@ -84,7 +85,7 @@
           }
         ],
         "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
+          "dnsServers": [ "[variables('dnsServer')]" ]
         }
       }
     },
