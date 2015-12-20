@@ -3,11 +3,14 @@
   "contentVersion": "1.0.0.0",
   "parameters": { },
   "variables": {
+    "apiVersion": {
+      "network": { "networkSecurityGroups": "2015-05-01-preview" }
+    },
     "networkSecurityGroupName": "mySG"
   },
   "resources": [
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('networkSecurityGroupName')]",
       "location": "[resourceGroup().location]",
@@ -33,5 +36,5 @@
       }
     }
   ],
-  "outputs": {}
+  "outputs": { }
 }
