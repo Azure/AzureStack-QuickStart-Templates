@@ -8,7 +8,6 @@
         "description": "The prefix of the new storage account created to store the VMs disks, three different storage accounts will be created using this string as a prefix for the name"
       }
     },
-
     "storageAccountType": {
       "type": "string",
       "allowedValues": [
@@ -22,7 +21,6 @@
       },
       "defaultValue": "Standard_LRS"
     },
-
     "storageDomain": {
       "type": "string",
       "defaultValue": "azurestack.local",
@@ -30,14 +28,12 @@
         "description": "the storage account domain. E.g. core.windows.net for Azure "
       }
     },
-
     "vmNamePrefix": {
       "type": "string",
       "metadata": {
         "description": "The Prefix for the Vms"
       }
     },
-
     "adVMSize": {
       "type": "string",
       "allowedValues": [
@@ -64,21 +60,18 @@
       },
       "defaultValue": "Standard_A1"
     },
-
     "dnsPrefix": {
       "type": "string",
       "metadata": {
         "description": "The DNS Prefix for the Public IP Address"
       }
     },
-
     "domainName": {
       "type": "string",
       "metadata": {
         "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
       }
     },
-
     "vmNetworkSubnet": {
       "type": "string",
       "metadata": {
@@ -86,7 +79,6 @@
       },
       "defaultValue": "10.0.0.0/24"
     },
-
     "virtualNetworkAddressRange": {
       "type": "string",
       "metadata": {
@@ -94,7 +86,6 @@
       },
       "defaultValue": "10.0.0.0/16"
     },
-
     "primaryAdIpAddress": {
       "type": "string",
       "metadata": {
@@ -102,7 +93,6 @@
       },
       "defaultValue": "10.0.0.4"
     },
-
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -110,14 +100,12 @@
       },
       "defaultValue": "localadmin"
     },
-
     "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "The password for the Administrator account of the new VMs and Domain"
       }
     },
-
     "assetLocation": {
       "type": "string",
       "metadata": {
@@ -125,7 +113,6 @@
       },
       "defaultValue": "https://azurestacktemplate.blob.core.windows.net/ad-non-ha"
     },
-
     "location": {
       "type": "string",
       "defaultValue": "local",
@@ -150,7 +137,6 @@
       }
     }
   },
-
   "variables": {
     "staticSubnetName": "ADStaticSubnet",
     "subnets": [
@@ -164,13 +150,10 @@
         }
       }
     ],
-
     "virtualNetworkName": "WorkloadVNET",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
     "adTemplateURL": "[concat(parameters('assetLocation'),'/adVmTemplate.json')]",
-
-
     "adStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'adsa')]",
     "adVmDepoyment": "DeployAdVms",
     "adVmDepoymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDepoyment'))]",
@@ -179,19 +162,13 @@
     "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",
     "deploySecondaryAdName": "deploySecondaryAdName",
     "deploySecondaryAdNameId": "[concat('Microsoft.Resources/deployments/', variables('deploySecondaryAdName'))]",
-
-
     "adVmNamePrefix": "[concat(parameters('vmNamePrefix'),'-AD-')]",
     "adPDCVMName": "[concat(variables('adVmNamePrefix'),'0')]",
     "vnetwithDNSTemplateUri": "[concat(parameters('assetLocation'),'/vnet-with-dns-server.json')]",
     "updateVNetDNS1": "updateVNetDNS1",
     "updateVNetDNS1Id": "[concat('Microsoft.Resources/deployments/', variables('updateVNetDNS1'))]",
-
-
     "updateSQLCNic1": "updateSQLCNic1",
     "updateSQLCNic1Id": "[concat('Microsoft.Resources/deployments/', variables('updateSQLCNic1'))]",
-
-
     "publicLBName": "ADPublicLoadBalancer",
     "publicIPAddressName": "lbPublikIP",
     "lbFE": "ADLBFE",
@@ -202,11 +179,9 @@
     "rdpPort": 3389,
     "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
     "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-
     "nsgName": "adNsg",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
   },
-
   "resources": [
     {
       "apiVersion": "2015-05-01-preview",
@@ -255,11 +230,10 @@
           }
         ],
         "dhcpOptions": {
-          "dnsServers": ["192.168.100.2"]
-        } 
+          "dnsServers": [ "192.168.100.2" ]
+        }
       }
     },
-
     {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -275,7 +249,6 @@
         }
       }
     },
-
     {
       "apiVersion": "2015-05-01-preview",
       "name": "[variables('publiclbName')]",
@@ -312,7 +285,6 @@
         ]
       }
     },
-
     {
       "name": "[variables('adVmDepoyment')]",
       "type": "Microsoft.Resources/deployments",
@@ -388,7 +360,6 @@
       }
     }
   ],
-
   "outputs": {
   }
 }
