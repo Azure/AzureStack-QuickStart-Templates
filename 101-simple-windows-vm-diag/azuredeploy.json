@@ -39,7 +39,8 @@
         "networkInterfaces": "2015-05-01-preview",
         "publicIPAddresses": "2015-05-01-preview",
         "networkSecurityGroups": "2015-05-01-preview"
-      }
+      },
+      "insights": { "vmDiagnosticsSettings": "2015-06-15" }
     },
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
@@ -226,7 +227,7 @@
           "name": "Microsoft.Insights.VMDiagnosticsSettings",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
+          "apiVersion": "[variables('apiVersion').insights.vmDiagnosticsSettings]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
           ],
