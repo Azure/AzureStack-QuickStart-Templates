@@ -112,29 +112,6 @@
         "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
       },
       "defaultValue": "https://azurestacktemplate.blob.core.windows.net/ad-non-ha"
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "local",
-      "allowedValues": [
-        "West US",
-        "East US",
-        "East US 2",
-        "Central US",
-        "South Central US",
-        "North Central US",
-        "North Europe",
-        "West Europe",
-        "East Asia",
-        "Southeast Asia",
-        "Japan East",
-        "Japan West",
-        "Southeast Asia",
-        "local"
-      ],
-      "metadata": {
-        "description": "The region to deploy the resources into"
-      }
     }
   },
   "variables": {
@@ -196,7 +173,7 @@
       "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
           {
@@ -218,7 +195,7 @@
     {
       "name": "[variables('virtualNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
       "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
       "properties": {
@@ -247,7 +224,7 @@
       "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[variables('virtualNetworkName')]"
       ],
@@ -262,7 +239,7 @@
       "apiVersion": "[variables('apiVersion').network.loadBalancers]",
       "name": "[variables('publiclbName')]",
       "type": "Microsoft.Network/loadBalancers",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[variables('publicIPAddressName')]"
       ],
@@ -308,7 +285,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "location": { "value": "[parameters('location')]" },
+          "location": { "value": "[resourceGroup().location]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "publicBEAddressPoolID": { "value": "[variables('publicBEAddressPoolID')]" },
@@ -339,7 +316,7 @@
         "parameters": {
           "primaryADName": { "value": "[variables('adPDCVMName')]" },
           "domainName": { "value": "[parameters('domainName')]" },
-          "location": { "value": "[parameters('location')]" },
+          "location": { "value": "[resourceGroup().location]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "assetLocation": { "value": "[parameters('assetLocation')]" }
@@ -360,7 +337,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "location": { "value": "[parameters('location')]" },
+          "location": { "value": "[resourceGroup().location]" },
           "virtualNetworkName": { "value": "[variables('virtualNetworkName')]" },
           "virtualNetworkAddressRange": { "value": "[parameters('virtualNetworkAddressRange')]" },
           "subnets": { "value": "[variables('subnets')]" },
