@@ -118,7 +118,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[parameters('newStorageAccountName')]",
+            "name": "[toLower(parameters('newStorageAccountName'))]",
             "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
@@ -177,6 +177,9 @@
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
             ],
             "properties": {
+                "dnsSettings": {
+                    "dnsServers": ["192.168.100.2"]
+                },
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
