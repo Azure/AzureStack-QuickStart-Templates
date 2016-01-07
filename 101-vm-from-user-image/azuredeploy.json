@@ -1,245 +1,241 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "vmName": {
-            "type": "string",
-            "metadata": {
-                "description": "This is the name of your virtual machine"
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of your virtual machine"
+      }
+    },
+    "osDiskUrlParam": {
+      "type": "string",
+      "metadata": {
+        "description": "URL to OS disk resource"
+      }
+    },
+    "dataDiskUrlParam": {
+      "type": "string",
+      "metadata": {
+        "description": "URL to data disk resource"
+      }
+    },
+    "dnsNameForPublicIP": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "adminUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "UserName for the Virtual Machine"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine"
+      }
+    },
+    "osType": {
+      "type": "string",
+      "allowedValues": [
+        "windows",
+        "linux"
+      ],
+      "metadata": {
+        "description": "This is the OS that your VM will be running"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "allowedValues": [
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4"
+      ],
+      "metadata": {
+        "description": "This is the size of your VM"
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": {
+      "compute": { "virtualMachines": "2015-06-15" },
+      "network": {
+        "virtualNetworks": "2015-05-01-preview",
+        "networkInterfaces": "2015-05-01-preview",
+        "publicIPAddresses": "2015-05-01-preview",
+        "networkSecurityGroups": "2015-05-01-preview"
+      }
+    },
+    "publicIPAddressName": "[concat(parameters('vmName'),'PublicIP')]",
+    "vmName": "[parameters('vmName')]",
+    "virtualNetworkName": "[concat(parameters('vmName'),'VNet')]",
+    "nicName": "[concat(parameters('vmName'),'Nic')]",
+    "addressPrefix": "10.0.0.0/24",
+    "subnet1Name": "mysubnet",
+    "subnet1Prefix": "10.0.0.0/24",
+    "publicIPAddressType": "Dynamic",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
+    "networkSecurityGroupName": "SecurityGroup",
+    "osDiskUrl": "[parameters('osDiskUrlParam')]",
+    "dataDiskUrl": "[parameters('dataDiskUrlParam')]",
+    "osDiskVhdName": "[concat(variables('osDiskUrl'),'-',variables('vmName'),'.vhd')]",
+    "dataDiskVhdName": "[concat(variables('dataDiskUrl'),'-',variables('vmName'),'.vhd')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NetworkSecurityGroup"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "rule1",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
             }
-        },
-        "osDiskUrlParam": {
-            "type": "string",
-            "metadata": {
-                "description": "URL to OS disk resource"
-            }
-        },
-        "dataDiskUrlParam": {
-            "type": "string",
-            "metadata": {
-                "description": "URL to data disk resource"
-            }
-        },
-        "dnsNameForPublicIP": {
-            "type": "string",
-            "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-            }
-        },
-        "adminUserName": {
-            "type": "string",
-            "metadata": {
-                "description": "UserName for the Virtual Machine"
-            }
-        },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the Virtual Machine"
-            }
-        },
-        "osType": {
-            "type": "string",
-            "allowedValues": [
-                "windows",
-                "linux"
-            ],
-            "metadata": {
-                "description": "This is the OS that your VM will be running"
-            }
-        },
-        "location": {
-            "type": "string",
-            "allowedValues": [
-                "local",
-                "westus",
-                "eastus"
-            ],
-            "metadata": {
-                "description": "Location where resources will be deployed"
-            }
-        },
-        "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_A1",
-            "allowedValues": [
-                "Standard_A1",
-                "Standard_A2",
-                "Standard_A3",
-                "Standard_A4"
-            ],
-            "metadata": {
-                "description": "This is the size of your VM"
-            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
         }
+      }
     },
-    "variables": {
-        "networkApiVersion": "2015-05-01-preview",
-        "computeApiVersion": "2015-06-15",
-        "location": "[parameters('location')]",
-        "publicIPAddressName": "[concat(parameters('vmName'),'PublicIP')]",
-        "vmName": "[parameters('vmName')]",
-        "virtualNetworkName": "[concat(parameters('vmName'),'VNet')]",
-        "nicName": "[concat(parameters('vmName'),'Nic')]",
-        "addressPrefix": "10.0.0.0/24",
-        "subnet1Name": "mysubnet",
-        "subnet1Prefix": "10.0.0.0/24",
-        "publicIPAddressType": "Dynamic",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
-        "networkSecurityGroupName": "SecurityGroup",
-        "osDiskUrl": "[parameters('osDiskUrlParam')]",
-        "dataDiskUrl": "[parameters('dataDiskUrlParam')]",
-        "osDiskVhdName": "[concat(variables('osDiskUrl'),'-',variables('vmName'),'.vhd')]",
-        "dataDiskVhdName": "[concat(variables('dataDiskUrl'),'-',variables('vmName'),'.vhd')]"
+    {
+      "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('subnet1Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+              }
+            }
+          }
+        ],
+        "dhcpOptions": {
+          "dnsServers": [ "192.168.100.2" ]
+        }
+      }
     },
-    "resources": [
-         {
-            "apiVersion": "[variables('networkApiVersion')]",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('networkSecurityGroupName')]",
-            "location": "[parameters('location')]",
-            "tags": {
-                "displayName": "NetworkSecurityGroup"
+    {
+      "apiVersion": "[variables('apiVersion').network.networkInterfaces]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnet1Ref')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion').compute.virtualMachines]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "dataDisks": [
+            {
+              "name": "[concat(variables('vmName'),'-dataDisk')]",
+              "lun": 0,
+              "createOption": "FromImage",
+              "image": {
+                "uri": "[variables('dataDiskUrl')]"
+              },
+              "vhd": {
+                "uri": "[variables('dataDiskVhdName')]"
+              }
+            }
+          ],
+          "osDisk": {
+            "name": "[concat(variables('vmName'),'-osDisk')]",
+            "osType": "[parameters('osType')]",
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
+            "image": {
+              "uri": "[variables('osDiskUrl')]"
             },
-            "properties": {
-                "securityRules": [
-                {
-                    "name": "rule1",
-                    "properties": {
-                        "protocol": "*",
-                        "sourcePortRange": "*",
-                        "destinationPortRange": "*",
-                        "sourceAddressPrefix": "*",
-                        "destinationAddressPrefix": "*",
-                        "access": "Allow",
-                        "priority": 101,
-                        "direction": "Inbound"
-                    }
-                }
-                ]
+            "vhd": {
+              "uri": "[variables('osDiskVhdName')]"
             }
+          }
         },
-        {
-            "apiVersion": "[variables('networkApiVersion')]",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIPAddressName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-                "dnsSettings": {
-                    "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
-                }
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
             }
-        },
-        {
-            "apiVersion": "[variables('networkApiVersion')]",
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[variables('virtualNetworkName')]",
-            "location": "[variables('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
-            ],
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('addressPrefix')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('subnet1Name')]",
-                        "properties": {
-                            "addressPrefix": "[variables('subnet1Prefix')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-                            }
-                        }
-                    }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": ["192.168.100.2"]
-                }
-            }
-        },
-        {
-            "apiVersion": "[variables('networkApiVersion')]",
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[variables('nicName')]",
-            "location": "[variables('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-                            },
-                            "subnet": {
-                                "id": "[variables('subnet1Ref')]"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "apiVersion": "[variables('computeApiVersion')]",
-            "type": "Microsoft.Compute/virtualMachines",
-            "name": "[variables('vmName')]",
-            "location": "[variables('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-            ],
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
-                },
-                "osProfile": {
-                    "computerName": "[variables('vmName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
-                },
-                "storageProfile": {
-                    "dataDisks": [
-                        {
-                            "name": "[concat(variables('vmName'),'-dataDisk')]",
-                            "lun": 0,
-                            "createOption": "FromImage",
-                            "image": {
-                                "uri": "[variables('dataDiskUrl')]"
-                            },
-                            "vhd": {
-                                "uri": "[variables('dataDiskVhdName')]"
-                            }
-                        }
-                    ],
-                    "osDisk": {
-                        "name": "[concat(variables('vmName'),'-osDisk')]",
-                        "osType": "[parameters('osType')]",
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage",
-                        "image": {
-                            "uri": "[variables('osDiskUrl')]"
-                        },
-                        "vhd": {
-                            "uri": "[variables('osDiskVhdName')]"
-                        }
-                    }
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-                        }
-                    ]
-                }
-            }
+          ]
         }
-    ]
+      }
+    }
+  ],
+  "outputs": { }
 }
