@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "newStorageAccountNamePrefix": {
-      "value": "spsa"
+      "value": "s####"
     },
     "vmNamePrefix": {
-      "value": "spvm"
+      "value": "s####"
     },
      "domainName": {
       "value": "contoso.com"
     },
     "dnsPrefix": {
-      "value": "spdns"
+      "value": "s####"
     },
     "location": {
       "value": "local"
@@ -21,16 +21,16 @@
       "value": "Administrator"
     },
     "adminPassword": {
-      "value": "#####"
+      "value": "!!123abcA"
     },
     "sqlServerServiceAccountPassword": {
-      "value": "#####"
+      "value": "!!123abcA"
     },
    "sharePointFarmAccountPassword": {
-      "value": "#####"
+      "value": "!!123abcA"
     },
     "sharePointFarmPassphrasePassword": {
-      "value": "#####"
+      "value": "!!123abcA"
     },
     "sharepoint2013SP1SourceDLLink":  {
       "value": "####"

@@ -194,7 +194,7 @@
             "metadata": {
                 "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://azurestacktemplate.blob.core.windows.net/sharepoint-2013-non-ha"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha"
         },
 
         "adAssetLocation": {
@@ -202,7 +202,7 @@
             "metadata": {
                 "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://azurestacktemplate.blob.core.windows.net/ad-non-ha"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha"
         },
 
         "sqlAssetLocation": {
@@ -210,7 +210,7 @@
             "metadata": {
                 "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://azurestacktemplate.blob.core.windows.net/sql-2014-non-ha"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha"
         },
 
         "location": {
