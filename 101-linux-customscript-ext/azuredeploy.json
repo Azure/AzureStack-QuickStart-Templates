@@ -1,31 +1,37 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "vmName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the existing VM to apply Linux custom script to"
-            }
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing VM to apply Linux custom script to"
+      }
+    }
 
-    },
-    "variables": {
-    },
-    "resources": [
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('vmName'),'/LinuxCustomScriptExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.3",
-                "settings": {
-                    "commandToExecute": "ifconfig"
-                }
-            }
+  },
+  "variables": {
+    "apiVersion": {
+      "compute": {
+        "virtualMachines": { "extensions": "2015-06-15" }
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/LinuxCustomScriptExtension')]",
+      "apiVersion": "[variables('apiVersion').compute.virtualMachines.extensions]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.3",
+        "settings": {
+          "commandToExecute": "ifconfig"
         }
-    ]
+      }
+    }
+  ],
+  "outputs": { }
 }
