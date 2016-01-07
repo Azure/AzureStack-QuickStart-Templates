@@ -3,11 +3,11 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "newStorageAccountNamePrefix": {
-      "value": "sqlhcz"
+      "value": "s####"
     },
 
     "vmNamePrefix": {
-      "value": "vmhcz"
+      "value": "v####"
     },
 
     "domainName": {
@@ -15,7 +15,7 @@
     },
 
     "dnsPrefix": {
-      "value": "vmhcz"
+      "value": "v####"
     },
     "location": {
       "value": "local"
