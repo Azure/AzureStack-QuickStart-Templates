@@ -17,10 +17,7 @@
     "dnsPrefix": {
       "value": "v####"
     },
-    "location": {
-      "value": "local"
-    },
-
+    
     "adminUsername": {
       "value": "Administrator"
     },
