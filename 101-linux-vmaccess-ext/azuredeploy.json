@@ -1,44 +1,50 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "vmName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the existing Linux VM to modify"
-            }
-        },
-	"username": {
-            "type": "string",
-            "metadata": {
-                "description": "Username of new or existing user"
-            }
-        },
-	"password": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for new or existing user"
-            }
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing Linux VM to modify"
+      }
     },
-    "variables": {
+    "username": {
+      "type": "string",
+      "metadata": {
+        "description": "Username of new or existing user"
+      }
     },
-    "resources": [
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('vmName'),'/LinuxVMAccessExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "VMAccessForLinux",
-                "typeHandlerVersion": "1.3",
-                "settings": {},
-                "protectedSettings": {
-                  "username": "[parameters('username')]",
-                  "password": "[parameters('password')]"
-                }
-            }
+    "password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for new or existing user"
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": {
+      "compute": {
+        "virtualMachines": { "extensions": "2015-06-15" }
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/LinuxVMAccessExtension')]",
+      "apiVersion": "[variables('apiVersion').compute.virtualMachines.extensions]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "VMAccessForLinux",
+        "typeHandlerVersion": "1.3",
+        "settings": { },
+        "protectedSettings": {
+          "username": "[parameters('username')]",
+          "password": "[parameters('password')]"
         }
-    ]
+      }
+    }
+  ],
+  "outputs": { }
 }
