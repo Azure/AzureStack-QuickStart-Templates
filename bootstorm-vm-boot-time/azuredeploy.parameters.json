@@ -2,11 +2,14 @@
   "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
   "contentVersion": "1.15.11.13",
   "parameters": {
-    "azureAdApplicationId": {
-      "value": "<Azure AD Application ID used as Username>"
+	"azureUser": {
+      "value": "<Your Azure user name>"
     },
-    "azureAdApplicationPassword": {
-      "value": "<Your secured password to Azure AD Application>"
+    "azurePassword": {
+      "value": "<Your secured password to Azure>"
+    },
+	"azureApplicationId": {
+      "value": "<Azure Application ID>"
     },
     "tenantId": {
       "value": "<Your secured tenant Id from Azure Subscription>"
@@ -18,7 +21,7 @@
       "value": "<Unique storage name e.g. vmbootsa103115>"
     },
     "location": {
-      "value": "West US"
+      "value": "local"
     },
     "vmAdminUsername": {
       "value": "<Your secured username for VMs>"
