@@ -4,71 +4,51 @@
 
 This template deploys requested number of VMs and a controller VM with public IP address in same virtual network. Controller VM turn-off all VMs then boot them simultaneously to measure an average and end-to-end VM boot time.
 
-For controller VM to manage all VMs, Azure SPN needs to be configured using instructions given below.
-
-<b>AZURE SPN CONFIGURATION</b>
-
-New-AzureRmADApplication -Password <any string to use as a password> -DisplayName <Any String Name> -IdentifierUris https://<UseAnyUniqueName e.g. serviceprinciplenm> -HomePage <same as IdentifierUris>
-
-<i>Use ApplicationId returned by above cmdlet</i>
-
-New-AzureRmADServicePrincipal -ApplicationId <ApplicationId>
-
-New-AzureRmRoleAssignment -RoleDefinitionName Owner -ServicePrincipalName "https://<same as IdentifierUris>"
-
-
-<b>SAMPLE AZURE SPN CONFIGURATION COMMANDS</b>
-
-$azureSubscriptionId = "<Your Azure subscription id (Get-AzureSubscription).SubscriptionId>"
-
-$azureAdIdUri = "https://azureadiduri"
-
-$azureAdPassword = "azureadpwd123"
-
-$azureAdDisplayName = "azureaddisplayname"
-
-Add-AzureRmAccount
-
-Select-AzureRmSubscription -SubscriptionID $azureSubscriptionId
-
-$azureAdApp = New-AzureRmADApplication -Password $azureAdPassword -DisplayName $azureAdDisplayName -IdentifierUris $azureAdIdUri -HomePage $azureAdIdUri
-
-New-AzureRmADServicePrincipal -ApplicationId $azureAdApp.ApplicationId
-
-New-AzureRmRoleAssignment -RoleDefinitionName Owner -ServicePrincipalName $azureAdIdUri
+NOTE: There is a 90 minutes Azure time-out which you can hit if large number of VMs are deployed. To circumvent that, all these operations are done using Scheduled Task (script: VMBootAllScript.ps1) which gets created by a DSC Script Resource (script: VMBootAll.ps1) by a Controller VM.
 
 
 <b>RESULTS</b>
 
-VM bootstorm results file is uploaded to Unique Azure Storage Account ('uniqueStorageAccountName' parameter provided by you) as a blob with name 'VMBootAllResult.log.ps1.zip'
+VM bootstorm results file is uploaded to Unique Azure Storage Account ('uniqueStorageAccountName' parameter provided by you) as a blob with name 'VMBootAllResult.log.ps1.zip. Detailed logs are also uploaded alongside with name VMBootAll.log.ps1.zip.'
 
 
 <b>DEPLOY</b>
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Fmaster%2Fbootstorm-vm-boot-time%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
+Login to AzureStack portal
 
+Click 'New' -> 'Custom' -> 'Template Deployment'
+
+Copy content in azuredeploy.json, click 'Edit Template', paste all the content and click 'Save'
+
+Fill in the parameters
+
+Click 'Create New' to create a new 'Resource Group'
+
+Click 'Create'
+
+Wait for results to appear in 'Storage Account' of a given 'Resource Group' parameter name resource
 
 
 <b>PARAMETERS</b>
 
-Azure AD Application Id: <Application ID returned by New-AzureADServicePrincipal cmdlet while setting up Azure SPN Configuration>
+azureUser: Tenant user name
 
-Azure AD Application Password: <Password you entered for New-AzureADServicePrincipal cmdlet while setting up Azure SPN Configuration>
+azurePassword: Tenant user password
 
-Tenant Id: (Get-AzureSubscription).TenantId
+azureApplicationId: Application id of AzureStack e.g. "https://azurestack.local-api/"
 
-Unique Dns Name for PublicIP: <Choose any string value unique across Azure>
+tenantId: Tenant id of AzureStack e.g. (Get-AzureRmSubscription).TenantId
 
-Unique Storage Account Name: <Choose any string value unique across Azure>
+uniqueDnsNameForPublicIP: <Choose any string value unique across Azure> e.g. "vmbootdns"
 
-Location: <Location where Azure resources will be deployed>
+uniqueStorageAccountName: <Choose any string value unique across Azure> e.g. "vmbootsa"
 
-VM Admin User Name: <Choose secure username for VMs>
+location: "local" for AzureStack
 
-VM Admin Password: <Choose secure password for VMs>
+vmAdminUsername: <Your VM admin username> e.g. "vmbootadmin"
 
-VM Count: <Choose number of VMs to deploy>
+vmAdminPassword: <Your VM secure admin password>
 
-VM OS Sku: <Choose version of Windows to deploy>
+vmCount: Number of VMs to deploy and bootstorm
+
+vmOsSku: Operating System sku to be deployed in VMs e.g. "2012-R2-Datacenter"

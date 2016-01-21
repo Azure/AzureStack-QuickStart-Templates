@@ -37,18 +37,18 @@ azurePassword: Tenant user password
 
 azureApplicationId: Application id of AzureStack e.g. "https://azurestack.local-api/"
 
-tenantId: Tenant id of AzureStack e.g. (Get-AzureSubscription).TenantId
+tenantId: Tenant id of AzureStack e.g. (Get-AzureRmSubscription).TenantId
 
-uniqueDnsNameForPublicIP: <Choose any string value unique across Azure>
+uniqueDnsNameForPublicIP: <Choose any string value unique across Azure> e.g. "vmbootdns"
 
-uniqueStorageAccountName: <Choose any string value unique across Azure>
+uniqueStorageAccountName: <Choose any string value unique across Azure> e.g. "vmbootsa"
 
 location: "local" for AzureStack
 
-vmAdminUsername: <Your VM admin username>
+vmAdminUsername: <Your VM admin username> e.g. "vmbootadmin"
 
-vmAdminPassword: <Your VM admin password>
+vmAdminPassword: <Your VM secure admin password>
 
 vmCount: Number of VMs to deploy and bootstorm
 
-vmOsSku: e.g. "2012-R2-Datacenter"
+vmOsSku: Operating System sku to be deployed in VMs e.g. "2012-R2-Datacenter"
