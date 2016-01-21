@@ -1,4 +1,4 @@
-## VM BOOTSTORM WORKLOAD ##
+## VM BOOTSTORM WORKLOAD FOR AZURESTACK (LOCAL) ##
 
 <b>DESCRIPTION</b>
 
@@ -31,11 +31,11 @@ Wait for results to appear in 'Storage Account' of a given 'Resource Group' para
 
 <b>PARAMETERS</b>
 
-azureUser: Tenant user name
+azureUser: Tenant user name used for azure portal login
 
-azurePassword: Tenant user password
+azurePassword: Tenant user password used for azure portal login
 
-azureApplicationId: Application id of AzureStack e.g. "https://azurestack.local-api/"
+azureApplicationId: "https://azurestack.local-api/"
 
 tenantId: Tenant id of AzureStack e.g. (Get-AzureRmSubscription).TenantId
 
@@ -43,7 +43,7 @@ uniqueDnsNameForPublicIP: <Choose any string value unique across Azure> e.g. "vm
 
 uniqueStorageAccountName: <Choose any string value unique across Azure> e.g. "vmbootsa"
 
-location: "local" for AzureStack
+location: "local"
 
 vmAdminUsername: <Your VM admin username> e.g. "vmbootadmin"
 
