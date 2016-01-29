@@ -1,0 +1,148 @@
+﻿{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"spVMName": {
+			"type": "string"
+		},
+		"location": {
+			"type": "string"
+		},
+		"domainName": {
+			"type": "string"
+		},
+		"adminUserName": {
+			"type": "string"
+		},
+		"sqlServerServiceAccountUserName": {
+			"type": "string"
+		},
+		"sharePointSetupUserAccountUserName": {
+			"type": "string"
+		},
+		"sharePointFarmAccountUserName": {
+			"type": "string"
+		},
+		"configDatabaseName": {
+			"type": "string"
+		},
+		"administrationContentDatabaseName": {
+			"type": "string"
+		},
+		"sqlVMName": {
+			"type": "string"
+		},
+		"fqdn": {
+			"type": "string"
+		},
+		"contentDatabaseName": {
+			"type": "string"
+		},
+		"spSiteTemplateName": {
+			"type": "string"
+		},
+		"adminPassword": {
+			"type": "securestring"
+		},
+		"sqlServerServiceAccountPassword": { 
+			"type": "securestring"
+		},
+		"sharePointSetupUserAccountPassword": {
+			"type": "securestring"
+		},
+		"sharePointFarmAccountPassword": {
+			"type": "securestring"
+		},
+		"sharePointFarmPassphrasePassword": {
+			"type": "securestring"
+		},
+		"sharepointFarmName": {
+			"type": "string"
+		},
+		"sharepointInstallSourceDrive": {
+			"type": "string"
+		},
+		"sharepointInstallSourceFolder": {
+			"type": "string"
+		},
+		"ProductKey": {
+			"type": "string"
+		},
+		"sharepoint2013SP1SourceDLLink": {
+			"type": "string",
+			"metadata": {
+				"description": "Direct download link for the SharePoint 2013 SP1 trial ISO"
+			}
+		},
+		"assetLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
+			}
+		}
+	},
+	"variables": {
+		"deploySPFarmModulesURL": "[concat(parameters('assetLocation'),'/deploySharePointFarm.ps1.zip')]",
+		"deploySPFarmConfigurationFunction": "deploySharePointFarm.ps1\\deploySharePointFarm"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"name": "[concat(parameters('spVMName'),'/ConfigureSPServer')]",
+			"apiVersion": "2015-06-15",
+			"dependsOn": [
+			],
+			"location": "[parameters('location')]",
+			"properties": {
+				"publisher": "Microsoft.Powershell",
+				"type": "DSC",
+				"typeHandlerVersion": "2.8",
+				"autoUpgradeMinorVersion": "true",
+				"settings": {
+					"ModulesUrl": "[variables('deploySPFarmModulesURL')]",
+					"ConfigurationFunction": "[variables('deploySPFarmConfigurationFunction')]",
+					"Properties": {
+						"DomainName": "[parameters('domainName')]",
+						"AdminCreds": {
+							"UserName": "[parameters('adminUserName')]",
+							"Password": "PrivateSettingsRef:AdminPassword"
+						},
+						"SQLServicecreds": {
+							"UserName": "[parameters('sqlServerServiceAccountUserName')]",
+							"Password": "PrivateSettingsRef:SQLServicePassword"
+						},
+						"SharePointSetupUserAccountcreds": {
+							"UserName": "[parameters('sharePointSetupUserAccountUserName')]",
+							"Password": "PrivateSettingsRef:SharePointSetupUserAccountPassword"
+						},
+						"SharePointFarmAccountcreds": {
+							"UserName": "[parameters('sharePointFarmAccountUserName')]",
+							"Password": "PrivateSettingsRef:SharePointFarmAccountPassword"
+						},
+						"SharePointFarmPassphrasecreds": {
+							"UserName": "ignore",
+							"Password": "PrivateSettingsRef:SharePointFarmPassphrasePassword"
+						},
+						"DatabaseName": "[parameters('configDatabaseName')]",
+						"AdministrationContentDatabaseName": "[parameters('administrationContentDatabaseName')]",
+						"DatabaseServer": "[concat(parameters('sqlVMName'),'.',parameters('domainName'))]",
+						"Configuration": "[concat('{\"roles\":[{\"type\":\"application\",\"properties\":{\"fqdn\":\"',parameters('fqdn'),'\",\"port\":8080}},{\"type\":\"web\",\"properties\":{\"webApp\":{\"name\":\"',parameters('sharepointFarmName'),'\",\"applicationPool\":\"',parameters('sharepointFarmName'),' AppPool\",\"applicationPoolAccount\":\"', parameters('sharePointFarmAccountUserName'),'\",\"url\":\"http://',parameters('fqdn'),'\",\"port\":80,\"hostHeader\":\"',parameters('fqdn'),'\",\"databaseName\":\"',parameters('contentDatabaseName'),'\"},\"site\":{\"name\":\"',parameters('sharepointFarmName'),'\",\"template\":\"',parameters('spSiteTemplateName'),'\",\"url\":\"http://',parameters('fqdn'),'\",\"ownerAliasDomain\":\"',parameters('domainName'),'\",\"ownerAliasUserName\":\"',parameters('sharePointFarmAccountUserName'),'\",\"secondaryOwnerAliasDomain\":\"',parameters('domainName'),'\",\"secondaryOwnerAliasUserName\":\"',parameters('adminUserName'),'\"}}}],\"configureForHa\":\"False\",\"loadBalancedSetProbePort\":0}')]",
+						"InstallSourceDrive": "[parameters('sharepointInstallSourceDrive')]",
+						"InstallSourceFolderName": "[parameters('sharepointInstallSourceFolder')]",
+						"ProductKey": "[parameters('ProductKey')]",
+						"SPDLLink": "[parameters('sharepoint2013SP1SourceDLLink')]"
+					}
+				},
+				"protectedSettings": {
+					"Items": {
+						"AdminPassword": "[parameters('adminPassword')]",
+						"SQLServicePassword": "[parameters('sqlServerServiceAccountPassword')]",
+						"SharePointSetupUserAccountPassword": "[parameters('sharePointSetupUserAccountPassword')]",
+						"SharePointFarmAccountPassword": "[parameters('sharePointFarmAccountPassword')]",
+						"SharePointFarmPassphrasePassword": "[parameters('sharePointFarmPassphrasePassword')]"
+					}
+				}
+			}
+		}
+	]
+}
