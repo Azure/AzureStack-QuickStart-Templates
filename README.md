@@ -45,13 +45,13 @@ $myBlobStorageEndpoint = "blob.azurestack.local"
 
 ### Create Resource Group for Template Deployment
 ```PowerShell
-New-AzureRMResourceGroup -Name $RGName -Location $myLocation
+New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 ```
 
 ### Deploy Simple IaaS Template 
 ```PowerShell
 New-AzureRmResourceGroupDeployment `
-    -Name "myDeploymen$myNum" `
+    -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
     -TemplateFile "c:\templates\azuredeploy-101-simple-windows-vm-withDNS.json" `
     -deploymentLocation $myLocation `
