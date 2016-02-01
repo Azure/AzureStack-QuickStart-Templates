@@ -43,6 +43,9 @@
 			"allowedValues": [
 				"Standard_D1",
 				"Standard_A1",
+				"Standard_A2",
+				"Standard_A3",
+				"Standard_A4",
 				"Standard_DS1",
 				"Standard_D2",
 				"Standard_DS2",
@@ -62,7 +65,7 @@
 			"metadata": {
 				"description": "The size of the AD VMs Created"
 			},
-			"defaultValue": "Standard_A2"
+			"defaultValue": "Standard_A4"
 		},
 
 		"dnsPrefix": {
@@ -136,7 +139,7 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			},
-			"defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-single-vm"
+			"defaultValue": "https://raw.githubusercontent.com/JesusAlvarezTorres/AzureStack-QuickStart-Templates-1/master/sharepoint-2013-single-vm"
 		},
 
 		"location": {
@@ -199,11 +202,11 @@
 		"spNicName1": "SPFarm-Nic-0",
 		"updateSPCNic1": "updateSPCNic1",
 		"updateSPCNic1Id": "[concat('Microsoft.Resources/deployments/', variables('updateSPCNic1'))]",
-		
+
 		"deploySPFarm": "deploySPFarm",
 		"deploySPFarmTemplateUrl": "[concat(parameters('assetLocation'),'/deploySharePointFarm.json')]",
 
-		
+
 
 		"publicLBName": "SPPublicLoadBalancer",
 		"publicIPAddressName": "lbPublikIP",
@@ -231,8 +234,8 @@
 		"spSiteTemplateName": "STS#0",
 		"sharepointFarmName": "spFarm",
 		"sppublicIPFQDN": "local.cloudapp.azure.com",
-		"spFQDN": "[concat(variables('spVmNamePrefix'),'0.',parameters('domainName'))]",
-		
+		"spFQDN": "[concat(variables('farmVMNamePrefix'),'0.',parameters('domainName'))]",
+
 
 		"subnets": [
 			{
@@ -471,15 +474,17 @@
 					"location": { "value": "[parameters('location')]" },
 					"domainName": { "value": "[parameters('domainName')]" },
 					"adminUserName": { "value": "[parameters('adminUsername')]" },
+					"sqlServerServiceAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
 					"sharePointSetupUserAccountUserName": { "value": "[parameters('adminUsername')]" },
 					"sharePointFarmAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
 					"configDatabaseName": { "value": "[variables('spconfigDatabaseName')]" },
 					"administrationContentDatabaseName": { "value": "[variables('spadministrationContentDatabaseName')]" },
-					"sqlVMName": { "value": "[concat(variables('sqlClusterVmNamePrefix'), '0')]" },
+					"sqlVMName": { "value": "[concat(variables('farmVMNamePrefix'), '0')]" },
 					"fqdn": { "value": "[variables('spFQDN')]" },
 					"contentDatabaseName": { "value": "[variables('spcontentDatabaseName')]" },
 					"spSiteTemplateName": { "value": "[variables('spSiteTemplateName')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
+					"sqlServerServiceAccountPassword": { "value":  "[parameters('sqlServerServiceAccountPassword')]"},
 					"sharePointSetupUserAccountPassword": { "value": "[parameters('adminPassword')]" },
 					"sharePointFarmAccountPassword": { "value": "[parameters('sqlServerServiceAccountPassword')]" },
 					"sharePointFarmPassphrasePassword": { "value": "[parameters('sharePointFarmPassphrasePassword')]" },
