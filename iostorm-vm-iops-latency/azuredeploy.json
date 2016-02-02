@@ -387,33 +387,13 @@
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMIOWorkload')]",
           "configurationFunction": "[variables('configurationFunctionVMIOWorkload')]",
-		  "properties": [
-            {
-              "name": "ControllerVMName",
-              "value": "[variables('vmName')]",
-              "typeName": "System.String"
-            },
-            {
-              "name": "ControllerVMPrivateIP",
-              "value": "[reference(variables('vmNicName')).ipConfigurations[0].properties.privateIPAddress]",
-              "typeName": "System.String"
-            },
-            {
-              "name": "VMName",
-              "value": "[concat(variables('vmName'),copyIndex())]",
-              "typeName": "System.String"
-            },
-            {
-              "name": "VMUserName",
-              "value": "[parameters('vmAdminUsername')]",
-              "typeName": "System.String"
-            },
-            {
-              "name": "VMPassword",
-              "value": "[parameters('vmAdminPassword')]",
-              "typeName": "System.String"
-            }
-          ]
+		  "properties": {
+            "ControllerVMName": "[variables('vmName')]",
+            "ControllerVMPrivateIP": "[reference(variables('vmNicName')).ipConfigurations[0].properties.privateIPAddress]",
+            "VMName": "[concat(variables('vmName'),copyIndex())]",
+            "VMAdminUserName": "[parameters('vmAdminUsername')]",
+            "VMAdminPassword": "[parameters('vmAdminPassword')]",
+          }
         }
       }
     }
