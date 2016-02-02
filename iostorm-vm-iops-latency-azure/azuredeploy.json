@@ -89,6 +89,9 @@
   },
   "variables": {
     "apiVersion": "2015-06-15",
+    "apiVersionCRP": "2015-06-15",
+    "apiVersionSRP": "2015-06-15",
+    "apiVersionNRP": "2015-05-01-preview",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "addressPrefix": "10.1.0.0/16",
@@ -97,7 +100,7 @@
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "vmiopublicip",
     "publicIPAddressType": "Dynamic",
-    "vmStorageAccountContainerName": "vmiostoraccn",
+    "vmStorageAccountContainerName": "vmiosac",
     "vmName": "vmiovm",
     "vmSize": "Standard_A2",
     "vmOsDiskName": "vmioosdisk",
@@ -112,11 +115,13 @@
     "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
     "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
     "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
-    "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO"
+    "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO",
+	"nsgName": "vmionsg",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionSRP')]",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[tolower(parameters('uniqueStorageAccountName'))]",
       "location": "[parameters('location')]",
@@ -125,7 +130,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[parameters('location')]",
@@ -136,8 +141,31 @@
         }
       }
     },
+	{
+      "apiVersion": "[variables('apiVersionNRP')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "nsgsrule",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[parameters('location')]",
@@ -151,14 +179,20 @@
           {
             "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgID')]"
+              }
             }
           }
-        ]
+        ],
+        "dhcpOptions": {
+          "dnsServers": [ "192.168.100.2" ]
+        }
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('vmNicName')]",
       "location": "[parameters('location')]",
@@ -184,7 +218,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('vmNicName'),copyIndex())]",
       "location": "[parameters('location')]",
@@ -210,7 +244,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionCRP')]",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[parameters('location')]",
@@ -259,7 +293,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionCRP')]",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(variables('vmName'),copyIndex())]",
       "location": "[parameters('location')]",
@@ -312,9 +346,9 @@
       }
     },
     {
+      "apiVersion": "[variables('apiVersionCRP')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),'/dscExtension')]",
-      "apiVersion": "[variables('apiVersion')]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'))]"
