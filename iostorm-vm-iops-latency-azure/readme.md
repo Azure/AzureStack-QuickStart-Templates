@@ -1,4 +1,4 @@
-## VM IOSTORM WORKLOAD ##
+## VM IOSTORM WORKLOAD FOR AZURE (CLOUD) ##
 
 <b>DESCRIPTION</b>
 
@@ -10,7 +10,10 @@ NOTE: There is a 90 minutes Azure time-out which you can hit if large number of 
 
 <b>AZURE SPN CONFIGURATION</b>
 ```PowerShell
-New-AzureRmADApplication -Password <any string to use as a password> -DisplayName <Any String Name> -IdentifierUris https://<UseAnyUniqueName e.g. serviceprinciplenm> -HomePage <same as IdentifierUris>
+New-AzureRmADApplication -Password <any string to use as a password> `
+ -DisplayName <Any String Name> `
+ -IdentifierUris https://<UseAnyUniqueName e.g. serviceprinciplenm> `
+ -HomePage <same as IdentifierUris>
 ```
 <i>Use ApplicationId returned by above cmdlet</i>
 ```PowerShell
@@ -33,7 +36,10 @@ Add-AzureRmAccount
 
 Select-AzureRmSubscription -SubscriptionID $azureSubscriptionId
 
-$azureAdApp = New-AzureRmADApplication -Password $azureAdPassword -DisplayName $azureAdDisplayName -IdentifierUris $azureAdIdUri -HomePage $azureAdIdUri
+$azureAdApp = New-AzureRmADApplication -Password $azureAdPassword `
+-DisplayName $azureAdDisplayName `
+-IdentifierUris $azureAdIdUri `
+-HomePage $azureAdIdUri
 
 New-AzureRmADServicePrincipal -ApplicationId $azureAdApp.ApplicationId
 
@@ -42,11 +48,11 @@ New-AzureRmRoleAssignment -RoleDefinitionName Owner -ServicePrincipalName $azure
 
 <b>PARAMETERS</b>
 ```PowerShell
-azureAdApplicationId: "3bcde4f2-44d7-4395-b5d3-88ed26173963" [As per Azure SPN Configuration instructions]
+azureAdApplicationId: "3bcde4f2-44d7-4395-b5d3-88ed26173963" #[As per Azure SPN Configuration instructions]
 
-azureAdApplicationPassword: "azurespnpwd" [As per Azure SPN Configuration instructions]
+azureAdApplicationPassword: "azurespnpwd" #[As per Azure SPN Configuration instructions]
 
-tenantId:"72f988bf-86f1-41af-91ab-2d7cd011db47" [(Get-AzureRmSubscription).TenantId]
+tenantId:"72f988bf-86f1-41af-91ab-2d7cd011db47" #[(Get-AzureRmSubscription).TenantId]
 
 uniqueDnsNameForPublicIP: "vmbootdns"
 
@@ -58,9 +64,9 @@ vmAdminUsername: "vmbootadmin"
 
 vmAdminPassword: "abcd00!!"
 
-vmCount: 2 [Number of VMs to deploy and bootstorm]
+vmCount: 2 #[Number of VMs to deploy and bootstorm]
 
-vmOsSku: "2012-R2-Datacenter" [Operating System sku to be deployed in VMs]
+vmOsSku: "2012-R2-Datacenter" #[Operating System sku to be deployed in VMs]
 ```
 
 <b>RESULTS</b>
