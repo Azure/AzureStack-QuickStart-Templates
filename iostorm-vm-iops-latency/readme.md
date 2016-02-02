@@ -31,25 +31,26 @@ Wait for results to appear in 'Storage Account' of a given 'Resource Group' para
 
 
 <b>PARAMETERS</b>
+```PowerShell
+azureUser: "tenantadmin1@microsoftazurestack.onmicrosoft.com" #[Tenant user name used for azure portal login]
 
-azureUser: Tenant user name used for azure portal login
-
-azurePassword: Tenant user password used for azure portal login
+azurePassword: "abcd!!00" #[Tenant user password used for azure portal login]
 
 azureApplicationId: "https://azurestack.local-api/"
 
-tenantId: Tenant id of AzureStack e.g. (Get-AzureRmSubscription).TenantId
+tenantId: "7ea3e2b7-334d-4083-807b-fa2000faa9b8" #[(Get-AzureRmSubscription).TenantId]
 
-uniqueDnsNameForPublicIP: <Choose any string value unique across Azure> e.g. "vmbootdns"
+uniqueDnsNameForPublicIP: "vmiodns"
 
-uniqueStorageAccountName: <Choose any string value unique across Azure> e.g. "vmbootsa"
+uniqueStorageAccountName: "vmiosa"
 
 location: "local"
 
-vmAdminUsername: <Your VM admin username> e.g. "vmbootadmin"
+vmAdminUsername: "vmbootadmin"
 
-vmAdminPassword: <Your VM secure admin password>
+vmAdminPassword: "abcd00!!"
 
-vmCount: Number of VMs to deploy and bootstorm
+vmCount: 2 #[Number of VMs to deploy and iostorm]
 
-vmOsSku: Operating System sku to be deployed in VMs e.g. "2012-R2-Datacenter"
+vmOsSku: "2012-R2-Datacenter" #[Operating System sku to be deployed in VMs]
+```
