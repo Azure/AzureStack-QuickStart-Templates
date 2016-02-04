@@ -5,13 +5,13 @@
     "azureAdApplicationId": {
       "type": "string",
       "metadata": {
-        "description": "Azure AD Application ID to authenticate inside controller VM."
+        "description": "Azure AD Application ID to authenticate inside controller VM for AzureCloud."
       }
     },
     "azureAdApplicationPassword": {
       "type": "string",
       "metadata": {
-        "description": "Azure AD Application password to authenticate inside controller VM."
+        "description": "Azure AD Application password to authenticate inside controller VM for AzureCloud."
       }
     },
     "tenantId": {
@@ -32,27 +32,34 @@
         "description": "Unique Storage Account name to place OS disks."
       }
     },
+    "storageDomain": {
+      "type": "string",
+      "defaultValue": "core.windows.net",
+      "metadata": {
+        "description": "The storage domain. e.g. For AzureStack 'azurestack.local' and for Azure Cloud 'core.windows.net'."
+      }
+    },
     "location": {
       "type": "string",
+      "defaultValue": "East US",
       "allowedValues": [
+        "West US",
         "East US",
         "East US 2",
-        "West US",
         "Central US",
         "South Central US",
+        "North Central US",
         "North Europe",
         "West Europe",
         "East Asia",
         "Southeast Asia",
         "Japan East",
         "Japan West",
-        "North Central US",
-        "Australia East",
-        "Australia Southeast",
-        "Brazil South"
+        "Southeast Asia",
+        "local"
       ],
       "metadata": {
-        "description": "Region to deploy VMs."
+        "description": "Region to deploy VMs, 'local' for AzureStack and all other supported regions for AzureCloud."
       }
     },
     "vmAdminUsername": {
@@ -104,19 +111,23 @@
     "vmName": "vmiovm",
     "vmSize": "Standard_A2",
     "vmOsDiskName": "vmioosdisk",
+    "vmIoBlockSize": "4096",
+    "vmIoDuration": "600",
+    "vmIoReadPercentage": "70",
+    "vmIoMaxLatency": "100",
     "vmNicName": "vmionic",
     "virtualNetworkName": "vmiovnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency-azure/",
-    "modulesPathTest": "https://vmbootio.blob.core.windows.net/modules/",
+    "modulesPath": "https://vmbootio.blob.core.windows.net/modules/",
+    "modulesPathProd": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency-azure/",
     "moduleVMIOController": "VMIOWorkloadController.zip",
     "moduleVMIOWorkload": "VMIOWorkload.zip",
     "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
     "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
     "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
     "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO",
-	"nsgName": "vmionsg",
+    "nsgName": "vmionsg",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
   },
   "resources": [
@@ -141,7 +152,7 @@
         }
       }
     },
-	{
+    {
       "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
@@ -169,6 +180,7 @@
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[parameters('location')]",
+      "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -185,10 +197,7 @@
               }
             }
           }
-        ],
-        "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
-        }
+        ]
       }
     },
     {
@@ -271,7 +280,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
+              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'),'/',variables('vmStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -287,7 +296,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'))]"
           }
         }
       }
@@ -324,7 +333,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
+              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'),'/',variables('vmStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -340,7 +349,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'))]"
           }
         }
       }
@@ -400,6 +409,10 @@
             "VMName": "[concat(variables('vmName'),copyIndex())]",
             "VMAdminUserName": "[parameters('vmAdminUsername')]",
             "VMAdminPassword": "[parameters('vmAdminPassword')]",
+            "VMIoBlockSize": "[variables('vmIoBlockSize')]",
+            "VMIoDuration": "[variables('vmIoDuration')]",
+            "VMIoReadPercentage": "[variables('vmIoReadPercentage')]",
+            "VMIoMaxLatency": "[variables('vmIoMaxLatency')]"
           }
         }
       }

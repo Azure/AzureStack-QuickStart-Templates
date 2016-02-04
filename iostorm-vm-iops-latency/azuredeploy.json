@@ -5,19 +5,20 @@
     "azureUser": {
       "type": "string",
       "metadata": {
-        "description": "Azure user to authenticate inside controller VM."
+        "description": "Azure user to authenticate inside controller VM for AzureStack."
       }
     },
     "azurePassword": {
       "type": "securestring",
       "metadata": {
-        "description": "Azure user password to authenticate inside controller VM."
+        "description": "Azure user password to authenticate inside controller VM for AzureStack."
       }
     },
     "azureApplicationId": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
-        "description": "Azure AD Application ID to authenticate inside controller VM."
+        "description": "Azure Application ID to authenticate inside controller VM for AzureStack."
       }
     },
     "tenantId": {
@@ -38,13 +39,34 @@
         "description": "Unique Storage Account name to place OS disks."
       }
     },
+    "storageDomain": {
+      "type": "string",
+      "defaultValue": "azurestack.local",
+      "metadata": {
+        "description": "The storage domain. e.g. For AzureStack 'azurestack.local' and for Azure Cloud 'core.windows.net'."
+      }
+    },
     "location": {
       "type": "string",
+      "defaultValue": "local",
       "allowedValues": [
+        "West US",
+        "East US",
+        "East US 2",
+        "Central US",
+        "South Central US",
+        "North Central US",
+        "North Europe",
+        "West Europe",
+        "East Asia",
+        "Southeast Asia",
+        "Japan East",
+        "Japan West",
+        "Southeast Asia",
         "local"
       ],
       "metadata": {
-        "description": "Region to deploy VMs."
+        "description": "Region to deploy VMs, 'local' for AzureStack and all other supported regions for AzureCloud."
       }
     },
     "vmAdminUsername": {
@@ -96,6 +118,10 @@
     "vmName": "vmiovm",
     "vmSize": "Standard_A2",
     "vmOsDiskName": "vmioosdisk",
+    "vmIoBlockSize": "4096",
+    "vmIoDuration": "600",
+    "vmIoReadPercentage": "70",
+    "vmIoMaxLatency": "100",
     "vmNicName": "vmionic",
     "virtualNetworkName": "vmiovnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
@@ -107,7 +133,7 @@
     "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
     "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
     "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO",
-	"nsgName": "vmionsg",
+    "nsgName": "vmionsg",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
   },
   "resources": [
@@ -132,7 +158,7 @@
         }
       }
     },
-	{
+    {
       "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
@@ -263,7 +289,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local/',variables('vmStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
+              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'),'/',variables('vmStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -279,7 +305,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local')]"
+            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'))]"
           }
         }
       }
@@ -316,7 +342,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local/',variables('vmStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
+              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'),'/',variables('vmStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -332,7 +358,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local')]"
+            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'))]"
           }
         }
       }
@@ -362,6 +388,7 @@
             "VMCount": "[parameters('vmCount')]",
             "VMAdminUserName": "[parameters('vmAdminUsername')]",
             "VMAdminPassword": "[parameters('vmAdminPassword')]",
+            "VMIoMaxLatency": "[variables('vmIoMaxLatency')]",
             "AzureStorageAccount": "[parameters('uniqueStorageAccountName')]"
           }
         }
@@ -387,12 +414,16 @@
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMIOWorkload')]",
           "configurationFunction": "[variables('configurationFunctionVMIOWorkload')]",
-		  "properties": {
+          "properties": {
             "ControllerVMName": "[variables('vmName')]",
             "ControllerVMPrivateIP": "[reference(variables('vmNicName')).ipConfigurations[0].properties.privateIPAddress]",
             "VMName": "[concat(variables('vmName'),copyIndex())]",
             "VMAdminUserName": "[parameters('vmAdminUsername')]",
             "VMAdminPassword": "[parameters('vmAdminPassword')]",
+            "VMIoBlockSize": "[variables('vmIoBlockSize')]",
+            "VMIoDuration": "[variables('vmIoDuration')]",
+            "VMIoReadPercentage": "[variables('vmIoReadPercentage')]",
+            "VMIoMaxLatency": "[variables('vmIoMaxLatency')]"
           }
         }
       }
