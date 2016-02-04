@@ -30,7 +30,7 @@ Wait for results to appear in 'Storage Account' of a given 'Resource Group' para
 
 
 <b>PARAMETERS</b>
-
+```Poweshell
 azureUser: Tenant user name used for azure portal login
 
 azurePassword: Tenant user password used for azure portal login
@@ -52,3 +52,4 @@ vmAdminPassword: <Your VM secure admin password>
 vmCount: Number of VMs to deploy and bootstorm
 
 vmOsSku: Operating System sku to be deployed in VMs e.g. "2012-R2-Datacenter"
+```
