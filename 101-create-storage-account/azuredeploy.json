@@ -4,9 +4,8 @@
   "parameters": {
     "storageAccountNamePrefix": {
       "type": "string",
-      "maxLength": 11,
       "metadata": {
-        "description": "Name prefix of the Storage Account. The maximum length of the prefix is 11 characters"
+        "description": "Name prefix of the Storage Account. The maximum length of the prefix is 24 characters"
       }
     }
   },
@@ -16,7 +15,7 @@
     },
     "storage": {
       "storageAccounts": {
-        "name": "[replace(replace(tolower(concat(parameters('storageAccountNamePrefix'), uniquestring(resourceGroup().id))), '-',''),'.','')]",
+        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
         "type": "Standard_LRS"
       }
     }
