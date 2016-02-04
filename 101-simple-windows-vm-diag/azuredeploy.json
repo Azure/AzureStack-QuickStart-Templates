@@ -13,6 +13,12 @@
         "description": "Blob storage endpoint"
       }
     },
+    "storageAccountNamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Name prefix of the Storage Account. The maximum length of the prefix is 24 characters"
+      }
+    }
     "vmsuffix": {
       "type": "string",
       "metadata": {
@@ -44,7 +50,7 @@
     },
         "storage": {
       "storageAccounts": {
-        "name": "[replace(replace(tolower(concat('storage', uniquestring(resourceGroup().id))), '-',''),'.','')]",
+        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
         "type": "Standard_LRS"
       }
     },
