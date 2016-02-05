@@ -14,12 +14,6 @@
 		"adminUserName": {
 			"type": "string"
 		},
-		"sqlServerServiceAccountUserName": {
-			"type": "string"
-		},
-		"sharePointSetupUserAccountUserName": {
-			"type": "string"
-		},
 		"sharePointFarmAccountUserName": {
 			"type": "string"
 		},
@@ -42,12 +36,6 @@
 			"type": "string"
 		},
 		"adminPassword": {
-			"type": "securestring"
-		},
-		"sqlServerServiceAccountPassword": { 
-			"type": "securestring"
-		},
-		"sharePointSetupUserAccountPassword": {
 			"type": "securestring"
 		},
 		"sharePointFarmAccountPassword": {
@@ -107,14 +95,6 @@
 							"UserName": "[parameters('adminUserName')]",
 							"Password": "PrivateSettingsRef:AdminPassword"
 						},
-						"SQLServicecreds": {
-							"UserName": "[parameters('sqlServerServiceAccountUserName')]",
-							"Password": "PrivateSettingsRef:SQLServicePassword"
-						},
-						"SharePointSetupUserAccountcreds": {
-							"UserName": "[parameters('sharePointSetupUserAccountUserName')]",
-							"Password": "PrivateSettingsRef:SharePointSetupUserAccountPassword"
-						},
 						"SharePointFarmAccountcreds": {
 							"UserName": "[parameters('sharePointFarmAccountUserName')]",
 							"Password": "PrivateSettingsRef:SharePointFarmAccountPassword"
@@ -136,8 +116,6 @@
 				"protectedSettings": {
 					"Items": {
 						"AdminPassword": "[parameters('adminPassword')]",
-						"SQLServicePassword": "[parameters('sqlServerServiceAccountPassword')]",
-						"SharePointSetupUserAccountPassword": "[parameters('sharePointSetupUserAccountPassword')]",
 						"SharePointFarmAccountPassword": "[parameters('sharePointFarmAccountPassword')]",
 						"SharePointFarmPassphrasePassword": "[parameters('sharePointFarmPassphrasePassword')]"
 					}

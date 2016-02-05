@@ -82,19 +82,12 @@
 			}
 		},
 
-		"sqlServerServiceAccountUserName": {
+		"sharePointFarmAccountUserName": {
 			"type": "string",
 			"metadata": {
 				"description": "The SQL Server Service account name"
 			},
 			"defaultValue": "sqlservice"
-		},
-
-		"sqlServerServiceAccountPassword": {
-			"type": "securestring",
-			"metadata": {
-				"description": "The SQL Server Service account password"
-			}
 		},
 
 		"vmNetworkSubnet": {
@@ -139,7 +132,7 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			},
-			"defaultValue": "https://raw.githubusercontent.com/JesusAlvarezTorres/AzureStack-QuickStart-Templates-1/master/sharepoint-2013-single-vm"
+			"defaultValue": "https://jesusatemplate.blob.core.windows.net/sharepoint-2013-single-vm"
 		},
 
 		"location": {
@@ -417,51 +410,11 @@
 			}
 		},
 		{
-			"name": "[variables('updateSPCNic1')]",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2015-01-01",
-			"dependsOn": [
-				"[variables('updateVNetDNS1Id')]"
-			],
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('nicTemplateURL')]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"nicName": {
-						"value": "[variables('spNicName1')]"
-					},
-					"ipConfigurations": {
-						"value": [
-							{
-								"name": "ipconfig1",
-								"properties": {
-									"privateIPAllocationMethod": "Dynamic",
-									"subnet": {
-										"id": "[variables('staticSubnetRef')]"
-									}
-								}
-							}
-						]
-					},
-					"dnsServers": {
-						"value": [ "[parameters('primaryAdIpAddress')]", "[variables('azureStackDNSIP')]" ]
-					}
-
-				}
-			}
-		},
-		{
 			"name": "[variables('deploySPFarm')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2015-01-01",
 			"dependsOn": [
-				"[variables('updateSPCNic1Id')]"
+				"[variables('updateVNetDNS1Id')]"
 			],
 			"properties": {
 				"mode": "Incremental",
@@ -474,9 +427,7 @@
 					"location": { "value": "[parameters('location')]" },
 					"domainName": { "value": "[parameters('domainName')]" },
 					"adminUserName": { "value": "[parameters('adminUsername')]" },
-					"sqlServerServiceAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
-					"sharePointSetupUserAccountUserName": { "value": "[parameters('adminUsername')]" },
-					"sharePointFarmAccountUserName": { "value": "[parameters('sqlServerServiceAccountUserName')]" },
+					"sharePointFarmAccountUserName": { "value": "[parameters('sharePointFarmAccountUserName')]" },
 					"configDatabaseName": { "value": "[variables('spconfigDatabaseName')]" },
 					"administrationContentDatabaseName": { "value": "[variables('spadministrationContentDatabaseName')]" },
 					"sqlVMName": { "value": "[concat(variables('farmVMNamePrefix'), '0')]" },
@@ -484,9 +435,7 @@
 					"contentDatabaseName": { "value": "[variables('spcontentDatabaseName')]" },
 					"spSiteTemplateName": { "value": "[variables('spSiteTemplateName')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"sqlServerServiceAccountPassword": { "value":  "[parameters('sqlServerServiceAccountPassword')]"},
-					"sharePointSetupUserAccountPassword": { "value": "[parameters('adminPassword')]" },
-					"sharePointFarmAccountPassword": { "value": "[parameters('sqlServerServiceAccountPassword')]" },
+					"sharePointFarmAccountPassword": { "value": "[parameters('sharePointFarmAccountPassword')]" },
 					"sharePointFarmPassphrasePassword": { "value": "[parameters('sharePointFarmPassphrasePassword')]" },
 					"sharepointFarmName": { "value": "[variables('sharepointFarmName')]" },
 					"sharepointInstallSourceDrive": { "value": "[variables('spSourceDrive')]" },
