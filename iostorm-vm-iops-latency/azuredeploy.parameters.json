@@ -20,6 +20,9 @@
     "uniqueStorageAccountName": {
       "value": "<Unique storage name e.g. vmiosa103115>"
     },
+    "storageDomain": {
+      "value": "azurestack.local"
+    },
     "location": {
       "value": "local"
     },
