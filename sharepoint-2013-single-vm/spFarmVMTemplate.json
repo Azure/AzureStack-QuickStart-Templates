@@ -81,29 +81,6 @@
 			}
 		},
 
-		"location": {
-			"type": "string",
-			"allowedValues": [
-				"West US",
-				"East US",
-				"East US 2",
-				"Central US",
-				"South Central US",
-				"North Central US",
-				"North Europe",
-				"West Europe",
-				"East Asia",
-				"Southeast Asia",
-				"Japan East",
-				"Japan West",
-				"Southeast Asia",
-				"local"
-			],
-			"metadata": {
-				"description": "The region to deploy the resources into"
-			}
-		},
-
 		"vmSize": {
 			"type": "string",
 			"allowedValues": [
@@ -156,10 +133,10 @@
 			}
 		},
 
-		"spEndPointNatRuleID": {
+		"lbBEPool": {
 			"type": "string",
 			"metadata": {
-				"description": "The resource id for the SharePoint site NAT rule"
+				"description": "The resource id for the SharePoint load balancer back end pool"
 			}
 		}
 
@@ -175,7 +152,7 @@
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[concat(parameters('storageAccount'), '0')]",
 			"apiVersion": "2015-05-01-preview",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"properties": {
 				"accountType": "[parameters('storageAccountType')]"
 			}
@@ -183,7 +160,7 @@
 		{
 			"name": "[concat(variables('spNicName'), '0')]",
 			"type": "Microsoft.Network/networkInterfaces",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"apiVersion": "2015-05-01-preview",
 			"dependsOn": [
 			],
@@ -196,12 +173,14 @@
 							"subnet": {
 								"id": "[parameters('subnetResourceId')]"
 							},
+							"loadBalancerBackendAddressPools": [
+								{
+									"id": "[parameters('lbBEPool')]"
+								}
+							],
 							"loadBalancerInboundNatRules": [
 								{
 									"id": "[parameters('rdpNATRuleID')]"
-								},
-								{ 
-									"id":  "[parameters('spEndPointNatRuleID')]"
 								}
 							]
 						}
@@ -213,7 +192,7 @@
 			"apiVersion": "2015-06-15",
 			"type": "Microsoft.Compute/virtualMachines",
 			"name": "[concat(parameters('vmNamePrefix'), '0')]",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts',concat(parameters('storageAccount'),  '0'))]",
 				"[resourceId('Microsoft.Network/networkInterfaces',concat(variables('spNicName'), '0'))]"

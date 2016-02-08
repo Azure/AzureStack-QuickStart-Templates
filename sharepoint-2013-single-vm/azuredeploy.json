@@ -135,29 +135,6 @@
 			"defaultValue": "https://jesusatemplate.blob.core.windows.net/sharepoint-2013-single-vm"
 		},
 
-		"location": {
-			"type": "string",
-			"allowedValues": [
-				"West US",
-				"East US",
-				"East US 2",
-				"Central US",
-				"South Central US",
-				"North Central US",
-				"North Europe",
-				"West Europe",
-				"East Asia",
-				"Southeast Asia",
-				"Japan East",
-				"Japan West",
-				"Southeast Asia",
-				"local"
-			],
-			"metadata": {
-				"description": "The region to deploy the resources into"
-			},
-			"defaultValue": "local"
-		},
 		"sharePointFarmAccountPassword": {
 			"type": "securestring",
 			"metadata": {
@@ -199,19 +176,19 @@
 		"deploySPFarm": "deploySPFarm",
 		"deploySPFarmTemplateUrl": "[concat(parameters('assetLocation'),'/deploySharePointFarm.json')]",
 
-
-
 		"publicLBName": "SPPublicLoadBalancer",
 		"publicIPAddressName": "lbPublikIP",
 		"lbFE": "SPLBFE",
+		"lbBE": "SPLBBE",
+		"lbHttpProbe": "SPHttpLBProbe",
+		"lbHttpsProbe": "SPHttpsLBProbe",
 		"rpdNAT": "SPRDPNAT",
 		"publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
 		"publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
-		"rdpPort": 3389,
+		"publiclbBEPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
+		"lbHttpProbeID": "[concat(variables('publiclbID'),'/probes/',variables('lbHttpProbe'))]",
+		"lbHttpsProbeID": "[concat(variables('publiclbID'),'/probes/',variables('lbHttpsProbe'))]",
 		"rdpNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-		"spNAT": "SPNAT",
-		"spNATPort": 80,
-		"spNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('spNAT'))]",
 		"azureStackDNSIP": "192.168.100.2",
 		"nsgName": "spNsg",
 		"nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
@@ -249,7 +226,7 @@
 			"apiVersion": "2015-05-01-preview",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[variables('nsgName')]",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"properties": {
 				"securityRules": [
 					{
@@ -272,7 +249,7 @@
 		{
 			"name": "[variables('virtualNetworkName')]",
 			"type": "Microsoft.Network/virtualNetworks",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"apiVersion": "2015-05-01-preview",
 			"dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
 			"properties": {
@@ -302,7 +279,7 @@
 			"apiVersion": "2015-05-01-preview",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('publicIPAddressName')]",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"dependsOn": [
 				"[variables('virtualNetworkName')]"
 			],
@@ -315,7 +292,7 @@
 			"apiVersion": "2015-05-01-preview",
 			"name": "[variables('publiclbName')]",
 			"type": "Microsoft.Network/loadBalancers",
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"dependsOn": [
 				"[variables('publicIPAddressName')]"
 			],
@@ -330,6 +307,69 @@
 						}
 					}
 				],
+				"backendAddressPools": [
+					{
+						"name": "[variables('lbBE')]"
+					}
+				],
+				"loadBalancingRules": [
+					{
+						"name": "[variables('lbHttpProbe')]",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[variables('publiclbFEConfigID')]"
+							},
+							"backendAddressPool": {
+								"id": "[variables('publiclbBEPoolID')]"
+							},
+							"probe": {
+								"id": "[variables('lbHttpProbeID')]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": 80,
+							"backendPort": 80,
+							"idleTimeoutInMinutes": 15
+						}
+					},
+					{
+						"name": "[variables('lbHttpsProbe')]",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[variables('publiclbFEConfigID')]"
+							},
+							"backendAddressPool": {
+								"id": "[variables('publiclbBEPoolID')]"
+							},
+							"probe": {
+								"id": "[variables('lbHttpsProbeID')]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": 443,
+							"backendPort": 443,
+							"idleTimeoutInMinutes": 15
+						}
+					}
+				],
+				"probes": [
+					{
+						"name": "SPHttpLBProbe",
+						"properties": {
+							"protocol": "Tcp",
+							"port": 80,
+							"intervalInSeconds": 15,
+							"numberOfProbes": 2
+						}
+					},
+					{
+						"name": "SPHttpsLBProbe",
+						"properties": {
+							"protocol": "Tcp",
+							"port": 443,
+							"intervalInSeconds": 15,
+							"numberOfProbes": 2
+						}
+					}
+				],
 				"inboundNatRules": [
 					{
 						"name": "[variables('rpdNAT')]",
@@ -338,20 +378,8 @@
 								"id": "[variables('publiclbFEConfigID')]"
 							},
 							"protocol": "tcp",
-							"frontendPort": "[variables('rdpPort')]",
+							"frontendPort": 3389,
 							"backendPort": 3389,
-							"enableFloatingIP": false
-						}
-					},
-					{
-						"name": "[variables('spNAT')]",
-						"properties": {
-							"frontendIPConfiguration": {
-								"id": "[variables('publiclbFEConfigID')]"
-							},
-							"protocol": "tcp",
-							"frontendPort": "[variables('spNATPort')]",
-							"backendPort": 80,
 							"enableFloatingIP": false
 						}
 					}
@@ -378,12 +406,11 @@
 					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
 					"adminUsername": { "value": "[parameters('adminUsername')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"location": { "value": "[parameters('location')]" },
 					"vmSize": { "value": "[parameters('farmVMSize')]" },
 					"subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
 					"dataDiskSize": { "value": 10 },
 					"rdpNATRuleID": { "value": "[variables('rdpNATRuleID')]" },
-					"spEndPointNatRuleID": { "value": "[variables('spNATRuleID')]" }
+					"lbBEPool": { "value": "[variables('publiclbBEPoolID')]" }
 				}
 			}
 		},
@@ -401,7 +428,7 @@
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
-					"location": { "value": "[parameters('location')]" },
+					"location": { "value": "[resourceGroup().location]" },
 					"virtualNetworkName": { "value": "[variables('virtualNetworkName')]" },
 					"virtualNetworkAddressRange": { "value": "[parameters('virtualNetworkAddressRange')]" },
 					"subnets": { "value": "[variables('subnets')]" },
@@ -424,7 +451,7 @@
 				},
 				"parameters": {
 					"spVMName": { "value": "[concat(variables('farmVMNamePrefix'), '0')]" },
-					"location": { "value": "[parameters('location')]" },
+					"location": { "value": "[resourceGroup().location]" },
 					"domainName": { "value": "[parameters('domainName')]" },
 					"adminUserName": { "value": "[parameters('adminUsername')]" },
 					"sharePointFarmAccountUserName": { "value": "[parameters('sharePointFarmAccountUserName')]" },
