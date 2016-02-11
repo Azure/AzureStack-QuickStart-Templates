@@ -2,22 +2,16 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.16.02.02",
   "parameters": {
-    "azureUser": {
-      "type": "string",
-      "metadata": {
-        "description": "Azure user to authenticate inside controller VM."
-      }
-    },
-    "azurePassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Azure user password to authenticate inside controller VM."
-      }
-    },
-    "azureApplicationId": {
+    "azureAdApplicationId": {
       "type": "string",
       "metadata": {
         "description": "Azure AD Application ID to authenticate inside controller VM."
+      }
+    },
+    "azureAdApplicationPassword": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure AD Application password to authenticate inside controller VM."
       }
     },
     "tenantId": {
@@ -40,7 +34,7 @@
     },
 	"storageDomain": {
       "type": "string",
-      "defaultValue": "azurestack.local",
+      "defaultValue": "core.windows.net",
       "metadata": {
         "description": "The storage domain. e.g. For AzureStack 'azurestack.local' and for Azure Cloud 'core.windows.net'."
       }
@@ -48,7 +42,21 @@
     "location": {
       "type": "string",
       "allowedValues": [
-        "local"
+        "East US",
+        "East US 2",
+        "West US",
+        "Central US",
+        "South Central US",
+        "North Europe",
+        "West Europe",
+        "East Asia",
+        "Southeast Asia",
+        "Japan East",
+        "Japan West",
+        "North Central US",
+        "Australia East",
+        "Australia Southeast",
+        "Brazil South"
       ],
       "metadata": {
         "description": "Region to deploy VMs."
@@ -107,7 +115,7 @@
     "virtualNetworkName": "vmbtvnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-	"modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time-azure/",
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
@@ -136,7 +144,7 @@
         }
       }
     },
-    {
+	{
       "apiVersion": "[variables('apiVersionNRP')]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
@@ -181,10 +189,7 @@
               }
             }
           }
-        ],
-        "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
-        }
+        ]
       }
     },
     {
@@ -357,10 +362,9 @@
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMBootAll')]",
           "configurationFunction": "[variables('configurationFunctionVMBootAll')]",
-          "properties": {
-            "AzureUserName": "[parameters('azureUser')]",
-            "AzurePassword": "[parameters('azurePassword')]",
-            "AzureApplicationId": "[parameters('azureApplicationId')]",
+		  "properties": {
+            "AzureUserName": "[parameters('azureAdApplicationId')]",
+            "AzurePassword": "[parameters('azureAdApplicationPassword')]",
             "TenantId": "[parameters('tenantId')]",
             "VMName": "[variables('vmName')]",
             "VMCount": "[parameters('vmCount')]",

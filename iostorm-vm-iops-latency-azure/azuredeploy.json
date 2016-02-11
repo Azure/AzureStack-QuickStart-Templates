@@ -112,15 +112,14 @@
     "vmSize": "Standard_A2",
     "vmOsDiskName": "vmioosdisk",
     "vmIoBlockSize": "4096",
-    "vmIoDuration": "600",
+    "vmIoDuration": "300",
     "vmIoReadPercentage": "70",
-    "vmIoMaxLatency": "100",
+    "vmIoMaxLatency": "500",
     "vmNicName": "vmionic",
     "virtualNetworkName": "vmiovnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "modulesPath": "https://vmbootio.blob.core.windows.net/modules/",
-    "modulesPathProd": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency-azure/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency-azure/",
     "moduleVMIOController": "VMIOWorkloadController.zip",
     "moduleVMIOWorkload": "VMIOWorkload.zip",
     "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
@@ -378,6 +377,7 @@
             "VMCount": "[parameters('vmCount')]",
             "VMAdminUserName": "[parameters('vmAdminUsername')]",
             "VMAdminPassword": "[parameters('vmAdminPassword')]",
+			"VMIoMaxLatency": "[variables('vmIoMaxLatency')]",
             "AzureStorageAccount": "[parameters('uniqueStorageAccountName')]"
           }
         }
