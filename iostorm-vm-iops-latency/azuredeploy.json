@@ -121,7 +121,7 @@
     "vmIoBlockSize": "4096",
     "vmIoDuration": "600",
     "vmIoReadPercentage": "70",
-    "vmIoMaxLatency": "500",
+    "vmIoMaxLatency": "100",
     "vmNicName": "vmionic",
     "virtualNetworkName": "vmiovnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
