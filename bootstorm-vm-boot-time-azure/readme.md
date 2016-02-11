@@ -1,4 +1,4 @@
-## VM BOOTSTORM WORKLOAD ##
+## VM BOOTSTORM WORKLOAD FOR AZURE (CLOUD) ##
 
 <b>DESCRIPTION</b>
 
@@ -7,7 +7,7 @@ This template deploys requested number of VMs and a controller VM with public IP
 For controller VM to manage all VMs, Azure SPN needs to be configured using instructions given below.
 
 <b>AZURE SPN CONFIGURATION</b>
-
+```Poweshell
 New-AzureRmADApplication -Password <any string to use as a password> -DisplayName <Any String Name> -IdentifierUris https://<UseAnyUniqueName e.g. serviceprinciplenm> -HomePage <same as IdentifierUris>
 
 <i>Use ApplicationId returned by above cmdlet</i>
@@ -15,10 +15,11 @@ New-AzureRmADApplication -Password <any string to use as a password> -DisplayNam
 New-AzureRmADServicePrincipal -ApplicationId <ApplicationId>
 
 New-AzureRmRoleAssignment -RoleDefinitionName Owner -ServicePrincipalName "https://<same as IdentifierUris>"
+```
 
 
 <b>SAMPLE AZURE SPN CONFIGURATION COMMANDS</b>
-
+```Poweshell
 $azureSubscriptionId = "<Your Azure subscription id (Get-AzureSubscription).SubscriptionId>"
 
 $azureAdIdUri = "https://azureadiduri"
@@ -36,6 +37,7 @@ $azureAdApp = New-AzureRmADApplication -Password $azureAdPassword -DisplayName $
 New-AzureRmADServicePrincipal -ApplicationId $azureAdApp.ApplicationId
 
 New-AzureRmRoleAssignment -RoleDefinitionName Owner -ServicePrincipalName $azureAdIdUri
+```
 
 
 <b>RESULTS</b>
@@ -52,7 +54,7 @@ VM bootstorm results file is uploaded to Unique Azure Storage Account ('uniqueSt
 
 
 <b>PARAMETERS</b>
-
+```Poweshell
 Azure AD Application Id: <Application ID returned by New-AzureADServicePrincipal cmdlet while setting up Azure SPN Configuration>
 
 Azure AD Application Password: <Password you entered for New-AzureADServicePrincipal cmdlet while setting up Azure SPN Configuration>
@@ -72,3 +74,4 @@ VM Admin Password: <Choose secure password for VMs>
 VM Count: <Choose number of VMs to deploy>
 
 VM OS Sku: <Choose version of Windows to deploy>
+```
