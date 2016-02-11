@@ -57,7 +57,7 @@ Get-AzureRmResourceProvider | Select ProviderNamespace -Expand ResourceTypes | F
 
 This cmdlet can also be used for Microsoft Azure.
 
-### Validate exisiting deployments templates
+### Validate existing deployments templates
 
 You can verify if an existing deployment template is valid for a given environment with the Test-AzureRmResourceGroupDeployment PowerShell cmdlet. After connecting to your environment in a PowerShell session run the following PowerShell cmdlet
 
