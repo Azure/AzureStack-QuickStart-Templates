@@ -38,6 +38,13 @@
         "description": "Unique Storage Account name to place OS disks."
       }
     },
+	"storageDomain": {
+      "type": "string",
+      "defaultValue": "azurestack.local",
+      "metadata": {
+        "description": "The storage domain. e.g. For AzureStack 'azurestack.local' and for Azure Cloud 'core.windows.net'."
+      }
+    },
     "location": {
       "type": "string",
       "allowedValues": [
@@ -104,7 +111,7 @@
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
-    "nsgName": "vmbtnsg",
+	"nsgName": "vmbtnsg",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
   },
   "resources": [
@@ -157,7 +164,7 @@
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[parameters('location')]",
-      "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
+	  "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -260,7 +267,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local/',variables('vmStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
+              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'),'/',variables('vmStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -276,7 +283,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local')]"
+            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'))]"
           }
         }
       }
@@ -313,7 +320,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local/',variables('vmStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
+              "uri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'),'/',variables('vmStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -329,7 +336,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.azurestack.local')]"
+            "storageUri": "[concat('http://',parameters('uniqueStorageAccountName'),'.blob.',parameters('storageDomain'))]"
           }
         }
       }
@@ -361,7 +368,7 @@
             "VMAdminPassword": "[parameters('vmAdminPassword')]",
             "AzureStorageAccount": "[parameters('uniqueStorageAccountName')]"
           }
-        }
+		}
       }
     }
   ]
