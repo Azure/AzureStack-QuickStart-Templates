@@ -57,6 +57,16 @@ Get-AzureRmResourceProvider | Select ProviderNamespace -Expand ResourceTypes | F
 
 This cmdlet can also be used for Microsoft Azure.
 
+### Validate exisiting deployments templates
+
+You can verify if an existing deployment template is valid for a given environment with the Test-AzureRmResourceGroupDeployment PowerShell cmdlet. After connecting to your environment in a PowerShell session run the following PowerShell cmdlet
+
+``` PowerShell
+Test-AzureRmResourceGroupDeployment -ResourceGroupName ExampleGroup -TemplateFile c:\Templates\azuredeploy.json
+```
+
+Please note that this cmdlet does not verify the resource provider specific properties for the resources within the template. This cmdlet can be used for Microsoft Azure and Microsoft Azure Stack Technical Preview.
+
 ## Guidelines for Microsoft Azure Stack deployment templates
 
 There are a couple of additional guidelines you should be aware of if you are contributing your deployment templates to the azure-quickstart-templates repository.
