@@ -32,7 +32,10 @@
     "sharePointFarmPassphrasePassword": {
       "value": "!!123abcA"
     },
-    "sharepoint2013SP1SourceDLLink":  {
+	"sharepoint2013SP1SourceDLLink": {
+	  "value": "####"
+	},
+	"sharepoint2013ProductKey":  {
       "value": "####"
     }
   }
