@@ -5,9 +5,6 @@
 		"spVMName": {
 			"type": "string"
 		},
-		"location": {
-			"type": "string"
-		},
 		"domainName": {
 			"type": "string"
 		},
@@ -67,6 +64,9 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			}
+		},
+		"publicIP": {
+			"type": "string",
 		}
 	},
 	"variables": {
@@ -80,7 +80,7 @@
 			"apiVersion": "2015-06-15",
 			"dependsOn": [
 			],
-			"location": "[parameters('location')]",
+			"location": "[resourceGroup().location]",
 			"properties": {
 				"publisher": "Microsoft.Powershell",
 				"type": "DSC",
@@ -110,7 +110,10 @@
 						"InstallSourceDrive": "[parameters('sharepointInstallSourceDrive')]",
 						"InstallSourceFolderName": "[parameters('sharepointInstallSourceFolder')]",
 						"ProductKey": "[parameters('ProductKey')]",
-						"SPDLLink": "[parameters('sharepoint2013SP1SourceDLLink')]"
+						"SPDLLink": "[parameters('sharepoint2013SP1SourceDLLink')]",
+						"SPInternetAlternateURL": "[concat('http://',parameters('publicIP'))]",
+						"SPWebAppName": "[parameters('sharepointFarmName')]",
+						"SPURLZone": "Internet"
 					}
 				},
 				"protectedSettings": {
