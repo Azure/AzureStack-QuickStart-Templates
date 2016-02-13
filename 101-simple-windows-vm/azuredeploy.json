@@ -25,20 +25,6 @@
                 "description": "Blob storage endpoint"
             }
         },
-
-
-        "deploymentLocation": {
-            "type": "string",
-            "defaultValue": "local",
-            "allowedValues": [
-                "local",
-                "westus",
-                "eastus"
-            ],
-            "metadata": {
-                "description": "Blob storage endpoint"
-            }
-        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -71,7 +57,7 @@
         }
     },
     "variables": {
-        "location": "[parameters('deploymentLocation')]",
+        "location": "[resourceGroup().location]",
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "OSDiskName": "osdisk",
