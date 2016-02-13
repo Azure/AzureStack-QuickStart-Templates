@@ -3,16 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "newStorageAccountName": {
-      "value": "myStorageAccount"
+      "value": "mystorage001"
     },
     "vmName": {
         "value": "myVM001"
     },
     "blobStorageEndpoint": {
       "value": "blob.azurestack.local"
-    },
-    "deploymentLocation": {
-      "value": "local"
     },
     "adminUsername": {
       "value": "admin123"
