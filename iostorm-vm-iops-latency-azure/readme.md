@@ -46,29 +46,6 @@ New-AzureRmADServicePrincipal -ApplicationId $azureAdApp.ApplicationId
 New-AzureRmRoleAssignment -RoleDefinitionName Owner -ServicePrincipalName $azureAdIdUri
 ```
 
-<b>PARAMETERS</b>
-```PowerShell
-azureAdApplicationId: "3bcde4f2-44d7-4395-b5d3-88ed26173963" #[As per Azure SPN Configuration instructions]
-
-azureAdApplicationPassword: "azurespnpwd" #[As per Azure SPN Configuration instructions]
-
-tenantId:"72f988bf-86f1-41af-91ab-2d7cd011db47" #[(Get-AzureRmSubscription).TenantId]
-
-uniqueDnsNameForPublicIP: "vmbootdns"
-
-uniqueStorageAccountName: "vmbootsa"
-
-location: "East US"
-
-vmAdminUsername: "vmbootadmin"
-
-vmAdminPassword: "abcd00!!"
-
-vmCount: 2 #[Number of VMs to deploy and bootstorm]
-
-vmOsSku: "2012-R2-Datacenter" #[Operating System sku to be deployed in VMs]
-```
-
 <b>RESULTS</b>
 
 VM iostorm results file is uploaded to Unique Azure Storage Account ('uniqueStorageAccountName' parameter provided by you) as a blob with name 'VMIOResult.log.ps1.zip'
