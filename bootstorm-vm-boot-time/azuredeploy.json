@@ -16,8 +16,9 @@
     },
     "azureApplicationId": {
       "type": "string",
+	  "defaultValue": "",
       "metadata": {
-        "description": "Azure AD Application ID to authenticate inside controller VM."
+        "description": "Azure AD Application ID to authenticate inside controller VM. e.g. Azure Stack: 'https://azurestack.local-api/', Azure: '' "
       }
     },
     "tenantId": {
