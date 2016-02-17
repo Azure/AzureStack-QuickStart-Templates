@@ -1,24 +1,19 @@
-# Create a 3-VM SharePoint 2013 farm with PowerShell DSC Extension
+# Create a single VM SharePoint 2013 farm with PowerShell DSC Extension
 
 This template will create a SharePoint 2013 farm using the PowerShell DSC Extension it creates the following resources:
 
 +	A Virtual Network
-+	Three Storage Accounts
-+	Two external load balancers
-+	One VM configured as Domain Controller for a new forest with a single domain
-+	One VM configured as SQL Server 2014 stand alone
-+	One VM configured as a one machine SharePoint 2013 farm
++	One Storage Account
++	One external load balancer
++	One VM configured as Domain Controller for a new forest with a single domain,  SQL Server 2014 stand alone, and SharePoint 2013 farm
 
-One external load balancer creates an RDP NAT rule to allow connectivity to the domain controller VM
-The second external load balancer creates an RDP NAT rule to allow connectivity to the SharePoint VM
-To access the SQL VM use the domain controller or the SharePoint VMs as jumpboxes
+The external load balancer creates an RDP NAT rule to allow connectivity to the farm VM; it also provides rules to access the SharePoint endpoints.
+(Requires adding the load balancer IP as an alternate URL for the SharePoint web application, this can be done on the SharePoint central admin portal)
 
 ## Notes
 
-+ 	The images used to create this deployment are
-	+ 	AD - Latest Windows Server 2012 R2 Image
-	+ 	SQL Server - Latest SQL Server 2014 on Windows Server 2012 R2 Image
-	+	SharePoint Server - Latest SharePoint 2013 on Windows Server 2012 R2 Image
++ 	The image used to create this deployment is
+	+ 	Latest Windows Server 2012 R2 Image with .Net 3.5
 +	The installer bits for SQL 2014 and SharePoint 2013 with SP1 are downloaded at deployment time but can be pre-loaded into the image
 	+	The download source for SharePoint 2013 has to include SP1, SharePoint 2013 without SP1 will not work for this template.
 + 	The image configuration is defined in variables - details below - but the scripts that configure this deployment have only been tested with these versions and may not work on other images.

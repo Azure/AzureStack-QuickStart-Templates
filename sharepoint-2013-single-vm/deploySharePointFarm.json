@@ -64,9 +64,6 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			}
-		},
-		"publicIP": {
-			"type": "string",
 		}
 	},
 	"variables": {
@@ -110,10 +107,7 @@
 						"InstallSourceDrive": "[parameters('sharepointInstallSourceDrive')]",
 						"InstallSourceFolderName": "[parameters('sharepointInstallSourceFolder')]",
 						"ProductKey": "[parameters('ProductKey')]",
-						"SPDLLink": "[parameters('sharepoint2013SP1SourceDLLink')]",
-						"SPInternetAlternateURL": "[concat('http://',parameters('publicIP'))]",
-						"SPWebAppName": "[parameters('sharepointFarmName')]",
-						"SPURLZone": "Internet"
+						"SPDLLink": "[parameters('sharepoint2013SP1SourceDLLink')]"
 					}
 				},
 				"protectedSettings": {

@@ -34,6 +34,9 @@
     },
     "sharepoint2013SP1SourceDLLink":  {
       "value": "####"
+    },
+  	"sharepoint2013ProductKey":  {
+      "value": "####"
     }
   }
 }

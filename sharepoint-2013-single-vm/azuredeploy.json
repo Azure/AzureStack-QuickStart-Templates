@@ -65,7 +65,7 @@
 			"metadata": {
 				"description": "The size of the AD VMs Created"
 			},
-			"defaultValue": "Standard_A4"
+			"defaultValue": "Standard_A3"
 		},
 
 		"dnsPrefix": {
@@ -132,7 +132,7 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			},
-			"defaultValue": "https://jesusatemplate.blob.core.windows.net/sharepoint-2013-single-vm"
+			"defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-single-vm"
 		},
 
 		"sharePointFarmAccountPassword": {
@@ -152,6 +152,12 @@
 			"metadata": {
 				"description": "Direct download link for the SharePoint 2013 SP1 trial ISO"
 			}
+		},
+		"sharepoint2013ProductKey": {
+			"type": "string",
+			"metadata": {
+				"description": "Product key for SharePoint 2013 trial"
+			}
 		}
 	},
 
@@ -160,9 +166,6 @@
 		"virtualNetworkName": "WorkloadVNET",
 		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
 		"staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
-		"publicIPTemplateURL": "[concat(parameters('assetLocation'),'/publicIP.json')]",
-		"publicIPDeployment": "DeployPublicIP",
-		"publicIPDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('publicIPDeployment'))]",
 		"farmVMTemplateURL": "[concat(parameters('assetLocation'),'/spFarmVMTemplate.json')]",
 		"farmVMDeployment": "DeploySPFarmVM",
 		"farmVMDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('farmVMDeployment'))]",
@@ -179,14 +182,16 @@
 		"publicIPAddressName": "lbPublicIP",
 		"lbFE": "SPLBFE",
 		"lbBE": "SPLBBE",
-		"lbHttpProbe": "SPHttpLBProbe",
-		"lbHttpsProbe": "SPHttpsLBProbe",
+		"spSiteProbe": "SPSiteProbe",
+		"spAdminProbe": "SPAdminProbe",
+		"spSiteRule": "SPSiteLBRule",
+		"spAdminRule": "SPAdminLBRule",
 		"rpdNAT": "SPRDPNAT",
 		"publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
 		"publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
 		"publiclbBEPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
-		"lbHttpProbeID": "[concat(variables('publiclbID'),'/probes/',variables('lbHttpProbe'))]",
-		"lbHttpsProbeID": "[concat(variables('publiclbID'),'/probes/',variables('lbHttpsProbe'))]",
+		"spSiteProbeID": "[concat(variables('publiclbID'),'/probes/',variables('spSiteProbe'))]",
+		"spAdminProbeID": "[concat(variables('publiclbID'),'/probes/',variables('spAdminProbe'))]",
 		"rdpNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
 		"azureStackDNSIP": "192.168.100.2",
 		"nsgName": "spNsg",
@@ -195,7 +200,6 @@
 
 		"spSourceDrive": "C:",
 		"spSourceFolder": "SharePoint2013",
-		"SPProductKey": "N3MDM-DXR3H-JD7QH-QKKCR-BY2Y7",
 		"sharePointFarmAccountUserName": "sp_farm",
 		"spconfigDatabaseName": "SP_Config",
 		"spadministrationContentDatabaseName": "SP_AdminContent",
@@ -275,22 +279,15 @@
 		},
 
 		{
-			"name": "[variables('publicIPDeployment')]",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2015-01-01",
+			"apiVersion": "2015-05-01-preview",
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[variables('publicIPAddressName')]",
+			"location": "[resourceGroup().location]",
 			"dependsOn": [
 				"[variables('virtualNetworkName')]"
 			],
 			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('publicIPTemplateURL')]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"publicIPAddressName": { "value": "[variables('publicIPAddressName')]" },
-					"publicIPDNSPrefix": { "value": "[parameters('dnsPrefix')]" }
-				}
+				"publicIPAllocationMethod": "Dynamic"
 			}
 		},
 
@@ -300,7 +297,7 @@
 			"type": "Microsoft.Network/loadBalancers",
 			"location": "[resourceGroup().location]",
 			"dependsOn": [
-				"[variables('publicIPDeploymentID')]"
+				"[variables('publicIPAddressName')]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [
@@ -320,7 +317,7 @@
 				],
 				"loadBalancingRules": [
 					{
-						"name": "[variables('lbHttpProbe')]",
+						"name": "[variables('spSiteRule')]",
 						"properties": {
 							"frontendIPConfiguration": {
 								"id": "[variables('publiclbFEConfigID')]"
@@ -329,7 +326,7 @@
 								"id": "[variables('publiclbBEPoolID')]"
 							},
 							"probe": {
-								"id": "[variables('lbHttpProbeID')]"
+								"id": "[variables('spSiteProbeID')]"
 							},
 							"protocol": "Tcp",
 							"frontendPort": 80,
@@ -338,7 +335,7 @@
 						}
 					},
 					{
-						"name": "[variables('lbHttpsProbe')]",
+						"name": "[variables('spAdminRule')]",
 						"properties": {
 							"frontendIPConfiguration": {
 								"id": "[variables('publiclbFEConfigID')]"
@@ -347,18 +344,18 @@
 								"id": "[variables('publiclbBEPoolID')]"
 							},
 							"probe": {
-								"id": "[variables('lbHttpsProbeID')]"
+								"id": "[variables('spAdminProbeID')]"
 							},
 							"protocol": "Tcp",
-							"frontendPort": 443,
-							"backendPort": 443,
+							"frontendPort": 8080,
+							"backendPort": 8080,
 							"idleTimeoutInMinutes": 15
 						}
 					}
 				],
 				"probes": [
 					{
-						"name": "SPHttpLBProbe",
+						"name": "[variables('spSiteProbe')]",
 						"properties": {
 							"protocol": "Tcp",
 							"port": 80,
@@ -367,10 +364,10 @@
 						}
 					},
 					{
-						"name": "SPHttpsLBProbe",
+						"name": "[variables('spAdminProbe')]",
 						"properties": {
 							"protocol": "Tcp",
-							"port": 443,
+							"port": 8080,
 							"intervalInSeconds": 15,
 							"numberOfProbes": 2
 						}
@@ -397,6 +394,7 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2015-01-01",
 			"dependsOn": [
+				"[variables('publicIPAddressName')]",
 				"[variables('publiclbName')]"
 			],
 			"properties": {
@@ -425,7 +423,8 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2015-01-01",
 			"dependsOn": [
-				"[variables('farmVMDeploymentId')]"
+				"[variables('publicIPAddressName')]",
+				"[variables('farmVMDeployment')]"
 			],
 			"properties": {
 				"mode": "Incremental",
@@ -446,6 +445,7 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2015-01-01",
 			"dependsOn": [
+				"[variables('publicIPAddressName')]",
 				"[variables('updateVNetDNS1Id')]"
 			],
 			"properties": {
@@ -471,10 +471,9 @@
 					"sharepointFarmName": { "value": "[variables('sharepointFarmName')]" },
 					"sharepointInstallSourceDrive": { "value": "[variables('spSourceDrive')]" },
 					"sharepointInstallSourceFolder": { "value": "[variables('spSourceFolder')]" },
-					"ProductKey": { "value": "[variables('SPProductKey')]" },
+					"ProductKey": { "value": "[parameters('sharepoint2013ProductKey')]" },
 					"assetLocation": { "value": "[parameters('assetLocation')]" },
-					"sharepoint2013SP1SourceDLLink": { "value": "[parameters('sharepoint2013SP1SourceDLLink')]" },
-					"publicIP": { "value": "[reference(variables('publicIPDeployment')).outputs.publicIPAddress.value]"}
+					"sharepoint2013SP1SourceDLLink": { "value": "[parameters('sharepoint2013SP1SourceDLLink')]" }
 				}
 			}
 		}
