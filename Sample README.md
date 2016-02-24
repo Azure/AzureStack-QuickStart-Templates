@@ -81,13 +81,13 @@ New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 New-AzureRmResourceGroupDeployment `
     -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
-    -TemplateFile "c:\templates\azuredeploy-101-simple-windows-vm-withDNS.json" `
+    -TemplateFile "azuredeploy-101-simple-windows-vm-withDNS.json" `
     -deploymentLocation $myLocation `
     -blobStorageEndpoint $myBlobStorageEndpoint `
     -newStorageAccountName "mystorage$myNum" `
     -dnsNameForPublicIP "mydns$myNum" `
-    -adminUsername "admin" `
-    -adminPassword ("User@123" | ConvertTo-SecureString -AsPlainText -Force) `
+    -adminUsername "GEN-UNIQUE-8" `
+    -adminPassword "GEN-PASSWORD" `
     -vmName "myVM$myNum" `
     -windowsOSVersion "2012-R2-Datacenter" 
 ```
