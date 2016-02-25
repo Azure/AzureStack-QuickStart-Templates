@@ -21,7 +21,7 @@
       "value": "West US"
     },
     "adminPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
     "storageDomain": {
       "value": "core.windows.net"

@@ -2,13 +2,13 @@
   "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
   "contentVersion": "1.16.1.28",
   "parameters": {
-	"azureUser": {
+    "azureUser": {
       "value": "<Your Azure user name>"
     },
     "azurePassword": {
-      "value": "<Your secured password to Azure>"
+      "value": "GEN-PASSWORD"
     },
-	"azureApplicationId": {
+    "azureApplicationId": {
       "value": "<Azure Application ID>"
     },
     "tenantId": {
@@ -30,7 +30,7 @@
       "value": "<Your secured username for VMs>"
     },
     "vmAdminPassword": {
-      "value": "<Your secured password for VMs>"
+      "value": "GEN-PASSWORD"
     },
     "vmCount": {
       "value": 2

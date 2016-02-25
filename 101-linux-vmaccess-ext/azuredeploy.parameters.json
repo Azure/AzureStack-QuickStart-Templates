@@ -9,7 +9,7 @@
         "value": "Test"
     },
     "password": {
-        "value": "Test123"
+      "value": "GEN-PASSWORD"
     }
   }
 }

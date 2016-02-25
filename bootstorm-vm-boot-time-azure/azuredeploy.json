@@ -9,7 +9,7 @@
       }
     },
     "azureAdApplicationPassword": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "Azure AD Application password to authenticate inside controller VM."
       }

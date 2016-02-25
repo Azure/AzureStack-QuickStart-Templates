@@ -6,7 +6,7 @@
       "value": "<Azure AD Application ID used as Username>"
     },
     "azureAdApplicationPassword": {
-      "value": "<Your secured password to Azure AD Application>"
+      "value": "GEN-PASSWORD"
     },
     "tenantId": {
       "value": "<Your secured tenant Id from Azure Subscription>"
@@ -24,7 +24,7 @@
       "value": "<Your secured username for VMs>"
     },
     "vmAdminPassword": {
-      "value": "<Your secured password for VMs>"
+      "value": "GEN-PASSWORD"
     },
     "vmCount": {
       "value": 2

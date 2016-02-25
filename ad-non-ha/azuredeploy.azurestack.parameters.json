@@ -22,7 +22,7 @@
       "value": "Administrator"
     },
     "adminPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     }
   }
 }

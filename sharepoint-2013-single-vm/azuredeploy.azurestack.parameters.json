@@ -21,16 +21,16 @@
       "value": "Administrator"
     },
     "adminPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
     "sqlServerServiceAccountPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
    "sharePointFarmAccountPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
     "sharePointFarmPassphrasePassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
     "sharepoint2013SP1SourceDLLink":  {
       "value": "####"
