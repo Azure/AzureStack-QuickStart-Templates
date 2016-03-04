@@ -21,7 +21,7 @@
       "value": "Administrator"
     },
     "adminPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
     "sqlServerServiceAccountPassword": {
       "value": "GEN-PASSWORD"
