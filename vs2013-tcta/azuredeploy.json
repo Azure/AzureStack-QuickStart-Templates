@@ -1,0 +1,370 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"newStorageAccountNamePrefix": {
+			"type": "string",
+			"metadata": {
+				"description": "The prefix of the new storage account created to store the VMs disks, three different storage accounts will be created using this string as a prefix for the name"
+			}
+		},
+
+		"storageAccountType": {
+			"type": "string",
+			"allowedValues": [
+				"Standard_LRS",
+				"Standard_GRS",
+				"Standard_RAGRS",
+				"Premium_LRS"
+			],
+			"metadata": {
+				"description": "The type of the Storage Account created"
+			},
+			"defaultValue": "Standard_LRS"
+		},
+
+		"storageDomain": {
+			"type": "string",
+			"defaultValue": "azurestack.local",
+			"metadata": {
+				"description": "The address of Primary AD"
+			}
+		},
+
+		"vmNamePrefix": {
+			"type": "string",
+			"metadata": {
+				"description": "The Prefix for the Vms"
+			}
+		},
+
+		"consoleVMSize": {
+			"type": "string",
+			"allowedValues": [
+				"Standard_D1",
+				"Standard_A1",
+				"Standard_A2",
+				"Standard_A3",
+				"Standard_A4",
+				"Standard_DS1",
+				"Standard_D2",
+				"Standard_DS2",
+				"Standard_D3",
+				"Standard_DS3",
+				"Standard_D4",
+				"Standard_DS4",
+				"Standard_D11",
+				"Standard_DS11",
+				"Standard_D12",
+				"Standard_DS12",
+				"Standard_D13",
+				"Standard_DS13",
+				"Standard_D14",
+				"Standard_DS14"
+			],
+			"metadata": {
+				"description": "The size of the console VM to be created"
+			},
+			"defaultValue": "Standard_A2"
+		},
+
+		"domainName": {
+			"type": "string",
+			"metadata": {
+				"description": "The domain name"
+			}
+		},
+
+		"targetResourceGroupName": {
+			"type": "string",
+			"metadata": {
+				"description": "Name of the resource group to test"
+			}
+		},
+
+		"vmNetworkName": {
+			"type": "string",
+			"metadata": {
+				"description": "Name of the VM network to connect to"
+			},
+			"defaultValue": "WorkloadVNET"
+		},
+
+		"vmNetworkSubnetName": {
+			"type": "string",
+			"metadata": {
+				"description": "Name of the exsisting subnet to connect to"
+			},
+			"defaultValue": "ADStaticSubnet"
+		},
+
+		"primaryAdIpAddress": {
+			"type": "string",
+			"metadata": {
+				"description": "The address of Primary AD"
+			},
+			"defaultValue": "10.0.0.4"
+		},
+
+		"adminUsername": {
+			"type": "string",
+			"metadata": {
+				"description": "The name of the Administrator of the new VMs and Domain"
+			}
+		},
+
+		"adminPassword": {
+			"type": "securestring",
+			"metadata": {
+				"description": "The password for the Administrator account of the new VMs and Domain"
+			}
+		},
+
+		"controllerServiceUserName": {
+			"type": "string",
+			"metadata": {
+				"description": "The name of the user account under which the test controller service will run"
+			}
+		},
+
+		"controllerServicePassword": {
+			"type": "securestring",
+			"metadata": {
+				"description": "The pasword of the user account under which the test controller service will run"
+			}
+		},
+
+		"agentServiceUserName": {
+			"type": "string",
+			"metadata": {
+				"description": "The name of the user account under which the test agent service will run"
+			}
+		},
+
+		"agentServicePassword": {
+			"type": "securestring",
+			"metadata": { 
+				"description": "The pasword of the user account under which the test agent service will run"
+			}
+		},
+
+		"assetLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
+			},
+			"defaultValue": "https://jesusatemplate.blob.core.windows.net/vs2013-tcta"
+		},
+		"testAgentCount": {
+			"type": "int",
+			"metadata": {
+				"description": "Number of test agent VMs to create"
+			},
+			"defaultValue": 1
+		}
+	},
+
+	"variables": {
+		"staticSubnetName": "SPStaticSubnet",
+		"virtualNetworkName": "WorkloadVNET",
+		"vnetID": "[resourceId(parameters('targetResourceGroupName'),'Microsoft.Network/virtualNetworks', parameters('vmNetworkName'))]",
+		"staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('vmNetworkSubnetName'))]",
+		"consoleTemplateURL": "[concat(parameters('assetLocation'),'/consoleVMTemplate.json')]",
+		"consoleVMDeployment": "DeployConsoleVM",
+		"consoleVMDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleVMDeployment'))]",
+		"consoleStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'csa')]",
+		"consoleVMNamePerfix": "[concat(parameters('vmNamePrefix'),'-c-')]",
+		"consoleConfigDeployment": "DeployConsoleVMConfiguration",
+		"consoleConfigDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleConfigDeployment'))]",
+		"consoleConfigTemplateUrl": "[concat(parameters('assetLocation'),'/deployTestConsole.json')]",
+		"publicLBName": "PublicLoadBalancer",
+		"taTemplateURL": "[concat(parameters('assetLocation'),'/taVMTemplate.json')]",
+		"taVMDeployment": "DeployTAVM",
+		"taStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'tasa')]",
+		"taVMNamePerfix": "[concat(parameters('vmNamePrefix'),'-ta-')]",
+		"taVMCreationLoop": "TALoop",
+		"taConfigDeployment": "DeployAgentConfiguration",
+		"taConfigLoop": "TAConfigLoop",
+		"taConfigTemplateUrl": "[concat(parameters('assetLocation'),'/deployTestAgent.json')]",
+		"publicIPAddressName": "PublicIP",
+		"lbFE": "LBFE",
+		"lbBE": "LBBE",
+		"rpdNAT": "CRDPNAT",
+		"publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
+		"publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
+		"publiclbBEPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
+		"rdpNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
+		"azureStackDNSIP": "192.168.100.2"
+	},
+
+	"resources": [
+
+		{
+			"apiVersion": "2015-05-01-preview",
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[variables('publicIPAddressName')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publicIPAllocationMethod": "Dynamic"
+			}
+		},
+
+		{
+			"apiVersion": "2015-05-01-preview",
+			"name": "[variables('publiclbName')]",
+			"type": "Microsoft.Network/loadBalancers",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[variables('publicIPAddressName')]"
+			],
+			"properties": {
+				"frontendIPConfigurations": [
+					{
+						"name": "[variables('lbFE')]",
+						"properties": {
+							"publicIPAddress": {
+								"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+							}
+						}
+					}
+				],
+				"backendAddressPools": [
+					{
+						"name": "[variables('lbBE')]"
+					}
+				],
+				"inboundNatRules": [
+					{
+						"name": "[variables('rpdNAT')]",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[variables('publiclbFEConfigID')]"
+							},
+							"protocol": "tcp",
+							"frontendPort": 3389,
+							"backendPort": 3389,
+							"enableFloatingIP": false
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "[variables('consoleVMDeployment')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2015-01-01",
+			"dependsOn": [
+				"[variables('publicIPAddressName')]",
+				"[variables('publiclbName')]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('consoleTemplateURL')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"vmNamePrefix": { "value": "[variables('consoleVMNamePerfix')]" },
+					"storageAccount": { "value": "[variables('consoleStorageName')]" },
+					"storageDomain": { "value": "[parameters('storageDomain')]" },
+					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
+					"adminUsername": { "value": "[parameters('adminUsername')]" },
+					"adminPassword": { "value": "[parameters('adminPassword')]" },
+					"vmSize": { "value": "[parameters('consoleVMSize')]" },
+					"subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
+					"dataDiskSize": { "value": 10 },
+					"rdpNATRuleID": { "value": "[variables('rdpNATRuleID')]" },
+					"lbBEPool": { "value": "[variables('publiclbBEPoolID')]" }
+				}
+			}
+		},
+		{
+			"name": "[concat(variables('taVMDeployment'),copyIndex())]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2015-01-01",
+			"dependsOn": [ ],
+			"copy": {
+				"name": "[variables('taVMCreationLoop')]",
+				"count": "[parameters('testAgentCount')]"
+			},
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('taTemplateURL')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"vmNamePrefix": "[variables('taVMNamePerfix')]",
+					"storageAccount": "[variables('taStorageName')]",
+					"storageDomain": { "value": "[parameters('storageDomain')]" },
+					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
+					"adminUsername": { "value": "[parameters('adminUsername')]" },
+					"adminPassword": { "value": "[parameters('adminPassword')]" },
+					"vmSize": { "value": "[parameters('taVMSize')]" },
+					"subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
+					"dataDiskSize": { "value": 5 },
+					"currentIndex": "[copyIndex()]"
+				}
+			}
+		},
+
+
+		{
+			"name": "[variables('consoleConfigDeployment')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2015-01-01",
+			"dependsOn": [
+				"[variables('consoleVMDeploymentID')]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('consoleConfigTemplateUrl')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"consoleVMName": { "value": "[concat(variables('consoleVMNamePerfix'), '0')]" },
+					"domainName": { "value": "[parameters('domainName')]" },
+					"adminUserName": { "value": "[parameters('adminUsername')]" },
+					"adminPassword": { "value": "[parameters('adminPassword')]" },
+					"controllerServiceUserName": { "value": "[parameters('controllerServiceUserName')]" },
+					"controllerServicePassword": { "value": "[parameters('controllerServicePassword')]" },
+					"assetLocation": { "value": "[parameters('assetLocation')]" }
+				}
+			}
+		},
+		
+		{
+			"name": "[concat(variables('taConfigDeployment'),copyIndex())]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2015-01-01",
+			"dependsOn": [
+				"[variables('taVMCreationLoop')]"
+			],
+			"copy": {
+				"name": "[variables('taConfigLoop')]",
+				"count": "[parameters('testAgentCount')]"
+			},
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('taConfigTemplateUrl')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"agentVMName": { "value": "[concat(variables('taVMNamePerfix'), copyIndex())]" },
+					"controllerVMName": { "value": "[concat(variables('consoleVMNamePerfix'), '0')]" },
+					"domainName": { "value": "[parameters('domainName')]" },
+					"adminUserName": { "value": "[parameters('adminUsername')]" },
+					"adminPassword": { "value": "[parameters('adminPassword')]" },
+					"agentServiceUserName": { "value": "[parameters('agentServiceUserName')]" },
+					"agentServicePassword": { "value": "[parameters('agentServicePassword')]" },
+					"assetLocation": { "value": "[parameters('assetLocation')]" }
+				}
+			}
+		}
+	],
+
+  "outputs": {
+  }
+}
