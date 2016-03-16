@@ -7,7 +7,7 @@
 			"metadata": {
 				"description": "The Prefix of the VM Name"
 			},
-			"defaultValue": "SPVM"
+			"defaultValue": "TCVM"
 		},
 
 		"windowsImagePublisher": {

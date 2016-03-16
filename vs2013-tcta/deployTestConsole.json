@@ -25,12 +25,6 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			}
-		},
-		"primaryADIPAddress": {
-			"type": "string",
-			"metadata": {
-				"description": "IP address of the target domain AD"
-			}
 		}
 	},
 	"variables": {
@@ -62,8 +56,7 @@
 						"SQLServicecreds": { 
 							"UserName": "[parameters('controllerServiceUserName')]",
 							"Password": "PrivateSettingsRef:ControllerPassword"
-						} ,
-						"primaryAdIpAddress": "[parameters('primaryADIPAddress')]"
+						}
 					}
 				},
 				"protectedSettings": {

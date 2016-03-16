@@ -28,12 +28,6 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			}
-		},
-		"primaryADIPAddress": {
-			"type": "string",
-			"metadata": {
-				"description": "IP address of the target domain AD"
-			}
 		}
 	},
 	"variables": {
@@ -66,8 +60,7 @@
 							"UserName": "[parameters('agentServiceUserName')]",
 							"Password": "PrivateSettingsRef:AgentPassword"
 						},
-						"TestControllerName": "[parameters('controllerVMName')]",
-						"primaryAdIpAddress": "[parameters('primaryADIPAddress')]"
+						"TestControllerName": "[parameters('controllerVMName')]"
 					}
 				},
 				"protectedSettings": {

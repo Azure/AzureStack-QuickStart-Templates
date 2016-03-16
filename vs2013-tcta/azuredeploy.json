@@ -68,6 +68,36 @@
 			"defaultValue": "Standard_A2"
 		},
 
+		"AgentVMSize": {
+			"type": "string",
+			"allowedValues": [
+				"Standard_D1",
+				"Standard_A1",
+				"Standard_A2",
+				"Standard_A3",
+				"Standard_A4",
+				"Standard_DS1",
+				"Standard_D2",
+				"Standard_DS2",
+				"Standard_D3",
+				"Standard_DS3",
+				"Standard_D4",
+				"Standard_DS4",
+				"Standard_D11",
+				"Standard_DS11",
+				"Standard_D12",
+				"Standard_DS12",
+				"Standard_D13",
+				"Standard_DS13",
+				"Standard_D14",
+				"Standard_DS14"
+			],
+			"metadata": {
+				"description": "The size of the console VM to be created"
+			},
+			"defaultValue": "Standard_A1"
+		},
+
 		"domainName": {
 			"type": "string",
 			"metadata": {
@@ -86,16 +116,14 @@
 			"type": "string",
 			"metadata": {
 				"description": "Name of the VM network to connect to"
-			},
-			"defaultValue": "WorkloadVNET"
+			}
 		},
 
 		"vmNetworkSubnetName": {
 			"type": "string",
 			"metadata": {
 				"description": "Name of the exsisting subnet to connect to"
-			},
-			"defaultValue": "ADStaticSubnet"
+			}
 		},
 
 		"primaryAdIpAddress": {
@@ -124,7 +152,8 @@
 			"type": "string",
 			"metadata": {
 				"description": "The name of the user account under which the test controller service will run"
-			}
+			},
+			"defaultValue": "tcserv"
 		},
 
 		"controllerServicePassword": {
@@ -138,7 +167,8 @@
 			"type": "string",
 			"metadata": {
 				"description": "The name of the user account under which the test agent service will run"
-			}
+			},
+			"defaultValue": "taserv"
 		},
 
 		"agentServicePassword": {
@@ -165,19 +195,17 @@
 	},
 
 	"variables": {
-		"staticSubnetName": "SPStaticSubnet",
-		"virtualNetworkName": "WorkloadVNET",
 		"vnetID": "[resourceId(parameters('targetResourceGroupName'),'Microsoft.Network/virtualNetworks', parameters('vmNetworkName'))]",
 		"staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('vmNetworkSubnetName'))]",
 		"consoleTemplateURL": "[concat(parameters('assetLocation'),'/consoleVMTemplate.json')]",
 		"consoleVMDeployment": "DeployConsoleVM",
 		"consoleVMDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleVMDeployment'))]",
 		"consoleStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'csa')]",
-		"consoleVMNamePerfix": "[concat(parameters('vmNamePrefix'),'-c-')]",
+		"consoleVMNamePerfix": "[concat(parameters('vmNamePrefix'),'-tc-')]",
 		"consoleConfigDeployment": "DeployConsoleVMConfiguration",
 		"consoleConfigDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleConfigDeployment'))]",
 		"consoleConfigTemplateUrl": "[concat(parameters('assetLocation'),'/deployTestConsole.json')]",
-		"publicLBName": "PublicLoadBalancer",
+		"publicLBName": "ConsolePublicLoadBalancer",
 		"taTemplateURL": "[concat(parameters('assetLocation'),'/taVMTemplate.json')]",
 		"taVMDeployment": "DeployTAVM",
 		"taStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'tasa')]",
@@ -186,9 +214,9 @@
 		"taConfigDeployment": "DeployAgentConfiguration",
 		"taConfigLoop": "TAConfigLoop",
 		"taConfigTemplateUrl": "[concat(parameters('assetLocation'),'/deployTestAgent.json')]",
-		"publicIPAddressName": "PublicIP",
-		"lbFE": "LBFE",
-		"lbBE": "LBBE",
+		"publicIPAddressName": "ConsolePublicIP",
+		"lbFE": "ConsoleLBFE",
+		"lbBE": "ConsoleLBBE",
 		"rpdNAT": "CRDPNAT",
 		"publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
 		"publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
@@ -294,16 +322,16 @@
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
-					"vmNamePrefix": "[variables('taVMNamePerfix')]",
-					"storageAccount": "[variables('taStorageName')]",
+					"vmNamePrefix": {"value": "[variables('taVMNamePerfix')]" },
+					"storageAccount": {"value": "[variables('taStorageName')]" },
 					"storageDomain": { "value": "[parameters('storageDomain')]" },
 					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
 					"adminUsername": { "value": "[parameters('adminUsername')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"vmSize": { "value": "[parameters('taVMSize')]" },
+					"vmSize": { "value": "[parameters('AgentVMSize')]" },
 					"subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
 					"dataDiskSize": { "value": 5 },
-					"currentIndex": "[copyIndex()]"
+					"currentIndex": { "value": "[copyIndex()]" }
 				}
 			}
 		},
@@ -329,7 +357,7 @@
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
 					"controllerServiceUserName": { "value": "[parameters('controllerServiceUserName')]" },
 					"controllerServicePassword": { "value": "[parameters('controllerServicePassword')]" },
-					"assetLocation": { "value": "[parameters('assetLocation')]" }
+					"assetLocation": { "value": "[parameters('assetLocation')]" }					
 				}
 			}
 		},
