@@ -183,7 +183,7 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			},
-			"defaultValue": "https://jesusatemplate.blob.core.windows.net/vs2013-tcta"
+			"defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/vs2013-tcta"
 		},
 		"testAgentCount": {
 			"type": "int",
@@ -191,6 +191,12 @@
 				"description": "Number of test agent VMs to create"
 			},
 			"defaultValue": 1
+		},
+		"VisualStudioProductKey": {
+			"type": "string",
+			"metadata": {
+				"description": "Product key (25 characters no spaces) for Visual Studio activation"
+			}
 		}
 	},
 
@@ -357,7 +363,8 @@
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
 					"controllerServiceUserName": { "value": "[parameters('controllerServiceUserName')]" },
 					"controllerServicePassword": { "value": "[parameters('controllerServicePassword')]" },
-					"assetLocation": { "value": "[parameters('assetLocation')]" }					
+					"assetLocation": { "value": "[parameters('assetLocation')]" },
+					"VisualStudioProductKey": { "value": "[parameters('VisualStudioProductKey')]" }					
 				}
 			}
 		},

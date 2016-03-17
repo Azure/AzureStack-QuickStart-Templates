@@ -25,6 +25,12 @@
 			"metadata": {
 				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
 			}
+		},
+		"VisualStudioProductKey": {
+			"type": "string",
+			"metadata": {
+				"description": "Product key (25 characters no spaces) for Visual Studio activation"
+			}
 		}
 	},
 	"variables": {
@@ -53,10 +59,11 @@
 							"UserName": "[parameters('adminUserName')]",
 							"Password": "PrivateSettingsRef:AdminPassword"
 						},
-						"SQLServicecreds": { 
+						"SQLServicecreds": {
 							"UserName": "[parameters('controllerServiceUserName')]",
 							"Password": "PrivateSettingsRef:ControllerPassword"
-						}
+						},
+						"VSProductKey": "[parameters('VisualStudioProductKey')]" 
 					}
 				},
 				"protectedSettings": {
