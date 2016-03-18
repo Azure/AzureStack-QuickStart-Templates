@@ -3,7 +3,7 @@
   "contentVersion": "1.16.1.28",
   "parameters": {
 	"azureAccountUsername": {
-      "value": "<Your Azure account SPN user name>"
+      "value": "<Your Azure account user name>"
     },
     "azureAccountPassword": {
       "value": "<Your secured Azure account password to Azure>"
