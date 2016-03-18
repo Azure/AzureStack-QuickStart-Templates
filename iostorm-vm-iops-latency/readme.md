@@ -7,6 +7,8 @@ This template deploys requested number of VMs and a controller VM with public IP
 
 For controller VM to upload results to Azure Storage Account, Azure SPN needs to be configured using instructions given below. (This is required especially for accounts with Multi-Factor authentication enabled by the system admins.)
 
+Please make sure to user unique resource group name for each deployment to avoid deployment failures due to name collisions of resources.
+
 NOTE: There is a 90 minutes Azure time-out which you can hit if large number of VMs are deployed. To circumvent that, all these operations are done using Scheduled Task which gets created by a DSC Script Resource by a Controller VM.
 
 

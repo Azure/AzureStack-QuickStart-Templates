@@ -46,7 +46,6 @@
     "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
     "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
     "adResourceID": "https://azurestack.local-api/",
-    "storageDomain": "azurestack.local",
     "vmOsSku": "2012-R2-Datacenter",
     "vmAdminUsername": "vmadministrator",
     "vmAdminPassword": "pwd0a!8b7",
@@ -224,7 +223,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('uniqueStorageAccountName'),'.blob.',variables('storageDomain'),'/',variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
+              "uri": "[concat(reference(variables('StorageAccountInfoDeployment')).outputs.storageAccountInfo.value.primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -240,7 +239,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('uniqueStorageAccountName'),'.blob.',variables('storageDomain'))]"
+            "storageUri": "[concat(reference(variables('StorageAccountInfoDeployment')).outputs.storageAccountInfo.value.primaryEndpoints.blob)]"
           }
         }
       }
@@ -277,7 +276,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('uniqueStorageAccountName'),'.blob.',variables('storageDomain'),'/',variables('uniqueStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
+              "uri": "[concat(reference(variables('StorageAccountInfoDeployment')).outputs.storageAccountInfo.value.primaryEndpoints.blob,concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -293,7 +292,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('uniqueStorageAccountName'),'.blob.',variables('storageDomain'))]"
+            "storageUri": "[concat(reference(variables('StorageAccountInfoDeployment')).outputs.storageAccountInfo.value.primaryEndpoints.blob)]"
           }
         }
       }
@@ -309,8 +308,8 @@
       "properties": {
         "publisher": "Microsoft.Powershell",
         "type": "DSC",
-        "typeHandlerVersion": "2.8",
-        "autoUpgradeMinorVersion": true,
+        "typeHandlerVersion": "2.13",
+        "autoUpgradeMinorVersion": false,
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMIOController')]",
           "configurationFunction": "[variables('configurationFunctionVMIOController')]",
@@ -344,8 +343,8 @@
       "properties": {
         "publisher": "Microsoft.Powershell",
         "type": "DSC",
-        "typeHandlerVersion": "2.6",
-        "autoUpgradeMinorVersion": true,
+        "typeHandlerVersion": "2.13",
+        "autoUpgradeMinorVersion": false,
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMIOWorkload')]",
           "configurationFunction": "[variables('configurationFunctionVMIOWorkload')]",

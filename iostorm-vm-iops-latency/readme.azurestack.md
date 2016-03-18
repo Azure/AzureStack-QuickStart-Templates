@@ -5,6 +5,8 @@
 
 This template deploys requested number of VMs and a controller VM with public IP address in same virtual network. Controller VM synchronizes IO workload on all VMs, collects and analyse results and upload it to the storage account.
 
+Please make sure to user unique resource group name for each deployment to avoid deployment failures due to name collisions of resources.
+
 NOTE: There is a 90 minutes Azure time-out which you can hit if large number of VMs are deployed. To circumvent that, all these operations are done using Scheduled Task which gets created by a DSC Script Resource by a Controller VM.
 
 
