@@ -115,7 +115,7 @@
 		"vmNetworkName": {
 			"type": "string",
 			"metadata": {
-				"description": "Name of the VM network to connect to"
+				"description": "Name of the existing VM network to connect to"
 			}
 		},
 
@@ -173,7 +173,7 @@
 
 		"agentServicePassword": {
 			"type": "securestring",
-			"metadata": { 
+			"metadata": {
 				"description": "The pasword of the user account under which the test agent service will run"
 			}
 		},
@@ -328,8 +328,8 @@
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
-					"vmNamePrefix": {"value": "[variables('taVMNamePerfix')]" },
-					"storageAccount": {"value": "[variables('taStorageName')]" },
+					"vmNamePrefix": { "value": "[variables('taVMNamePerfix')]" },
+					"storageAccount": { "value": "[variables('taStorageName')]" },
 					"storageDomain": { "value": "[parameters('storageDomain')]" },
 					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
 					"adminUsername": { "value": "[parameters('adminUsername')]" },
@@ -364,16 +364,17 @@
 					"controllerServiceUserName": { "value": "[parameters('controllerServiceUserName')]" },
 					"controllerServicePassword": { "value": "[parameters('controllerServicePassword')]" },
 					"assetLocation": { "value": "[parameters('assetLocation')]" },
-					"VisualStudioProductKey": { "value": "[parameters('VisualStudioProductKey')]" }					
+					"VisualStudioProductKey": { "value": "[parameters('VisualStudioProductKey')]" }
 				}
 			}
 		},
-		
+
 		{
 			"name": "[concat(variables('taConfigDeployment'),copyIndex())]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2015-01-01",
 			"dependsOn": [
+				"[variables('consoleConfigDeploymentID')]",
 				"[variables('taVMCreationLoop')]"
 			],
 			"copy": {
