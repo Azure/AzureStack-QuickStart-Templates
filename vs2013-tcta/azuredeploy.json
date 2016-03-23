@@ -2,107 +2,12 @@
 	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
-		"newStorageAccountNamePrefix": {
-			"type": "string",
-			"metadata": {
-				"description": "The prefix of the new storage account created to store the VMs disks, three different storage accounts will be created using this string as a prefix for the name"
-			}
-		},
-
-		"storageAccountType": {
-			"type": "string",
-			"allowedValues": [
-				"Standard_LRS",
-				"Standard_GRS",
-				"Standard_RAGRS",
-				"Premium_LRS"
-			],
-			"metadata": {
-				"description": "The type of the Storage Account created"
-			},
-			"defaultValue": "Standard_LRS"
-		},
-
-		"storageDomain": {
-			"type": "string",
-			"defaultValue": "azurestack.local",
-			"metadata": {
-				"description": "The address of Primary AD"
-			}
-		},
-
-		"vmNamePrefix": {
-			"type": "string",
-			"metadata": {
-				"description": "The Prefix for the Vms"
-			}
-		},
-
-		"consoleVMSize": {
-			"type": "string",
-			"allowedValues": [
-				"Standard_D1",
-				"Standard_A1",
-				"Standard_A2",
-				"Standard_A3",
-				"Standard_A4",
-				"Standard_DS1",
-				"Standard_D2",
-				"Standard_DS2",
-				"Standard_D3",
-				"Standard_DS3",
-				"Standard_D4",
-				"Standard_DS4",
-				"Standard_D11",
-				"Standard_DS11",
-				"Standard_D12",
-				"Standard_DS12",
-				"Standard_D13",
-				"Standard_DS13",
-				"Standard_D14",
-				"Standard_DS14"
-			],
-			"metadata": {
-				"description": "The size of the console VM to be created"
-			},
-			"defaultValue": "Standard_A2"
-		},
-
-		"AgentVMSize": {
-			"type": "string",
-			"allowedValues": [
-				"Standard_D1",
-				"Standard_A1",
-				"Standard_A2",
-				"Standard_A3",
-				"Standard_A4",
-				"Standard_DS1",
-				"Standard_D2",
-				"Standard_DS2",
-				"Standard_D3",
-				"Standard_DS3",
-				"Standard_D4",
-				"Standard_DS4",
-				"Standard_D11",
-				"Standard_DS11",
-				"Standard_D12",
-				"Standard_DS12",
-				"Standard_D13",
-				"Standard_DS13",
-				"Standard_D14",
-				"Standard_DS14"
-			],
-			"metadata": {
-				"description": "The size of the console VM to be created"
-			},
-			"defaultValue": "Standard_A1"
-		},
-
 		"domainName": {
 			"type": "string",
 			"metadata": {
 				"description": "The domain name"
-			}
+			},
+			"defaultValue": "contoso.com"
 		},
 
 		"targetResourceGroupName": {
@@ -138,7 +43,8 @@
 			"type": "string",
 			"metadata": {
 				"description": "The name of the Administrator of the new VMs and Domain"
-			}
+			},
+			"defaultValue": "Administrator"
 		},
 
 		"adminPassword": {
@@ -148,33 +54,18 @@
 			}
 		},
 
-		"controllerServiceUserName": {
+		"serviceAccountUserName": {
 			"type": "string",
 			"metadata": {
-				"description": "The name of the user account under which the test controller service will run"
+				"description": "The name of the user account under which the test controller and test agent services will run"
 			},
 			"defaultValue": "tcserv"
 		},
 
-		"controllerServicePassword": {
+		"serviceAccountPassword": {
 			"type": "securestring",
 			"metadata": {
-				"description": "The pasword of the user account under which the test controller service will run"
-			}
-		},
-
-		"agentServiceUserName": {
-			"type": "string",
-			"metadata": {
-				"description": "The name of the user account under which the test agent service will run"
-			},
-			"defaultValue": "taserv"
-		},
-
-		"agentServicePassword": {
-			"type": "securestring",
-			"metadata": {
-				"description": "The pasword of the user account under which the test agent service will run"
+				"description": "The password of the user account under which the test controller and test agent services will run"
 			}
 		},
 
@@ -201,21 +92,24 @@
 	},
 
 	"variables": {
+		"storageAccountType": "Standard_LRS",
 		"vnetID": "[resourceId(parameters('targetResourceGroupName'),'Microsoft.Network/virtualNetworks', parameters('vmNetworkName'))]",
 		"staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('vmNetworkSubnetName'))]",
+		"consoleVMSize": "Standard_A2",
 		"consoleTemplateURL": "[concat(parameters('assetLocation'),'/consoleVMTemplate.json')]",
 		"consoleVMDeployment": "DeployConsoleVM",
 		"consoleVMDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleVMDeployment'))]",
-		"consoleStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'csa')]",
-		"consoleVMNamePerfix": "[concat(parameters('vmNamePrefix'),'-tc-')]",
+		"consoleStorageName": "[concat(resourceGroup().Name,'csa')]",
+		"consoleVMNamePerfix": "[resourceGroup().Name,'-tc-')]",
 		"consoleConfigDeployment": "DeployConsoleVMConfiguration",
 		"consoleConfigDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleConfigDeployment'))]",
 		"consoleConfigTemplateUrl": "[concat(parameters('assetLocation'),'/deployTestConsole.json')]",
 		"publicLBName": "ConsolePublicLoadBalancer",
+		"TestAgentVMSize": "Standard_A1",
 		"taTemplateURL": "[concat(parameters('assetLocation'),'/taVMTemplate.json')]",
 		"taVMDeployment": "DeployTAVM",
-		"taStorageName": "[concat(parameters('newStorageAccountNamePrefix'),'tasa')]",
-		"taVMNamePerfix": "[concat(parameters('vmNamePrefix'),'-ta-')]",
+		"taStorageName": "[concat(resourceGroup().Name,'tasa')]",
+		"taVMNamePerfix": "[concat(resourceGroup().Name,'-ta-')]",
 		"taVMCreationLoop": "TALoop",
 		"taConfigDeployment": "DeployAgentConfiguration",
 		"taConfigLoop": "TAConfigLoop",
@@ -300,11 +194,10 @@
 				"parameters": {
 					"vmNamePrefix": { "value": "[variables('consoleVMNamePerfix')]" },
 					"storageAccount": { "value": "[variables('consoleStorageName')]" },
-					"storageDomain": { "value": "[parameters('storageDomain')]" },
-					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
+					"storageAccountType": { "value": "[variables('storageAccountType')]" },
 					"adminUsername": { "value": "[parameters('adminUsername')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"vmSize": { "value": "[parameters('consoleVMSize')]" },
+					"vmSize": { "value": "[variables('consoleVMSize')]" },
 					"subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
 					"dataDiskSize": { "value": 10 },
 					"rdpNATRuleID": { "value": "[variables('rdpNATRuleID')]" },
@@ -330,11 +223,10 @@
 				"parameters": {
 					"vmNamePrefix": { "value": "[variables('taVMNamePerfix')]" },
 					"storageAccount": { "value": "[variables('taStorageName')]" },
-					"storageDomain": { "value": "[parameters('storageDomain')]" },
-					"storageAccountType": { "value": "[parameters('storageAccountType')]" },
+					"storageAccountType": { "value": "[variables('storageAccountType')]" },
 					"adminUsername": { "value": "[parameters('adminUsername')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"vmSize": { "value": "[parameters('AgentVMSize')]" },
+					"vmSize": { "value": "[variables('TestAgentVMSize')]" },
 					"subnetResourceId": { "value": "[variables('staticSubnetRef')]" },
 					"dataDiskSize": { "value": 5 },
 					"currentIndex": { "value": "[copyIndex()]" }
@@ -357,12 +249,12 @@
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
-					"consoleVMName": { "value": "[concat(variables('consoleVMNamePerfix'), '0')]" },
+					"testConsoleVMName": { "value": "[concat(variables('consoleVMNamePerfix'), '0')]" },
 					"domainName": { "value": "[parameters('domainName')]" },
 					"adminUserName": { "value": "[parameters('adminUsername')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"controllerServiceUserName": { "value": "[parameters('controllerServiceUserName')]" },
-					"controllerServicePassword": { "value": "[parameters('controllerServicePassword')]" },
+					"controllerServiceUserName": { "value": "[parameters('serviceAccountUserName')]" },
+					"controllerServicePassword": { "value": "[parameters('serviceAccountPassword')]" },
 					"assetLocation": { "value": "[parameters('assetLocation')]" },
 					"VisualStudioProductKey": { "value": "[parameters('VisualStudioProductKey')]" }
 				}
@@ -388,13 +280,13 @@
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
-					"agentVMName": { "value": "[concat(variables('taVMNamePerfix'), copyIndex())]" },
-					"controllerVMName": { "value": "[concat(variables('consoleVMNamePerfix'), '0')]" },
+					"testAgentVMName": { "value": "[concat(variables('taVMNamePerfix'), copyIndex())]" },
+					"testControllerVMName": { "value": "[concat(variables('consoleVMNamePerfix'), '0')]" },
 					"domainName": { "value": "[parameters('domainName')]" },
 					"adminUserName": { "value": "[parameters('adminUsername')]" },
 					"adminPassword": { "value": "[parameters('adminPassword')]" },
-					"agentServiceUserName": { "value": "[parameters('agentServiceUserName')]" },
-					"agentServicePassword": { "value": "[parameters('agentServicePassword')]" },
+					"agentServiceUserName": { "value": "[parameters('serviceAccountUserName')]" },
+					"agentServicePassword": { "value": "[parameters('serviceAccountPassword')]" },
 					"assetLocation": { "value": "[parameters('assetLocation')]" }
 				}
 			}

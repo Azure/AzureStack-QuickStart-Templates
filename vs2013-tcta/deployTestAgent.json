@@ -2,10 +2,10 @@
 	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
-		"agentVMName": {
+		"testAgentVMName": {
 			"type": "string"
 		},
-		"controllerVMName": {
+		"testControllerVMName": {
 			"type": "string"
 		},
 		"domainName": {
@@ -37,7 +37,7 @@
 	"resources": [
 		{
 			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"name": "[concat(parameters('agentVMName'),'/ConfigureAgentVM')]",
+			"name": "[concat(parameters('testAgentVMName'),'/ConfigureAgentVM')]",
 			"apiVersion": "2015-06-15",
 			"dependsOn": [
 			],
@@ -60,7 +60,7 @@
 							"UserName": "[parameters('agentServiceUserName')]",
 							"Password": "PrivateSettingsRef:AgentPassword"
 						},
-						"TestControllerName": "[parameters('controllerVMName')]"
+						"TestControllerName": "[parameters('testControllerVMName')]"
 					}
 				},
 				"protectedSettings": {
