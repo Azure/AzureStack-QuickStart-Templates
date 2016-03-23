@@ -4,14 +4,12 @@
     "parameters": {
         "newStorageAccountName": {
             "type": "string",
-            "defaultValue": "savmsimp",
             "metadata": {
                 "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
             }
         },
         "vmName": {
             "type": "string",
-            "defaultValue": "vmsim",
             "metadata": {
                 "description": "Name of the VM."
             }
@@ -29,21 +27,18 @@
         },
         "adminUsername": {
             "type": "string",
-            "defaultValue": "vmadministrator",
             "metadata": {
                 "description": "Username for the Virtual Machine."
             }
         },
         "adminPassword": {
             "type": "securestring",
-            "defaultValue": "User@123",
             "metadata": {
                 "description": "Password for the Virtual Machine."
             }
         },
         "dnsNameForPublicIP": {
             "type": "string",
-            "defaultValue": "dsnvmsim",
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
             }
