@@ -13,7 +13,9 @@ The components are connected to an existing virtual network to allow connectivit
 
 + 	The image used to create this deployment is
 	+ 	Latest Windows Server 2012 R2 Image with .Net 3.5
-+	The installer bits for SQL 2014 and Visual Studio 2013 Ultimate with Update 5 are downloaded at deployment time but can be pre-loaded into the image
++	The installer bits for SQL 2014 and Visual Studio 2013 Ultimate with Update 5 are downloaded at deployment time but can be pre-loaded into the image.
+	SQL 2014 trial can be downloaded here: https://www.microsoft.com/en-us/evalcenter/evaluate-sql-server-2014. 
+	After downloading the ISO, extract the files to a folder called SQL2014 on the image
 + 	The image configuration is defined in variables - details below - but the scripts that configure this deployment have only been tested with these versions and may not work on other images.
 +	Required workaround for Azure Stack TP:
 	+	Add a DNS forwarder to address 192.168.100.2 on the DNS server for the network to which the TC/TA farm will be connected to before deploying this template.

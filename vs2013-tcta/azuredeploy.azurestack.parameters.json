@@ -2,13 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "newStorageAccountNamePrefix": {
-      "value": "s####"
-    },
-    "vmNamePrefix": {
-      "value": "s####"
-    },
-     "domainName": {
+    "domainName": {
       "value": "contoso.com"
     },
 	"targetResourceGroupName": {
@@ -26,13 +20,10 @@
     "adminPassword": {
       "value": "GEN-PASSWORD"
     },
-    "controllerServicePassword": {
+    "serviceAccountUserName": {
       "value": "GEN-PASSWORD"
     },
-   "agentServicePassword": {
-      "value": "GEN-PASSWORD"
-    },
-  	"VisualStudioProductKey":  {
+   "VisualStudioProductKey":  {
       "value": "####"
     }
   }

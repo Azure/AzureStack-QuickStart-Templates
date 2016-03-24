@@ -100,7 +100,7 @@
 		"consoleVMDeployment": "DeployConsoleVM",
 		"consoleVMDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleVMDeployment'))]",
 		"consoleStorageName": "[concat(resourceGroup().Name,'csa')]",
-		"consoleVMNamePerfix": "[resourceGroup().Name,'-tc-')]",
+		"consoleVMNamePerfix": "[concat(resourceGroup().Name,'-tc-')]",
 		"consoleConfigDeployment": "DeployConsoleVMConfiguration",
 		"consoleConfigDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('consoleConfigDeployment'))]",
 		"consoleConfigTemplateUrl": "[concat(parameters('assetLocation'),'/deployTestConsole.json')]",
