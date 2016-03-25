@@ -45,7 +45,7 @@
     "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
     "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
     "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-    "adResourceID": "null",
+    "adResourceID": "https://azurestack.local-api/",
     "vmOsSku": "2012-R2-Datacenter",
     "vmAdminUsername": "vmadministrator",
     "vmAdminPassword": "pwd0a!8b7",
@@ -55,13 +55,13 @@
     "vmIoBlockSize": "4096",
     "vmIoDuration": "600",
     "vmIoReadPercentage": "70",
-    "vmIoMaxLatency": "50",
+    "vmIoMaxLatency": "100",
     "vmNicName": "[concat('nc', resourceGroup().name)]",
     "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "nsgName": "[concat('ng', resourceGroup().name)]",
-    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",~
     "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency/",
     "moduleVMIOController": "VMIOWorkloadController.zip",
     "moduleVMIOWorkload": "VMIOWorkload.zip",
@@ -137,7 +137,10 @@
               }
             }
           }
-        ]
+        ],
+        "dhcpOptions": {
+          "dnsServers": [ "192.168.100.2" ]
+        }
       }
     },
     {
