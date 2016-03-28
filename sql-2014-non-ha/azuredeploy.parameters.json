@@ -1,13 +1,14 @@
-{
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+
+ {
+"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "newStorageAccountNamePrefix": {
-      "value": "sqlhcz"
+      "value": "s####"
     },
 
     "vmNamePrefix": {
-      "value": "vmhcz"
+      "value": "v####"
     },
 
      "domainName": {
@@ -15,19 +16,19 @@
     },
 
     "dnsPrefix": {
-      "value": "vmhcz"
+      "value": "v####"
     },
     "location": {
-      "value": "West US"
+      "value": "local"
+    },
+    "adminUsername": {
+      "value": "Administrator"
     },
     "adminPassword": {
-      "value": "!!123abcA"
+      "value": "GEN-PASSWORD"
     },
     "sqlServerServiceAccountPassword": {
-      "value": "!!123abcA"
-    },
-    "storageDomain": {
-      "value": "core.windows.net"
+      "value": "GEN-PASSWORD"
     }
   }
 }
