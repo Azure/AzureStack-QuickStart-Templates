@@ -17,14 +17,14 @@
 			}
 		},
 
-		"vmNetworkName": {
+		"targetVMNetworkName": {
 			"type": "string",
 			"metadata": {
 				"description": "Name of the existing VM network to connect to"
 			}
 		},
 
-		"vmNetworkSubnetName": {
+		"targetVMNetworkSubnetName": {
 			"type": "string",
 			"metadata": {
 				"description": "Name of the exsisting subnet to connect to"
@@ -93,8 +93,8 @@
 
 	"variables": {
 		"storageAccountType": "Standard_LRS",
-		"vnetID": "[resourceId(parameters('targetResourceGroupName'),'Microsoft.Network/virtualNetworks', parameters('vmNetworkName'))]",
-		"staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('vmNetworkSubnetName'))]",
+		"vnetID": "[resourceId(parameters('targetResourceGroupName'),'Microsoft.Network/virtualNetworks', parameters('targetVMNetworkName'))]",
+		"staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('targetVMNetworkSubnetName'))]",
 		"consoleVMSize": "Standard_A2",
 		"consoleTemplateURL": "[concat(parameters('assetLocation'),'/consoleVMTemplate.json')]",
 		"consoleVMDeployment": "DeployConsoleVM",

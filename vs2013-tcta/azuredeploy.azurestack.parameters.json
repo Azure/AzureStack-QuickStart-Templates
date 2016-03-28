@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "domainName": {
@@ -8,19 +8,22 @@
 	"targetResourceGroupName": {
 		"value": "####rg"
 	},
-	"vmNetworkName": {
+	"targetVMNetworkName": {
 		"value": "####net"
 	},
-	"vmNetworkSubnetName": {
+	"targetVMNetworkSubnetName": {
       "value": "####net"
     },
     "adminUsername": {
       "value": "Administrator"
     },
-    "adminPassword": {
-      "value": "GEN-PASSWORD"
+	"adminPassword": {
+		"value": "GEN-PASSWORD"
+	},
+	"serviceAccountUserName": {
+      "value": "tcserv"
     },
-    "serviceAccountUserName": {
+    "serviceAccountPassword": {
       "value": "GEN-PASSWORD"
     },
    "VisualStudioProductKey":  {
