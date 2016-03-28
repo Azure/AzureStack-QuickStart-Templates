@@ -1,0 +1,78 @@
+﻿{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"testConsoleVMName": {
+			"type": "string"
+		},
+		"domainName": {
+			"type": "string"
+		},
+		"adminUserName": {
+			"type": "string"
+		},
+		"adminPassword": {
+			"type": "securestring"
+		},
+		"controllerServiceUserName": {
+			"type": "string"
+		},
+		"controllerServicePassword": {
+			"type": "securestring"
+		},
+		"assetLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
+			}
+		},
+		"VisualStudioProductKey": {
+			"type": "string",
+			"metadata": {
+				"description": "Product key (25 characters no spaces) for Visual Studio activation"
+			}
+		}
+	},
+	"variables": {
+		"deployConsoleModulesURL": "[concat(parameters('assetLocation'),'/deployTestConsole.ps1.zip')]",
+		"deployConsoleConfigurationFunction": "deployTestConsole.ps1\\deployTestConsole"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"name": "[concat(parameters('testConsoleVMName'),'/ConfigureConsoleVM')]",
+			"apiVersion": "2015-06-15",
+			"dependsOn": [
+			],
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publisher": "Microsoft.Powershell",
+				"type": "DSC",
+				"typeHandlerVersion": "2.13",
+				"autoUpgradeMinorVersion": "false",
+				"settings": {
+					"ModulesUrl": "[variables('deployConsoleModulesURL')]",
+					"ConfigurationFunction": "[variables('deployConsoleConfigurationFunction')]",
+					"Properties": {
+						"DomainName": "[parameters('domainName')]",
+						"AdminCreds": {
+							"UserName": "[parameters('adminUserName')]",
+							"Password": "PrivateSettingsRef:AdminPassword"
+						},
+						"SQLServicecreds": {
+							"UserName": "[parameters('controllerServiceUserName')]",
+							"Password": "PrivateSettingsRef:ControllerPassword"
+						},
+						"VSProductKey": "[parameters('VisualStudioProductKey')]" 
+					}
+				},
+				"protectedSettings": {
+					"Items": {
+						"AdminPassword": "[parameters('adminPassword')]",
+						"ControllerPassword": "[parameters('controllerServicePassword')]"
+					}
+				}
+			}
+		}
+	]
+}
