@@ -5,13 +5,13 @@
     "azureAccountUsername": {
       "type": "string",
       "metadata": {
-        "description": "Azure account SPN user name to authenticate inside controller VM."
+        "description": "Azure tenant user name to authenticate inside controller VM."
       }
     },
     "azureAccountPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "Azure account SPN password to authenticate inside controller VM."
+        "description": "Azure tenant user password to authenticate inside controller VM."
       }
     },
     "tenantId": {
@@ -36,7 +36,7 @@
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "addressPrefix": "10.0.0.0/16",
-    "location": "[resourceGroup().location]",
+    "location":"[resourceGroup().location]",
     "subnetName": "[concat('vsn', resourceGroup().name)]",
     "subnetPrefix": "10.0.0.0/24",
     "storageAccountType": "Standard_LRS",
@@ -45,7 +45,7 @@
     "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
     "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
     "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-    "adResourceID": "null",
+    "adResourceID": "https://azurestack.local-api/",
     "vmOsSku": "2012-R2-Datacenter",
     "vmAdminUsername": "vmadministrator",
     "vmAdminPassword": "pwd0a!8b7",
@@ -130,7 +130,10 @@
               }
             }
           }
-        ]
+        ],
+        "dhcpOptions": {
+          "dnsServers": [ "192.168.100.2" ]
+        }
       }
     },
     {
