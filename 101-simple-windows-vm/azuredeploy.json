@@ -14,17 +14,6 @@
                 "description": "Name of the VM."
             }
         },
-        "blobStorageEndpoint": {
-            "type": "string",
-            "defaultValue": "blob.azurestack.local",
-            "allowedValues": [
-                "blob.azurestack.local",
-                "blob.core.windows.net"
-            ],
-            "metadata": {
-                "description": "Blob storage endpoint"
-            }
-        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -210,7 +199,7 @@
                     "osDisk": {
                         "name": "osdisk",
                         "vhd": {
-                            "uri": "[concat('http://',parameters('newStorageAccountName'),'.', parameters('blobStorageEndpoint'), '/', variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -226,7 +215,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[concat('http://',parameters('newStorageAccountName'),'.', parameters('blobStorageEndpoint'))]"
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }
             }
