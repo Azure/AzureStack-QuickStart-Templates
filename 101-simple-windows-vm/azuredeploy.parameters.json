@@ -8,9 +8,6 @@
     "vmName": {
         "value": "myVM001"
     },
-    "blobStorageEndpoint": {
-      "value": "blob.azurestack.local"
-    },
     "adminUsername": {
       "value": "admin123"
     },
