@@ -6,7 +6,7 @@
         "value": "myVM001"
     },
     "scriptFile": {
-        "value": "https://vmbootio.blob.core.windows.net/azurestack/VMCustomScriptExtension.ps1"
+        "value": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/101-vm-ext-win-cs-scriptfile/VMCustomScriptExtension.ps1"
     },  
     "scriptName": {
         "value": "VMCustomScriptExtension.ps1"
