@@ -1,24 +1,24 @@
 {
-	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-	"contentVersion": "1.0.0.0",
-	"parameters": {
-		"TestControllerVMName": {
-			"value": "sprg-tc-0"
-		},
-		"TestControllerServiceUserName": {
-			"value": "tcserv"
-		},
-		"TargetSPServerVMName": {
-			"value": "sprg-sp-0"
-		},
-		"TargetSPSiteURL": {
-			"value": "http://sprg-sp-0.contoso.com"
-		},
-		"TargetSPTestUserName": {
-			"value": "spadmin@contoso.com"
-		},
-		"TargetSPTestUserPassword": { 
-			"value": "GEN-PASSWORD"
-		}
-	}
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "TestControllerVMName": {
+            "value": "sprg-tc-0"
+        },
+        "TestControllerServiceUserName": {
+            "value": "tcserv"
+        },
+        "TargetSPServerVMName": {
+            "value": "sprg-sp-0"
+        },
+        "TargetSPSiteURL": {
+            "value": "http://sprg-sp-0.contoso.com"
+        },
+        "TargetSPTestUserName": {
+            "value": "spadmin@contoso.com"
+        },
+        "TargetSPTestUserPassword": {
+            "value": "GEN-PASSWORD"
+        }
+    }
 }

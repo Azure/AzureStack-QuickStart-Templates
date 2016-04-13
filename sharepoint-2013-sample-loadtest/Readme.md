@@ -17,8 +17,8 @@ This template will prepare the target SharePoint farm for load test execution an
 		+ https://github.com/Azure/AzureStack-QuickStart-Templates/tree/master/vs2013-tcta
 + 	This template makes use of nested templates for deploying the VM extensions, the main template (azuredeploy.json) assumes that the SharePoint 2013 and VS 2013 TC/TA farms are deployed
 	on the same resource group. If they however are on different resource groups:
-	+ Run TargetPrepareForLoadTest.json on the SharePoint 2013 resource group
-	+ Run TCRunLoadTest.json on the VS 2013 TC/TA resource group
+	+ Run SharePointFarmPrepareForLoadTest.json on the SharePoint 2013 resource group
+	+ Run TestControllerRunLoadTest.json on the VS 2013 TC/TA resource group
 
 ## Deploying from Portal
 
