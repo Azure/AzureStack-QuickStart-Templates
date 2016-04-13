@@ -17,8 +17,9 @@ This template will prepare the target SharePoint farm for load test execution an
 		+ https://github.com/Azure/AzureStack-QuickStart-Templates/tree/master/vs2013-tcta
 + 	This template makes use of nested templates for deploying the VM extensions, the main template (azuredeploy.json) assumes that the SharePoint 2013 and VS 2013 TC/TA farms are deployed
 	on the same resource group. If they however are on different resource groups:
-	+ Run SharePointFarmPrepareForLoadTest.json on the SharePoint 2013 resource group
-	+ Run TestControllerRunLoadTest.json on the VS 2013 TC/TA resource group
+	+ Deploy SharePointFarmPrepareForLoadTest.json on the SharePoint 2013 resource group
+	+ Deploy TestControllerRunLoadTest.json on the VS 2013 TC/TA resource group
+	The above templates can be deployed from the portal or from PowerShell; follow the instructions in the sections bellow but instead of using azuredeploy.json use the above .json files instead.	
 
 ## Deploying from Portal
 
@@ -31,7 +32,7 @@ This template will prepare the target SharePoint farm for load test execution an
 
 ## Deploying from PowerShell
 
-Download azuredeploy.json and azuredeploy.azurestack.parameters.json to local machine 
+Download azuredeploy.json and azuredeploy.parameters.json to local machine 
 
 Modify parameter value in azuredeploy.azurestack.parameters.json as needed 
 
@@ -72,4 +73,4 @@ New-AzurermResourceGroup -Name $resourceGroupName -Location $location
 
 #Start new Deployment
 New-AzurermResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName `
-    -TemplateParameterFile .\azuredeploy.azurestack.parameters.json -TemplateFile .\azuredeploy.json
+    -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json
