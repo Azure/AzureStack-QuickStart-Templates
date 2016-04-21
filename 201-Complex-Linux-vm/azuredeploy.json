@@ -2,17 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "blobStorageEndpoint": {
-            "type": "string",
-            "defaultValue": "blob.azurestack.local",
-            "allowedValues": [
-                "blob.azurestack.local",
-                "blob.core.windows.net"
-            ],
-            "metadata": {
-                "description": "Blob storage endpoint"
-            }
-        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -25,13 +14,6 @@
             "metadata": {
                 "description": "Password for the Virtual Machine."
             }
-        },
-        "assetLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
-            },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-complex-linux-vm"
         },
         "ubuntuOSVersion": {
       "type": "string",
@@ -66,8 +48,9 @@
         "vmSize": "Standard_A1",
         "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-complex-linux-vm",
         "scriptFileName": "docker.sh",
-        "scriptFile": "[concat(parameters('assetLocation'),'/',variables('scriptFileName'))]",
+        "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "networkSecurityGroupName": "mySG",
         "apiVersion": {
@@ -212,7 +195,7 @@
                 "osDisk": {
                     "name": "osdisk",
                     "vhd": {
-                        "uri": "[concat('http://',variables('storageAccountName'),'.', parameters('blobStorageEndpoint'), '/', variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+                        "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
                     },
                     "caching": "ReadWrite",
                     "createOption": "FromImage"
@@ -228,7 +211,7 @@
             "diagnosticsProfile": {
                 "bootDiagnostics": {
                     "enabled": "true",
-                    "storageUri": "[concat('http://',variables('storageAccountName'),'.', parameters('blobStorageEndpoint'))]"
+                    "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                 }
             }
         }
