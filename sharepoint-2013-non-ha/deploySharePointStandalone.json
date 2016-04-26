@@ -5,9 +5,6 @@
         "spVMName": {
             "type": "string"
         },
-        "location": {
-            "type": "string"
-        },
         "domainName": {
             "type": "string"
         },
@@ -76,7 +73,7 @@
         }
     },
     "variables": {
-        "deploySPStandaloneModulesURL":"[concat(parameters('assetLocation'),'/InstallAndConfigureSharePointServer.ps1.zip')]",
+        "deploySPStandaloneModulesURL": "[concat(parameters('assetLocation'),'/InstallAndConfigureSharePointServer.ps1.zip')]",
         "deploySPStandaloneConfigurationFunction": "InstallAndConfigureSharePointServer.ps1\\InstallAndConfigureSharePointServer"
     },
     "resources": [
@@ -86,7 +83,7 @@
             "apiVersion": "2015-06-15",
             "dependsOn": [
             ],
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",
@@ -120,7 +117,7 @@
                         "InstallSourceDrive": "[parameters('sharepointInstallSourceDrive')]",
                         "InstallSourceFolderName": "[parameters('sharepointInstallSourceFolder')]",
                         "ProductKey": "[parameters('ProductKey')]",
-                        "SPDLLink" :  "[parameters('sharepoint2013SP1SourceDLLink')]"
+                        "SPDLLink": "[parameters('sharepoint2013SP1SourceDLLink')]"
                     }
                 },
                 "protectedSettings": {

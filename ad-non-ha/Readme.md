@@ -5,7 +5,7 @@ This template will create a AD domain controller Server using the PowerShell DSC
 +	A Virtual Network
 +	One Storage Account
 +	One external load balancer
-+	One VM configured as Domain Controller for a new forest with a single domain
++	One A1 size VM configured as Domain Controller for a new forest with a single domain
 
 The external load balancer creates an RDP NAT rule to allow connectivity to the AD VM created.
 
@@ -13,14 +13,15 @@ The external load balancer creates an RDP NAT rule to allow connectivity to the 
 
 + 	The images used to create this deployment are
 	+ 	AD - Latest Windows Server 2012 R2 Image
-
++	The VM size, storage type on which the VM is created , subnet and IP address can be updated before deployment. 
++	All the resources will be deployed in the same location as the resource group.
 + 	The image configuration is defined in variables - details below - but the scripts that configure this deployment have only been tested with version mentioned above and may not work on other images.
 
 ## Deploying from Portal
 
 +	Login into Azurestack portal
 +	Click "New" -> "Custom" -> "Template deployment"
-+	Copy conent in azuredeploy.json, Click "Edit Tempalte" and paste content, then Click "Save"
++	Copy conent in azuredeploy.json, Click "Edit Template" and paste content, then Click "Save"
 +	Fill the parameters
 +	Click "Create new" to create new Resource Group
 +	Click "Create"
@@ -28,9 +29,9 @@ The external load balancer creates an RDP NAT rule to allow connectivity to the 
 
 ## Deploying from PowerShell
 
-Download azuredeploy.json and azuredeploy.azurestack.parameters.json to local machine 
+Download azuredeploy.json and azuredeploy.parameters.json to local machine 
 
-Modify parameter value in azuredeploy.azurestack.parameters.json as needed 
+Modify parameter value in azuredeploy.parameters.json as needed 
 
 Allow cookies in IE: Open IE at c:\Program Files\Internet Explorer\iexplore.exe -> Internet Options -> Privacy -> Advanced -> Click OK -> Click OK again
 
@@ -69,4 +70,4 @@ New-AzurermResourceGroup -Name $resourceGroupName -Location $location
 
 #Start new Deployment
 New-AzurermResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName `
-    -TemplateParameterFile .\azuredeploy.azurestack.parameters.json -TemplateFile .\azuredeploy.json
+    -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json
