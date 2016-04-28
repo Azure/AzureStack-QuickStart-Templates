@@ -5,11 +5,20 @@
         "domainName": {
             "value": "contoso.com"
         },
+        "sqlServerServiceAccountUserName": {
+            "value": "sa"
+        },
         "adminUsername": {
             "value": "lcladmin"
         },
         "adminPassword": {
             "value": "GEN-PASSWORD"
+        },
+        "sharepoint2013SP1DownloadLink": {
+            "value": "####"
+        },
+        "sharepoint2013ProductKey": {
+            "value": "####"
         }
     }
 }
