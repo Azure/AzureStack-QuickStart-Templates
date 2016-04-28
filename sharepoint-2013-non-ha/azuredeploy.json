@@ -39,7 +39,7 @@
             "type": "string",
             "metadata": {
                 "description": "Product key for SharePoint 2013 SP1 required for SharePoint setup"
-            },
+            }
         }
     },
     "variables": {
