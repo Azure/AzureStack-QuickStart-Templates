@@ -1,0 +1,33 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "jetstressVMCount": {
+            "value": "1"
+        },
+        "testExecutionTime": {
+            "value": "1H00M0S"
+        },
+        "numberOfThreads": {
+            "value": "AutoSeek"
+        },
+        "testType": {
+            "value": "DiskSubsystemThroughput"
+        },
+        "storageDiskCapacityPercentage": {
+            "value": "80"
+        },
+        "iopsCapacityPercentage": {
+            "value": "80"
+        },
+        "exchangeMailboxCount": {
+            "value": "10"
+        },
+        "exchangeIopsPerMailbox": {
+            "value": "1"
+        },
+        "exchangeMailboxSizeInMB": {
+            "value": "200"
+        }
+    }
+}

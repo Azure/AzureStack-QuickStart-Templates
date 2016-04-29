@@ -1,0 +1,334 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "jetstressVMCount": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "Number of VMs to deploy and run jetstress (Exchange) load test."
+            }
+        },
+        "testExecutionTime": {
+            "type": "string",
+            "defaultValue": "1H00M0S",
+            "metadata": {
+                "description": "Duration to run jetstress load test."
+            }
+        },
+        "numberOfThreads": {
+            "type": "string",
+            "defaultValue": "AutoSeek",
+            "allowedValues": [
+                "AutoSeek",
+                "1 thread",
+                "2 threads",
+                "4 threads",
+                "8 threads",
+                "16 threads",
+                "32 threads"
+            ],
+            "metadata": {
+                "description": "Jetstress can autoseek or have fixed number of threads to run load test"
+            }
+        },
+        "testType": {
+            "type": "string",
+            "defaultValue": "DiskSubsystemThroughput",
+            "allowedValues": [
+                "DiskSubsystemThroughput",
+                "ExchangeMailboxProfile"
+            ],
+            "metadata": {
+                "description": "Jetstress load test type - 1. Disk Subsystem Throughput (Recommended) 2. Exchange Mailbox Profile"
+            }
+        },
+        "storageDiskCapacityPercentage": {
+            "type": "int",
+            "defaultValue": 80,
+            "metadata": {
+                "description": "Storage Capacity % to use for Disk Subsystem Throughput test"
+            }
+        },
+        "iopsCapacityPercentage": {
+            "type": "int",
+            "defaultValue": 80,
+            "metadata": {
+                "description": "IOPS Capacity % to use for Disk Subsystem Throughput test"
+            }
+        },
+        "exchangeMailboxCount": {
+            "type": "int",
+            "defaultValue": 10,
+            "metadata": {
+                "description": "Mailbox count to use for Exchange Mailbox Profile test"
+            }
+        },
+        "exchangeIopsPerMailbox": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "IOPS per Mailbox to use for Exchange Mailbox Profile test"
+            }
+        },
+        "exchangeMailboxSizeInMB": {
+            "type": "int",
+            "defaultValue": 200,
+            "metadata": {
+                "description": "Mailbox size in MBs to use for Exchange Mailbox Profile test"
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": {
+            "compute": "2015-06-15",
+            "storage": "2015-06-15",
+            "network": "2015-05-01-preview"
+        },
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "addressPrefix": "10.0.0.0/16",
+        "storageAccountType": "Standard_LRS",
+        "publicIPAddressName": "[concat('ip', resourceGroup().name)]",
+        "publicIPAddressType": "Dynamic",
+        "subnetPrefix": "10.0.0.0/24",
+        "subnetName": "[concat('sn', resourceGroup().name)]",
+        "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
+        "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
+        "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
+        "location": "[resourceGroup().location]",
+        "vmOsSku": "2012-R2-Datacenter",
+        "vmAdminUsername": "vmadministrator",
+        "vmAdminPassword": "pwd0a!8b7",
+        "vmName": "[concat('vm', resourceGroup().name)]",
+        "vmOsDiskName": "[concat('od', resourceGroup().name)]",
+        "vmDatabaseDiskName": "[concat('db', resourceGroup().name)]",
+        "vmSize": "Standard_A2",
+        "vmDatabaseDiskSizeInGB": "10",
+        "vmNicName": "[concat('nc', resourceGroup().name)]",
+        "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "modulesPath": "https://vmbootio.blob.core.windows.net/astest/",
+        "modulesPathProd": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
+        "modulesJetstress": "JetstressWorkload.zip",
+        "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
+        "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
+        "nsgName": "[concat('ng', resourceGroup().name)]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('apiVersion').storage]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[tolower(variables('uniqueStorageAccountName'))]",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "publicIPLoop",
+                "count": "[parameters('jetstressVMCount')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('uniqueDnsNameForPublicIP')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[variables('nsgID')]"
+                            }
+                        }
+                    }
+                ],
+                "dhcpOptions": {
+                    "dnsServers": [ "192.168.100.2" ]
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmNicName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[parameters('jetstressVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'),copyIndex())]",
+                "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'),copyIndex()))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('vmName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "vmLoop",
+                "count": "[parameters('jetstressVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[variables('vmAdminUsername')]",
+                    "adminPassword": "[variables('vmAdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('vmOsSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDatabaseDiskName'),copyIndex(),'.vhd')]"
+                            },
+                            "name": "[concat(variables('vmDatabaseDiskName'),copyIndex())]",
+                            "createOption": "empty",
+                            "caching": "None",
+                            "diskSizeGB": "[variables('vmDatabaseDiskSizeInGB')]",
+                            "lun": 0
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "extensionLoop",
+                "count": "[parameters('jetstressVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.13",
+                "autoUpgradeMinorVersion": false,
+                "settings": {
+                    "modulesUrl": "[variables('modulesUrlJetstress')]",
+                    "configurationFunction": "[variables('configurationFunctionJetstress')]",
+                    "properties": {
+                        "ExecutionTime": "[parameters('testExecutionTime')]",
+                        "AutoSeek": "[parameters('numberOfThreads')]",
+                        "ThreadCount": "[parameters('numberOfThreads')]",
+                        "TestType": "[parameters('testType')]",
+                        "StorageCapacityPercentage": "[parameters('storageDiskCapacityPercentage')]",
+                        "IopsCapacityPercentage": "[parameters('iopsCapacityPercentage')]",
+                        "MailboxCount": "[parameters('exchangeMailboxCount')]",
+                        "IopsPerMailbox": "[parameters('exchangeIopsPerMailbox')]",
+                        "MailboxSizeinMB": "[parameters('exchangeMailboxSizeInMB')]",
+                        "VMAdminCreds": {
+                            "userName": "[variables('vmAdminUsername')]",
+                            "password": "PrivateSettingsRef:vmAdminPassword"
+                        },
+                        "storageAccountName": "[variables('uniqueStorageAccountName')]",
+                        "storageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-05-01-preview').key1]",
+                        "storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersion').storage).primaryEndpoints['blob']]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "vmAdminPassword": "[variables('vmAdminPassword')]"
+                    }
+                }
+            }
+        }
+    ]
+}
