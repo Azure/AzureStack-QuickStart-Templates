@@ -318,9 +318,9 @@
                             "userName": "[variables('vmAdminUsername')]",
                             "password": "PrivateSettingsRef:vmAdminPassword"
                         },
-                        "storageAccountName": "[variables('uniqueStorageAccountName')]",
-                        "storageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-05-01-preview').key1]",
-                        "storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersion').storage).primaryEndpoints['blob']]"
+						"StorageAccountName": "[variables('uniqueStorageAccountName')]",
+						"StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-05-01-preview').key1]",
+                        "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersion').storage).primaryEndpoints['blob']]"
                     }
                 },
                 "protectedSettings": {
