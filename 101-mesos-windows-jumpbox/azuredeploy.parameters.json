@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentparameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": 
+    {
+        "linuxAdminPassword": {
+            "value": "GEN-PASSWORD"
+        },
+        "windowsAdminPassword": {
+            "value": "GEN-PASSWORD"
+        },
+        "agentCount": {
+            "value": 1
+        },
+        "masterCount": {
+            "value": 1
+        },
+        "agentVMSize": {
+            "value": "Standard_A1"
+        },
+        "masterVMSize": {
+            "value": "Standard_A2"
+        },
+        "nameSuffix": {
+            "value": "UNIQUESTRING"
+        }
+    }
+}
