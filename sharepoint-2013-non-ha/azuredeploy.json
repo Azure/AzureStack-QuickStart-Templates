@@ -32,21 +32,22 @@
         "sharepoint2013SP1DownloadLink": {
             "type": "string",
             "metadata": {
-                "description": "Direct download link for the SharePoint 2013 SP1 trial ISO"
+                "description": "Direct download link for the SharePoint 2013 SP1 trial ISO. For example: http://download.msdn.microsoft.com/pr/en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso?t=XXXXXXXXXXXXXXX"
             }
         },
         "sharepoint2013ProductKey": {
             "type": "string",
             "metadata": {
                 "description": "Product key for SharePoint 2013 SP1 required for SharePoint setup"
-            }
+            },
+            "defaultValue": "XXXX-XXXX-XXXX-XXXX"
         }
     },
     "variables": {
         "storageAccountType": "Standard_LRS",
         "adVMSize": "Standard_A1",
         "sqlVMSize": "Standard_A2",
-        "spVMSize": "Standard_A2",
+        "spVMSize": "Standard_A3",
         "spassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha",
         "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
         "sqlAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
