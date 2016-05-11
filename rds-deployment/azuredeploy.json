@@ -54,8 +54,8 @@
     "subnetName": "Subnet",
     "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks','vnet'),'/subnets/',variables('subnetName'))]",
     "publicIpRef": "publicIp",
-    "assetLocation": "https://raw.githubusercontent.com/MahendraAgrawal/AzureStack-QuickStart-Templates/master/rds-deployment/",
-    "adAssetLocation": "https://raw.githubusercontent.com/MahendraAgrawal/AzureStack-QuickStart-Templates/master/ad-non-ha/",
+    "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/rds-deployment/",
+    "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha/",
     "apiVersion": "2015-06-15",
     "apiVersionNRP": "2015-05-01-preview",
     "DNSIP": "192.168.100.2",
@@ -310,7 +310,7 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "https://raw.githubusercontent.com/MahendraAgrawal/AzureStack-QuickStart-Templates/master/ad-non-ha/CreateADPDC.ps1.zip",
+              "ModulesUrl": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha/CreateADPDC.ps1.zip",
               "ConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
               "Properties": {
                 "DomainName": "[parameters('adDomainName')]",
