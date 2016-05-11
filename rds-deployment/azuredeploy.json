@@ -343,7 +343,6 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "location": { "value": "[resourceGroup().location]" },
           "virtualNetworkName": { "value": "vnet" },
           "virtualNetworkAddressRange": { "value": "[variables('vnetAddressRange')]" },
           "subnets": { "value": "[variables('subnets')]" },
