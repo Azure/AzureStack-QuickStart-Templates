@@ -1,8 +1,5 @@
 # [IaaS Linux VM Comprehensive Resources]
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazurestack-quickstart-templates%2Fmaster%2F101-simple-linux-vm%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
 <a href="http://armviz.io/#/?load=https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/101-simple-linux-vm/azuredeploy.json" target="_blank">
   <img src="http://armviz.io/visualizebutton.png"/>
 </a>
@@ -12,12 +9,13 @@ This template deploys a Linux VM and also uses customscript, VMLinuxAccess and D
 
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
-| Microsoft Azure      | - | yes |
 | Microsoft Azure Stack      | TP1      |  yes|
 
 ## Prerequisites
 
-In case of AzureStack , Make sure Linux VHD is in Platform Image Repository(TODO: Instructions will be added to download the VHD and copy to AzureStack share)
+Follow the below links to create an Ubuntu Image and upload the same to Azure Stack's Platform Image Repository
+1. https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-create-upload-ubuntu/ 
+2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
 
 ## Deployment steps
 You can either click the "deploy to Azure" button at the beginning of this document or deploy the solution from PowerShell with the following PowerShell script or deploy to azure stack portal using custom deployment.
@@ -56,7 +54,6 @@ You can either click the "deploy to Azure" button at the beginning of this docum
 $myNum = "001" #Modify this per deployment
 $RGName = "myRG$myNum"
 $myLocation = "local"
-$myBlobStorageEndpoint = "blob.azurestack.local"
 
 # Create Resource Group for Template Deployment
 New-AzureRmResourceGroup -Name $RGName -Location $myLocation
@@ -66,7 +63,6 @@ New-AzureRmResourceGroupDeployment `
     -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
     -TemplateFile "azuredeploy.json" `
-    -blobStorageEndpoint $myBlobStorageEndpoint `
     -adminUsername "admin" `
     -adminPassword ("GEN-PASSWORD" | ConvertTo-SecureString -AsPlainText -Force)`
     -ubuntuOSVersion "15.10" `
