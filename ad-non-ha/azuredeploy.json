@@ -135,7 +135,8 @@
                 "subnets": "[variables('subnets')]",
                 "dhcpOptions": {
                     "dnsServers": [
-                        "[variables('azureStackDNSIPAddress')]"
+                      "[variables('primaryAdIpAddress')]",
+                      "[variables('azureStackDNSIPAddress')]"
                     ]
                 }
             }
@@ -293,7 +294,8 @@
                         "value": "[variables('subnets')]"
                     },
                     "dnsServerAddress": {
-                        "value": [ "[variables('primaryAdIpAddress')]" ]
+                        "value": [ "[variables('primaryAdIpAddress')]",
+                      "[variables('azureStackDNSIPAddress')]" ]
                     }
                 }
             }
