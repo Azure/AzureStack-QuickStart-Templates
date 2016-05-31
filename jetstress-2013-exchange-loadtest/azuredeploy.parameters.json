@@ -5,8 +5,8 @@
         "jetstressVMCount": {
             "value": "1"
         },
-        "testExecutionTime": {
-            "value": "1H00M0S"
+        "testExecutionTimeInMinutes": {
+            "value": "60"
         },
         "numberOfThreads": {
             "value": "AutoSeek"

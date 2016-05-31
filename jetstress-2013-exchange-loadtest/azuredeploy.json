@@ -9,7 +9,7 @@
                 "description": "Number of VMs to deploy and run jetstress (Exchange) load test."
             }
         },
-        "testExecutionTime": {
+        "testExecutionTimeInMinutes": {
             "type": "string",
             "defaultValue": "1H00M0S",
             "metadata": {
@@ -109,8 +109,7 @@
         "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "modulesPath": "https://vmbootio.blob.core.windows.net/astest/",
-        "modulesPathProd": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
+        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
         "modulesJetstress": "JetstressWorkload.zip",
         "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
         "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
@@ -305,7 +304,7 @@
                     "modulesUrl": "[variables('modulesUrlJetstress')]",
                     "configurationFunction": "[variables('configurationFunctionJetstress')]",
                     "properties": {
-                        "ExecutionTime": "[parameters('testExecutionTime')]",
+                        "ExecutionTime": "[parameters('testExecutionTimeInMinutes')]",
                         "AutoSeek": "[parameters('numberOfThreads')]",
                         "ThreadCount": "[parameters('numberOfThreads')]",
                         "TestType": "[parameters('testType')]",
