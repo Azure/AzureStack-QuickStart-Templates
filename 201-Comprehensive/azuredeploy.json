@@ -17,7 +17,7 @@
             "defaultValue": "[substring(resourcegroup().id,15,36)]"
         },
         "dnsServer": {
-            "type": "securestring",
+            "type": "string",
             "metadata": {
                 "description": "The DNS server IP address for VM internet connectivity"
             },
