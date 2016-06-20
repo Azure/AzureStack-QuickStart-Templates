@@ -12,8 +12,21 @@
         "adminPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "The password for the Administrator account of the new VMs"
-            }
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            },
+            "defaultValue": "[substring(resourcegroup().id,15,36)]"
+        },
+        "dnsServer": {
+            "type": "string",
+            "metadata": {
+                "description": "The DNS server IP address for VM internet connectivity"
+            },
+            "defaultValue": "192.168.200.3", 
+            "allowedValues": [ 
+                    "192.168.200.3", 
+                    "192.168.100.2", 
+                    "" 
+            ] 
         }
     },
     "variables": {
@@ -59,7 +72,11 @@
         "rDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
         "nsgName": "[concat('CVMNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+<<<<<<< HEAD
         "azureStackDNSIP": "10.11.18.12",
+=======
+        "azureStackDNSIP": "[parameters('dnsServer')]",
+>>>>>>> refs/remotes/Azure/master
         "apiVersion": {
             "resources": {
                 "deployments": "2015-01-01"

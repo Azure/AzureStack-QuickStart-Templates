@@ -27,7 +27,7 @@
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs and Domain"
-            },
+            }
         }
     },
     "variables": {

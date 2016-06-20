@@ -7,7 +7,7 @@
             "metadata": {
                 "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
             },
-            "defaultValue": "constoso.com"
+            "defaultValue": "contoso.com"
         },
         "adminUsername": {
             "type": "string",
@@ -135,7 +135,8 @@
                 "subnets": "[variables('subnets')]",
                 "dhcpOptions": {
                     "dnsServers": [
-                        "[variables('azureStackDNSIPAddress')]"
+                      "[variables('primaryAdIpAddress')]",
+                      "[variables('azureStackDNSIPAddress')]"
                     ]
                 }
             }
@@ -293,7 +294,8 @@
                         "value": "[variables('subnets')]"
                     },
                     "dnsServerAddress": {
-                        "value": [ "[variables('primaryAdIpAddress')]" ]
+                        "value": [ "[variables('primaryAdIpAddress')]",
+                      "[variables('azureStackDNSIPAddress')]" ]
                     }
                 }
             }
