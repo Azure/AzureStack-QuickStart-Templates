@@ -59,7 +59,7 @@
         "rDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
         "nsgName": "[concat('CVMNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-        "azureStackDNSIP": "192.168.100.3",
+        "azureStackDNSIP": "10.11.4.12",
         "apiVersion": {
             "resources": {
                 "deployments": "2015-01-01"
