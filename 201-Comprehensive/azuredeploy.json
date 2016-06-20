@@ -21,12 +21,7 @@
             "metadata": {
                 "description": "The DNS server IP address for VM internet connectivity"
             },
-            "defaultValue": "192.168.200.3", 
-            "allowedValues": [ 
-                    "192.168.200.3", 
-                    "192.168.100.2", 
-                    "" 
-            ] 
+            "defaultValue": "10.11.4.12"
         }
     },
     "variables": {
@@ -72,11 +67,7 @@
         "rDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
         "nsgName": "[concat('CVMNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-<<<<<<< HEAD
-        "azureStackDNSIP": "10.11.18.12",
-=======
         "azureStackDNSIP": "[parameters('dnsServer')]",
->>>>>>> refs/remotes/Azure/master
         "apiVersion": {
             "resources": {
                 "deployments": "2015-01-01"
