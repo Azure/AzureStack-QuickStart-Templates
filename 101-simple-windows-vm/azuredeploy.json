@@ -24,7 +24,8 @@
             "type": "securestring",
             "metadata": {
                 "description": "Password for the Virtual Machine."
-            }
+            },
+            "defaultValue": "[substring(resourcegroup().id,15,36)]" 
         },
         "dnsNameForPublicIP": {
             "type": "string",
