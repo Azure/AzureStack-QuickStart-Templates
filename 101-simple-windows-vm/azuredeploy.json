@@ -23,8 +23,9 @@
         "adminPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Password for the Virtual Machine."
-            }
+                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+            },
+            "defaultValue": "[substring(resourcegroup().id,15,36)]"
         },
         "dnsNameForPublicIP": {
             "type": "string",
