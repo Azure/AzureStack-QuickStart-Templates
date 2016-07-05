@@ -25,6 +25,19 @@
         "description": "vm suffix"
       }
     },
+    "adminUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "UserName for the Virtual Machine"
+      },
+      "defaultValue": "Administrator",
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine"
+      }
+    },
     "windowsOSVersion": {
       "type": "string",
       "defaultValue": "2012-R2-Datacenter",
@@ -199,8 +212,8 @@
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
-          "adminUsername": "'admin'",
-          "adminPassword": "'User@123'"
+          "adminUsername": "[parameters('adminUserName')]",
+          "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {

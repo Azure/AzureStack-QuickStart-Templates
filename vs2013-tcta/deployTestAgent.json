@@ -1,0 +1,75 @@
+﻿{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"testAgentVMName": {
+			"type": "string"
+		},
+		"testControllerVMName": {
+			"type": "string"
+		},
+		"domainName": {
+			"type": "string"
+		},
+		"adminUserName": {
+			"type": "string"
+		},
+		"adminPassword": {
+			"type": "securestring"
+		},
+		"agentServiceUserName": {
+			"type": "string"
+		},
+		"agentServicePassword": {
+			"type": "securestring"
+		},
+		"assetLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
+			}
+		}
+	},
+	"variables": {
+		"deployAgentModulesURL": "[concat(parameters('assetLocation'),'/deployTestAgent.ps1.zip')]",
+		"deployAgentConfigurationFunction": "deployTestAgent.ps1\\deployTestAgent"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"name": "[concat(parameters('testAgentVMName'),'/ConfigureAgentVM')]",
+			"apiVersion": "2015-06-15",
+			"dependsOn": [
+			],
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publisher": "Microsoft.Powershell",
+				"type": "DSC",
+				"typeHandlerVersion": "2.13",
+				"autoUpgradeMinorVersion": "false",
+				"settings": {
+					"ModulesUrl": "[variables('deployAgentModulesURL')]",
+					"ConfigurationFunction": "[variables('deployAgentConfigurationFunction')]",
+					"Properties": {
+						"DomainName": "[parameters('domainName')]",
+						"AdminCreds": {
+							"UserName": "[parameters('adminUserName')]",
+							"Password": "PrivateSettingsRef:AdminPassword"
+						},
+						"AgentServicecreds": {
+							"UserName": "[parameters('agentServiceUserName')]",
+							"Password": "PrivateSettingsRef:AgentPassword"
+						},
+						"TestControllerName": "[parameters('testControllerVMName')]"
+					}
+				},
+				"protectedSettings": {
+					"Items": {
+						"AdminPassword": "[parameters('adminPassword')]",
+						"AgentPassword": "[parameters('agentServicePassword')]"
+					}
+				}
+			}
+		}
+	]
+}

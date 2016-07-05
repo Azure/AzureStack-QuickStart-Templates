@@ -3,5 +3,5 @@
   "description": "This template creates requested number of VMs, boot them and start IO workload simultaneously.",
   "summary": "This template creates VM iostorm and reports IOPS and latency values.",
   "githubUsername": "dipakmsft",
-  "dateUpdated": "2016-01-28"
+  "dateUpdated": "2016-03-23"
 }

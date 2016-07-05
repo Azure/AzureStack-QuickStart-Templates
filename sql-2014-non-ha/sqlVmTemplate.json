@@ -1,257 +1,201 @@
 ﻿{
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "vmNamePrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "The Prefix of the VM Name"
-      },
-      "defaultValue": "SqlVM"
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "windowsImagePublisher": {
+            "type": "string",
+            "metadata": {
+                "description": "The Publisher of Windows Image"
+            },
+            "defaultValue": "MicrosoftWindowsServer"
+        },
+        "windowsImageOffer": {
+            "type": "string",
+            "metadata": {
+                "description": "The offer of Windows Image"
+            },
+            "defaultValue": "WindowsServer"
+        },
+        "windowsImageSKU": {
+            "type": "string",
+            "metadata": {
+                "description": "The SKU Name of Windows Image"
+            },
+            "defaultValue": "2012-R2-Datacenter"
+        },
+        "windowsImageVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "The Version of Windows Image"
+            },
+            "defaultValue": "latest"
+        },
+        "sqlDiskSize": {
+            "type": "int",
+            "metadata": {
+                "description": "The Size of SQL VM data disk. Default 2 GB"
+            },
+            "defaultValue": 2
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The VM Name"
+            }
+        },
+        "storageAccount": {
+            "type": "string",
+            "metadata": {
+                "description": "The Storage Account Name"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "metadata": {
+                "description": "The type of the Storage Account created"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The size of the AD VMs Created"
+            }
+        },
+        "subnetResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "the resource id to the subnet"
+            }
+        },
+        "sqlNicName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Nic attached to the SQL VM"
+            }
+        }
     },
+    "variables": {
+        "apiVersion": {
+            "storage": {
+                "storageAccounts": "2015-06-15"
+            },
+            "compute": {
+                "virtualMachines": "2015-06-15"
+            },
+            "network": {
+                "virtualNetworks": "2015-05-01-preview"
+            }
+        },
+        "location": "[resourceGroup().location]",
+        "vmContainerName": "vhds"
 
-    "windowsImagePublisher": {
-      "type": "string",
-      "metadata": {
-        "description": "The Publisher of Windows Image"
-      },
-      "defaultValue": "MicrosoftWindowsServer"
     },
-    "windowsImageOffer": {
-      "type": "string",
-      "metadata": {
-        "description": "The offer of Windows Image"
-      },
-      "defaultValue": "WindowsServer"
-    },
-    "windowsImageSKU": {
-      "type": "string",
-      "metadata": {
-        "description": "The SKU Name of Windows Image"
-      },
-      "defaultValue": "2012-R2-Datacenter"
-    },
-
-    "windowsImageVersion": {
-      "type": "string",
-      "metadata": {
-        "description": "The Version of Windows Image"
-      },
-      "defaultValue": "latest"
-    },
-
-    "storageAccount": {
-      "type": "string",
-      "metadata": {
-        "description": "The Storage Account Name"
-      }
-    },
-
-    "storageDomain": {
-      "type": "string",
-      "defaultValue": "azurestack.local",
-      "metadata": {
-        "description": "the storage domain"
-      }
-    },
-
-    "storageAccountType": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ],
-      "metadata": {
-        "description": "The type of the Storage Account created"
-      }
-    },
-
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the Administrator of the new VMs and Domain"
-      }
-    },
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "The password for the Administrator account of the new VMs and Domain"
-      }
-    },
-
-    "location": {
-      "type": "string",
-      "allowedValues": [
-        "West US",
-        "East US",
-        "East US 2",
-        "Central US",
-        "South Central US",
-        "North Central US",
-        "North Europe",
-        "West Europe",
-        "East Asia",
-        "Southeast Asia",
-        "Japan East",
-        "Japan West",
-        "Southeast Asia",
-        "local"
-      ],
-      "metadata": {
-        "description": "The region to deploy the resources into"
-      }
-    },
-
-    "vmSize": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_D1",
-        "Standard_DS1",
-        "Standard_D2",
-        "Standard_DS2",
-        "Standard_D3",
-        "Standard_A1",
-        "Standard_A2",
-        "Standard_A3",
-        "Standard_DS3",
-        "Standard_D4",
-        "Standard_DS4",
-        "Standard_D11",
-        "Standard_DS11",
-        "Standard_D12",
-        "Standard_DS12",
-        "Standard_D13",
-        "Standard_DS13",
-        "Standard_D14",
-        "Standard_DS14"
-      ],
-      "metadata": {
-        "description": "The size of the AD VMs Created"
-      },
-      "defaultValue": "Standard_A2"
-    },
-
-    "subnetResourceId": {
-      "type": "string",
-      "metadata": {
-        "description": "the resource id to the subnet"
-      }
-    },
-
-    "sqlDiskSize": {
-      "type": "int",
-      "metadata": {
-        "description": "The address of Primary AD"
-      },
-      "defaultValue": 10
-    }
-
-  },
-  "variables": {
-    
-    "sqlNicName": "SqlMachine-Nic-",
-    "vmContainerName": "vhds"
-    
-  },
-  "resources": [
-    {
-			"type": "Microsoft.Storage/storageAccounts",
-			"name": "[concat(parameters('storageAccount'), '0')]",
-      "apiVersion": "2015-05-01-preview",
-			"location": "[parameters('location')]",
-			"properties": {
-			"accountType": "[parameters('storageAccountType')]"
-			}
-		},
-    {
-			"name": "[concat(variables('sqlNicName'), '0')]",
-			"type": "Microsoft.Network/networkInterfaces",
-			"location": "[parameters('location')]",
-			"apiVersion": "2015-05-01-preview",
-			"dependsOn": [
-			],
-			"properties": {
-				"ipConfigurations": [
-					{
-						"name": "ipconfig1",
-						"properties": {
-							"privateIPAllocationMethod": "Dynamic",
-							"subnet": {
-								"id": "[parameters('subnetResourceId')]"
-							}
-						}
-					}
-				]
-			}
-		},
-    {
-			"apiVersion": "2015-06-15",
-			"type": "Microsoft.Compute/virtualMachines",
-			"name": "[concat(parameters('vmNamePrefix'), '0')]",
-			"location": "[parameters('location')]",
-			"dependsOn": [
-				"[resourceId('Microsoft.Storage/storageAccounts',concat(parameters('storageAccount'),  '0'))]",
-				"[resourceId('Microsoft.Network/networkInterfaces',concat(variables('sqlNicName'), '0'))]"
-			],
-			"properties": {
-				"hardwareProfile": {
-					"vmSize": "[parameters('vmSize')]"
-				},
-				"osProfile": {
-					"computerName": "[concat(parameters('vmNamePrefix'), '0')]",
-					"adminUsername": "[parameters('adminUsername')]",
-					"adminPassword": "[parameters('adminPassword')]"
-				},
-				"storageProfile": {
-					"imageReference": {
-						"publisher": "[parameters('windowsImagePublisher')]",
-						"offer": "[parameters('windowsImageOffer')]",
-						"sku": "[parameters('windowsImageSKU')]",
-						"version": "[parameters('windowsImageVersion')]"
-					},
-					"osDisk": {
-						"name": "osdisk",
-						"vhd": {
-							"uri": "[concat('http://',parameters('storageAccount'),'0', '.blob.' ,parameters('storageDomain'), '/',variables('vmContainerName'),'/', parameters('vmNamePrefix'), '0','-osdisk.vhd')]"
-						},
-						"caching": "ReadWrite",
-						"createOption": "FromImage"
-					},
-					"dataDisks": [
-						{
-							"vhd": {
-								"uri":"[concat('http://',parameters('storageAccount'),'0', '.blob.' ,parameters('storageDomain'), '/',variables('vmContainerName'),'/', parameters('vmNamePrefix'), '0','data-1.vhd')]"
-							},
-							"name":"[concat(parameters('vmNamePrefix'), '0','data-1.vhd')]",
-							"caching" : "None",
-							"createOption": "empty",
-							"diskSizeGB": "[parameters('sqlDiskSize')]",
-							"lun": 0
-						},
-						{
-							"vhd": {
-								"uri":"[concat('http://',parameters('storageAccount'), '0', '.blob.' ,parameters('storageDomain'), '/',variables('vmContainerName'),'/', parameters('vmNamePrefix'), '0','log-1.vhd')]"
-							},
-							"name":"[concat(parameters('vmNamePrefix'), '0','log-1.vhd')]",
-							"caching" : "None",
-							"createOption": "empty",
-							"diskSizeGB": "[parameters('sqlDiskSize')]",
-							"lun": 1
-						}
-					]
-				},
-				"networkProfile": {
-					"networkInterfaces": [
-						{
-							"id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('sqlNicName'), '0'))]"
-						}
-					]
-				}
-			}
-		}
-  ],
-    "outputs": {
-    }
+    "resources": [
+        {
+            "name": "[parameters('storageAccount')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "location": "[variables('location')]",
+            "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
+            "properties": {
+                "accountType": "[parameters('storageAccountType')]"
+            }
+        },
+        {
+            "name": "[parameters('sqlNicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[variables('location')]",
+            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('subnetResourceId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('vmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[variables('location')]",
+            "apiVersion": "[variables('apiVersion').compute.virtualMachines]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccount'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces',parameters('sqlNicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('windowsImagePublisher')]",
+                        "offer": "[parameters('windowsImageOffer')]",
+                        "sku": "[parameters('windowsImageSKU')]",
+                        "version": "[parameters('windowsImageVersion')]"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('vmName'), '0','-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage','storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',parameters('vmName'),'0','-data-1.vhd')]"
+                            },
+                            "name": "[concat(parameters('vmName'), '0','data-1.vhd')]",
+                            "caching": "None",
+                            "createOption": "empty",
+                            "diskSizeGB": "[parameters('sqlDiskSize')]",
+                            "lun": 0
+                        },
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage','storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('vmContainerName'),'/', parameters('vmName'), '0','log-1.vhd')]"
+                            },
+                            "name": "[concat(parameters('vmName'), '0','log-1.vhd')]",
+                            "caching": "None",
+                            "createOption": "empty",
+                            "diskSizeGB": "[parameters('sqlDiskSize')]",
+                            "lun": 1
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',parameters('sqlNicName'))]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": { }
 }

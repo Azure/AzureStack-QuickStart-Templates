@@ -57,6 +57,16 @@ Get-AzureRmResourceProvider | Select ProviderNamespace -Expand ResourceTypes | F
 
 This cmdlet can also be used for Microsoft Azure.
 
+### Validate existing deployment templates
+
+You can verify if an existing deployment template is valid for a given environment with the Test-AzureRmResourceGroupDeployment PowerShell cmdlet. After connecting to your environment in a PowerShell session run the following PowerShell cmdlet
+
+``` PowerShell
+Test-AzureRmResourceGroupDeployment -ResourceGroupName ExampleGroup -TemplateFile c:\Templates\azuredeploy.json
+```
+
+Please note that this cmdlet does not verify the resource provider specific properties for the resources within the template. This cmdlet can be used for Microsoft Azure and Microsoft Azure Stack Technical Preview.
+
 ## Guidelines for Microsoft Azure Stack deployment templates
 
 There are a couple of additional guidelines you should be aware of if you are contributing your deployment templates to the azure-quickstart-templates repository.
@@ -144,31 +154,40 @@ Storage account names need to be lower case and can't contain hyphens (-) in add
 Once uniqueString is added to ARM in a future technical preview release of Microsoft Azure Stack this sample will be updated based on uniqueString.  
 
 
-### Storage endpoint namespace
+### Public endpoint namespace
 
-If you use Storage in your template, Create a parameter to specify the storage namespace. Set the default value of the parameter to core.windows.net. Additional endpoints can be specified in the allowed value property. 
+If you use a public endpoint in your template (e.g. blob storage public endpoint), do not hardcode the namespace. Use the reference function to retrieve the namespace dynamically. This allows you to deploy the template to different public namespace environments, without the requirement to change the endpoint in the template manually.
+
+Use the following reference to specify the osDisk. Define a variable for the `storageAccountName` (as specified in the previous example), a variable for the `vmStorageAccountContainerName` and a variable for the `OSDiskName`.  
 
 ```JSON
-"parameters": {
-"storageNamespace": {
-  "type": "string",
-  "defaultValue": "core.windows.net",
-  "allowedValues": [
-    "core.windows.net",
-    "azurestack.local"
-  ],
-  "metadata": {
-    "description": "The endpoint namespace for storage"
-  }
-}
+"osDisk": {
+	"name": "osdisk",
+	"vhd": {
+		"uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+	}
 }
 ```
 
-Create a variable that concatenates the storageAccountname and the namespace to a URI.
+If you have other values in your template configured with a public namespace, change these to reflect the same reference function. For example the `storageUri` property of the virtual machine `diagnosticsProfile`.
 
 ```JSON
-"variables": {
-"diskUri":"[concat('http://',variables('storageAccountName'),'.blob.'parameters('storageEndpoint'),'/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+"diagnosticsProfile": {
+	"bootDiagnostics": {
+		"enabled": "true",
+		"storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+	}
+}
+```
+
+You can also reference an existing storage account in a different resource group.
+
+```JSON
+"osDisk": {
+	"name": "osdisk",
+	"vhd": {
+		"uri": "[concat(reference(resourceId(parameters('existingResourceGroup'), 'Microsoft.Storage/storageAccounts/', parameters('existingStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+	}
 }
 ```
 

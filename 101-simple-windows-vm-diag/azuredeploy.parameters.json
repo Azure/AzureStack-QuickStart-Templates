@@ -11,6 +11,9 @@
     "deploymentLocation": {
       "value": "local"
     },
+    "adminPassword": {
+      "value": "GEN-PASSWORD"
+    },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     }
