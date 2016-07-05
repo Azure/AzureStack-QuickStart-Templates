@@ -11,9 +11,6 @@
     "adminUsername": {
       "value": "admin123"
     },
-    "adminPassword": {
-      "value": "GEN-PASSWORD"
-    },
     "dnsNameForPublicIP": {
       "value": "mydns001"
     },
