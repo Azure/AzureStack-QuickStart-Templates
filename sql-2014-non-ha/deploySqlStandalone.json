@@ -1,143 +1,100 @@
 ﻿{
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "sqlVMNamePrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "The prefix of  VM name for Sql Cluster"
-      }
-    },
-
-    "domainName": {
-      "type": "string",
-      "metadata": {
-        "description": "The domain name"
-      }
-    },
-
-    "sqlLBName": {
-      "type": "string",
-      "metadata": {
-        "description": "the load balancer name for SQL Cluster"
-      }
-    },
-
-    "dnsServerName": {
-      "type": "string",
-      "metadata": {
-        "description": "The Dns Server Name"
-      }
-    },
-   
-    "location": {
-      "type": "string",
-      "allowedValues": [
-        "West US",
-        "East US",
-        "East US 2",
-        "Central US",
-        "South Central US",
-        "North Central US",
-        "North Europe",
-        "West Europe",
-        "East Asia",
-        "Southeast Asia",
-        "Japan East",
-        "Japan West",
-        "Southeast Asia",
-        "local"
-      ],
-      "metadata": {
-        "description": "The region to deploy the resources into"
-      }
-    },
-
-    "sqlServerServiceAccountUserName": {
-      "type": "string",
-      "metadata": {
-        "description": "The SQL Server Service account name"
-      },
-      "defaultValue": "sqlservice"
-    },
-
-    "sqlServerServiceAccountPassword":{
-			"type": "securestring",
-			"metadata": {
-				"description": "The SQL Server Service account password"
-			}
-		},
-
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the Administrator of the new VMs and Domain"
-      }
-    },
-
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "The password for the Administrator account of the new VMs and Domain"
-      }
-    },
-
-    "primaryAdIpAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The address of Primary AD"
-      },
-      "defaultValue": "10.0.0.4"
-    },
-    "assetLocation": {
-      "type": "string",
-      "metadata": {
-        "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
-      }
-    }
-  },
-  "variables": {
-    "deploySqlStandaloneModulesURL":"[concat(parameters('assetLocation'),'/deploySqlStandalone.ps1.zip')]",
-    "deploySqlStandaloneConfigurationFunction": "deploySqlStandalone.ps1\\deploySqlStandalone"
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('sqlVMNamePrefix'),'0/sqlAOPrepare')]",
-      "apiVersion": "2015-06-15",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-      ],
-      "properties": {
-        "publisher": "Microsoft.Powershell",
-        "type": "DSC",
-        "typeHandlerVersion": "2.8",
-        "autoUpgradeMinorVersion": "true",
-        "settings": {
-          "modulesUrl": "[variables('deploySqlStandaloneModulesURL')]",
-          "configurationFunction": "[variables('deploySqlStandaloneConfigurationFunction')]",
-          "properties": {
-            "domainName": "[parameters('domainName')]",
-            "primaryAdIpAddress": "[parameters('primaryAdIpAddress')]",
-            "adminCreds": {
-              "userName": "[parameters('adminUserName')]",
-              "password": "PrivateSettingsRef:adminPassword"
-            },
-            "sqlServiceCreds": {
-              "userName": "[parameters('sqlServerServiceAccountUserName')]",
-              "password": "PrivateSettingsRef:sqlServerServiceAccountPassword"
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "The VM name for Sql Cluster"
             }
-          }
         },
-        "protectedSettings": {
-          "items": {
-            "adminPassword": "[parameters('adminPassword')]",
-            "sqlServerServiceAccountPassword": "[parameters('sqlServerServiceAccountPassword')]"
-          }
+        "domainName": {
+            "type": "string",
+            "metadata": {
+                "description": "The domain name"
+            }
+        },
+        "sqlServerServiceAccountUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "The SQL Server Service account name"
+            },
+            "defaultValue": "sqlservice"
+        },
+        "sqlServerServiceAccountPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The SQL Server Service account password"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+        "primaryAdIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The address of Primary AD"
+            },
+            "defaultValue": "10.0.0.4"
+        },
+        "assetLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
+            }
         }
-      }
-    }
-  ],
+    },
+    "variables": {
+        "deploySqlStandaloneModulesURL": "[concat(parameters('assetLocation'),'/deploySqlStandalone.ps1.zip')]",
+        "deploySqlStandaloneConfigurationFunction": "deploySqlStandalone.ps1\\deploySqlStandalone"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('sqlVMName'),'/sqlAOPrepare')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.8",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "modulesUrl": "[variables('deploySqlStandaloneModulesURL')]",
+                    "configurationFunction": "[variables('deploySqlStandaloneConfigurationFunction')]",
+                    "properties": {
+                        "domainName": "[parameters('domainName')]",
+                        "primaryAdIpAddress": "[parameters('primaryAdIpAddress')]",
+                        "adminCreds": {
+                            "userName": "[parameters('adminUserName')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        },
+                        "sqlServiceCreds": {
+                            "userName": "[parameters('sqlServerServiceAccountUserName')]",
+                            "password": "PrivateSettingsRef:sqlServerServiceAccountPassword"
+                        }
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]",
+                        "sqlServerServiceAccountPassword": "[parameters('sqlServerServiceAccountPassword')]"
+                    }
+                }
+            }
+        }
+    ],
     "outputs": {
     }
 }

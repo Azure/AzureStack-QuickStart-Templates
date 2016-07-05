@@ -2,27 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "newStorageAccountName": {
-      "value": "myStorageAccount"
-    },
-    "vmName": {
-        "value": "myVM001"
-    },
-    "blobStorageEndpoint": {
-      "value": "blob.azurestack.local"
-    },
-    "deploymentLocation": {
-      "value": "local"
-    },
-    "adminUsername": {
-      "value": "admin123"
-    },
-    "adminPassword": {
-      "value": "ADmin123_!"
-    },
-    "dnsNameForPublicIP": {
-      "value": "mydns001"
-    },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     }
