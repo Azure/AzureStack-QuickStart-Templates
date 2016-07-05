@@ -2,17 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "blobStorageEndpoint": {
-      "type": "string",
-      "defaultValue": "blob.azurestack.local",
-      "allowedValues": [
-        "blob.azurestack.local",
-        "blob.core.windows.net"
-      ],
-      "metadata": {
-        "description": "Blob storage endpoint"
-      }
-    },
     "storageAccountNamePrefix": {
       "type": "string",
       "metadata": {
@@ -212,7 +201,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('storage').storageAccounts.name,'.', parameters('blobStorageEndpoint'), '/', variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), variables('apiVersion').storage.storageAccounts).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -228,7 +217,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('storage').storageAccounts.name,'.', parameters('blobStorageEndpoint'))]"
+            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), variables('apiVersion').storage.storageAccounts).primaryEndpoints.blob)]"
           }
         }
       },
