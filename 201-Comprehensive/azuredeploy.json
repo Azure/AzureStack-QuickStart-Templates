@@ -323,28 +323,6 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/EnableWindowsFeature')]",
-            "apiVersion": "[variables('apiVersion').compute]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat(variables('vmName'), '0')]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Powershell",
-                "type": "DSC",
-                "typeHandlerVersion": "2.8",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "modulesUrl": "[variables('ModulesURL')]",
-                    "configurationFunction": "[variables('ConfigurationFunction')]",
-                    "properties": {
-                        "featureName": "[variables('WindowsFeatureName')]"
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmName'), '0','/BGInfo')]",
             "apiVersion": "[variables('apiVersion').compute]",
             "dependsOn": [
@@ -358,27 +336,6 @@
                 "typeHandlerVersion": "2.1",
                 "settings": {
                     "Properties": [ ]
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/CustomScriptExtension')]",
-            "apiVersion": "[variables('apiVersion').compute]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'), '0','/extensions/BGInfo')]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.4",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "fileUris": [
-                        "[variables('scriptFile')]"
-                    ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFileName'), ' ', variables('WindowsFeatureName'))]"
                 }
             }
         }
