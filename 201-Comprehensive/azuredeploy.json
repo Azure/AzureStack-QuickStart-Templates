@@ -326,7 +326,7 @@
             "name": "[concat(variables('vmName'), '0','/BGInfo')]",
             "apiVersion": "[variables('apiVersion').compute]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'), '0','/extensions/EnableWindowsFeature')]"
+                "[concat(variables('vmName'), '0')]"
             ],
             "location": "[resourceGroup().location]",
             "properties": {
