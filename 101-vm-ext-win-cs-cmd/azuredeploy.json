@@ -6,7 +6,8 @@
       "type": "string",
       "metadata": {
         "description": "Name of the existing VM to apply the custom script to"
-      }
+      },
+      "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]"
     }
   },
   "variables": {
