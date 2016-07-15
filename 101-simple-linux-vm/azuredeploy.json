@@ -13,7 +13,8 @@
             "type": "securestring",
             "metadata": {
                 "description": "Password for the Virtual Machine."
-            }
+            },
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
         },
         "ubuntuOSVersion": {
             "type": "string",
