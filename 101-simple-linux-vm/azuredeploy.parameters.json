@@ -5,10 +5,6 @@
         "adminUsername": {
             "value": "localadmin"
         },
-
-        "adminPassword": {
-            "value": "GEN-PASSWORD"
-        },
         "ubuntuOSVersion": {
             "value": "15.10"
         }
