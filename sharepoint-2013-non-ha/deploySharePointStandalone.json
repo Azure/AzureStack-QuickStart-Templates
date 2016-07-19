@@ -65,6 +65,13 @@
                 "description": "Direct download link for the SharePoint 2013 SP1 trial ISO"
             }
         },
+        "primaryAdIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The address of Primary AD"
+            },
+            "defaultValue": "10.0.0.4"
+        },
         "assetLocation": {
             "type": "string",
             "metadata": {
@@ -94,6 +101,7 @@
                     "ConfigurationFunction": "[variables('deploySPStandaloneConfigurationFunction')]",
                     "Properties": {
                         "DomainName": "[parameters('domainName')]",
+                        "primaryAdIpAddress": "[parameters('primaryAdIpAddress')]",
                         "AdminCreds": {
                             "UserName": "[parameters('adminUserName')]",
                             "Password": "PrivateSettingsRef:AdminPassword"

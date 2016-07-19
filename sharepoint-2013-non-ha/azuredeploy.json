@@ -29,6 +29,13 @@
                 "description": "The password for the Administrator account of the new VMs and Domain"
             }
         },
+        "sqlInstallationISOUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The Uri to the SQL Server installation ISO. E.g http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+            },
+            "defaultValue": "http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+        },
         "sharepoint2013SP1DownloadLink": {
             "type": "string",
             "metadata": {
@@ -48,9 +55,9 @@
         "adVMSize": "Standard_A1",
         "sqlVMSize": "Standard_A2",
         "spVMSize": "Standard_A3",
-        "spassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha",
-        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
-        "sqlAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
+        "spassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/sharepoint-2013-non-ha",
+        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/ad-non-ha",
+        "sqlAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/sql-2014-non-ha",
         "location": "[resourceGroup().location]",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
@@ -58,8 +65,8 @@
         "sqlServerServiceAccountPassword": "[parameters('adminPassword')]",
         "sharePointFarmAccountPassword": "[parameters('adminPassword')]",
         "sharePointFarmPassphrasePassword": "[parameters('adminPassword')]",
-        "dnsPrefix": "[concat('SPADDNS',resourceGroup().name)]",
-        "spdnsPrefix": "[concat('SPDNS',resourceGroup().name)]",
+        "dnsPrefix": "[tolower(concat(resourceGroup().name, 'dc'))]",
+        "spdnsPrefix": "[tolower(concat(resourceGroup().name,'sp'))]",
         "staticSubnetName": "[concat('SPSubNet',resourceGroup().name)]",
         "virtualNetworkName": "[concat('SPVnet',resourceGroup().name)]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -108,7 +115,6 @@
         "rdpPort": 3389,
         "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-        "azureStackDNSIP": "192.168.100.2",
         "nsgName": "[concat('SPNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
         "splbFE": "SPLBFE1",
@@ -196,12 +202,7 @@
                             }
                         }
                     }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": [
-                        "[variables('azureStackDNSIP')]"
-                    ]
-                }
+                ]
             }
         },
         {
@@ -551,8 +552,7 @@
                     },
                     "dnsServerAddress": {
                         "value": [
-                            "[variables('primaryAdIpAddress')]",
-                            "[variables('azureStackDNSIP')]"
+                            "[variables('primaryAdIpAddress')]"
                         ]
                     }
                 }
@@ -578,6 +578,9 @@
                     },
                     "domainName": {
                         "value": "[parameters('domainName')]"
+                    },
+                    "sqlInstallationISOUri": {
+                        "value": "[parameters('sqlInstallationISOUri')]"
                     },
                     "sqlServerServiceAccountUserName": {
                         "value": "[parameters('sqlServerServiceAccountUserName')]"
@@ -677,6 +680,9 @@
                     },
                     "sharepoint2013SP1SourceDLLink": {
                         "value": "[parameters('sharepoint2013SP1DownloadLink')]"
+                    },
+                    "primaryAdIpAddress": {
+                        "value": "[variables('primaryAdIpAddress')]"
                     }
                 }
             }

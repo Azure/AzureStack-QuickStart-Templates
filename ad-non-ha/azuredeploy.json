@@ -41,16 +41,15 @@
                 "networkSecurityGroups": "2015-05-01-preview"
             }
         },
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/ad-non-ha",
         "adVMSize": "Standard_A1",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
         "primaryAdIpAddress": "10.0.0.4",
         "storageAccountType": "Standard_LRS",
-        "azureStackDNSIPAddress": "192.168.100.2",
         "adTemplateURL": "[concat(variables('assetLocation'),'/adVmTemplate.json')]",
         "adStorageName": "[tolower(concat('adsa',resourceGroup().name))]",
-        "dnsPrefix": "[concat('ADDNS',resourceGroup().name)]",
+        "dnsPrefix": "[tolower(concat(resourceGroup().name,'dc'))]",
         "adVmDeployment": "CreateADVMs",
         "adVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment'))]",
         "adPDCVMName": "[concat('AD',resourceGroup().name)]",
@@ -132,13 +131,7 @@
                         "id": "[variables('nsgID')]"
                     }
                 },
-                "subnets": "[variables('subnets')]",
-                "dhcpOptions": {
-                    "dnsServers": [
-                      "[variables('primaryAdIpAddress')]",
-                      "[variables('azureStackDNSIPAddress')]"
-                    ]
-                }
+                "subnets": "[variables('subnets')]"
             }
         },
         {
@@ -294,8 +287,7 @@
                         "value": "[variables('subnets')]"
                     },
                     "dnsServerAddress": {
-                        "value": [ "[variables('primaryAdIpAddress')]",
-                      "[variables('azureStackDNSIPAddress')]" ]
+                        "value": [ "[variables('primaryAdIpAddress')]" ]
                     }
                 }
             }
