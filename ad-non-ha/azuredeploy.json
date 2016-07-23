@@ -14,13 +14,14 @@
             "metadata": {
                 "description": "The name of the Administrator of the new VMs and Domain"
             },
-            "defaultValue": "lcladmin"
+            "defaultValue": "vmadmin"
         },
         "adminPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs and Domain"
-            }
+            },
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         }
     },
     "variables": {
@@ -35,10 +36,10 @@
                 "deployments": "2015-01-01"
             },
             "network": {
-                "virtualNetworks": "2015-05-01-preview",
-                "loadBalancers": "2015-05-01-preview",
-                "publicIPAddresses": "2015-05-01-preview",
-                "networkSecurityGroups": "2015-05-01-preview"
+                "virtualNetworks": "2015-06-15",
+                "loadBalancers": "2015-06-15",
+                "publicIPAddresses": "2015-06-15",
+                "networkSecurityGroups": "2015-06-15"
             }
         },
         "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/ad-non-ha",
