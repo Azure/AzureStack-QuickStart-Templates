@@ -68,7 +68,7 @@
             "storage": "2015-06-15",
             "compute": "2015-06-15"
         },
-        "NICPrefix": "[tolower(concat('vmnic', resourceGroup().name))]",
+        "NICPrefix": "[tolower(concat('vmni1c', resourceGroup().name))]",
         "vmContainerName": "vhds",
         "WindowsFeatureName": "Web-Server",
         "ModulesURL": "[concat(variables('assetLocation'),'/windowsFeature.zip')]",
