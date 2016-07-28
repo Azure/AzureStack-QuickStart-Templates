@@ -3,25 +3,37 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adminUsername": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The name of the Administrator of the new VMs"
             },
-            "defaultValue": "vmadmin"
+            "defaultValue": "lcladmin"
         },
         "adminPassword": {
-            "type": "SecureString",
+            "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
             },
-            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+            "defaultValue": "[substring(resourcegroup().id,15,36)]"
+        },
+        "dnsServer": {
+            "type": "string",
+            "metadata": {
+                "description": "The DNS server IP address for VM internet connectivity"
+            },
+            "defaultValue": "192.168.200.3", 
+            "allowedValues": [ 
+                    "192.168.200.3", 
+                    "192.168.100.2", 
+                    "" 
+            ] 
         }
     },
     "variables": {
         "storageAccountType": "Standard_LRS",
-        "vmName": "[tolower(concat('vm', resourceGroup().name))]",
+        "vmName": "[concat('CVM', resourceGroup().name)]",
         "VMSize": "Standard_A2",
-        "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
+        "dnsPrefix": "[concat('CVM', resourceGroup().name)]",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
         "primaryAdIpAddress": "10.0.0.4",
@@ -31,7 +43,7 @@
         "windowsImageVersion": "latest",
         "dataDiskSize": 2,
         "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-Comprehensive",
-        "staticSubnetName": "vmstaticsubnet",
+        "staticSubnetName": "CVMStaticSubnet",
         "subnets": [
             {
                 "name": "[variables('staticSubnetName')]",
@@ -43,33 +55,36 @@
                 }
             }
         ],
-        "virtualNetworkName": "[tolower(concat('vmvnet',resourceGroup().name))]",
+        "virtualNetworkName": "[concat('CVMNet',resourceGroup().name)]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
         "adTemplateURL": "[concat(variables('assetLocation'),'/adVmTemplate.json')]",
-        "storageName": "[tolower(concat('vmsa', resourceGroup().name))]",
-        "publicLBName": "[tolower(concat('vmplb', resourceGroup().name))]",
-        "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
-        "lbFE": "[tolower(concat('vmlbfe',resourceGroup().name))]",
-        "lbBE": "[tolower(concat('vmlbbe',resourceGroup().name))]",
-        "rpdNAT": "[tolower(concat('vmrdpnat',resourceGroup().name))]",
+        "storageName": "[tolower(concat('CVMSA', resourceGroup().name))]",
+        "publicLBName": "[concat('CVMPLB', resourceGroup().name)]",
+        "publicIPAddressName": "[concat('CVMPIP',resourceGroup().name)]",
+        "lbFE": "[concat('CVMLBFE',resourceGroup().name)]",
+        "lbBE": "[concat('CVMLBBE',resourceGroup().name)]",
+        "rpdNAT": "[concat('CVMRDPNAT',resourceGroup().name)]",
         "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
         "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
         "rdpPort": 3389,
         "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "rDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-        "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
+        "nsgName": "[concat('CVMNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+        "azureStackDNSIP": "[parameters('dnsServer')]",
         "apiVersion": {
             "resources": {
                 "deployments": "2015-01-01"
             },
-            "network": "2015-06-15",
-            "storage": "2015-06-15",
+            "network": "2015-05-01-preview",
+            "storage": "2015-05-01-preview",
             "compute": "2015-06-15"
         },
-        "NICPrefix": "[tolower(concat('vmnic', resourceGroup().name))]",
+        "NICPrefix": "[concat('NIC', resourceGroup().name)]",
         "vmContainerName": "vhds",
+        "storageAccountTemplateURL": "[concat(variables('assetLocation'),'/storageAccount.json')]",
+        "StorageAccountInfoDeployment": "StorageAccountInfoDeployment",
         "WindowsFeatureName": "Web-Server",
         "ModulesURL": "[concat(variables('assetLocation'),'/windowsFeature.zip')]",
         "ConfigurationFunction": "windowsFeature.ps1\\EnalbeWindowsFeature",
@@ -78,10 +93,10 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('nsgName')]",
-            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
             "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').network]",
             "properties": {
                 "securityRules": [
                     {
@@ -101,10 +116,13 @@
             }
         },
         {
-            "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
-            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/virtualNetworks",
             "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').network]",
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -121,32 +139,37 @@
                             }
                         }
                     }
-                ]
-            },
-            "dependsOn": [
-                "[variables('nsgID')]"
-            ]
+                ],
+                "dhcpOptions": {
+                    "dnsServers": [
+                        "[variables('azureStackDNSIP')]"
+                    ]
+                }
+            }
         },
         {
-            "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('publicIPAddressName')]",
-            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/publicIPAddresses",
             "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').network]",
+            "dependsOn": [
+                "[variables('vnetID')]"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
                     "domainNameLabel": "[variables('dnsPrefix')]"
                 }
-            },
-            "dependsOn": [
-                "[variables('vnetID')]"
-            ]
+            }
         },
         {
-            "type": "Microsoft.Network/loadBalancers",
             "name": "[variables('publiclbName')]",
-            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/loadBalancers",
             "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').network]",
+            "dependsOn": [
+                "[variables('publicIPAddressName')]"
+            ],
             "properties": {
                 "frontendIPConfigurations": [
                     {
@@ -172,28 +195,29 @@
                         }
                     }
                 ]
-            },
-            "dependsOn": [
-                "[variables('publicIPAddressName')]"
-            ]
+            }
         },
         {
-            "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageName')]",
-            "apiVersion": "[variables('apiVersion').storage]",
+            "type": "Microsoft.Storage/storageAccounts",
             "location": "[resourceGroup().location]",
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
-            },
+            "apiVersion": "[variables('apiVersion').storage]",
             "dependsOn": [
                 "[variables('publiclbName')]"
-            ]
+            ],
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
         },
         {
-            "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('NICPrefix'), '0')]",
-            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
             "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('vnetID')]",
+                "[variables('publiclbName')]"
+            ],
+            "apiVersion": "[variables('apiVersion').network]",
             "properties": {
                 "ipConfigurations": [
                     {
@@ -211,17 +235,17 @@
                         }
                     }
                 ]
-            },
+            }
+        },
+        {
+            "name": "[concat(variables('NICPrefix'), '1')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('vnetID')]",
                 "[variables('publiclbName')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('NICPrefix'), '1')]",
+            ],
             "apiVersion": "[variables('apiVersion').network]",
-            "location": "[resourceGroup().location]",
             "properties": {
                 "ipConfigurations": [
                     {
@@ -234,17 +258,38 @@
                         }
                     }
                 ]
-            },
-            "dependsOn": [
-                "[variables('vnetID')]",
-                "[variables('publiclbName')]"
-            ]
+            }
         },
         {
-            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('StorageAccountInfoDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',variables('storageName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storageAccountTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageName')]"
+                    }
+                }
+            }
+        },
+        {
             "name": "[concat(variables('vmName'), '0')]",
-            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
             "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',variables('storageName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '1'))]"
+            ],
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "[variables('vmSize')]"
@@ -272,7 +317,7 @@
                     "dataDisks": [
                         {
                             "vhd": {
-                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',  variables('vmName'), '0','data-1.vhd')]"
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmName'), '0','data-1.vhd')]"
                             },
                             "name": "[concat(variables('vmName'), '0','-data-disk1')]",
                             "createOption": "empty",
@@ -292,17 +337,16 @@
                         }
                     ]
                 }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]",
-                "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '1'))]"
-            ]
+            }
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/DSCExtension-EnableWindowsFeature')]",
+            "name": "[concat(variables('vmName'), '0','/EnableWindowsFeature')]",
             "apiVersion": "[variables('apiVersion').compute]",
             "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat(variables('vmName'), '0')]"
+            ],
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",
@@ -315,15 +359,15 @@
                         "featureName": "[variables('WindowsFeatureName')]"
                     }
                 }
-            },
-            "dependsOn": [
-                "[concat(variables('vmName'), '0')]"
-            ]
+            }
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/BGInfoExtension')]",
+            "name": "[concat(variables('vmName'), '0','/BGInfo')]",
             "apiVersion": "[variables('apiVersion').compute]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'), '0','/extensions/EnableWindowsFeature')]"
+            ],
             "location": "[resourceGroup().location]",
             "properties": {
                 "publisher": "Microsoft.Compute",
@@ -333,16 +377,16 @@
                 "settings": {
                     "Properties": [ ]
                 }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'), '0','/extensions/DSCExtension-EnableWindowsFeature')]"
-            ]
+            }
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/CustomScriptExtension-VerifyWindowsFeature')]",
+            "name": "[concat(variables('vmName'), '0','/CustomScriptExtension')]",
             "apiVersion": "[variables('apiVersion').compute]",
             "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'), '0','/extensions/BGInfo')]"
+            ],
             "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
@@ -354,12 +398,8 @@
                     ],
                     "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFileName'), ' ', variables('WindowsFeatureName'))]"
                 }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'), '0','/extensions/BGInfoExtension')]"
-            ]
+            }
         }
     ],
     "outputs": { }
 }
-
