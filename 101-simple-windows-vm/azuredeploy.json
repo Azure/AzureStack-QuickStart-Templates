@@ -6,36 +6,32 @@
             "type": "string",
             "metadata": {
                 "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
-            },
-             "defaultValue": "[replace(replace(tolower(concat('sa',resourceGroup().name)), '-', ''), '.','')]"
+            }
         },
         "vmName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the VM."
-            },
-            "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]"
+            }
         },
         "adminUsername": {
             "type": "string",
             "metadata": {
                 "description": "Username for the Virtual Machine."
-            },
-            "defaultValue": "vmadmin1"
+            }
         },
         "adminPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
             },
-            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
+            "defaultValue": "[substring(resourcegroup().id,15,36)]"
         },
         "dnsNameForPublicIP": {
             "type": "string",
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-            },
-            "defaultValue": "[replace(replace(tolower(concat('dns',resourceGroup().name)), '-', ''), '.','')]"
+            }
         },
         "windowsOSVersion": {
             "type": "string",
@@ -55,19 +51,19 @@
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "OSDiskName": "osdisk",
-        "nicName": "[replace(replace(tolower(concat('nic',resourceGroup().name)), '-', ''), '.','')]",
+        "nicName": "myVnic",
         "addressPrefix": "10.0.0.0/24",
-        "subnetName": "[replace(replace(tolower(concat('subnet',resourceGroup().name)), '-', ''), '.','')]",
+        "subnetName": "mySubnet",
         "subnetPrefix": "10.0.0.0/24",
         "storageAccountType": "Standard_LRS",
-        "publicIPAddressName": "[replace(replace(tolower(concat('pip',resourceGroup().name)), '-', ''), '.','')]",
+        "publicIPAddressName": "myPublicIP",
         "publicIPAddressType": "Dynamic",
         "vmStorageAccountContainerName": "vhds",
         "vmSize": "Standard_A1",
-        "virtualNetworkName": "[replace(replace(tolower(concat('vnet',resourceGroup().name)), '-', ''), '.','')]",
+        "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[replace(replace(tolower(concat('nsg',resourceGroup().name)), '-', ''), '.','')]"
+        "networkSecurityGroupName": "mySG"
     },
     "resources": [
         {
@@ -141,7 +137,10 @@
                             }
                         }
                     }
-                ]
+                ],
+                "dhcpOptions": {
+                    "dnsServers": ["192.168.100.2"]
+                }
             }
         },
         {
@@ -154,6 +153,9 @@
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
             ],
             "properties": {
+                "dnsSettings": {
+                    "dnsServers": ["192.168.100.2"]
+                },
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
