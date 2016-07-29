@@ -410,92 +410,6 @@
             }
         },
         {
-            "name": "[variables('sqlClusterVmDeployment')]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
-            "dependsOn": [
-                "[variables('adVmDeploymentID')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('sqlClusterTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "adminUsername": {
-                        "value": "[parameters('adminUsername')]"
-                    },
-                    "adminPassword": {
-                        "value": "[parameters('adminPassword')]"
-                    },
-                    "storageAccount": {
-                        "value": "[variables('sqlStorageName')]"
-                    },
-                    "subnetResourceId": {
-                        "value": "[variables('staticSubnetID')]"
-                    },
-                    "vmName": {
-                        "value": "[variables('sqlClusterVmName')]"
-                    },
-                    "storageAccountType": {
-                        "value": "[variables('storageAccountType')]"
-                    },
-                    "vmSize": {
-                        "value": "[variables('sqlVMSize')]"
-                    },
-                    "sqlNICName": {
-                        "value": "[variables('sqlNicName')]"
-                    }
-                }
-            }
-        },
-        {
-            "name": "[variables('spVmDeployment')]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
-            "dependsOn": [
-                "[variables('spPublicLBID')]",
-                "[variables('adVmDeploymentID')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('spTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "vmName": {
-                        "value": "[variables('spVmName')]"
-                    },
-                    "storageAccount": {
-                        "value": "[variables('spStorageName')]"
-                    },
-                    "storageAccountType": {
-                        "value": "[variables('storageAccountType')]"
-                    },
-                    "adminUsername": {
-                        "value": "[parameters('adminUsername')]"
-                    },
-                    "adminPassword": {
-                        "value": "[parameters('adminPassword')]"
-                    },
-                    "vmSize": {
-                        "value": "[variables('spVMSize')]"
-                    },
-                    "subnetResourceId": {
-                        "value": "[variables('staticSubnetID')]"
-                    },
-                    "rdpNATRuleID": {
-                        "value": "[variables('spRDPNATRuleID')]"
-                    },
-                    "lbBEPool": {
-                        "value": "[variables('sppublicBEAddressPoolID')]"
-                    }
-                }
-            }
-        },
-        {
             "name": "[variables('deployPrimaryAd')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
@@ -559,12 +473,97 @@
             }
         },
         {
+            "name": "[variables('sqlClusterVmDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[variables('updateVNetDNS1Id')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('sqlClusterTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('sqlStorageName')]"
+                    },
+                    "subnetResourceId": {
+                        "value": "[variables('staticSubnetID')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('sqlClusterVmName')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[variables('storageAccountType')]"
+                    },
+                    "vmSize": {
+                        "value": "[variables('sqlVMSize')]"
+                    },
+                    "sqlNICName": {
+                        "value": "[variables('sqlNicName')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('spVmDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[variables('spPublicLBID')]",
+                "[variables('updateVNetDNS1Id')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('spTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[variables('spVmName')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('spStorageName')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[variables('storageAccountType')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[variables('spVMSize')]"
+                    },
+                    "subnetResourceId": {
+                        "value": "[variables('staticSubnetID')]"
+                    },
+                    "rdpNATRuleID": {
+                        "value": "[variables('spRDPNATRuleID')]"
+                    },
+                    "lbBEPool": {
+                        "value": "[variables('sppublicBEAddressPoolID')]"
+                    }
+                }
+            }
+        },
+        {
             "name": "[variables('deploySqlStandalone')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
             "dependsOn": [
-                "[variables('sqlClusterVmDeploymentID')]",
-                "[variables('updateVNetDNS1Id')]"
+                "[variables('sqlClusterVmDeploymentID')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -603,6 +602,7 @@
                 }
             }
         },
+        
         {
             "name": "[variables('deploySPStandalone')]",
             "type": "Microsoft.Resources/deployments",
