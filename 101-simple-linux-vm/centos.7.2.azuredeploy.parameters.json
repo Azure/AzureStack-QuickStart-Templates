@@ -11,15 +11,15 @@
         },
 
         "imagePublisher": {
-            "value": "Canonical"
+            "value": "OpenLogic"
         },
 
         "imageOffer": {
-            "value": "UbuntuServer"
+            "value": "CentOS"
         },
 
         "imageSku": {
-            "value": "15.10"
+            "value": "7.2"
         }
     }
 }

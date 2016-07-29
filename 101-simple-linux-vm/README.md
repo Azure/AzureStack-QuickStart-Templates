@@ -1,9 +1,9 @@
-# [IaaS Linux VM Comprehensive Resources]
+# [IaaS Linux VM]
 
 <a href="http://armviz.io/#/?load=https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/101-simple-linux-vm/azuredeploy.json" target="_blank">
   <img src="http://armviz.io/visualizebutton.png"/>
 </a>
-This template deploys a Linux VM and also uses customscript, VMLinuxAccess and Docker Extensions
+This template deploys a simple Linux VM such as ubuntu 15.10, sles 12 SP1 , CentOS 67
 
 `Tags: [Tag1, Tag2, Tag3]`
 
@@ -13,12 +13,14 @@ This template deploys a Linux VM and also uses customscript, VMLinuxAccess and D
 
 ## Prerequisites
 
-Follow the below links to create an Ubuntu Image and upload the same to Azure Stack's Platform Image Repository
-1. https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-create-upload-ubuntu/ 
+Follow the below links to create a Linux Image and upload the same to Azure Stack's Platform Image Repository
+1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/ 
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
 
 ## Deployment steps
-You can either click the "deploy to Azure" button at the beginning of this document or deploy the solution from PowerShell with the following PowerShell script or deploy to azure stack portal using custom deployment.
+1. Deploy to azure stack portal using custom deployment.
+2. Deploy through Visual Studio using azuredeploy.json and azuredeploy.parameters.json. Note: for other linux versions deployment , rename the *.azuredeploy.parameters.json to the default name before deploying via VisualStudio
+2. Deploy the solution from PowerShell with the following PowerShell script 
 
 ``` PowerShell
 ## Specify your AzureAD Tenant in a variable. 
@@ -55,17 +57,21 @@ $myNum = "001" #Modify this per deployment
 $RGName = "myRG$myNum"
 $myLocation = "local"
 
+$templateFile= "azuredeploy.json"
+$templateParameterFile= "azuredeploy.parameters.json"
+# For Ubuntu 14.04 $templateParameterFile= "ubuntu.14.04.azuredeploy.parameters.json"
+# For Suse $templateParameterFile= "suse.12.sp1.azuredeploy.parameters.json"
+# For CentOS 6.7 $templateParameterFile= "centos.6.7.azuredeploy.parameters.json"
+# For CentOS 7.2 $templateParameterFile= "centos.7.2.azuredeploy.parameters.json"
+
 # Create Resource Group for Template Deployment
 New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 
 # Deploy Template 
 New-AzureRmResourceGroupDeployment `
-    -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
-    -TemplateFile "azuredeploy.json" `
-    -adminUsername "admin" `
-    -adminPassword ("GEN-PASSWORD" | ConvertTo-SecureString -AsPlainText -Force)`
-    -ubuntuOSVersion "15.10" `
+    -TemplateFile $templateFile `
+	-TemplateParameterFile $templateParameterFile
 ```
 
 

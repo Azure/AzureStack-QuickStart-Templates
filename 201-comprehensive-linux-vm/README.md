@@ -5,34 +5,24 @@ This template deploys a Linux VM and also uses customscript, VMLinuxAccess and D
 ## Prerequisites
 
 Follow the below links to create an Ubuntu Image and upload the same to Azure Stack's Platform Image Repository
-1. https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-create-upload-ubuntu/ 
+1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/ 
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
 
 ## Deployment steps
 Deploy the solution from PowerShell with the following PowerShell script or deploy to azure stack portal using custom deployment.
 
 ``` PowerShell
-## Specify your AzureAD Tenant in a variable. 
-# If you know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 1)
-# If you do not know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 2)
-
-# Option 1) If you know the prefix of your <prefix>.onmicrosoft.com AzureAD namespace.
-# You need to set that in the $AadTenantId varibale (e.g. contoso.onmicrosoft.com).
-    $AadTenantId = "contoso"
-
-# Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
-# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Technical Preview.
-    $AadTenant = Login-AzureRmAccount
-    $AadTenantId = $AadTenant.Context.Tenant.TenantId
-
 ## Configure the environment with the Add-AzureRmEnvironment cmdlt
-    Add-AzureRmEnvironment -Name 'Azure Stack' `
-        -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
-        -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/"`
-        -ResourceManagerEndpoint ("https://api.azurestack.local/") `
-        -GalleryEndpoint ("https://gallery.azurestack.local/") `
-        -GraphEndpoint "https://graph.windows.net/"
-
+$endptOut = Invoke-RestMethod "$("https://api.$env:USERDNSDOMAIN".ToLowerInvariant())/metadata/endpoints?api-version=1.0"
+$envName = "AzureStackCloud"
+Add-AzureRmEnvironment -Name ($envName) `
+	                -ActiveDirectoryEndpoint ($ActiveDirectoryEndpoint = $($endptOut.authentication.loginEndpoint) + $($endptOut.authentication.audiences[0]).Split("/")[-1] + "/") `
+	                -ActiveDirectoryServiceEndpointResourceId ($ActiveDirectoryServiceEndpointResourceId = $($endptOut.authentication.audiences[0])) `
+	                -ResourceManagerEndpoint ($ResourceManagerEndpoint = $("https://api.$env:USERDNSDOMAIN".ToLowerInvariant())) `
+	                -GalleryEndpoint ($GalleryEndpoint = $endptOut.galleryEndpoint) `
+	                -GraphEndpoint ($GraphEndpoint = $endptOut.graphEndpoint) `
+	               -StorageEndpointSuffix ($StorageEndpointSuffix="$($env:USERDNSDOMAIN)".ToLowerInvariant()) `
+	               -AzureKeyVaultDnsSuffix ($AzureKeyVaultDnsSuffix="vault.$($env:USERDNSDOMAIN)".ToLowerInvariant()) 
 ## Authenticate a user to the environment (you will be prompted during authentication)
     $privateEnv = Get-AzureRmEnvironment 'Azure Stack'
     $privateAzure = Add-AzureRmAccount -Environment $privateEnv -Verbose

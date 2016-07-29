@@ -11,15 +11,15 @@
         },
 
         "imagePublisher": {
-            "value": "Canonical"
+            "value": "Suse"
         },
 
         "imageOffer": {
-            "value": "UbuntuServer"
+            "value": "SlesServer"
         },
 
         "imageSku": {
-            "value": "15.10"
+            "value": "12.SP1"
         }
     }
 }
