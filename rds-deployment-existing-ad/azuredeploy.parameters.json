@@ -6,10 +6,10 @@
       "value": "GEN-PASSWORD"
     },
     "adminUsername": {
-      "value": "azureUser"
+      "value": "lcladmin"
     },
     "adDomainName": {
-      "value": "mydomain.local"
+      "value": "contoso.com"
     },
     "numberOfRdshInstances": {
       "value": 1

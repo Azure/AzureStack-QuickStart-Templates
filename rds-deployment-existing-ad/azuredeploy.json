@@ -53,18 +53,43 @@
     "vnetAddressRange": "10.0.0.0/16",
     "subnetAddressRange": "10.0.0.0/24",
     "dnsServerPrivateIp": "10.0.0.4",
-    "DNSIP": "192.168.100.2",
     "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('adVnetName')),'/subnets/',variables('adSubnetName'))]",
     "publicIpRef": "publicIp",
+    "brokerIpRef": "brokerpublicIp",
+    "gatewayIpRef": "gatewaypublicIp",
     "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/rds-deployment/",
     "apiVersion": "2015-06-15",
-    "apiVersionNRP": "2015-05-01-preview"
+    "apiVersionNRP": "2015-06-15"
   },
     "resources": [
-        {
+      {
+        "apiVersion": "[variables('apiVersionNRP')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIpRef')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publicIPAllocationMethod": "Dynamic",
+          "dnsSettings": {
+            "domainNameLabel": "[variables('dnsLabelPrefix')]"
+          }
+        }
+      },
+      {
             "apiVersion": "[variables('apiVersionNRP')]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIpRef')]",
+            "name": "[variables('gatewayIpRef')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsLabelPrefix')]"
+                }
+            }
+        },
+      {
+            "apiVersion": "[variables('apiVersionNRP')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('brokerIpRef')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -166,6 +191,9 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayIpRef'))]"
+                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     },
@@ -187,8 +215,7 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
@@ -207,6 +234,9 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('brokerIpRef'))]"
+                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     }
@@ -215,8 +245,7 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
@@ -247,8 +276,7 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }

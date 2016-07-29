@@ -29,6 +29,13 @@
                 "description": "The password for the Administrator account of the new VMs and Domain"
             }
         },
+        "sqlInstallationISOUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The Uri to the SQL Server installation ISO. E.g http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+            },
+            "defaultValue": "http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+        },
         "sharepoint2013SP1DownloadLink": {
             "type": "string",
             "metadata": {
@@ -48,9 +55,9 @@
         "adVMSize": "Standard_A1",
         "sqlVMSize": "Standard_A2",
         "spVMSize": "Standard_A3",
-        "spassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha",
-        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
-        "sqlAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
+        "spassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/sharepoint-2013-non-ha",
+        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/ad-non-ha",
+        "sqlAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/sql-2014-non-ha",
         "location": "[resourceGroup().location]",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
@@ -58,8 +65,8 @@
         "sqlServerServiceAccountPassword": "[parameters('adminPassword')]",
         "sharePointFarmAccountPassword": "[parameters('adminPassword')]",
         "sharePointFarmPassphrasePassword": "[parameters('adminPassword')]",
-        "dnsPrefix": "[concat('SPADDNS',resourceGroup().name)]",
-        "spdnsPrefix": "[concat('SPDNS',resourceGroup().name)]",
+        "dnsPrefix": "[tolower(concat(resourceGroup().name, 'dc'))]",
+        "spdnsPrefix": "[tolower(concat(resourceGroup().name,'sp'))]",
         "staticSubnetName": "[concat('SPSubNet',resourceGroup().name)]",
         "virtualNetworkName": "[concat('SPVnet',resourceGroup().name)]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -108,7 +115,6 @@
         "rdpPort": 3389,
         "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-        "azureStackDNSIP": "192.168.100.2",
         "nsgName": "[concat('SPNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
         "splbFE": "SPLBFE1",
@@ -196,12 +202,7 @@
                             }
                         }
                     }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": [
-                        "[variables('azureStackDNSIP')]"
-                    ]
-                }
+                ]
             }
         },
         {
@@ -409,92 +410,6 @@
             }
         },
         {
-            "name": "[variables('sqlClusterVmDeployment')]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
-            "dependsOn": [
-                "[variables('adVmDeploymentID')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('sqlClusterTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "adminUsername": {
-                        "value": "[parameters('adminUsername')]"
-                    },
-                    "adminPassword": {
-                        "value": "[parameters('adminPassword')]"
-                    },
-                    "storageAccount": {
-                        "value": "[variables('sqlStorageName')]"
-                    },
-                    "subnetResourceId": {
-                        "value": "[variables('staticSubnetID')]"
-                    },
-                    "vmName": {
-                        "value": "[variables('sqlClusterVmName')]"
-                    },
-                    "storageAccountType": {
-                        "value": "[variables('storageAccountType')]"
-                    },
-                    "vmSize": {
-                        "value": "[variables('sqlVMSize')]"
-                    },
-                    "sqlNICName": {
-                        "value": "[variables('sqlNicName')]"
-                    }
-                }
-            }
-        },
-        {
-            "name": "[variables('spVmDeployment')]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
-            "dependsOn": [
-                "[variables('spPublicLBID')]",
-                "[variables('adVmDeploymentID')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('spTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "vmName": {
-                        "value": "[variables('spVmName')]"
-                    },
-                    "storageAccount": {
-                        "value": "[variables('spStorageName')]"
-                    },
-                    "storageAccountType": {
-                        "value": "[variables('storageAccountType')]"
-                    },
-                    "adminUsername": {
-                        "value": "[parameters('adminUsername')]"
-                    },
-                    "adminPassword": {
-                        "value": "[parameters('adminPassword')]"
-                    },
-                    "vmSize": {
-                        "value": "[variables('spVMSize')]"
-                    },
-                    "subnetResourceId": {
-                        "value": "[variables('staticSubnetID')]"
-                    },
-                    "rdpNATRuleID": {
-                        "value": "[variables('spRDPNATRuleID')]"
-                    },
-                    "lbBEPool": {
-                        "value": "[variables('sppublicBEAddressPoolID')]"
-                    }
-                }
-            }
-        },
-        {
             "name": "[variables('deployPrimaryAd')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
@@ -551,9 +466,94 @@
                     },
                     "dnsServerAddress": {
                         "value": [
-                            "[variables('primaryAdIpAddress')]",
-                            "[variables('azureStackDNSIP')]"
+                            "[variables('primaryAdIpAddress')]"
                         ]
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('sqlClusterVmDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[variables('updateVNetDNS1Id')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('sqlClusterTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('sqlStorageName')]"
+                    },
+                    "subnetResourceId": {
+                        "value": "[variables('staticSubnetID')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('sqlClusterVmName')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[variables('storageAccountType')]"
+                    },
+                    "vmSize": {
+                        "value": "[variables('sqlVMSize')]"
+                    },
+                    "sqlNICName": {
+                        "value": "[variables('sqlNicName')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('spVmDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[variables('spPublicLBID')]",
+                "[variables('updateVNetDNS1Id')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('spTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[variables('spVmName')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('spStorageName')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[variables('storageAccountType')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[variables('spVMSize')]"
+                    },
+                    "subnetResourceId": {
+                        "value": "[variables('staticSubnetID')]"
+                    },
+                    "rdpNATRuleID": {
+                        "value": "[variables('spRDPNATRuleID')]"
+                    },
+                    "lbBEPool": {
+                        "value": "[variables('sppublicBEAddressPoolID')]"
                     }
                 }
             }
@@ -563,8 +563,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
             "dependsOn": [
-                "[variables('sqlClusterVmDeploymentID')]",
-                "[variables('updateVNetDNS1Id')]"
+                "[variables('sqlClusterVmDeploymentID')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -578,6 +577,9 @@
                     },
                     "domainName": {
                         "value": "[parameters('domainName')]"
+                    },
+                    "sqlInstallationISOUri": {
+                        "value": "[parameters('sqlInstallationISOUri')]"
                     },
                     "sqlServerServiceAccountUserName": {
                         "value": "[parameters('sqlServerServiceAccountUserName')]"
@@ -600,6 +602,7 @@
                 }
             }
         },
+        
         {
             "name": "[variables('deploySPStandalone')]",
             "type": "Microsoft.Resources/deployments",
@@ -677,6 +680,9 @@
                     },
                     "sharepoint2013SP1SourceDLLink": {
                         "value": "[parameters('sharepoint2013SP1DownloadLink')]"
+                    },
+                    "primaryAdIpAddress": {
+                        "value": "[variables('primaryAdIpAddress')]"
                     }
                 }
             }

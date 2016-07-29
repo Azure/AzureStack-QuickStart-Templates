@@ -1,0 +1,36 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "value": "myvm"
+        },
+        "adminUsername": {
+            "value": "Administrator"
+        },
+        "adminPassword": {
+            "value": "GEN-PASSWORD"
+        },
+        "dcVNetName": {
+            "value": "contosovnet"
+        },
+        "dcSubnetName": {
+            "value": "contososubnet"
+        },
+        "domainToJoin": {
+            "value": "contoso.com"
+        },
+        "ouToJoin": {
+            "value": ""
+        },
+        "domainJoinOptions": { 
+            "value": 3
+        },
+        "domainUserName": {
+            "value": "Administrator"
+        },
+        "domainPassword": { 
+            "value": "GEN-PASSWORD"
+        }
+    }
+}
