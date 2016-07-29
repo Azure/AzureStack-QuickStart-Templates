@@ -32,7 +32,6 @@ set -x
 AZUREUSER=${9}
 POSTINSTALLSCRIPTURI=${10}
 BASESUBNET=${11}
-PrivateIP=${12}
 HOMEDIR="/home/$AZUREUSER"
 VMNAME=`hostname`
 VMNUMBER=`echo $VMNAME | sed 's/.*[^0-9]\([0-9]\+\)*$/\1/'`
@@ -47,8 +46,6 @@ echo "VMNUMBER: $VMNUMBER, VMPREFIX: $VMPREFIX"
 echo "SWARMENABLED: $SWARMENABLED, MARATHONENABLED: $MARATHONENABLED, CHRONOSENABLED: $CHRONOSENABLED"
 echo "ACCOUNTNAME: $ACCOUNTNAME"
 echo "BASESUBNET: $BASESUBNET"
-echo "adding IP to /etc/hosts"
-echo "$PrivateIP $VMNAME" >>/etc/hosts
 ###################
 # Common Functions
 ###################
@@ -57,7 +54,7 @@ ensureAzureNetwork()
   # ensure the host name is resolvable
   hostResolveHealthy=1
   for i in {1..120}; do
-   getent hosts $VMNAME
+   host $VMNAME
    if [ $? -eq 0 ]
     then
       # hostname has been found continue
@@ -206,7 +203,7 @@ zkconfig()
 ######################
 # resolve self in DNS
 ######################
-#echo "$HOSTADDR $VMNAME" | sudo tee -a /etc/hosts
+echo "$HOSTADDR $VMNAME" | sudo tee -a /etc/hosts
 
 ################
 # Install Docker
@@ -502,7 +499,7 @@ installMesosDCOSCLI()
   sudo pip install virtualenv
   sudo -i -u $AZUREUSER mkdir $HOMEDIR/dcos
   for i in {1..10}; do
-    wget --tries 4 --retry-connrefused --waitretry=15 -qO- https://raw.githubusercontent.com/mesosphere/dcos-cli/master/bin/install/install-optout-dcos-cli.sh | sudo -i -u $AZUREUSER /bin/bash -s $HOMEDIR/dcos/. http://leader.mesos --add-path yes
+    wget --tries 4 --retry-connrefused --waitretry=15 -qO- https://raw.githubusercontent.com/mesosphere/dcos-cli/master/bin/install/install-optout-dcos-cli.sh | sudo -i -u $AZUREUSER /bin/bash -s $HOMEDIR/dcos/. http://$VMNAME:5050 --add-path yes
     if [ $? -eq 0 ]
     then
       echo "Mesos DCOS-CLI installed successfully"

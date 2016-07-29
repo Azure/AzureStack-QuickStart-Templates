@@ -121,14 +121,14 @@
         },
         "disablePasswordAuthentication": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": true,
             "metadata": {
                 "description": "This setting controls whether password auth is disabled for Linux VMs provisioned by this template. Default is true which disables password and makes SSH key required."
             }
         },
         "setLinuxConfigurationForVMCreate": {
             "type": "int",
-            "defaultValue": 0,
+            "defaultValue": 1,
             "allowedValues": [ 0, 1 ],
             "metadata": {
                 "description": "This setting controls whether Linux configuration with SSH Key is passed in VM PUT Payload.  Defaults to 1.  If SSH Key is blank, this must be set to 0."
@@ -160,7 +160,7 @@
             "metadata": {
                 "description": "The root location for all the configuring scripts"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/101-mesos-windows-jumpbox/parts/"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/mesos-windows-jumpbox/parts/"
         }
     },
     "variables": {
@@ -172,9 +172,9 @@
             "storage": "2015-05-01-preview",
             "compute": "2015-06-15"
         },
-        "jumpboxEndpointDNSName": "[concat('jumpbox', variables('nameSuffix'))]",
-        "masterEndpointDNSName": "[concat('master', variables('nameSuffix'))]",
-        "agentEndpointDNSName": "[concat('agent', variables('nameSuffix'))]",
+        "jumpboxEndpointDNSName": "[tolower(concat('jumpbox', variables('nameSuffix')))]",
+        "masterEndpointDNSName": "[tolower(concat('master', variables('nameSuffix')))]",
+        "agentEndpointDNSName": "[tolower(concat('agent', variables('nameSuffix')))]",
         "agentCount": "[parameters('agentCount')]",
         "masterCount": "[parameters('masterCount')]",
         "agentVMSize": "[parameters('agentVMSize')]",
@@ -195,12 +195,10 @@
         "storageLocation": "[resourceGroup().location]",
 
         "sshKeyPath": "[concat('/home/', variables('adminUsername'), '/.ssh/authorized_keys')]",
-        "disablePasswordAuthentication": "[parameters('disablePasswordAuthentication')]",
-        "setLinuxConfigurationForVMCreate": "[parameters('setLinuxConfigurationForVMCreate')]",
         "linuxConfigurations": [
             { },
             {
-                "disablePasswordAuthentication": "[variables('disablePasswordAuthentication')]",
+                "disablePasswordAuthentication": "[parameters('disablePasswordAuthentication')]",
                 "ssh": {
                     "publicKeys": [
                         {
@@ -211,7 +209,7 @@
                 }
             }
         ],
-        "linuxConfiguration": "[variables('linuxConfigurations')[variables('setLinuxConfigurationForVMCreate')]]",
+        "linuxConfiguration": "[variables('linuxConfigurations')[parameters('setLinuxConfigurationForVMCreate')]]",
 
         "orchestratorName": "mesos",
 
@@ -229,7 +227,7 @@
         "virtualNetworkName": "[concat(variables('orchestratorName'), '-vnet-', variables('nameSuffix'))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetName": "[concat(variables('orchestratorName'), '-subnet')]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",        
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "addressPrefix": "10.0.0.0/16",
         "subnetPrefix": "10.0.0.0/18",
         "baseSubnet": "[split(variables('subnetPrefix'),'0/18')[0]]",
@@ -292,14 +290,10 @@
         "setBrowserFirstTabDefaultSuffix": "0:5050",
         "DisableIeEsc": ";Set-ItemProperty -Path HKLM:'\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}' -Name IsInstalled -Value 0 -Force; Set-ItemProperty -Path HKLM:'\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}'  -Name IsInstalled -Value 0 -Force;\"",
         "jumpboxWindowsCustomScript": "[concat(variables('setBrowserFirstTabDefaultPrefix'),variables('masterVMNamePrefix'),variables('setBrowserFirstTabDefaultSuffix'),variables('DisableIeEsc'))]",
-        "jumpboxScriptName": "hostnameResolution.ps1",
-        "jumpboxHostnameFix": "[concat('powershell -ExecutionPolicy Unrestricted -file hostnameResolution.ps1', ' ', variables('masterVMNamePrefix'), ' ', variables('agentVMNamePrefix'), ' ', variables('masterFirstAddr'),' ', variables('agentFirstAddr'), ' ', parameters('masterCount'), ' ', parameters('agentCount'), ' ', variables('baseSubnet'))]",
-
         "masterNSGName": "[concat(variables('orchestratorName'), '-master-nsg-', variables('nameSuffix'))]",
         "masterNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('masterNSGName'))]",
         "masterVMNamePrefix": "[concat(variables('orchestratorName'), '-masterVM-', variables('nameSuffix'), '-')]",
         "masterFirstAddr": 5,
-        "azureStackDNSIP": "192.168.100.2",
         "agentNSGName": "[concat(variables('orchestratorName'), '-agent-nsg-', variables('nameSuffix'))]",
         "agentNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('agentNSGName'))]",
         "agentFirstAddr": 20,
@@ -328,10 +322,7 @@
                             "addressPrefix": "[variables('subnetPrefix')]"
                         }
                     }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": [ "[variables('azureStackDNSIP')]" ]
-                }
+                ]
             }
         },
         {
@@ -419,9 +410,6 @@
                 "networkSecurityGroup": {
                     "id": "[variables('jumpboxNSGID')]"
                 },
-                "dnsSettings": {
-                    "dnsServers": [ "[ variables('azureStackDNSIP')]" ]
-                },
                 "ipConfigurations": [
                     {
                         "name": "ipConfig",
@@ -496,8 +484,8 @@
                 "typeHandlerVersion": "1.4",
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
-                    "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('jumpboxScriptName'))]" ],
-                    "commandToExecute": "[concat(variables('jumpboxWindowsCustomScript'), variables('jumpboxHostnamefix'))]"
+                    "fileUris": [],
+                    "commandToExecute": "[variables('jumpboxWindowsCustomScript')]"
                 }
             }
         },
@@ -521,32 +509,6 @@
                             "priority": 200,
                             "direction": "Inbound"
                         }
-                    },
-                    {
-                        "name": "rule1",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 101,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "rule2",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 101,
-                            "direction": "Outbound"
-                        }
                     }
                 ]
             }
@@ -568,10 +530,6 @@
                 "networkSecurityGroup": {
                     "id": "[variables('masterNSGID')]"
                 },
-                "dnsSettings": {
-                    "dnsServers": [ "[ variables('azureStackDNSIP')]" ]
-                },
-
                 "ipConfigurations": [
                     {
                         "name": "ipConfigNode",
@@ -653,7 +611,7 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('mesosScriptName'))]", "[concat(parameters('configureScriptsRootLocation'), variables('nginxScriptName'))]" ],
-                    "commandToExecute": "[concat('/bin/bash -c \"/bin/bash configure-mesos-azurestack.sh ', variables('clusterInstallParameters'),' ', reference(concat(variables('masterVMNamePrefix'), 'nic-', copyIndex()), '2015-05-01-preview').ipConfigurations[0].properties.privateIPAddress ,' >> /var/log/azure/cluster-bootstrap.log 2>&1\"')]"
+                    "commandToExecute": "[concat('/bin/bash -c \"/bin/bash configure-mesos-azurestack.sh ', variables('clusterInstallParameters'), ' >> /var/log/azure/cluster-bootstrap.log 2>&1\"')]"
                 }
             }
         },
@@ -718,32 +676,6 @@
                             "priority": 230,
                             "direction": "Inbound"
                         }
-                    },
-                    {
-                        "name": "rule1",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 101,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "rule2",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 101,
-                            "direction": "Outbound"
-                        }
                     }
                 ]
             }
@@ -764,9 +696,6 @@
             "properties": {
                 "networkSecurityGroup": {
                     "id": "[variables('agentNSGID')]"
-                },
-                "dnsSettings": {
-                    "dnsServers": [ "[ variables('azureStackDNSIP')]" ]
                 },
                 "ipConfigurations": [
                     {
@@ -849,7 +778,7 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('mesosScriptName'))]", "[concat(parameters('configureScriptsRootLocation'), variables('nginxScriptName'))]" ],
-                    "commandToExecute": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash configure-mesos-azurestack.sh ', variables('clusterInstallParameters'),' ', reference(concat(variables('agentVMNamePrefix'), 'nic-', copyIndex()), '2015-05-01-preview').ipConfigurations[0].properties.privateIPAddress,' >> /var/log/azure/cluster-bootstrap.log 2>&1 &\" &')]"
+                    "commandToExecute": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash configure-mesos-azurestack.sh ', variables('clusterInstallParameters'),' >> /var/log/azure/cluster-bootstrap.log 2>&1 &\" &')]"
                 }
             }
         }
