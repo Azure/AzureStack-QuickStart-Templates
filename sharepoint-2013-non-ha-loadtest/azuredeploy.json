@@ -74,7 +74,7 @@
         }
     },
     "variables": {
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha-loadtest",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/sharepoint-2013-non-ha-loadtest",
         "PrepareSQLDeployment": "PrepareSQLForLoadTest",
         "PrepareSQLDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('PrepareSQLDeployment'))]",
         "PrepareSQLTemplateURL": "[concat(variables('assetLocation'),'/azuredeploy.SQLPrepareForLoadTest.json')]",
