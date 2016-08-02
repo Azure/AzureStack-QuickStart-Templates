@@ -109,7 +109,8 @@
         "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
+        "modulesPath": "https://vmbootio.blob.core.windows.net/astest/",
+        "modulesPathProd": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
         "modulesJetstress": "JetstressWorkload.zip",
         "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
         "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
@@ -138,7 +139,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[variables('uniqueDnsNameForPublicIP')]"
+                    "domainNameLabel": "[concat(variables('uniqueDnsNameForPublicIP'),copyIndex())]"
                 }
             }
         },
@@ -188,10 +189,7 @@
                             }
                         }
                     }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": [ "192.168.100.2" ]
-                }
+                ]
             }
         },
         {
@@ -299,7 +297,7 @@
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",
                 "typeHandlerVersion": "2.13",
-                "autoUpgradeMinorVersion": false,
+                "autoUpgradeMinorVersion": true,
                 "settings": {
                     "modulesUrl": "[variables('modulesUrlJetstress')]",
                     "configurationFunction": "[variables('configurationFunctionJetstress')]",
@@ -313,12 +311,14 @@
                         "MailboxCount": "[parameters('exchangeMailboxCount')]",
                         "IopsPerMailbox": "[parameters('exchangeIopsPerMailbox')]",
                         "MailboxSizeinMB": "[parameters('exchangeMailboxSizeInMB')]",
+                        "Location": "[variables('location')]",
+                        "VMName": "[concat(variables('vmName'),copyIndex())]",
                         "VMAdminCreds": {
                             "userName": "[variables('vmAdminUsername')]",
                             "password": "PrivateSettingsRef:vmAdminPassword"
                         },
-						"StorageAccountName": "[variables('uniqueStorageAccountName')]",
-						"StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-05-01-preview').key1]",
+                        "StorageAccountName": "[variables('uniqueStorageAccountName')]",
+                        "StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-05-01-preview').key1]",
                         "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersion').storage).primaryEndpoints['blob']]"
                     }
                 },
@@ -331,3 +331,4 @@
         }
     ]
 }
+

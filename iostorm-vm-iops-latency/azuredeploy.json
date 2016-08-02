@@ -84,7 +84,7 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "nsgName": "[tolower(concat('ng', resourceGroup().name))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/iostorm-vm-iops-latency/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/iostorm-vm-iops-latency/",
     "moduleVMIOController": "VMIOWorkloadController.zip",
     "moduleVMIOWorkload": "VMIOWorkload.zip",
     "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
