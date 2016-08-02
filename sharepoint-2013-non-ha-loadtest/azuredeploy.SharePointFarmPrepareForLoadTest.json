@@ -52,7 +52,7 @@
         }
     },
     "variables": {
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha-loadtest",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/sharepoint-2013-non-ha-loadtest",
         "LogToFileScriptName": "LogToFile.psm1",
         "LogToFileScriptURL": "[concat(variables('assetLocation'),'/CommonScripts/',variables('LogToFileScriptName'))]",
         "PrepTargetScriptName": "PrepareTargetForRun.ps1",

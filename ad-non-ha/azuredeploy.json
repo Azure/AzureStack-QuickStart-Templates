@@ -42,7 +42,7 @@
                 "networkSecurityGroups": "2015-06-15"
             }
         },
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/ad-non-ha",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/ad-non-ha",
         "adVMSize": "Standard_A1",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",

@@ -55,8 +55,8 @@
                 "networkSecurityGroups": "2015-05-01-preview"
             }
         },
-        "sqlassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/sql-2014-non-ha",
-        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/AzureStackTechnicalPreview2/ad-non-ha",
+        "sqlassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/sql-2014-non-ha",
+        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/ad-non-ha",
         "location": "[resourceGroup().location]",
         "sqlServerServiceAccountPassword": "[parameters('adminPassword')",
         "vmNetworkSubnet": "10.0.0.0/24",
