@@ -3,8 +3,8 @@
     "contentVersion": "1.0.0.0",
     "parameters": 
     {
-        "linuxAdminPassword": {
-          "value": "GEN-PASSWORD"
+        "sshRSAPublicKey": {
+          "value": "GEN-SSH-PUB-KEY"
         },
         "windowsAdminPassword": {
             "value": "GEN-PASSWORD"
@@ -25,10 +25,10 @@
             "value": "GEN-UNIQUE"
         },
         "setLinuxConfigurationForVMCreate": {
-            "value": 0
+            "value": 1
         },
         "disablePasswordAuthentication": {
-            "value": false
+            "value": true
         }
     }
 }
