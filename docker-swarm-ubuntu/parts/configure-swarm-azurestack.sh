@@ -27,7 +27,6 @@ MASTERFIRSTADDR=${3}
 AZUREUSER=${4}
 POSTINSTALLSCRIPTURI=${5}
 BASESUBNET=${6}
-PrivateIP=${7}
 VMNAME=`hostname`
 VMNUMBER=`echo $VMNAME | sed 's/.*[^0-9]\([0-9]\+\)*$/\1/'`
 VMPREFIX=`echo $VMNAME | sed 's/\(.*[^0-9]\)*[0-9]\+$/\1/'`
@@ -39,8 +38,6 @@ echo "vmname: $VMNAME"
 echo "VMNUMBER: $VMNUMBER, VMPREFIX: $VMPREFIX"
 echo "BASESUBNET: $BASESUBNET"
 echo "AZUREUSER: $AZUREUSER"
-echo "adding IP to /etc/hosts"
-echo "$PrivateIP $VMNAME" >>/etc/hosts
 ###################
 # Common Functions
 ###################
@@ -50,7 +47,7 @@ ensureAzureNetwork()
   # ensure the host name is resolvable
   hostResolveHealthy=1
   for i in {1..120}; do
-    getent hosts $VMNAME
+    host $VMNAME
     if [ $? -eq 0 ]
     then
       # hostname has been found continue
