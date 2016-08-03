@@ -9,7 +9,9 @@ Follow the below links to create an Ubuntu Image and upload the same to Azure St
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
 
 ## Deployment steps
-Deploy the solution from PowerShell with the following PowerShell script or deploy to azure stack portal using custom deployment.
+1. Deploy to azure stack portal using custom deployment.
+2. Deploy through Visual Studio using azuredeploy.json and azuredeploy.parameters.json.
+2. Deploy the solution from PowerShell with the following PowerShell script 
 
 ``` PowerShell
 ## Configure the environment with the Add-AzureRmEnvironment cmdlt
@@ -23,9 +25,12 @@ Add-AzureRmEnvironment -Name ($envName) `
 	                -GraphEndpoint ($GraphEndpoint = $endptOut.graphEndpoint) `
 	               -StorageEndpointSuffix ($StorageEndpointSuffix="$($env:USERDNSDOMAIN)".ToLowerInvariant()) `
 	               -AzureKeyVaultDnsSuffix ($AzureKeyVaultDnsSuffix="vault.$($env:USERDNSDOMAIN)".ToLowerInvariant()) 
-## Authenticate a user to the environment (you will be prompted during authentication)
-    $privateEnv = Get-AzureRmEnvironment 'Azure Stack'
-    $privateAzure = Add-AzureRmAccount -Environment $privateEnv -Verbose
+## Authenticate a user to the environment 
+    $AADUserName = "Enter_AADUserName"
+	$AADUserPassword="Enter_AADUserPassword"
+	$aadCredential = New-Object System.Management.Automation.PSCredential($AADUserName, (ConvertTo-SecureString -String $AADUserPassword -AsPlainText -Force))
+    $privateEnv = Get-AzureRmEnvironment $envName -Credential $aadCredential
+    $privateAzure = Add-AzureRmAccount -Environment $privateEnv -Credential $aadCredential -Verbose
     Select-AzureRmProfile -Profile $privateAzure
 
 ## Select an existing subscription where the deployment will take place
@@ -36,17 +41,18 @@ $myNum = "001" #Modify this per deployment
 $RGName = "myRG$myNum"
 $myLocation = "local"
 
+$templateFile= "azuredeploy.json"
+# Fix the GEN-* values in the azuredeploy.parameters.json before proceeding to next steps
+$templateParameterFile= "azuredeploy.parameters.json"
+
 # Create Resource Group for Template Deployment
 New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 
 # Deploy Template 
 New-AzureRmResourceGroupDeployment `
-    -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
-    -TemplateFile "azuredeploy.json" `
-    -adminUsername "admin" `
-    -adminPassword ("GEN-PASSWORD" | ConvertTo-SecureString -AsPlainText -Force)`
-    -ubuntuOSVersion "15.10" `
+    -TemplateFile $templateFile `
+	-TemplateParameterFile $templateParameterFile
 ```
 
 
