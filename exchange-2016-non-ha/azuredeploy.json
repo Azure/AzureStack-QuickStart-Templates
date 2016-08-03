@@ -1,265 +1,303 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "exchangeStorageSize": {
-      "type": "int",
-      "defaultValue": 1073741824,
-      "metadata": {
-        "description": "Exchange Mailbox storage size."
-      }
-    },
-    "exchangeVMCount": {
-      "type": "int",
-      "defaultValue": 1,
-      "metadata": {
-        "description": "Number of Exchange VMs to deploy."
-      }
-    }
-  },
-  "variables": {
-    "apiVersion": {
-      "compute": "2015-06-15",
-      "storage": "2015-06-15",
-      "network": "2015-05-01-preview"
-    },
-    "imagePublisher": "MicrosoftWindowsServer",
-    "imageOffer": "WindowsServer",
-    "addressPrefix": "10.0.0.0/16",
-    "storageAccountType": "Standard_LRS",
-    "publicIPAddressName": "[concat('ip', resourceGroup().name)]",
-    "publicIPAddressType": "Dynamic",
-    "subnetPrefix": "10.0.0.0/24",
-    "subnetName": "[concat('sn', resourceGroup().name)]",
-    "exchangeDomainName": "[concat(resourceGroup().name, '.com')]",
-    "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
-    "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
-    "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-    "location": "[resourceGroup().location]",
-    "vmOsSku": "2012-R2-Datacenter",
-    "vmAdminUsername": "vmadministrator",
-    "vmAdminPassword": "pwd0a!8b7",
-    "vmName": "[concat('vm', resourceGroup().name)]",
-    "vmOsDiskName": "[concat('od', resourceGroup().name)]",
-    "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
-    "vmSize": "Standard_A2",
-    "vmDataDiskSize": "15",
-    "vmNicName": "[concat('nc', resourceGroup().name)]",
-    "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/dipakmsft/AzureStack-QuickStart-Templates/master/exchange-2016-non-ha/",
-    "modulesExchange": "ExchangeWorkload.zip",
-    "modulesUrlExchange": "[concat(variables('modulesPath'),variables('modulesExchange'))]",
-    "modulesExchangeData": "ExchangeWorkload.psd1",
-    "modulesUrlExchangeData": "[concat(variables('modulesPath'),variables('modulesExchangeData'))]",
-    "configurationFunctionExchange": "ExchangeWorkload.ps1\\InstallAndConfigureExchange",
-    "nsgName": "[concat('ng', resourceGroup().name)]",
-    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
-  },
-  "resources": [
-    {
-      "apiVersion": "[variables('apiVersion').storage]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[tolower(variables('uniqueStorageAccountName'))]",
-      "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
-      "location": "[variables('location')]",
-      "copy": {
-        "name": "publicIPLoop",
-        "count": "[parameters('exchangeVMCount')]"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('uniqueDnsNameForPublicIP')]"
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "exchangeStorageSize": {
+            "type": "int",
+            "defaultValue": 10,
+            "metadata": {
+                "description": "Exchange Mailbox storage size in GB."
+            }
+        },
+        "exchangeVMCount": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "Number of Exchange VMs to deploy."
+            }
         }
-      }
     },
-    {
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[variables('nsgName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "nsgsrule",
-            "properties": {
-              "protocol": "*",
-              "sourcePortRange": "*",
-              "destinationPortRange": "*",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 101,
-              "direction": "Inbound"
-            }
-          }
-        ]
-      }
-    },
-    {
-
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[variables('location')]",
-      "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+    "variables": {
+        "apiVersion": {
+            "compute": "2015-06-15",
+            "storage": "2015-06-15",
+            "network": "2015-06-15"
         },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[variables('nsgID')]"
-              }
-            }
-          }
-        ],
-        "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
-        }
-      }
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "addressPrefix": "10.0.0.0/16",
+        "storageAccountType": "Standard_LRS",
+        "publicIPAddressName": "[concat('ip', resourceGroup().name)]",
+        "publicIPAddressType": "Dynamic",
+        "subnetPrefix": "10.0.0.0/24",
+        "subnetName": "[concat('sn', resourceGroup().name)]",
+        "exchangeDomainName": "[concat(resourceGroup().name, '.com')]",
+        "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
+        "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
+        "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
+        "location": "[resourceGroup().location]",
+        "vmOsSku": "2012-R2-Datacenter",
+        "vmAdminUsername": "vmadministrator",
+        "vmAdminPassword": "pwd0a!8b7",
+        "vmName": "[concat('vm', resourceGroup().name)]",
+        "vmOsDiskName": "[concat('od', resourceGroup().name)]",
+        "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
+        "vmSize": "Standard_A2",
+        "vmDataDiskSize": "15",
+        "vmNicName": "[concat('nc', resourceGroup().name)]",
+        "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/exchange-2016-non-ha/",
+        "modulesExchange": "ExchangeWorkload.zip",
+        "modulesUrlExchange": "[concat(variables('modulesPath'),variables('modulesExchange'))]",
+        "modulesExchangeData": "ExchangeWorkload.psd1",
+        "modulesUrlExchangeData": "[concat(variables('modulesPath'),variables('modulesExchangeData'))]",
+        "configurationFunctionExchange": "ExchangeWorkload.ps1\\InstallAndConfigureExchange",
+        "nsgName": "[concat('ng', resourceGroup().name)]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+        "exchangeInstallerPath": "InstallerExchange",
+        "exchangeISOUri": "https://download.microsoft.com/download/6/4/8/648EB83C-00F9-49B2-806D-E46033DA4AE6/ExchangeServer2016-CU1.iso",
+        "modulesExchangeISODownload": "CSDownloadISO.ps1",
+        "modulesUrlExchangeISODownload": "[concat(variables('modulesPath'),variables('modulesExchangeISODownload'))]"
     },
-    {
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(variables('vmNicName'),copyIndex())]",
-      "location": "[variables('location')]",
-      "copy": {
-        "name": "nicLoop",
-        "count": "[parameters('exchangeVMCount')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'),copyIndex())]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfigpublic",
+    "resources": [
+        {
+            "apiVersion": "[variables('apiVersion').storage]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[tolower(variables('uniqueStorageAccountName'))]",
+            "location": "[variables('location')]",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'),copyIndex()))]"
-              },
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
+                "accountType": "[variables('storageAccountType')]"
             }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion').compute]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(variables('vmName'),copyIndex())]",
-      "location": "[variables('location')]",
-      "copy": {
-        "name": "vmLoop",
-        "count": "[parameters('exchangeVMCount')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
-      ],
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
         },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[variables('vmAdminUsername')]",
-          "adminPassword": "[variables('vmAdminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('vmOsSku')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "publicIPLoop",
+                "count": "[parameters('exchangeVMCount')]"
             },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "vhd": {
-                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'.vhd')]"
-              },
-              "name": "[concat(variables('vmDataDiskName'),copyIndex())]",
-              "createOption": "empty",
-              "caching": "None",
-              "diskSizeGB": "[variables('vmDataDiskSize')]",
-              "lun": 0
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('uniqueDnsNameForPublicIP')]"
+                }
             }
-          ]
         },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
             }
-          ]
-        }
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion').compute]",
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
-      "location": "[variables('location')]",
-      "copy": {
-        "name": "extensionLoop",
-        "count": "[parameters('exchangeVMCount')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.Powershell",
-        "type": "DSC",
-        "typeHandlerVersion": "2.13",
-        "autoUpgradeMinorVersion": false,
-        "settings": {
-          "modulesUrl": "[variables('modulesUrlExchange')]",
-          "configurationFunction": "[variables('configurationFunctionExchange')]",
-          "properties": {
-            "DomainName": "[variables('exchangeDomainName')]",
-            "StorageSize": "[parameters('exchangeStorageSize')]",
-            "VMAdminCreds": {
-              "userName": "[variables('vmAdminUsername')]",
-              "password": "PrivateSettingsRef:vmAdminPassword"
-            }
-          }
         },
-        "protectedSettings": {
-          "items": {
-            "vmAdminPassword": "[variables('vmAdminPassword')]"
-          },
-          "DataBlobUri": "[variables('modulesUrlExchangeData')]"
+        {
+
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[variables('nsgID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmNicName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[parameters('exchangeVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'),copyIndex())]",
+                "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'),copyIndex()))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('vmName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "vmLoop",
+                "count": "[parameters('exchangeVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[variables('vmAdminUsername')]",
+                    "adminPassword": "[variables('vmAdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('vmOsSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-0','.vhd')]"
+                            },
+                            "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-0')]",
+                            "createOption": "empty",
+                            "caching": "None",
+                            "diskSizeGB": "[variables('vmDataDiskSize')]",
+                            "lun": 0
+                        },
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-1','.vhd')]"
+                            },
+                            "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-1')]",
+                            "createOption": "empty",
+                            "caching": "None",
+                            "diskSizeGB": "[variables('vmDataDiskSize')]",
+                            "lun": 1
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+		{
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),copyIndex(),'/CustomScriptExtension')]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "customExtensionLoop",
+                "count": "[parameters('exchangeVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[variables('modulesUrlExchangeISODownload')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('modulesExchangeISODownload'),' -uri ',variables('exchangeISOUri'),' -destination ',variables('exchangeInstallerPath'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "extensionLoop",
+                "count": "[parameters('exchangeVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]",
+				"[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex(),'/extensions/','CustomScriptExtension')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.15",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesUrl": "[variables('modulesUrlExchange')]",
+                    "configurationFunction": "[variables('configurationFunctionExchange')]",
+                    "properties": {
+                        "DomainName": "[variables('exchangeDomainName')]",
+                        "StorageSize": "[parameters('exchangeStorageSize')]",
+                        "VMAdminCreds": {
+                            "userName": "[variables('vmAdminUsername')]",
+                            "password": "PrivateSettingsRef:vmAdminPassword"
+                        },
+                        "Location": "[variables('location')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "vmAdminPassword": "[variables('vmAdminPassword')]"
+                    },
+                    "DataBlobUri": "[variables('modulesUrlExchangeData')]"
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }

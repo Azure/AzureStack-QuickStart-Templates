@@ -3,10 +3,10 @@
   "contentVersion": "1.16.03.24",
   "parameters": {
 	"azureAccountUsername": {
-      "value": "<Your Azure tenant account user name>"
+      "value": "vmadministrator"
     },
     "azureAccountPassword": {
-      "value": "<Your secured Azure tenant account password>"
+      "value": "pwd0a!8b7"
     },
     "tenantId": {
       "value": "<Your secured tenant Id from Azure Subscription>"

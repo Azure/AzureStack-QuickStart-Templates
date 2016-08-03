@@ -1,75 +1,97 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.16.03.23",
+  "contentVersion": "1.16.07.29",
   "parameters": {
-    "azureAccountUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Azure user to authenticate inside controller VM for AzureStack. Azure AD Application ID to authenticate inside controller VM for Azure."
-      }
-    },
-    "azureAccountPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Azure user password to authenticate inside controller VM for AzureStack. Azure AD Application password to authenticate inside controller VM for Azure."
-      }
-    },
-    "tenantId": {
-      "type": "string",
-      "metadata": {
-        "description": "Azure Subscription Tenant Id."
-      }
-    },
     "vmCount": {
       "type": "int",
       "defaultValue": 2,
       "metadata": {
-        "description": "Number of VMs to create."
+        "description": "Number of VMs to create and run IO simulation in determining the maximum IOPS reached without exceeding specified latency thresholds as acceptable performance limit."
+      }
+    },
+    "vmOsSku": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM."
+      }
+    },
+    "vmDataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 5,
+      "metadata": {
+        "description": "VM IO workload target data disk size in GB."
+      }
+    },
+    "vmIoLatencyThresholdInMS": {
+      "type": "int",
+      "defaultValue": 60,
+      "metadata": {
+        "description": "VM IO workload latency threshold in milliseconds."
+      }
+    },
+    "vmIoDurationInSec": {
+      "type": "int",
+      "defaultValue": 60,
+      "metadata": {
+        "description": "VM IO workload duration in seconds."
+      }
+    },
+    "vmIoBlockSizeInBytes": {
+      "type": "int",
+      "defaultValue": 4096,
+      "metadata": {
+        "description": "VM IO workload block size in bytes."
+      }
+    },
+    "vmIoReadPercentage": {
+      "type": "int",
+      "defaultValue": 90,
+      "metadata": {
+        "description": "VM IO workload read percentage."
       }
     }
   },
-    "variables": {
-        "apiVersion": "2015-06-15",
-        "apiVersionCRP": "2015-06-15",
-        "apiVersionSRP": "2015-06-15",
-        "apiVersionNRP": "2015-05-01-preview",
-        "imagePublisher": "MicrosoftWindowsServer",
-        "imageOffer": "WindowsServer",
-        "addressPrefix": "10.1.0.0/16",
-        "location": "[resourceGroup().location]",
-        "subnetName": "[concat('sn', resourceGroup().name)]",
-        "subnetPrefix": "10.1.0.0/24",
-        "storageAccountType": "Standard_LRS",
-        "publicIPAddressType": "Dynamic",
-        "publicIPAddressName": "[concat('ip', resourceGroup().name)]",
-        "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
-        "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
-        "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-        "adResourceID": "null",
-        "vmOsSku": "2012-R2-Datacenter",
-        "vmAdminUsername": "vmadministrator",
-        "vmAdminPassword": "pwd0a!8b7",
-        "vmName": "[concat('vm', resourceGroup().name)]",
-        "vmOsDiskName": "[concat('od', resourceGroup().name)]",
-        "vmSize": "Standard_A2",
-        "vmIoBlockSize": "4096",
-        "vmIoDuration": "600",
-        "vmIoReadPercentage": "70",
-        "vmIoMaxLatency": "50",
-        "vmNicName": "[concat('nc', resourceGroup().name)]",
-        "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "nsgName": "[concat('ng', resourceGroup().name)]",
-        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency/",
-        "moduleVMIOController": "VMIOWorkloadController.zip",
-        "moduleVMIOWorkload": "VMIOWorkload.zip",
-        "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
-        "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
-        "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
-        "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO"
-    },
+  "variables": {
+    "apiVersionCRP": "2015-06-15",
+    "apiVersionSRP": "2015-06-15",
+    "apiVersionNRP": "2015-06-15",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "addressPrefix": "10.0.0.0/16",
+    "location": "[resourceGroup().location]",
+    "subnetName": "[tolower(concat('sn', resourceGroup().name))]",
+    "subnetPrefix": "10.0.0.0/24",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressType": "Dynamic",
+    "publicIPAddressName": "[tolower(concat('ip', resourceGroup().name))]",
+    "uniqueDnsNameForPublicIP": "[tolower(concat('dns', resourceGroup().name))]",
+    "uniqueStorageAccountName": "[tolower(concat('sa', resourceGroup().name))]",
+    "uniqueStorageAccountContainerName": "[tolower(concat('sc', resourceGroup().name))]",
+    "vmAdminUsername": "vmadministrator",
+    "vmAdminPassword": "[subscription().subscriptionId]",
+    "vmName": "[concat('vm', resourceGroup().name)]",
+    "vmOsDiskName": "[concat('od', resourceGroup().name)]",
+    "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
+    "vmSize": "Standard_A2",
+    "vmNicName": "[tolower(concat('nc', resourceGroup().name))]",
+    "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "nsgName": "[tolower(concat('ng', resourceGroup().name))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/iostorm-vm-iops-latency/",
+    "moduleVMIOController": "VMIOWorkloadController.zip",
+    "moduleVMIOWorkload": "VMIOWorkload.zip",
+    "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
+    "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
+    "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
+    "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO"
+  },
   "resources": [
     {
       "apiVersion": "[variables('apiVersionSRP')]",
@@ -214,7 +236,7 @@
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[variables('vmOsSku')]",
+            "sku": "[parameters('vmOsSku')]",
             "version": "latest"
           },
           "osDisk": {
@@ -252,7 +274,8 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
+        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]",
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -267,7 +290,7 @@
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[variables('vmOsSku')]",
+            "sku": "[parameters('vmOsSku')]",
             "version": "latest"
           },
           "osDisk": {
@@ -277,7 +300,29 @@
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
-          }
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-0','.vhd')]"
+              },
+              "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-0')]",
+              "createOption": "empty",
+              "caching": "None",
+              "diskSizeGB": "[parameters('vmDataDiskSizeInGB')]",
+              "lun": 0
+            },
+            {
+              "vhd": {
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-1','.vhd')]"
+              },
+              "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-1')]",
+              "createOption": "empty",
+              "caching": "None",
+              "diskSizeGB": "[parameters('vmDataDiskSizeInGB')]",
+              "lun": 1
+            }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -305,31 +350,29 @@
       "properties": {
         "publisher": "Microsoft.Powershell",
         "type": "DSC",
-        "typeHandlerVersion": "2.13",
-        "autoUpgradeMinorVersion": false,
+        "typeHandlerVersion": "2.15",
+        "autoUpgradeMinorVersion": true,
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMIOController')]",
           "configurationFunction": "[variables('configurationFunctionVMIOController')]",
-            "properties": {
-                "AzureUserName": "[parameters('azureAccountUsername')]",
-                "AzurePassword": "[parameters('azureAccountPassword')]",
-                "AdResourceID": "[variables('adResourceID')]",
-                "TenantId": "[parameters('tenantId')]",
-                "VMName": "[variables('vmName')]",
-                "VMCount": "[parameters('vmCount')]",
-                "VMAdminUserName": "[variables('vmAdminUsername')]",
-                "VMAdminPassword": "[variables('vmAdminPassword')]",
-                "VMIoMaxLatency": "[variables('vmIoMaxLatency')]",
-                "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
-                "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), variables('apiVersionSRP')).key1]"
-            }
+          "properties": {
+            "VMName": "[variables('vmName')]",
+            "VMCount": "[parameters('vmCount')]",
+            "VMAdminUserName": "[variables('vmAdminUsername')]",
+            "VMAdminPassword": "[variables('vmAdminPassword')]",
+            "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
+            "Location": "[variables('location')]",
+            "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
+            "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), variables('apiVersionSRP')).key1]",
+            "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersionSRP')).primaryEndpoints['blob']]"
+          }
         }
       }
     },
     {
+      "apiVersion": "[variables('apiVersionCRP')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
-      "apiVersion": "[variables('apiVersion')]",
       "location": "[variables('location')]",
       "copy": {
         "name": "vmLoop",
@@ -341,8 +384,8 @@
       "properties": {
         "publisher": "Microsoft.Powershell",
         "type": "DSC",
-        "typeHandlerVersion": "2.13",
-        "autoUpgradeMinorVersion": false,
+        "typeHandlerVersion": "2.15",
+        "autoUpgradeMinorVersion": true,
         "settings": {
           "modulesUrl": "[variables('modulesUrlVMIOWorkload')]",
           "configurationFunction": "[variables('configurationFunctionVMIOWorkload')]",
@@ -352,10 +395,10 @@
             "VMName": "[concat(variables('vmName'),copyIndex())]",
             "VMAdminUserName": "[variables('vmAdminUsername')]",
             "VMAdminPassword": "[variables('vmAdminPassword')]",
-            "VMIoBlockSize": "[variables('vmIoBlockSize')]",
-            "VMIoDuration": "[variables('vmIoDuration')]",
-            "VMIoReadPercentage": "[variables('vmIoReadPercentage')]",
-            "VMIoMaxLatency": "[variables('vmIoMaxLatency')]"
+            "VMIoBlockSize": "[parameters('vmIoBlockSizeInBytes')]",
+            "VMIoDuration": "[parameters('vmIoDurationInSec')]",
+            "VMIoReadPercentage": "[parameters('vmIoReadPercentage')]",
+            "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]"
           }
         }
       }

@@ -9,7 +9,7 @@
             }
         },
         "azureAccountPassword": {
-            "type": "securestring",
+            "type": "string",
             "metadata": {
                 "description": "Azure tenant user password to authenticate inside controller VM."
             }
@@ -44,7 +44,6 @@
         "uniqueDnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
         "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
         "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-        "adResourceID": "https://azurestack.local-api/",
         "vmOsSku": "2012-R2-Datacenter",
         "vmAdminUsername": "vmadministrator",
         "vmAdminPassword": "pwd0a!8b7",
@@ -57,7 +56,8 @@
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "nsgName": "[concat('ng', resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
+        "modulesPath": "https://vmbootio.blob.core.windows.net/astest/",
+        "modulesPathProd": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
         "moduleVMBootAll": "VMBootAll.zip",
         "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
         "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll"
@@ -129,10 +129,7 @@
                             }
                         }
                     }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": [ "192.168.100.2" ]
-                }
+                ]
             }
         },
         {
@@ -300,22 +297,23 @@
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",
-                "typeHandlerVersion": "2.13",
-                "autoUpgradeMinorVersion": true,
+                "typeHandlerVersion": "2.15",
+                "autoUpgradeMinorVersion": false,
                 "settings": {
                     "modulesUrl": "[variables('modulesUrlVMBootAll')]",
                     "configurationFunction": "[variables('configurationFunctionVMBootAll')]",
                     "properties": {
-                        "azureAccountUsername": "[parameters('azureAccountUsername')]",
-                        "azureAccountPassword": "[parameters('azureAccountPassword')]",
-                        "AdResourceID": "[variables('adResourceID')]",
+                        "AzureAccountUsername": "[parameters('azureAccountUsername')]",
+                        "AzureAccountPassword": "[parameters('azureAccountPassword')]",
                         "TenantId": "[parameters('tenantId')]",
+                        "Location": "[variables('location')]",
                         "VMName": "[variables('vmName')]",
                         "VMCount": "[parameters('vmCount')]",
                         "VMAdminUserName": "[variables('vmAdminUsername')]",
                         "VMAdminPassword": "[variables('vmAdminPassword')]",
                         "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
-                        "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), variables('apiVersionSRP')).key1]"
+                        "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), variables('apiVersionSRP')).key1]",
+                        "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersionSRP')).primaryEndpoints['blob']]"
                     }
                 }
             }
