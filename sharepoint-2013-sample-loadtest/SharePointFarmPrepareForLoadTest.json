@@ -38,6 +38,7 @@
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
                 "typeHandlerVersion": "1.4",
+                "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
                         "[variables('PrepareTargetForRunScriptURL')]"
