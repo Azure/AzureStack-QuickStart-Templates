@@ -68,7 +68,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('PrepareTargetTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerServiceUserName": {
@@ -92,7 +92,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('RunLoadTestTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerVMName": {
