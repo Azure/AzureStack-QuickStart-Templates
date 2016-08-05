@@ -27,6 +27,14 @@ To access the SQL VM use the domain controller or the SharePoint VMs as jumpboxe
 	after a period of time. If you have an iso available, place it on a location where it is reachable for the VMs to download (Azure blob storage for example)
 +	This template requires a product key for SharePoint 2013. A trial key for SharePoint 2013 can be found on MSDN subscriber downloads or from the TechNet
 	evaluation center.
+	
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fsharepoint-2013-non-ha%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fsharepoint-2013-non-ha%2Fazuredeploy.json" target="_blank">
+    <img src="http://armviz.io/visualizebutton.png"/>
+</a>
 
 ## Deploying from Portal
 
