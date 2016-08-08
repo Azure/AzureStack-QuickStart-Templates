@@ -54,7 +54,7 @@
         "RunnerScriptName": "ScriptExtensionRunner.ps1",
         "RunnerScriptURL": "[concat(parameters('assetLocation'),'/',variables('RunnerScriptName'))]",
         "LoadTestPackageURL": "[concat(parameters('assetLocation'),'/SPSampleLT.zip')]",
-        "LoadTestUnpackLocation": "C:\\LoadTests\\SPSampleLT"
+        "LoadTestUnpackLocation": "%SystemDrive%\\LoadTests\\SPSampleLT"
     },
     "resources": [
         {

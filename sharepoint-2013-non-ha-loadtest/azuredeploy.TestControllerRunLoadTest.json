@@ -72,7 +72,7 @@
         "RunnerScriptName": "TestControllerScriptExtensionRunner.ps1",
         "RunnerScriptURL": "[concat(variables('assetLocation'),'/TestControllerScripts/',variables('RunnerScriptName'))]",
         "LoadTestPackageURL": "[concat(variables('assetLocation'),'/SharePointLoadTest.zip')]",
-        "LoadTestUnpackLocation": "$env:SystemDrive\\LoadTests\\SharePointLoadTest"
+        "LoadTestUnpackLocation": "%SystemDrive%\\LoadTests\\SharePointLoadTest"
     },
     "resources": [
         {
