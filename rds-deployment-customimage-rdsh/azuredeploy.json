@@ -13,15 +13,13 @@
       "type": "string",
       "metadata": {
         "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'. For example johnadmin"
-      },
-      "defaultValue": "vmadmin"
+      }
     },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "The password for the administrator account of the new VM and the domain"
-      },
-      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+      }
     },
     "imageSKU": {
       "type": "string",
@@ -34,7 +32,7 @@
       },
       "defaultValue": "2012-R2-Datacenter"
     },
-        "rdshImageStorageAccountName": {
+    "rdshImageStorageAccountName": {
             "type": "string",
             "metadata": {
                 "description": "This is the name of the your storage account where you stored the os custom image you want to use for rdsh machines. For example johnrdshstore"
@@ -46,64 +44,39 @@
             "description": "The URI for source of the blob containing the custom image. For example https://johnrdshstore.blob.core.windows.net/johncontainer/MyWindowServerOS.vhd"
         }
     },
-    "NumberOfRemoteDesktopSessionHosts": {
+    "numberOfRdshInstances": {
       "type": "int",
       "defaultValue": 1,
       "metadata": {
-        "description": "Number of RemoteDesktopSessionHosts"
+        "description": "Number of RDSH instances"
       }
     }
   },
-    "variables": {
-        "dnsLabelPrefix": "[concat('dns', resourceGroup().name)]",
-        "rdshVmSize": "Standard_A2",
-        "storageAccountName": "[concat('sa', resourceGroup().name)]",
-        "storageAccountType": "Standard_LRS",
-        "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-        "imagePublisher": "MicrosoftWindowsServer",
-        "imageOffer": "WindowsServer",
-        "adVnetName": "[concat('ADVNET',resourceGroup().name)]",
-        "adSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
-        "vnetAddressRange": "10.0.0.0/16",
-        "subnetAddressRange": "10.0.0.0/24",
-        "dnsServerPrivateIp": "10.0.0.4",
-        "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('adVnetName')),'/subnets/',variables('adSubnetName'))]",
-        "publicIpRef": "publicIp",
-        "brokerIpRef": "brokerpublicIp",
-        "gatewayIpRef": "gatewaypublicIp",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment-existing-ad/",
-        "apiVersion": "2015-06-15",
-        "apiVersionNRP": "2015-06-15"
-    },
+  "variables": {
+    "dnsLabelPrefix": "[concat('dns', resourceGroup().name)]",
+    "rdshVmSize":  "Standard_A2",
+    "storageAccountName": "[concat('sa', resourceGroup().name)]",
+    "storageAccountType": "Standard_LRS",
+    "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "adVnetName": "[concat('ADVNET',resourceGroup().name)]",
+    "adSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
+    "vnetAddressRange": "10.0.0.0/16",
+    "subnetAddressRange": "10.0.0.0/24",
+    "dnsServerPrivateIp": "10.0.0.4",
+    "DNSIP": "192.168.100.2",
+    "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('adVnetName')),'/subnets/',variables('adSubnetName'))]",
+    "publicIpRef": "publicIp",
+    "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/rds-deployment/",
+    "apiVersion": "2015-06-15",
+    "apiVersionNRP": "2015-05-01-preview"
+  },
     "resources": [
-      {
-        "apiVersion": "[variables('apiVersionNRP')]",
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[variables('publicIpRef')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "publicIPAllocationMethod": "Dynamic",
-          "dnsSettings": {
-            "domainNameLabel": "[variables('dnsLabelPrefix')]"
-          }
-        }
-      },
-      {
+        {
             "apiVersion": "[variables('apiVersionNRP')]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('gatewayIpRef')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic",
-                "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsLabelPrefix')]"
-                }
-            }
-        },
-      {
-            "apiVersion": "[variables('apiVersionNRP')]",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('brokerIpRef')]",
+            "name": "[variables('publicIpRef')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -205,9 +178,6 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
-                    "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayIpRef'))]"
-                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     },
@@ -229,7 +199,8 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]"
+                "[variables('dnsServerPrivateIp')]",
+                "[variables('DNSIP')]"
               ]
             }
             }
@@ -248,9 +219,6 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
-                    "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('brokerIpRef'))]"
-                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     }
@@ -259,7 +227,8 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]"
+                "[variables('dnsServerPrivateIp')]",
+                "[variables('DNSIP')]"
               ]
             }
             }
@@ -271,7 +240,7 @@
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "rdsh-nic-loop",
-                "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
+                "count": "[parameters('numberOfRdshInstances')]"
             },
             "dependsOn": [
                 "Microsoft.Network/loadBalancers/loadBalancer"
@@ -290,7 +259,8 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]"
+                "[variables('dnsServerPrivateIp')]",
+                "[variables('DNSIP')]"
               ]
             }
             }
@@ -382,7 +352,7 @@
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "rdsh-vm-loop",
-        "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
+        "count": "[parameters('numberOfRdshInstances')]"
       },
       "dependsOn": [
         "Microsoft.Compute/virtualMachines/gw-vm/extensions/gateway",
@@ -538,7 +508,7 @@
             "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
             "domainName": "[parameters('adDomainName')]",
             "externalfqdn": "[concat('gateway.',parameters('adDomainName'))]",
-            "NumberOfRemoteDesktopSessionHosts": "[parameters('NumberOfRemoteDesktopSessionHosts')]",
+            "numberOfRdshInstances": "[parameters('numberOfRdshInstances')]",
             "sessionHostNamingPrefix": "rdsh-",
             "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]"
           }

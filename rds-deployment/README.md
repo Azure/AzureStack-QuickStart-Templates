@@ -1,8 +1,11 @@
-# Create Remote Desktop Sesson Collection deployment using existing AD.
-This template will create a Remote Desktop Sesson Collection farm using the PowerShell DSC Extension. Please note this expects that AD is already setup (The Vnet and Subnet names are currently in variables so, you need to update it to use yours). it creates the following resources:
+# Create Remote Desktop Sesson Collection deployment
 
+This template will create a Remote Desktop Sesson Collection farm using the PowerShell DSC Extension it creates the following resources:
+
++	A Virtual Network
 +	One Storage Account
 +	One external load balancer
++	One VM configured as Domain Controller for a new forest with a single domain
 +	One VM configured as RDS Connection Broker and Licensing Server role
 +	One VM configured as RDS Gateway and Web access Server role
 +	One (or more) VMs configured as RDSH host role. NOTE: Because HA is not supported on AzureStack TP2, please use only one VM or it will fail.
@@ -13,7 +16,7 @@ This template will create a Remote Desktop Sesson Collection farm using the Powe
 +	Login into Azurestack portal
 +	Click "New" -> "Custom" -> "Template deployment"
 +	Copy conent in azuredeploy.json, Click "Edit Tempalte" and paste content, then Click "Save"
-+	Fill the parameters. Again, this uses existing AD. Please see note above.
++	Fill the parameters
 +	Click "Create new" to create new Resource Group
 +	Click "Create"
 

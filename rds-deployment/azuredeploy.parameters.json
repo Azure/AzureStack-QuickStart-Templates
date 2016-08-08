@@ -11,17 +11,8 @@
     "adDomainName": {
       "value": "mydomain.local"
     },
-    "rdshImageStorageAccountName": {
-      "value": "my-rdsh-image-storage-name"
-    },
-    "rdshsourceImageVhdUri": {
-      "value": "rdsh-source-image-uri"
-    },
     "numberOfRdshInstances": {
       "value": 1
-},
-    "imageSKU": {
-      "value": "2012-R2-Datacenter"
     }
   }
 }
