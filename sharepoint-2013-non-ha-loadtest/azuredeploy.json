@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+    "contentVersion": "1.16.8.5",
     "parameters": {
         "TestControllerVMName": {
             "type": "string",
@@ -94,7 +94,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('PrepareSQLTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerServiceUserName": {
@@ -117,7 +117,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('PrepareSPTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerServiceUserName": {
@@ -156,7 +156,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('RunLoadTestTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerVMName": {

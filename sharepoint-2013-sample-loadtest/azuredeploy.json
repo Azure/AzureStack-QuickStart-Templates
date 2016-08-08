@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+    "contentVersion": "1.16.8.5",
     "parameters": {
         "TestControllerVMName": {
             "type": "string",
@@ -41,14 +41,15 @@
             "type": "securestring",
             "metadata": {
                 "description": "Password of the user account to be used for lad testing."
-            }
+            },
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         },
         "assetLocation": {
             "type": "string",
             "metadata": {
                 "description": "The location of resources that the template is dependent on such as scripts and load test package"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-sample-loadtest"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/sharepoint-2013-sample-loadtest"
         }
     },
     "variables": {
@@ -67,7 +68,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('PrepareTargetTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerServiceUserName": {
@@ -91,7 +92,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('RunLoadTestTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerVMName": {
