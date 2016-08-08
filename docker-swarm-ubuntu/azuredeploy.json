@@ -119,16 +119,9 @@
                 "description": "This is the windows sku used by the windows jumpbox"
             }
         },
-        "disablePasswordAuthentication": {
-            "type": "bool",
-            "defaultValue": true,
-            "metadata": {
-                "description": "This setting controls whether password auth is disabled for Linux VMs provisioned by this template. Default is true which disables password and makes SSH key required."
-            }
-        },
-        "setLinuxConfigurationForVMCreate": {
+        "setSSHKeysLinuxConfiguration": {
             "type": "int",
-            "defaultValue": 1,
+            "defaultValue": 0,
             "allowedValues": [ 0, 1 ],
             "metadata": {
                 "description": "This setting controls whether Linux configuration with SSH Key is passed in VM PUT Payload.  Defaults to 1.  If SSH Key is blank, this must be set to 0."
@@ -146,13 +139,6 @@
             "defaultValue": 40,
             "metadata": {
                 "description": "This specifies the number of VMs per storage accounts"
-            }
-        },
-        "postInstallScriptURI": {
-            "type": "string",
-            "defaultValue": "disabled",
-            "metadata": {
-                "description": "After installation, this specifies a script to download and install.  To disabled, set value to 'disabled'."
             }
         },
         "configureScriptsRootLocation": {
@@ -189,7 +175,6 @@
         "windowsAdminUsername": "[parameters('windowsAdminUsername')]",
         "windowsAdminPassword": "[parameters('windowsAdminPassword')]",
         "vmsPerStorageAccount": "[parameters('vmsPerStorageAccount')]",
-        "postInstallScriptURI": "[parameters('postInstallScriptURI')]",
 
         "nameSuffix": "[tolower(parameters('nameSuffix'))]",
         "storageLocation": "[resourceGroup().location]",
@@ -198,7 +183,7 @@
         "linuxConfigurations": [
             { },
             {
-                "disablePasswordAuthentication": "[parameters('disablePasswordAuthentication')]",
+                "disablePasswordAuthentication": true,
                 "ssh": {
                     "publicKeys": [
                         {
@@ -209,7 +194,7 @@
                 }
             }
         ],
-        "linuxConfiguration": "[variables('linuxConfigurations')[parameters('setLinuxConfigurationForVMCreate')]]",
+        "linuxConfiguration": "[variables('linuxConfigurations')[parameters('setSSHKeysLinuxConfiguration')]]",
 
         "orchestratorName": "swarm",
 
@@ -273,7 +258,7 @@
         "agentStorageAccountName": "[concat(variables('storageAccountBaseName'),'agent', variables('nameSuffix'))]",
         "omsStorageAccount": "none",
         "omsStorageAccountKey": "none",
-        "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('adminUsername'),' ',variables('postInstallScriptURI'), ' ', variables('baseSubnet'))]",
+        "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('adminUsername'),' ',' ', ' ', variables('baseSubnet'))]",
         "jumpboxNSGName": "[concat(variables('orchestratorName'), '-jumpbox-nsg-', variables('nameSuffix'))]",
         "jumpboxNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('jumpboxNSGName'))]",
         "jumpboxAddr": 4,
