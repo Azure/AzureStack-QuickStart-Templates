@@ -13,13 +13,15 @@
       "type": "string",
       "metadata": {
         "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'. For example johnadmin"
-      }
+      },
+      "defaultValue": "vmadmin"
     },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "The password for the administrator account of the new VM and the domain"
-      }
+      },
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
     },
     "imageSKU": {
       "type": "string",
@@ -32,7 +34,7 @@
       },
       "defaultValue": "2012-R2-Datacenter"
     },
-    "rdshImageStorageAccountName": {
+        "rdshImageStorageAccountName": {
             "type": "string",
             "metadata": {
                 "description": "This is the name of the your storage account where you stored the os custom image you want to use for rdsh machines. For example johnrdshstore"
@@ -44,11 +46,11 @@
             "description": "The URI for source of the blob containing the custom image. For example https://johnrdshstore.blob.core.windows.net/johncontainer/MyWindowServerOS.vhd"
         }
     },
-    "numberOfRdshInstances": {
+    "NumberOfRemoteDesktopSessionHosts": {
       "type": "int",
       "defaultValue": 1,
       "metadata": {
-        "description": "Number of RDSH instances"
+        "description": "Number of RemoteDesktopSessionHosts"
       }
     }
   },
@@ -65,18 +67,43 @@
         "vnetAddressRange": "10.0.0.0/16",
         "subnetAddressRange": "10.0.0.0/24",
         "dnsServerPrivateIp": "10.0.0.4",
-        "DNSIP": "192.168.100.2",
         "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('adVnetName')),'/subnets/',variables('adSubnetName'))]",
         "publicIpRef": "publicIp",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment/",
+        "brokerIpRef": "brokerpublicIp",
+        "gatewayIpRef": "gatewaypublicIp",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment-existing-ad/",
         "apiVersion": "2015-06-15",
-        "apiVersionNRP": "2015-05-01-preview"
+        "apiVersionNRP": "2015-06-15"
     },
     "resources": [
-        {
+      {
+        "apiVersion": "[variables('apiVersionNRP')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIpRef')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publicIPAllocationMethod": "Dynamic",
+          "dnsSettings": {
+            "domainNameLabel": "[variables('dnsLabelPrefix')]"
+          }
+        }
+      },
+      {
             "apiVersion": "[variables('apiVersionNRP')]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIpRef')]",
+            "name": "[variables('gatewayIpRef')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsLabelPrefix')]"
+                }
+            }
+        },
+      {
+            "apiVersion": "[variables('apiVersionNRP')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('brokerIpRef')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -178,6 +205,9 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayIpRef'))]"
+                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     },
@@ -199,8 +229,7 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
@@ -219,6 +248,9 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('brokerIpRef'))]"
+                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     }
@@ -227,8 +259,7 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
@@ -240,7 +271,7 @@
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "rdsh-nic-loop",
-                "count": "[parameters('numberOfRdshInstances')]"
+                "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
             },
             "dependsOn": [
                 "Microsoft.Network/loadBalancers/loadBalancer"
@@ -259,8 +290,7 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
@@ -352,7 +382,7 @@
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "rdsh-vm-loop",
-        "count": "[parameters('numberOfRdshInstances')]"
+        "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
       },
       "dependsOn": [
         "Microsoft.Compute/virtualMachines/gw-vm/extensions/gateway",
@@ -508,7 +538,7 @@
             "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
             "domainName": "[parameters('adDomainName')]",
             "externalfqdn": "[concat('gateway.',parameters('adDomainName'))]",
-            "numberOfRdshInstances": "[parameters('numberOfRdshInstances')]",
+            "NumberOfRemoteDesktopSessionHosts": "[parameters('NumberOfRemoteDesktopSessionHosts')]",
             "sessionHostNamingPrefix": "rdsh-",
             "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]"
           }
