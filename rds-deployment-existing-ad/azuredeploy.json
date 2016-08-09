@@ -523,7 +523,7 @@
             "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
             "domainName": "[parameters('adDomainName')]",
             "externalfqdn": "[concat('gateway.',parameters('adDomainName'))]",
-            "NumberOfRemoteDesktopSessionHosts": "[parameters('NumberOfRemoteDesktopSessionHosts')]",
+            "numberOfRdshInstances": "[parameters('NumberOfRemoteDesktopSessionHosts')]",
             "sessionHostNamingPrefix": "rdsh-",
             "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]"
           }
