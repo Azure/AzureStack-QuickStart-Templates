@@ -14,21 +14,24 @@
             "type": "string",
             "metadata": {
                 "description": "Name of the resource group to test"
-            }
+            },
+            "defaultValue": "[resourceGroup().name]"
         },
 
         "targetVMNetworkName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the existing VM network to connect to"
-            }
+            },
+            "defaultValue": "[concat('SPVnet',resourceGroup().name)]"
         },
 
         "targetVMNetworkSubnetName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the exsisting subnet to connect to"
-            }
+            },
+            "defaultValue": "[concat('SPSubNet',resourceGroup().name)]"
         },
 
         "adminUsername": {
@@ -36,14 +39,15 @@
             "metadata": {
                 "description": "The name of the Administrator of the new VMs and Domain"
             },
-            "defaultValue": "Administrator"
+            "defaultValue": "lcladmin"
         },
 
         "adminPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs and Domain"
-            }
+            },            
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         },
 
         "serviceAccountUserName": {
@@ -58,7 +62,8 @@
             "type": "securestring",
             "metadata": {
                 "description": "The password of the user account under which the test controller and test agent services will run"
-            }
+            },            
+            "defaultValue": "[concat('SA',subscription().subscriptionId)]"
         },
 
         "testAgentCount": {

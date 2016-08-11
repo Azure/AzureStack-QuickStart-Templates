@@ -14,7 +14,7 @@
             "metadata": {
                 "description": "Username for the Virtual Machine local administrator"
             },
-            "defaultValue": "Administrator"
+            "defaultValue": "vmadmin"
         },
         "adminPassword": {
             "type": "securestring",
@@ -28,21 +28,21 @@
             "metadata": {
                 "description": "Name of the resource group that cointains the domain controller"
             },
-            "defaultValue": "ContosoRG"
+            "defaultValue": "[resourceGroup().name]"
         },
         "dcVNetName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the extisting VNet that contains the domain controller"
             },
-            "defaultValue": "contosovnet"
+            "defaultValue": "[concat('ADVNET',resourceGroup().name)]"
         },
         "dcSubnetName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the existing subnet that contains the domain controller"
             },
-            "defaultValue": "contososubnet"
+            "defaultValue": "[concat('ADStaticSubnet',resourceGroup().name)]"
         },
         "domainToJoin": {
             "type": "string",
@@ -70,13 +70,14 @@
             "metadata": {
                 "description": "Username of the domain account to be used for joining the domain"
             },
-            "defaultValue": "Administrator"
+            "defaultValue": "vmadmin"
         },
         "domainPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "Password of the domain account to be used for joining the domain"
-            }
+            },
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         }
     },
     "variables": {
