@@ -7,7 +7,7 @@
             "metadata": {
                 "description": "Name of the existing test controller VM resource to use"
             },
-            "defaultValue": "sprg-tc-0"
+            "defaultValue": "[concat(resourceGroup().name,'-tc-0')]"
         },
         "TestControllerServiceUserName": {
             "type": "string",
@@ -21,34 +21,35 @@
             "metadata": {
                 "description": "Name of the existing SharePoint server VM resource to test"
             },
-            "defaultValue": "sprg-sp-0"
+            "defaultValue": "[concat('SP',resourceGroup().name)]"
         },
         "TargetSQLServerVMName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the existing SQL server VM resource to test"
             },
-            "defaultValue": "sprg-sql-0"
+            "defaultValue": "[concat('SPSQL',resourceGroup().name)]"
         },
         "TargetSharePointServerAdminUserName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the SharePoint administrator account"
             },
-            "defaultValue": "Administrator"
+            "defaultValue": "lcladmin"
         },
         "TargetSharePointServerUserPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "Password of the SharePoint administrator account"
-            }
+            },            
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         },
         "TargetSharePointSiteURL": {
             "type": "string",
             "metadata": {
                 "description": "URL of the SharePoint end point to test."
             },
-            "defaultValue": "http://sprg-sp-0.contoso.com"
+            "defaultValue": "[concat('http://SP',resourceGroup().name,'.contoso.com')]"
         },
         "NumberOfLoadTestUsers": {
             "type": "int",
