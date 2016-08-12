@@ -27,7 +27,8 @@
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs and Domain"
-            }
+            },            
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         },
         "sqlInstallationISOUri": {
             "type": "string",
@@ -45,9 +46,8 @@
         "sharepoint2013ProductKey": {
             "type": "string",
             "metadata": {
-                "description": "Product key for SharePoint 2013 SP1 required for SharePoint setup"
-            },
-            "defaultValue": "XXXX-XXXX-XXXX-XXXX"
+                "description": "Product key for SharePoint 2013 SP1 required for SharePoint setup. e.g. XXXX-XXXX-XXXX-XXXX "
+            }
         }
     },
     "variables": {
