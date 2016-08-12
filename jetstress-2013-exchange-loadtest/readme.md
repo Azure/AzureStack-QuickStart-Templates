@@ -1,8 +1,11 @@
 # JETSTRESS 2013 WORKLoAD FOR EXCHANGE 2016 CU1 ON AZURESTACK
 
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fmaster%2Fjetstress-2013-exchange-loadtest%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fjetstress-2013-exchange-loadtest%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fjetstress-2013-exchange-loadtest%2Fazuredeploy.json" target="_blank">
+    <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
 This template deploys a Jetstress workload for Exchange 2016. The Jetstress workload simulates Exchange database and find out IOPS supported by a given storage subsystem.
@@ -15,8 +18,8 @@ NOTE: There is a 90 minutes Azure time-out which you can hit if large number of 
 
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
-| Microsoft Azure      | - | no |
-| Microsoft Azure Stack      | TP1      |  no |
+| Microsoft Azure      | - | yes |
+| Microsoft Azure Stack      | TP2      |  yes |
 
 
 ## Deployed resources
