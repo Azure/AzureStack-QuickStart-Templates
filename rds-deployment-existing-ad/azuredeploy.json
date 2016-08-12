@@ -13,13 +13,15 @@
       "type": "string",
       "metadata": {
         "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'. For example johnadmin"
-      }
+      },
+      "defaultValue": "vmadmin"
     },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "The password for the administrator account of the new VM and the domain"
-      }
+      },
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
     },
     "imageSKU": {
       "type": "string",
@@ -32,11 +34,11 @@
       },
       "defaultValue": "2012-R2-Datacenter"
     },
-    "numberOfRdshInstances": {
+    "NumberOfRemoteDesktopSessionHosts": {
       "type": "int",
       "defaultValue": 1,
       "metadata": {
-        "description": "Number of RDSH instances"
+        "description": "Number of RemoteDesktopSessionHosts"
       }
     }
   },
@@ -57,7 +59,7 @@
         "publicIpRef": "publicIp",
         "brokerIpRef": "brokerpublicIp",
         "gatewayIpRef": "gatewaypublicIp",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment/",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment-existing-ad/",
         "apiVersion": "2015-06-15",
         "apiVersionNRP": "2015-06-15"
     },
@@ -257,7 +259,7 @@
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "rdsh-nic-loop",
-                "count": "[parameters('numberOfRdshInstances')]"
+                "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
             },
             "dependsOn": [
                 "Microsoft.Network/loadBalancers/loadBalancer"
@@ -368,7 +370,7 @@
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "rdsh-vm-loop",
-        "count": "[parameters('numberOfRdshInstances')]"
+        "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
       },
       "dependsOn": [
         "Microsoft.Compute/virtualMachines/gw-vm/extensions/gateway",
@@ -521,7 +523,7 @@
             "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
             "domainName": "[parameters('adDomainName')]",
             "externalfqdn": "[concat('gateway.',parameters('adDomainName'))]",
-            "numberOfRdshInstances": "[parameters('numberOfRdshInstances')]",
+            "numberOfRdshInstances": "[parameters('NumberOfRemoteDesktopSessionHosts')]",
             "sessionHostNamingPrefix": "rdsh-",
             "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]"
           }
