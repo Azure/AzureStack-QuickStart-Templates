@@ -27,7 +27,7 @@ function DownloadISO {
 	# Download ISO
 	$retries = 3
 	# Stop retrying after download succeeds or all retries attempted
-	whiel(($retries -gt 0) -and ($result -eq $false)) {
+	while(($retries -gt 0) -and ($result -eq $false)) {
 		try
 		{
 			"Downloading URI: $uri ($sizeInBytes bytes) to path: $destination" | Tee-Object -FilePath $logFilePath -Append
