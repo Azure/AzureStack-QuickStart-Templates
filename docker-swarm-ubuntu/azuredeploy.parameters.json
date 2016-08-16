@@ -21,9 +21,6 @@
         "masterVMSize": {
             "value": "Standard_A2"
         },
-        "nameSuffix": {
-            "value": "GEN-UNIQUE"
-        },
         "setLinuxConfigurationForVMCreate": {
             "value": 0
         },

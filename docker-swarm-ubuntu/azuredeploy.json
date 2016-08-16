@@ -127,13 +127,6 @@
                 "description": "This setting controls whether Linux configuration with SSH Key is passed in VM PUT Payload.  Defaults to 1.  If SSH Key is blank, this must be set to 0."
             }
         },
-        "nameSuffix": {
-            "type": "string",
-            "defaultValue": "0",
-            "metadata": {
-                "description": "A UNIQUE string to be included in the names of resources created.  Defaults to 0.  Can not be blank."
-            }
-        },
         "vmsPerStorageAccount": {
             "type": "int",
             "defaultValue": 40,
@@ -158,6 +151,8 @@
             "storage": "2015-05-01-preview",
             "compute": "2015-06-15"
         },
+        "orchestratorName": "swarm",
+        "nameSuffix": "[replace(replace(substring(tolower(uniqueString(resourceGroup().id)),0,5), '-', ''), '.','')]",
         "jumpboxEndpointDNSName": "[tolower(concat('jumpbox', variables('nameSuffix')))]",
         "masterEndpointDNSName": "[tolower(concat('master', variables('nameSuffix')))]",
         "agentEndpointDNSName": "[tolower(concat('agent', variables('nameSuffix')))]",
@@ -175,8 +170,6 @@
         "windowsAdminUsername": "[parameters('windowsAdminUsername')]",
         "windowsAdminPassword": "[parameters('windowsAdminPassword')]",
         "vmsPerStorageAccount": "[parameters('vmsPerStorageAccount')]",
-
-        "nameSuffix": "[tolower(parameters('nameSuffix'))]",
         "storageLocation": "[resourceGroup().location]",
 
         "sshKeyPath": "[concat('/home/', variables('adminUsername'), '/.ssh/authorized_keys')]",
@@ -195,8 +188,6 @@
             }
         ],
         "linuxConfiguration": "[variables('linuxConfigurations')[parameters('setSSHKeysLinuxConfiguration')]]",
-
-        "orchestratorName": "swarm",
 
 
         "jumpboxPublicIPAddressName": "[concat(variables('orchestratorName'), '-jumpbox-ip-', '-', variables('nameSuffix'))]",
