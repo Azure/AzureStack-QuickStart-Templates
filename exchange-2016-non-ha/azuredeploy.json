@@ -9,7 +9,7 @@
                 "description": "Number of Exchange VMs to deploy."
             }
         },
-        "exchangeStorageSize": {
+        "exchangeStorageSizeInGB": {
             "type": "int",
             "defaultValue": 10,
             "metadata": {
@@ -283,7 +283,7 @@
                     "configurationFunction": "[variables('configurationFunctionExchange')]",
                     "properties": {
                         "DomainName": "[variables('exchangeDomainName')]",
-                        "StorageSize": "[parameters('exchangeStorageSize')]",
+                        "StorageSize": "[parameters('exchangeStorageSizeInGB')]",
                         "VMAdminCreds": {
                             "userName": "[variables('vmAdminUsername')]",
                             "password": "PrivateSettingsRef:vmAdminPassword"

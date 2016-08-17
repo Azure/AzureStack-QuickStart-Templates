@@ -3,7 +3,7 @@
     "contentVersion": "1.16.8.3",
     "parameters": {
         "jetstressVMCount": {
-            "value": "1"
+            "value": "4"
         },
         "testExecutionTimeInMinutes": {
             "value": "60"
