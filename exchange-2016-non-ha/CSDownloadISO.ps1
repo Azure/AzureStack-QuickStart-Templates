@@ -30,7 +30,7 @@ function DownloadISO {
 	while(($retries -gt 0) -and ($result -eq $false)) {
 		try
 		{
-			"Downloading URI: $uri ($sizeInBytes bytes) to path: $destination" | Tee-Object -FilePath $logFilePath -Append
+			"Downloading ISO from URI: $uri to destination: $destination" | Tee-Object -FilePath $logFilePath -Append
 			$isoFileName = [System.IO.Path]::GetFileName($uri)
 			$webClient = New-Object System.Net.WebClient
 			$_date = Get-Date -Format hh:mmtt
@@ -52,7 +52,6 @@ function DownloadISO {
 				Remove-Item $destination -Force -Confirm:0 -ErrorAction SilentlyContinue
 			}
 		}
-		
 	}
 	
 	# Extract ISO
