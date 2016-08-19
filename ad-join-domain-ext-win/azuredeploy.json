@@ -7,7 +7,7 @@
             "metadata": {
                 "description": "Name of the Virtual Machine to be created"
             },
-            "defaultValue": "myvm"
+            "defaultValue": "[concat('myvm',resourceGroup().name)]"
         },
         "adminUsername": {
             "type": "string",
