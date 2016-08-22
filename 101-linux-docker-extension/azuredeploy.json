@@ -6,7 +6,8 @@
       "type": "string",
       "metadata": {
         "description": "Name of the existing VM to apply Docker extension to"
-      }
+      },
+      "defaultValue": "[concat('vm', resourceGroup().name)]"
     }
 
   },
