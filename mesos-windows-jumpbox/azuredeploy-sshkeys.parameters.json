@@ -20,11 +20,8 @@
         "masterVMSize": {
             "value": "Standard_A2"
         },
-        "setLinuxConfigurationForVMCreate": {
+        "setSSHKeysLinuxConfiguration": {
             "value": 1
-        },
-        "disablePasswordAuthentication": {
-            "value": true
         }
     }
     }
