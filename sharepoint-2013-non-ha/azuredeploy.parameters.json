@@ -2,21 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "domainName": {
-            "value": "contoso.com"
-        },
-        "sqlServerServiceAccountUserName": {
-            "value": "sa"
-        },
-        "adminUsername": {
-            "value": "lcladmin"
-        },
-        "adminPassword": {
-            "value": "GEN-PASSWORD"
-        },
-        "sqlInstallationISOUri": { 
-            "value": "http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
-        },
         "sharepoint2013SP1DownloadLink": {
             "value": ""
         },
