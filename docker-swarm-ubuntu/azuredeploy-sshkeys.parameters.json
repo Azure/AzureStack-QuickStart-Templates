@@ -6,9 +6,6 @@
         "sshRSAPublicKey": {
           "value": "GEN-SSH-PUB-KEY"
         },
-        "windowsAdminPassword": {
-            "value": "GEN-PASSWORD"
-        },
         "agentCount": {
             "value": 1
         },
