@@ -6,14 +6,14 @@
             "type": "string",
             "defaultValue": "adminuser",
             "metadata": {
-                "description": "User name for the Linux Virtual Machines (SSH or Password)."
+                "description": "User name for the Linux Virtual Machines (SSH or Password).Default value is adminuser"
             }
         },
         "linuxAdminPassword": {
             "type": "securestring",
-            "defaultValue": "",
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
             "metadata": {
-                "description": "Password for the Linux Virtual Machine.  Not Required.  If not set, you must provide a SSH key."
+                "description": "Password for the Linux Virtual Machine. Default value is 'Subscription#<subscription id>'. Not Required.  If not set, you must provide a SSH key."
             }
         },
         "sshRSAPublicKey": {
@@ -27,14 +27,14 @@
             "type": "string",
             "defaultValue": "adminuser",
             "metadata": {
-                "description": "User name for the Windows Jumpbox Virtual Machine (Password Only Supported)."
+                "description": "User name for the Windows Jumpbox Virtual Machine (Password Only Supported).Default value is adminuser"
             }
         },
         "windowsAdminPassword": {
             "type": "securestring",
-            "defaultValue": "",
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
             "metadata": {
-                "description": "Password for the Windows Jumpbox Virtual Machine."
+                "description": "Password for the Windows Jumpbox Virtual Machine. Default value is 'Subscription#<subscription id>'."
             }
         },
         "agentVMSize": {
@@ -199,7 +199,7 @@
 
         "virtualNetworkName": "[concat(variables('orchestratorName'), '-vnet-', variables('nameSuffix'))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetName": "[concat(variables('orchestratorName'), '-subnet')]",
+        "subnetName": "[concat(variables('orchestratorName'), '-subnet-', variables('nameSuffix'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "addressPrefix": "10.0.0.0/16",
         "subnetPrefix": "10.0.0.0/18",
