@@ -3,10 +3,10 @@
     "contentVersion": "1.16.8.3",
     "parameters": {
         "jetstressVMCount": {
-            "value": "4"
+            "value": 4
         },
         "testExecutionTimeInMinutes": {
-            "value": "60"
+            "value": 60
         },
         "numberOfThreads": {
             "value": "AutoSeek"
@@ -15,19 +15,19 @@
             "value": "DiskSubsystemThroughput"
         },
         "storageDiskCapacityPercentage": {
-            "value": "80"
+            "value": 80
         },
         "iopsCapacityPercentage": {
-            "value": "80"
+            "value": 80
         },
         "exchangeMailboxCount": {
-            "value": "10"
+            "value": 10
         },
         "exchangeIopsPerMailbox": {
-            "value": "1"
+            "value": 1
         },
         "exchangeMailboxSizeInMB": {
-            "value": "200"
+            "value": 200
         }
     }
 }

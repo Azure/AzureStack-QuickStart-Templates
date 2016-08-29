@@ -3,7 +3,7 @@
   "contentVersion": "1.16.07.29",
   "parameters": {
     "vmCount": {
-      "value": 2
+      "value": 5
     }
   }
 }
