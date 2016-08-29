@@ -10,8 +10,8 @@
       }
     },
     "testExecutionTimeInMinutes": {
-      "type": "string",
-      "defaultValue": "60",
+      "type": "int",
+      "defaultValue": 60,
       "metadata": {
         "description": "Duration to run Jetstress load test."
       }
