@@ -11,22 +11,22 @@
         },
         "adminPassword": {
             "type": "securestring",
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
             "metadata": {
-                "description": "Password for the Virtual Machine."
+                "description": "Password for the Virtual Machine.Default value is 'Subscription#<subscription id>'"
             }
         },
         "ubuntuOSVersion": {
-      "type": "string",
-      "defaultValue": "15.10",
-      "allowedValues": [
-        "14.04.2-LTS",
-        "14.04.3-LTS",
-        "15.10"
-      ],
-      "metadata": {
-        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Allowed values:14.04.2-LTS, 14.04.3-LTS, 15.10."
-      }
-    }
+            "type": "string",
+            "defaultValue": "15.10",
+            "allowedValues": [
+                "14.04.3-LTS",
+                "15.10"
+            ],
+            "metadata": {
+                "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Allowed values: 14.04.3-LTS, 15.10."
+            }
+        }
     },
     "variables": {
         "dnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
@@ -47,10 +47,11 @@
         "vmSize": "Standard_A1",
         "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-complex-linux-vm",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-comprehensive-linux-vm",
         "scriptFileName": "docker.sh",
         "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]",
         "apiVersion": {
             "resources": { "deployments": "2015-01-01" },
             "network": "2015-05-01-preview",
@@ -58,184 +59,284 @@
             "compute": "2015-06-15"
         }
     },
-  "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[toLower(variables('storageAccountName'))]",
-      "apiVersion": "[variables('apiVersion').storage]",
-      "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('dnsNameForPublicIP')]"
-        }
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[toLower(variables('storageAccountName'))]",
+            "apiVersion": "[variables('apiVersion').storage]",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
         },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion').network]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
-      "location": "[variables('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-              },
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-        "apiVersion": "[variables('apiVersion').compute]",
-        "type": "Microsoft.Compute/virtualMachines",
-        "name": "[variables('vmName')]",
-        "location": "[variables('location')]",
-        "dependsOn": [
-            "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-            "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-        ],
-        "properties": {
-            "hardwareProfile": {
-                "vmSize": "[variables('vmSize')]"
-            },
-            "osProfile": {
-                "computerName": "[variables('vmName')]",
-                "adminUsername": "[parameters('adminUsername')]",
-                "adminPassword": "[parameters('adminPassword')]"
-            },
-            "storageProfile": {
-                "imageReference": {
-                    "publisher": "[variables('imagePublisher')]",
-                    "offer": "[variables('imageOffer')]",
-                    "sku": "[parameters('ubuntuOSVersion')]",
-                    "version": "latest"
-                },
-                "osDisk": {
-                    "name": "osdisk",
-                    "vhd": {
-                        "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
-                    },
-                    "caching": "ReadWrite",
-                    "createOption": "FromImage"
-                }
-            },
-            "networkProfile": {
-                "networkInterfaces": [
+                "securityRules": [
                     {
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        "name": "ssh",
+                        "properties": {
+                            "description": "Allow RDP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        },
+                        "name": "rule1",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
                     }
                 ]
-            },
-            "diagnosticsProfile": {
-                "bootDiagnostics": {
-                    "enabled": "true",
-                    "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('nicName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[variables('networkSecurityGroupName')]"
+            ],
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('vmName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[parameters('ubuntuOSVersion')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": "true",
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/LinuxDiagnosticExtension')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "LinuxDiagnostic",
+                "typeHandlerVersion": "2.3",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "perfCfg": [
+                        {
+                            "query": "SELECT UsedMemory,AvailableMemory FROM SCX_MemoryStatisticalInformation",
+                            "table": "Memory"
+                        }
+                    ],
+                    "enableSyslog": "true"
+
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[variables('storageAccountName')]",
+                    "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/LinuxCustomScriptExtension')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "CustomScriptForLinux",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "commandToExecute": "touch /test.txt",
+                    "enableInternalDNSCheck": "false"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/LinuxDockerExtension')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "DockerExtension",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "fileUris": [ "[variables('scriptFile')]" ],
+                    "commandToExecute": "sh docker.sh"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/LinuxVMAccessExtension')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "VMAccessForLinux",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": "true",
+                "settings": { },
+                "protectedSettings": {
+                    "username": "[parameters('adminUsername')]",
+                    "password": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/installospatching')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "OSPatchingForLinux",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "disabled": false,
+                    "stop": false,
+                    "rebootAfterPatch": "Auto",
+                    "category": "ImportantAndRecommended",
+                    "installDuration": "01:00",
+                    "oneoff": true,
+                    "intervalOfWeeks": "1",
+                    "dayOfWeek": "Sunday",
+                    "startTime": "03:00",
+                    "vmStatusTest": {
+                        "local": false,
+                        "idleTestScript": "",
+                        "healthyTestScript": ""
+                    }
                 }
             }
         }
-    },
-    {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(variables('vmName'),'/LinuxCustomScriptExtension')]",
-        "apiVersion": "[variables('apiVersion').compute]",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-        ],
-        "properties": {
-            "publisher": "Microsoft.OSTCExtensions",
-            "type": "CustomScriptForLinux",
-            "typeHandlerVersion": "1.3",            
-            "autoUpgradeMinorVersion": "true",
-            "settings": {
-                "commandToExecute": "touch /test.txt",
-                "enableInternalDNSCheck": "false"
-            }
-        }
-    },
-    {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(variables('vmName'),'/LinuxDockerExtension')]",
-        "apiVersion": "[variables('apiVersion').compute]",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-        ],
-        "properties": {
-            "publisher": "Microsoft.Azure.Extensions",
-            "type": "DockerExtension",
-            "typeHandlerVersion": "1.0",            
-            "autoUpgradeMinorVersion": "true",
-            "settings": {
-                "fileUris": [ "[variables('scriptFile')]" ],
-                "commandToExecute": "sh docker.sh"
-            }
-        }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),'/LinuxVMAccessExtension')]",
-      "apiVersion": "[variables('apiVersion').compute]",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-        ],
-      "properties": {
-        "publisher": "Microsoft.OSTCExtensions",
-        "type": "VMAccessForLinux",
-        "typeHandlerVersion": "1.3",            
-        "autoUpgradeMinorVersion": "true",
-        "settings": { },
-        "protectedSettings": {
-          "username": "[parameters('adminUsername')]",
-          "password": "[parameters('adminPassword')]"
-        }
-      }
-    }
-  ],
+    ],
 
-  "outputs": {
-  }
+    "outputs": {
+    }
 }

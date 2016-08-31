@@ -1,6 +1,6 @@
 # [IaaS Linux VM Comprehensive Resources]
 
-This template deploys a Linux VM and also uses customscript, VMLinuxAccess and Docker Extensions
+This template deploys a Linux VM and also uses customscript, VMLinuxAccess, Docker, Linux Diagnostic and OSPatchingforLinux Extensions
 
 ## Prerequisites
 
@@ -42,7 +42,6 @@ $RGName = "myRG$myNum"
 $myLocation = "local"
 
 $templateFile= "azuredeploy.json"
-# Fix the GEN-* values in the azuredeploy.parameters.json before proceeding to next steps
 $templateParameterFile= "azuredeploy.parameters.json"
 
 # Create Resource Group for Template Deployment
