@@ -14,14 +14,16 @@ The below content is to give overall architecture of the Swarm Cluster
 
   The following image is an example of a cluster with 3 masters, and 3 agents:
 
- ![Image of Swarm cluster on azure](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/dockerswarm-ubuntu/images/swarm.png)
+ ![Image of Swarm cluster on azure](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/docker-swarm-ubuntu/images/swarm.png)
 
  All VMs are on the same private subnet, 10.0.0.0/18, and fully accessible to each other.
+
 ## Prerequisites
 
-Follow the below links to create an Ubuntu Image and upload the same to Azure Stack's Platform Image Repository
-1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/ 
+Follow the below links to create/download an Ubuntu 14.04 LTS Image and upload the same to Azure Stack's Platform Image Repository(PIR)
+1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
+	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating teh manifest.json in PIR
 
 ## Deployment steps
 => Deploy to azurestack, using custom deployment in azurestack portal.
@@ -43,7 +45,7 @@ Follow the below links to create an Ubuntu Image and upload the same to Azure St
 
 ## Explore Swarm with Simple hello world
  1. After successfully deploying the template write down the two output master and agent FQDNs.
- 2. SSH to port 2200 of the master FQDN
+ 2. SSH to port 22 of the master private ip
  3. Type `docker -H 10.0.0.5:2375 info` to see the status of the agent nodes.
  ![Image of docker info](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/docker-swarm-ubuntu/images/dockerinfo.png)
  4. Type `docker -H 10.0.0.5:2375 run hello-world` to see the hello-world test app run on one of the agents
