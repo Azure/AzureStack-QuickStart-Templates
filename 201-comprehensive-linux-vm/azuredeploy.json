@@ -218,36 +218,6 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/LinuxDiagnosticExtension')]",
-            "apiVersion": "[variables('apiVersion').compute]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "LinuxDiagnostic",
-                "typeHandlerVersion": "2.3",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "perfCfg": [
-                        {
-                            "query": "SELECT UsedMemory,AvailableMemory FROM SCX_MemoryStatisticalInformation",
-                            "table": "Memory"
-                        }
-                    ],
-                    "enableSyslog": "true"
-
-                },
-                "protectedSettings": {
-                    "storageAccountName": "[variables('storageAccountName')]",
-                    "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmName'),'/LinuxCustomScriptExtension')]",
             "apiVersion": "[variables('apiVersion').compute]",
             "location": "[resourceGroup().location]",
