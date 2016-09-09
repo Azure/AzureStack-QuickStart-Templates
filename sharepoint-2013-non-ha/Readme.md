@@ -13,15 +13,28 @@ One external load balancer creates an RDP NAT rule to allow connectivity to the 
 The second external load balancer creates an RDP NAT rule to allow connectivity to the SharePoint VM
 To access the SQL VM use the domain controller or the SharePoint VMs as jumpboxes
 
+## Parameters
++	domainName: FQDN of the new domain to be created.
++	sqlServerServiceAccountUserName: Username of the SQL server service account to create.
++	adminUsername: Username of the local Administrator account of the new VMs and domain.
++	adminPassword: Password of the local Administrator account of the new VMs and domain.
++	sharepoint2013SP1DownloadLink: Direct download link for the SharePoint 2013 with SP1 ISO.
++	sharepoint2013ProductKey: Product key for SharePoint 2013 with SP1, required for SharePoint setup.
+
 ## Notes
++	This template requires a SharePoint 2013 with SP1 iso for installing the SharePoint server. If the provided iso does not include SP1 setup will fail.
+	A direct link for SharePoint 2013 with SP1 iso can be obtained from MSDN subscriber downloads. Note however that MSDN subscribe downloads links expire
+	after a period of time. If you have an iso available, place it on a location where it is reachable for the VMs to download (Azure blob storage for example)
++	This template requires a product key for SharePoint 2013. A trial key for SharePoint 2013 can be found on MSDN subscriber downloads or from the TechNet
+	evaluation center.
+	
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fsharepoint-2013-non-ha%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
 
-+ 	The images used to create this deployment are
-	+ 	AD - Latest Windows Server 2012 R2 Image
-	+ 	SQL Server - Latest SQL Server 2014 on Windows Server 2012 R2 Image
-	+	SharePoint Server - Latest SharePoint 2013 on Windows Server 2012 R2 Image
-
-+	The installer bits for SQL 2014 and SharePoint 2013 were pre-loaded into the image
-+ 	The image configuration is defined in variables - details below - but the scripts that configure this deployment have only been tested with these versions and may not work on other images.
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fsharepoint-2013-non-ha%2Fazuredeploy.json" target="_blank">
+    <img src="http://armviz.io/visualizebutton.png"/>
+</a>
 
 ## Deploying from Portal
 

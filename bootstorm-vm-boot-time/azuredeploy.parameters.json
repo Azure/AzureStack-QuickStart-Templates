@@ -1,18 +1,18 @@
 {
   "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
-  "contentVersion": "1.16.03.24",
+  "contentVersion": "1.16.08.15",
   "parameters": {
 	"azureAccountUsername": {
-      "value": "<Your Azure account SPN user name>"
+      "value": "AZURE-AD-ACCOUNT-USERNAME"
     },
     "azureAccountPassword": {
-      "value": "<Your secured Azure account SPN password>"
+      "value": "AZURE-AD-ACCOUNT-PASSWORD"
     },
     "tenantId": {
-      "value": "<Your secured tenant Id from Azure Subscription>"
+      "value": "AZURE-AD-ACCOUNT-TENANT-ID"
     },
     "vmCount": {
-      "value": 2
+      "value": 5
     }
   }
 }
