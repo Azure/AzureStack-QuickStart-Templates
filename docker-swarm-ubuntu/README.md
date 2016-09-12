@@ -23,7 +23,7 @@ The below content is to give overall architecture of the Swarm Cluster
 Follow the below links to create/download an Ubuntu 14.04 LTS Image and upload the same to Azure Stack's Platform Image Repository(PIR)
 1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
-	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating teh manifest.json in PIR
+	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating the manifest.json in PIR
 
 ## Deployment steps
 => Deploy to azurestack, using custom deployment in azurestack portal.

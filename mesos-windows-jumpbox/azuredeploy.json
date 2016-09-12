@@ -251,8 +251,6 @@
         "omsStorageAccount": "none",
         "omsStorageAccountKey": "none",
         "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('swarmEnabled'),' ',variables('marathonEnabled'),' ',variables('chronosEnabled'),' ',variables('omsStorageAccount'),' ',variables('omsStorageAccountKey'),' ', variables('adminUsername'),' ', 'disabled', ' ', variables('baseSubnet'))]",
-        "jumpboxNSGName": "[concat(variables('orchestratorName'), '-jumpbox-nsg-', variables('nameSuffix'))]",
-        "jumpboxNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('jumpboxNSGName'))]",
         "jumpboxAddr": 4,
         "jumpboxVMName": "[concat('jumpboxVM-', variables('nameSuffix'))]",
         "jumpboxVMSize": "Standard_A1",
@@ -322,42 +320,14 @@
         },
         {
             "apiVersion": "[variables('apiVersion').network]",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('jumpboxNSGName')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "ssh",
-                        "properties": {
-                            "description": "Allow RDP",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "apiVersion": "[variables('apiVersion').network]",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('jumpboxVMName'), '-nic')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses',variables('jumpboxPublicIPAddressName'))]",
-                "[variables('vnetID')]",
-                "[variables('jumpboxNSGID')]"
+                "[variables('vnetID')]"
             ],
             "properties": {
-                "networkSecurityGroup": {
-                    "id": "[variables('jumpboxNSGID')]"
-                },
                 "ipConfigurations": [
                     {
                         "name": "ipConfig",

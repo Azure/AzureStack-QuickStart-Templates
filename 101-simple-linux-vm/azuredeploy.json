@@ -34,7 +34,7 @@
             "type": "string",
             "defaultValue": "14.04.3-LTS",
             "metadata": {
-                "description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 15.10, 12.SP1, 6.7 , 7.2"
+                "description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 12.SP1, 6.7 , 7.2"
             }
         }
     },
@@ -87,22 +87,11 @@
                             "description": "Allow RDP",
                             "protocol": "Tcp",
                             "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
+                            "destinationPortRange": "22",
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
                             "priority": 200,
-                            "direction": "Inbound"
-                        },
-                        "name": "rule1",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 101,
                             "direction": "Inbound"
                         }
                     }
