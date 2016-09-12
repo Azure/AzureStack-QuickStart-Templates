@@ -20,9 +20,10 @@ This template shows a simple example to deploy OSPatching Extension on an Linux 
 
 ## Prerequisites for Azure Stack
 
-Follow the below links to create a Linux Image and upload the same to Azure Stack's Platform Image Repository
+Follow the below links to create/download an Ubuntu 14.04 LTS Image and upload the same to Azure Stack's Platform Image Repository
 1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/ 
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
+Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating the manifest.json in PIR
 
 ## Deployment Steps 
 

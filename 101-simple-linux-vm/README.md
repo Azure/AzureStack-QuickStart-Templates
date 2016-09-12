@@ -13,9 +13,10 @@ This template deploys a simple Linux VM such as ubuntu 14.04, ubuntu 15.10, sles
 
 ## Prerequisites
 
-Follow the below links to create a Linux Image and upload the same to Azure Stack's Platform Image Repository
+Follow the below links to create/download a Linux Image and upload the same to Azure Stack's Platform Image Repository
 1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/ 
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
+	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json or parameters.json while creating the manifest.json in PIR
 
 ## Deployment steps
 1. Deploy to azure stack portal using custom deployment.
@@ -52,9 +53,7 @@ $RGName = "myRG$myNum"
 $myLocation = "local"
 
 $templateFile= "azuredeploy.json"
-# Fix the GEN-* values in the azuredeploy.parameters.json before proceeding to next steps
 $templateParameterFile= "azuredeploy.parameters.json"
-# For Ubuntu 14.04 $templateParameterFile= "ubuntu.14.04.azuredeploy.parameters.json"
 # For Suse $templateParameterFile= "suse.12.sp1.azuredeploy.parameters.json"
 # For CentOS 6.7 $templateParameterFile= "centos.6.7.azuredeploy.parameters.json"
 # For CentOS 7.2 $templateParameterFile= "centos.7.2.azuredeploy.parameters.json"
