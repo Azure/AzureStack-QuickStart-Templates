@@ -26,6 +26,7 @@
         "publisher": "Microsoft.Compute",
         "type": "BGInfo",
         "typeHandlerVersion": "2.1",
+        "autoUpgradeMinorVersion": "true",
         "settings": {
           "Properties": [
           ]

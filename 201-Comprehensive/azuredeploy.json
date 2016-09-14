@@ -43,7 +43,7 @@
         "windowsImageVersion": "latest",
         "dataDiskSize": 2,
         "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-Comprehensive",
-        "staticSubnetName": "CVMStaticSubnet",
+        "staticSubnetName": "vmstaticsubnet",
         "subnets": [
             {
                 "name": "[variables('staticSubnetName')]",

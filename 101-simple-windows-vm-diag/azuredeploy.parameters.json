@@ -5,14 +5,17 @@
     "vmsuffix": {
       "value": "myVM"
     },
-    "deploymentLocation": {
-      "value": "local"
-    },
     "adminPassword": {
       "value": "GEN-PASSWORD"
     },
+    "storageAccountNamePrefix": {
+      "value": "DiagStor"
+    },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
+    },
+    "DiagnosticResourceGroup": {
+      "value": "DiagRg"
     }
   }
 }

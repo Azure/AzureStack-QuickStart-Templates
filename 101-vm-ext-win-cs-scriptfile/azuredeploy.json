@@ -37,7 +37,8 @@
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.4",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": "true",
         "settings": {
           "fileUris": [ "[parameters('scriptFile')]" ],
           "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',parameters('scriptName'))]"

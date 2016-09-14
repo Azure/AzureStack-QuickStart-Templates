@@ -127,7 +127,17 @@
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[parameters('subnetResourceId')]"
-                            }
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[parameters('lbBEPool')]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                { 
+                                    "id": "[parameters('rdpNATRuleID')]"
+                                }
+                            ]
                         }
                     }
                 ]

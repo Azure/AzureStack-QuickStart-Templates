@@ -1,0 +1,707 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "linuxAdminUsername": {
+            "type": "string",
+            "defaultValue": "adminuser",
+            "metadata": {
+                "description": "User name for the Linux Virtual Machines (SSH or Password).Default value is adminuser"
+            }
+        },
+        "linuxAdminPassword": {
+            "type": "securestring",
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
+            "metadata": {
+                "description": "Password for the Linux Virtual Machine. Default value is 'Subscription#<subscription id>'. Not Required.  If not set, you must provide a SSH key."
+            }
+        },
+        "sshRSAPublicKey": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "SSH public key used for auth to all Linux machines.  Not Required.  If not set, you must provide a password key."
+            }
+        },
+        "windowsAdminUsername": {
+            "type": "string",
+            "defaultValue": "adminuser",
+            "metadata": {
+                "description": "User name for the Windows Jumpbox Virtual Machine (Password Only Supported).Default value is adminuser"
+            }
+        },
+        "windowsAdminPassword": {
+            "type": "securestring",
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
+            "metadata": {
+                "description": "Password for the Windows Jumpbox Virtual Machine. Default value is 'Subscription#<subscription id>'."
+            }
+        },
+        "agentVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_A1",
+            "metadata": {
+                "description": "The size of the Agent Virtual Machine. Ex: Standard_XX where XX can A1, A2, A3 etc"
+            }
+        },
+        "agentCount": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The number of swarm agents for the cluster.  This value can be from 1 to 100"
+            }
+        },
+        "masterVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_A1",
+            "metadata": {
+                "description": "The size of the Master Virtual Machine.Ex: Standard_XX where XX can A1, A2, A3 etc"
+            }
+        },
+        "masterCount": {
+            "type": "int",
+            "defaultValue": 1,
+            "allowedValues": [
+                1,
+                3,
+                5
+            ],
+            "metadata": {
+                "description": "The number of swarm masters for the cluster."
+            }
+        },
+        "linuxPublisher": {
+            "type": "string",
+            "defaultValue": "Canonical",
+            "metadata": {
+                "description": "This is the publisher of the image used by the linux cluster"
+            }
+        },
+        "linuxOffer": {
+            "type": "string",
+            "defaultValue": "UbuntuServer",
+            "metadata": {
+                "description": "This is the offer of the image used by the linux cluster"
+            }
+        },
+        "linuxSku": {
+            "type": "string",
+            "defaultValue": "14.04.3-LTS",
+            "metadata": {
+                "description": "This is the linux sku used by the linux cluster"
+            }
+        },
+        "linuxVersion": {
+            "type": "string",
+            "defaultValue": "latest",
+            "metadata": {
+                "description": "This is the linux version used by the linux cluster"
+            }
+        },
+        "windowsJumpboxPublisher": {
+            "type": "string",
+            "defaultValue": "MicrosoftWindowsServer",
+            "metadata": {
+                "description": "This is the windows publisher used by the windows jumpbox"
+            }
+        },
+        "windowsJumpboxOffer": {
+            "type": "string",
+            "defaultValue": "WindowsServer",
+            "metadata": {
+                "description": "This is the windows offer used by the windows jumpbox"
+            }
+        },
+        "windowsJumpboxSku": {
+            "type": "string",
+            "defaultValue": "2012-R2-Datacenter",
+            "metadata": {
+                "description": "This is the windows sku used by the windows jumpbox"
+            }
+        },
+        "setSSHKeysLinuxConfiguration": {
+            "type": "int",
+            "defaultValue": 0,
+            "allowedValues": [ 0, 1 ],
+            "metadata": {
+                "description": "This setting controls whether Linux configuration with SSH Key is passed in VM PUT Payload.  Defaults to 1.  If SSH Key is blank, this must be set to 0."
+            }
+        },
+        "vmsPerStorageAccount": {
+            "type": "int",
+            "defaultValue": 40,
+            "metadata": {
+                "description": "This specifies the number of VMs per storage accounts"
+            }
+        },
+        "configureScriptsRootLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The root location for all the configuring scripts"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/docker-swarm-ubuntu/parts/"
+        }
+    },
+    "variables": {
+        "adminUsername": "[parameters('linuxAdminUsername')]",
+        "adminPassword": "[parameters('linuxAdminPassword')]",
+        "apiVersion": {
+            "resources": { "deployments": "2015-01-01" },
+            "network": "2015-05-01-preview",
+            "storage": "2015-05-01-preview",
+            "compute": "2015-06-15"
+        },
+        "orchestratorName": "swarm",
+        "nameSuffix": "[replace(replace(substring(tolower(uniqueString(resourceGroup().id)),0,5), '-', ''), '.','')]",
+        "jumpboxEndpointDNSName": "[tolower(concat('jumpbox', variables('nameSuffix')))]",
+        "masterEndpointDNSName": "[tolower(concat('master', variables('nameSuffix')))]",
+        "agentEndpointDNSName": "[tolower(concat('agent', variables('nameSuffix')))]",
+        "agentCount": "[parameters('agentCount')]",
+        "masterCount": "[parameters('masterCount')]",
+        "agentVMSize": "[parameters('agentVMSize')]",
+        "sshRSAPublicKey": "[parameters('sshRSAPublicKey')]",
+        "linuxPublisher": "[parameters('linuxPublisher')]",
+        "linuxOffer": "[parameters('linuxOffer')]",
+        "linuxSku": "[parameters('linuxSku')]",
+        "linuxVersion": "[parameters('linuxVersion')]",
+        "windowsJumpboxPublisher": "[parameters('windowsJumpboxPublisher')]",
+        "windowsJumpboxOffer": "[parameters('windowsJumpboxOffer')]",
+        "windowsJumpboxSku": "[parameters('windowsJumpboxSku')]",
+        "windowsAdminUsername": "[parameters('windowsAdminUsername')]",
+        "windowsAdminPassword": "[parameters('windowsAdminPassword')]",
+        "vmsPerStorageAccount": "[parameters('vmsPerStorageAccount')]",
+        "storageLocation": "[resourceGroup().location]",
+
+        "sshKeyPath": "[concat('/home/', variables('adminUsername'), '/.ssh/authorized_keys')]",
+        "linuxConfigurations": [
+            { },
+            {
+                "disablePasswordAuthentication": true,
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "[variables('sshKeyPath')]",
+                            "keyData": "[variables('sshRSAPublicKey')]"
+                        }
+                    ]
+                }
+            }
+        ],
+        "linuxConfiguration": "[variables('linuxConfigurations')[parameters('setSSHKeysLinuxConfiguration')]]",
+
+
+        "jumpboxPublicIPAddressName": "[concat(variables('orchestratorName'), '-jumpbox-ip-', '-', variables('nameSuffix'))]",
+        "swarmEnabled": true,
+        "osImagePublisher": "[variables('linuxPublisher')]",
+        "osImageOffer": "[variables('linuxOffer')]",
+        "osImageSKU": "[variables('linuxSku')]",
+        "osImageVersion": "[variables('linuxVersion')]",
+
+        "virtualNetworkName": "[concat(variables('orchestratorName'), '-vnet-', variables('nameSuffix'))]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetName": "[concat(variables('orchestratorName'), '-subnet-', variables('nameSuffix'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "addressPrefix": "10.0.0.0/16",
+        "subnetPrefix": "10.0.0.0/18",
+        "baseSubnet": "[split(variables('subnetPrefix'),'0/18')[0]]",
+        "storageAccountType": "Standard_LRS",
+        "storageAccountPrefixes": [
+            "0",
+            "6",
+            "c",
+            "i",
+            "o",
+            "u",
+            "1",
+            "7",
+            "d",
+            "j",
+            "p",
+            "v",
+            "2",
+            "8",
+            "e",
+            "k",
+            "q",
+            "w",
+            "3",
+            "9",
+            "f",
+            "l",
+            "r",
+            "x",
+            "4",
+            "a",
+            "g",
+            "m",
+            "s",
+            "y",
+            "5",
+            "b",
+            "h",
+            "n",
+            "t",
+            "z"
+        ],
+        "storageAccountPrefixesCount": "[length(variables('storageAccountPrefixes'))]",
+        "storageAccountBaseName": "[concat(variables('orchestratorName'), 'sa')]",
+        "masterStorageAccountName": "[concat(variables('storageAccountBaseName'),'master', variables('nameSuffix'))]",
+        "agentStorageAccountName": "[concat(variables('storageAccountBaseName'),'agent', variables('nameSuffix'))]",
+        "omsStorageAccount": "none",
+        "omsStorageAccountKey": "none",
+        "jumpboxNSGName": "[concat(variables('orchestratorName'), '-jumpbox-nsg-', variables('nameSuffix'))]",
+        "jumpboxNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('jumpboxNSGName'))]",
+        "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('adminUsername'),' ',' ', ' ', variables('baseSubnet'))]",        
+        "jumpboxAddr": 4,
+        "jumpboxVMName": "[concat('jumpboxVM-', variables('nameSuffix'))]",
+        "jumpboxVMSize": "Standard_A1",
+        "masterNSGName": "[concat(variables('orchestratorName'), '-master-nsg-', variables('nameSuffix'))]",
+        "masterNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('masterNSGName'))]",
+        "masterVMNamePrefix": "[concat(variables('orchestratorName'), '-masterVM-', variables('nameSuffix'), '-')]",
+        "masterFirstAddr": 5,
+        "agentNSGName": "[concat(variables('orchestratorName'), '-agent-nsg-', variables('nameSuffix'))]",
+        "agentNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('agentNSGName'))]",
+        "agentFirstAddr": 20,
+        "agentVMNamePrefix": "[concat(variables('orchestratorName'), '-agentVM-', variables('nameSuffix'), '-')]",
+        "agentStorageAccountsCount": "[add(div(variables('agentCount'), variables('vmsPerStorageAccount')), mod(add(mod(variables('agentCount'), variables('vmsPerStorageAccount')),2), add(mod(variables('agentCount'), variables('vmsPerStorageAccount')),1)))]",
+        "agentsPerIPv4Octet": 200,
+        "swarmScriptName": "configure-swarm-azurestack.sh"
+    },
+    "resources": [        
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('masterStorageAccountName')]",
+            "apiVersion": "[variables('apiVersion').storage]",
+            "location": "[variables('storageLocation')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('jumpboxPublicIPAddressName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('jumpboxEndpointDNSName')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('jumpboxNSGName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "ssh",
+                        "properties": {
+                            "description": "Allow RDP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('jumpboxVMName'), '-nic')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses',variables('jumpboxPublicIPAddressName'))]",
+                "[variables('vnetID')]",
+                "[variables('jumpboxNSGID')]"
+            ],
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[variables('jumpboxNSGID')]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(variables('baseSubnet'), variables('jumpboxAddr'))]",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('jumpboxPublicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('jumpboxVMName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('jumpboxVMName'), '-nic')]",
+                "[variables('masterStorageAccountName')]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('jumpboxVMSize')]"
+                },
+                "osProfile": {
+                    "computername": "[variables('jumpboxVMName')]",
+                    "adminUsername": "[variables('windowsAdminUsername')]",
+                    "adminPassword": "[variables('windowsAdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('windowsJumpboxPublisher')]",
+                        "offer": "[variables('windowsJumpboxOffer')]",
+                        "sku": "[variables('windowsJumpboxSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('jumpboxVMName'),'-osdisk')]",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('masterStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('jumpboxVMName'), '-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('jumpboxVMName'), '-nic'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('masterNSGName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "ssh",
+                        "properties": {
+                            "description": "Allow SSH",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('masterVMNamePrefix'), 'nic-', copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicLoopNode",
+                "count": "[variables('masterCount')]"
+            },
+            "dependsOn": [
+                "[variables('vnetID')]",
+                "[variables('masterNSGID')]"
+            ],
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[variables('masterNSGID')]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfigNode",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(variables('baseSubnet'), copyIndex(variables('masterFirstAddr')))]",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "vmLoopNode",
+                "count": "[variables('masterCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('masterVMNamePrefix'), 'nic-', copyIndex())]",
+                "[variables('masterStorageAccountName')]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('masterVMSize')]"
+                },
+                "osProfile": {
+                    "computername": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
+                    "adminUsername": "[variables('adminUsername')]",
+                    "adminPassword": "[variables('adminPassword')]",
+                    "linuxConfiguration": "[variables('linuxConfiguration')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('osImagePublisher')]",
+                        "offer": "[variables('osImageOffer')]",
+                        "sku": "[variables('osImageSKU')]",
+                        "version": "[variables('osImageVersion')]"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('masterVMNamePrefix'), copyIndex(),'-osdisk')]",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('masterStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('masterVMNamePrefix'), copyIndex(), '-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('masterVMNamePrefix'), 'nic-', copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('masterVMNamePrefix'), copyIndex(), '/configuremaster')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "vmLoopNode",
+                "count": "[variables('masterCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('masterVMNamePrefix'), copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "CustomScriptForLinux",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('swarmScriptName'))]" ],
+                    "commandToExecute": "[concat('/bin/bash -c \"/bin/bash configure-swarm-azurestack.sh ', variables('clusterInstallParameters'), ' >> /var/log/azure/cluster-bootstrap.log 2>&1\"')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(variables('storageAccountPrefixes')[mod(copyIndex(),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(copyIndex(),variables('storageAccountPrefixesCount'))],variables('agentStorageAccountName'),copyIndex(1))]",
+            "apiVersion": "[variables('apiVersion').storage]",
+            "location": "[variables('storageLocation')]",
+            "copy": {
+                "name": "vmLoopNode",
+                "count": "[variables('agentStorageAccountsCount')]"
+            },
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('agentNSGName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "http",
+                        "properties": {
+                            "description": "Allow HTTP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 210,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "https",
+                        "properties": {
+                            "description": "Allow HTTPS",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 220,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Tcp8080",
+                        "properties": {
+                            "description": "Allow port 8080",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8080",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 230,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').network]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('agentVMNamePrefix'), 'nic-', copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicLoopNode",
+                "count": "[variables('agentCount')]"
+            },
+            "dependsOn": [
+                "[variables('vnetID')]",
+                "[variables('agentNSGID')]"
+            ],
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[variables('agentNSGID')]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfigNode",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(split(variables('subnetPrefix'),'0.0/18')[0], div(copyIndex(),variables('agentsPerIPv4Octet')), '.', add(mod(copyIndex(),variables('agentsPerIPv4Octet')), variables('agentFirstAddr')))]",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion').compute]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "vmLoopNode",
+                "count": "[variables('agentCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(div(copyIndex(),variables('vmsPerStorageAccount')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(div(copyIndex(),variables('vmsPerStorageAccount')),variables('storageAccountPrefixesCount'))],variables('agentStorageAccountName'),add(1,div(copyIndex(),variables('vmsPerStorageAccount'))))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('agentVMNamePrefix'), 'nic-', copyIndex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('agentVMSize')]"
+                },
+                "osProfile": {
+                    "computername": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
+                    "adminUsername": "[variables('adminUsername')]",
+                    "adminPassword": "[variables('adminPassword')]",
+                    "linuxConfiguration": "[variables('linuxConfiguration')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('osImagePublisher')]",
+                        "offer": "[variables('osImageOffer')]",
+                        "sku": "[variables('osImageSKU')]",
+                        "version": "[variables('osImageVersion')]"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('agentVMNamePrefix'), copyIndex(),'-osdisk')]",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(div(copyIndex(),variables('vmsPerStorageAccount')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(div(copyIndex(),variables('vmsPerStorageAccount')),variables('storageAccountPrefixesCount'))],variables('agentStorageAccountName'),add(1,div(copyIndex(),variables('vmsPerStorageAccount')))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('agentVMNamePrefix'), copyIndex(), '-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('agentVMNamePrefix'), 'nic-', copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('agentVMNamePrefix'), copyIndex(), '/configureagent')]",
+            "apiVersion": "[variables('apiVersion').compute]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "vmLoopNode",
+                "count": "[variables('agentCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('agentVMNamePrefix'), copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "CustomScriptForLinux",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('swarmScriptName'))]" ],
+                    "commandToExecute": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash configure-swarm-azurestack.sh ', variables('clusterInstallParameters'), ' >> /var/log/azure/cluster-bootstrap.log 2>&1 &\" &')]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

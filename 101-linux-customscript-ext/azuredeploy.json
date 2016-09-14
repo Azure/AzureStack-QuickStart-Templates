@@ -6,9 +6,9 @@
       "type": "string",
       "metadata": {
         "description": "Name of the existing VM to apply Linux custom script to"
-      }
-    }
-
+      },
+      "defaultValue": "[concat('vm', resourceGroup().name)]"
+    }    
   },
   "variables": {
     "apiVersion": {
@@ -27,6 +27,7 @@
         "publisher": "Microsoft.OSTCExtensions",
         "type": "CustomScriptForLinux",
         "typeHandlerVersion": "1.3",
+        "autoUpgradeMinorVersion": "true",
         "settings": {
           "commandToExecute": "ifconfig"
         }

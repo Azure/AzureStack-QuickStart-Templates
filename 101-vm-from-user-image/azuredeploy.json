@@ -151,10 +151,7 @@
               }
             }
           }
-        ],
-        "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
-        }
+        ]        
       }
     },
     {
@@ -205,6 +202,7 @@
             {
               "name": "[concat(variables('vmName'),'-dataDisk')]",
               "lun": 0,
+              "caching": "ReadOnly",
               "createOption": "FromImage",
               "image": {
                 "uri": "[variables('dataDiskUrl')]"

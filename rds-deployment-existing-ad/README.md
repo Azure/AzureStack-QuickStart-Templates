@@ -12,6 +12,7 @@ This template will create a Remote Desktop Sesson Collection farm using the Powe
 
 +	Login into Azurestack portal
 +	Click "New" -> "Custom" -> "Template deployment"
++	Deploy ad-non-ha template. if you already have deployed ad-non-ha, then you can use that AD deployment by its resource group for this deployment.
 +	Copy conent in azuredeploy.json, Click "Edit Tempalte" and paste content, then Click "Save"
 +	Fill the parameters. Again, this uses existing AD. Please see note above.
 +	Click "Create new" to create new Resource Group

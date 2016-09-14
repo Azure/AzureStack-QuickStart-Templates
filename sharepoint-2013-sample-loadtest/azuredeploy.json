@@ -1,13 +1,13 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+    "contentVersion": "1.16.8.5",
     "parameters": {
         "TestControllerVMName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the existing test controller VM resource to use"
             },
-            "defaultValue": "sprg-tc-0"
+            "defaultValue": "[concat(resourceGroup().name,'-tc-0')]"
         },
         "TestControllerServiceUserName": {
             "type": "string",
@@ -21,27 +21,28 @@
             "metadata": {
                 "description": "Name of the existing SharePoint server VM resource to test"
             },
-            "defaultValue": "sprg-sp-0"
+            "defaultValue": "[concat('SP',resourceGroup().name)]"
         },
         "TargetSPSiteURL": {
             "type": "string",
             "metadata": {
                 "description": "URL of the SharePoint end point to test."
             },
-            "defaultValue": "http://sprg-sp-0.contoso.com"
+            "defaultValue": "[concat('http://SP',resourceGroup().name,'.contoso.com')]"
         },
         "TargetSPTestUserName": {
             "type": "string",
             "metadata": {
                 "description": "User name an existing user account to be used for load testing. User must have access to the target SharePoint endpoint."
             },
-            "defaultValue": "spadmin@contoso.com"
+            "defaultValue": "lcladmin@contoso.com"
         },
         "TargetSPTestUserPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "Password of the user account to be used for lad testing."
-            }
+            },
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         },
         "assetLocation": {
             "type": "string",
@@ -67,7 +68,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('PrepareTargetTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerServiceUserName": {
@@ -91,7 +92,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[variables('RunLoadTestTemplateURL')]",
-                    "contentVersion": "1.0.0.0"
+                    "contentVersion": "1.16.8.5"
                 },
                 "parameters": {
                     "TestControllerVMName": {

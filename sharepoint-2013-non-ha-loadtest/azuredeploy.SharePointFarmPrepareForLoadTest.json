@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+    "contentVersion": "1.16.8.5",
     "parameters": {
         "TestControllerServiceUserName": {
             "type": "string",
@@ -70,7 +70,7 @@
         "CreateUsersScriptURL": "[concat(variables('assetLocation'),'/SharePointSiteScripts/',variables('CreateUsersScriptName'))]",
         "RunnerScriptURL": "[concat(variables('assetLocation'),'/SharePointSiteScripts/',variables('RunnerScriptName'))]",
         "LoadTestPackageURL": "[concat(variables('assetLocation'),'/SharePointLoadTest.zip')]",
-        "LoadTestUnpackLocation": "C:\\LoadTests\\SharePointLoadTest"
+        "LoadTestUnpackLocation": "%tmp%\\SharePointLoadTest"
     },
     "resources": [
         {
@@ -81,7 +81,8 @@
             "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.4",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
                         "[variables('LogToFileScriptURL')]",

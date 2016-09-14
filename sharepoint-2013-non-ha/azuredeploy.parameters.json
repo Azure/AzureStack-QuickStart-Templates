@@ -2,23 +2,11 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "domainName": {
-            "value": "contoso.com"
-        },
-        "sqlServerServiceAccountUserName": {
-            "value": "sa"
-        },
-        "adminUsername": {
-            "value": "lcladmin"
-        },
-        "adminPassword": {
-            "value": "GEN-PASSWORD"
-        },
         "sharepoint2013SP1DownloadLink": {
-            "value": "####"
+            "value": ""
         },
         "sharepoint2013ProductKey": {
-            "value": "####"
+            "value": ""
         }
     }
 }
