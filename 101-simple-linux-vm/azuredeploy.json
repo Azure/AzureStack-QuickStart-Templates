@@ -56,26 +56,20 @@
         "virtualNetworkName": "[tolower(concat('vnet',uniquestring(resourceGroup().id)))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]",
-        "apiVersion": {
-            "resources": { "deployments": "2015-01-01" },
-            "network": "2015-05-01-preview",
-            "storage": "2015-05-01-preview",
-            "compute": "2015-06-15"
-        }
+        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]"        
     },
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[toLower(variables('storageAccountName'))]",
-            "apiVersion": "[variables('apiVersion').storage]",
+            "apiVersion": "2015-05-01-preview",
             "location": "[variables('location')]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('networkSecurityGroupName')]",
             "location": "[resourceGroup().location]",
@@ -99,7 +93,7 @@
                 }
             },
             {
-                "apiVersion": "[variables('apiVersion').network]",
+                "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/publicIPAddresses",
                 "name": "[variables('publicIPAddressName')]",
                 "location": "[variables('location')]",
@@ -111,7 +105,7 @@
                 }
             },
             {
-                "apiVersion": "[variables('apiVersion').network]",
+                "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/virtualNetworks",
                 "name": "[variables('virtualNetworkName')]",
                 "location": "[variables('location')]",
@@ -132,7 +126,7 @@
                 }
             },
             {
-                "apiVersion": "[variables('apiVersion').network]",
+                "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/networkInterfaces",
                 "name": "[variables('nicName')]",
                 "location": "[variables('location')]",
@@ -162,7 +156,7 @@
                 }
             },
             {
-                "apiVersion": "[variables('apiVersion').compute]",
+                "apiVersion": "2015-06-15",
                 "type": "Microsoft.Compute/virtualMachines",
                 "name": "[variables('vmName')]",
                 "location": "[variables('location')]",

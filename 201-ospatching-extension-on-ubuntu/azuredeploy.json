@@ -102,14 +102,7 @@
         }
     },
     "variables": {
-        "extensionName": "OSPatching",
         "scenarioPrefix": "[concat('ospatchlinux',substring(uniquestring(resourceGroup().id),0,5))]",
-        "apiVersion": {
-            "resources": { "deployments": "2015-01-01" },
-            "network": "2015-05-01-preview",
-            "storage": "2015-05-01-preview",
-            "compute": "2015-06-15"
-        },
         "imagePublisher": "Canonical",
         "imageOffer": "UbuntuServer",
         "ubuntuOSVersion": "14.04.3-LTS",
@@ -135,14 +128,14 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageAccountName')]",
-            "apiVersion": "[variables('apiVersion').storage]",
+            "apiVersion": "2015-05-01-preview",
             "location": "[resourceGroup().location]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('networkSecurityGroupName')]",
             "location": "[resourceGroup().location]",
@@ -166,7 +159,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('publicIPAddressName')]",
             "location": "[resourceGroup().location]",
@@ -178,7 +171,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
@@ -199,7 +192,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('nicName')]",
             "location": "[resourceGroup().location]",
@@ -229,7 +222,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('vmName')]",
             "location": "[resourceGroup().location]",
@@ -274,7 +267,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmName'),'/installospatching')]",
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"

@@ -80,11 +80,6 @@
     }
   },
   "variables": {
-    "apiVersion": {
-      "compute": "2015-06-15",
-      "storage": "2015-06-15",
-      "network": "2015-05-01-preview"
-    },
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "addressPrefix": "10.0.0.0/16",
@@ -122,7 +117,7 @@
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion').storage]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[tolower(variables('uniqueStorageAccountName'))]",
       "location": "[variables('location')]",
@@ -131,7 +126,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
       "location": "[variables('location')]",
@@ -147,7 +142,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
       "location": "[variables('location')]",
@@ -171,7 +166,7 @@
     },
     {
 
-      "apiVersion": "[variables('apiVersion').network]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[variables('location')]",
@@ -196,7 +191,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('vmNicName'),copyIndex())]",
       "location": "[variables('location')]",
@@ -226,7 +221,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').compute]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(variables('vmName'),copyIndex())]",
       "location": "[variables('location')]",
@@ -268,7 +263,7 @@
                 "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDatabaseDiskName'),copyIndex(),'.vhd')]"
               },
               "name": "[concat(variables('vmDatabaseDiskName'),copyIndex())]",
-              "createOption": "empty",
+              "createOption": "Empty",
               "caching": "None",
               "diskSizeGB": "[variables('vmDatabaseDiskSizeInGB')]",
               "lun": 0
@@ -285,7 +280,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').compute]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),copyIndex(),'/CustomScriptExtension')]",
       "location": "[variables('location')]",
@@ -310,7 +305,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').compute]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
       "location": "[variables('location')]",
@@ -347,8 +342,8 @@
               "password": "PrivateSettingsRef:vmAdminPassword"
             },
             "StorageAccountName": "[variables('uniqueStorageAccountName')]",
-            "StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-05-01-preview').key1]",
-            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), variables('apiVersion').storage).primaryEndpoints['blob']]"
+            "StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
+            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').storage.primaryEndpoints['blob']]"
           }
         },
         "protectedSettings": {

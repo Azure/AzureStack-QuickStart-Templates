@@ -3,14 +3,6 @@
   "contentVersion": "1.0.0.0",
   "parameters": { },
   "variables": {
-    "apiVersion": {
-      "network": {
-        "virtualNetworks": "2015-05-01-preview",
-        "publicIPAddresses": "2015-05-01-preview",
-        "networkSecurityGroups": "2015-05-01-preview",
-        "networkInterfaces": "2015-05-01-preview"
-      }
-    },
     "nicName": "myNic",
     "publicIPAddressName": "myPubIP",
     "vnetName": "myVNet",
@@ -21,14 +13,13 @@
     "subnetPrefix": "10.0.0.0/24",
     "publicIPAddressType": "Dynamic",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables ('subnetName'))]",
-    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables ('subnetName'))]",    
     "numberOfInstances": 1,
     "dnsServer": "192.168.100.2"
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
       "location": "[resourceGroup().location]",
@@ -51,7 +42,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[resourceGroup().location]",
@@ -60,7 +51,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network.VirtualNetworks]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetName')]",
       "location": "[resourceGroup().location]",
@@ -90,7 +81,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network.networkInterfaces]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('nicName'), copyindex())]",
       "location": "[resourceGroup().location]",

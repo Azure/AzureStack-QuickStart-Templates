@@ -25,23 +25,6 @@
         }
     },
     "variables": {
-        "apiVersion": {
-            "storage": {
-                "storageAccounts": "2015-06-15"
-            },
-            "compute": {
-                "virtualMachines": "2015-06-15"
-            },
-            "resources": {
-                "deployments": "2015-01-01"
-            },
-            "network": {
-                "virtualNetworks": "2015-06-15",
-                "loadBalancers": "2015-06-15",
-                "publicIPAddresses": "2015-06-15",
-                "networkSecurityGroups": "2015-06-15"
-            }
-        },
         "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/ad-non-ha",
         "adVMSize": "Standard_A1",
         "vmNetworkSubnet": "10.0.0.0/24",
@@ -57,20 +40,16 @@
         "deployPrimaryAdTemplateURL": "[concat(variables('assetLocation'),'/deployPrimaryAD.json')]",
         "deployPrimaryAd": "ConfigureAD",
         "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",
-        "deploySecondaryAdName": "deploySecondaryAdName",
-        "deploySecondaryAdNameId": "[concat('Microsoft.Resources/deployments/', variables('deploySecondaryAdName'))]",
         "updateVNetDNS1": "UpdateVNetDNS",
         "vnetwithDNSTemplateURL": "[concat(variables('assetLocation'),'/vnet-with-dns-server.json')]",
         "publicLBName": "[concat('ADPLB',resourceGroup().name)]",
         "publicIPAddressName": "[concat('ADlbPublicIP',resourceGroup().name)]",
         "lbFE": "[concat('ADLBFE',resourceGroup().name)]",
-        "lbBE": "[concat('ADLBBE',resourceGroup().name)]",
         "rpdNAT": "[concat('ADRDPNAT',resourceGroup().name)]",
         "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
         "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
         "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
         "rdpPort": 3389,
-        "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
         "nsgName": "[concat('ADNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
@@ -96,7 +75,7 @@
             "name": "[variables('nsgName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
+            "apiVersion": "2015-06-15",
             "properties": {
                 "securityRules": [
                     {
@@ -119,7 +98,7 @@
             "name": "[variables('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[variables('nsgID')]"
             ],
@@ -139,7 +118,7 @@
             "name": "[variables('publicIPAddressName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[variables('vnetID')]"
             ],
@@ -154,7 +133,7 @@
             "name": "[variables('publiclbName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/loadBalancers",
-            "apiVersion": "[variables('apiVersion').network.loadBalancers]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[variables('publicIPAddressID')]"
             ],
@@ -188,7 +167,7 @@
         {
             "name": "[variables('adVmDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('publiclbID')]"
             ],
@@ -235,7 +214,7 @@
         {
             "name": "[variables('deployPrimaryAd')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('adVmDeploymentId')]"
             ],
@@ -267,7 +246,7 @@
         {
             "name": "[variables('updateVNetDNS1')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('deployPrimaryAdId')]"
             ],
