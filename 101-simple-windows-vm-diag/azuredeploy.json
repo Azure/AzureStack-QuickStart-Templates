@@ -45,19 +45,8 @@
     }
   },
   "variables": {
-    "apiVersion": {
-      "storage": { "storageAccounts": "2015-06-15" },
-      "compute": { "virtualMachines": "2015-06-15" },
-      "network": {
-        "virtualNetworks": "2015-05-01-preview",
-        "networkInterfaces": "2015-05-01-preview",
-        "publicIPAddresses": "2015-05-01-preview",
-        "networkSecurityGroups": "2015-05-01-preview"
-      },
-      "insights": { "vmDiagnosticsSettings": "2015-06-15" }
-    },
-        "storage": {
-      "storageAccounts": {
+    "storage": {
+    "storageAccounts": {
         "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
         "type": "Standard_LRS"
       }
@@ -90,7 +79,7 @@
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
+      "apiVersion":"2015-05-01-preview",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('networkSecurityGroupName')]",
       "location": "[resourceGroup().location]",
@@ -118,14 +107,14 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storage').storageAccounts.name]",
-      "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storage').storageAccounts.type]"
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[resourceGroup().location]",
@@ -137,7 +126,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[resourceGroup().location]",
@@ -167,7 +156,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').network.networkInterfaces]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
       "location": "[resourceGroup().location]",
@@ -193,7 +182,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion').compute.virtualMachines]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
@@ -220,7 +209,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), variables('apiVersion').storage.storageAccounts).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), '2015-06-15').primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -236,7 +225,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), variables('apiVersion').storage.storageAccounts).primaryEndpoints.blob)]"
+            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), '2015-06-15').primaryEndpoints.blob)]"
           }
         }
       },
@@ -245,7 +234,7 @@
           "name": "Microsoft.Insights.VMDiagnosticsSettings",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "[variables('apiVersion').insights.vmDiagnosticsSettings]",
+          "apiVersion": "2015-06-15",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
           ],

@@ -6,9 +6,6 @@
         "sshRSAPublicKey": {
           "value": "GEN-SSH-PUB-KEY"
         },
-        "windowsAdminPassword": {
-            "value": "GEN-PASSWORD"
-        },
         "agentCount": {
             "value": 1
         },
@@ -21,14 +18,8 @@
         "masterVMSize": {
             "value": "Standard_A2"
         },
-        "nameSuffix": {
-            "value": "GEN-UNIQUE"
-        },
-        "setLinuxConfigurationForVMCreate": {
+        "setSSHKeysLinuxConfiguration": {
             "value": 1
-        },
-        "disablePasswordAuthentication": {
-            "value": true
         }
     }
 }

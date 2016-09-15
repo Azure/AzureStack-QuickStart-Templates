@@ -1,12 +1,13 @@
 # [IaaS Linux VM Comprehensive Resources]
 
-This template deploys a Linux VM and also uses customscript, VMLinuxAccess and Docker Extensions
+This template deploys a Linux VM and also uses customscript, VMLinuxAccess, Docker, Linux Diagnostic and OSPatchingforLinux Extensions
 
 ## Prerequisites
 
-Follow the below links to create an Ubuntu Image and upload the same to Azure Stack's Platform Image Repository
+Follow the below links to download/create an Ubuntu 14.04.3-LTS Image and upload the same to Azure Stack's Platform Image Repository(PIR)
 1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/ 
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
+	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating the manifest.json in PIR
 
 ## Deployment steps
 1. Deploy to azure stack portal using custom deployment.
@@ -42,7 +43,6 @@ $RGName = "myRG$myNum"
 $myLocation = "local"
 
 $templateFile= "azuredeploy.json"
-# Fix the GEN-* values in the azuredeploy.parameters.json before proceeding to next steps
 $templateParameterFile= "azuredeploy.parameters.json"
 
 # Create Resource Group for Template Deployment
