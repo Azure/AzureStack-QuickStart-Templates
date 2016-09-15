@@ -145,17 +145,9 @@
     "variables": {
         "adminUsername": "[parameters('linuxAdminUsername')]",
         "adminPassword": "[parameters('linuxAdminPassword')]",
-        "apiVersion": {
-            "resources": { "deployments": "2015-01-01" },
-            "network": "2015-05-01-preview",
-            "storage": "2015-05-01-preview",
-            "compute": "2015-06-15"
-        },
         "orchestratorName": "swarm",
         "nameSuffix": "[replace(replace(substring(tolower(uniqueString(resourceGroup().id)),0,5), '-', ''), '.','')]",
         "jumpboxEndpointDNSName": "[tolower(concat('jumpbox', variables('nameSuffix')))]",
-        "masterEndpointDNSName": "[tolower(concat('master', variables('nameSuffix')))]",
-        "agentEndpointDNSName": "[tolower(concat('agent', variables('nameSuffix')))]",
         "agentCount": "[parameters('agentCount')]",
         "masterCount": "[parameters('masterCount')]",
         "agentVMSize": "[parameters('agentVMSize')]",
@@ -191,7 +183,6 @@
 
 
         "jumpboxPublicIPAddressName": "[concat(variables('orchestratorName'), '-jumpbox-ip-', '-', variables('nameSuffix'))]",
-        "swarmEnabled": true,
         "osImagePublisher": "[variables('linuxPublisher')]",
         "osImageOffer": "[variables('linuxOffer')]",
         "osImageSKU": "[variables('linuxSku')]",
@@ -247,8 +238,6 @@
         "storageAccountBaseName": "[concat(variables('orchestratorName'), 'sa')]",
         "masterStorageAccountName": "[concat(variables('storageAccountBaseName'),'master', variables('nameSuffix'))]",
         "agentStorageAccountName": "[concat(variables('storageAccountBaseName'),'agent', variables('nameSuffix'))]",
-        "omsStorageAccount": "none",
-        "omsStorageAccountKey": "none",
         "jumpboxNSGName": "[concat(variables('orchestratorName'), '-jumpbox-nsg-', variables('nameSuffix'))]",
         "jumpboxNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('jumpboxNSGName'))]",
         "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('adminUsername'),' ',' ', ' ', variables('baseSubnet'))]",        
@@ -269,7 +258,7 @@
     },
     "resources": [        
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
@@ -292,14 +281,14 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('masterStorageAccountName')]",
-            "apiVersion": "[variables('apiVersion').storage]",
+            "apiVersion": "2015-05-01-preview",
             "location": "[variables('storageLocation')]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('jumpboxPublicIPAddressName')]",
             "location": "[resourceGroup().location]",
@@ -311,7 +300,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('jumpboxNSGName')]",
             "location": "[resourceGroup().location]",
@@ -335,7 +324,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('jumpboxVMName'), '-nic')]",
             "location": "[resourceGroup().location]",
@@ -366,7 +355,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('jumpboxVMName')]",
             "location": "[resourceGroup().location]",
@@ -379,7 +368,7 @@
                     "vmSize": "[variables('jumpboxVMSize')]"
                 },
                 "osProfile": {
-                    "computername": "[variables('jumpboxVMName')]",
+                    "computerName": "[variables('jumpboxVMName')]",
                     "adminUsername": "[variables('windowsAdminUsername')]",
                     "adminPassword": "[variables('windowsAdminPassword')]"
                 },
@@ -409,7 +398,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('masterNSGName')]",
             "location": "[resourceGroup().location]",
@@ -433,7 +422,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('masterVMNamePrefix'), 'nic-', copyIndex())]",
             "location": "[resourceGroup().location]",
@@ -464,7 +453,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
             "location": "[resourceGroup().location]",
@@ -481,7 +470,7 @@
                     "vmSize": "[parameters('masterVMSize')]"
                 },
                 "osProfile": {
-                    "computername": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
+                    "computerName": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
                     "adminUsername": "[variables('adminUsername')]",
                     "adminPassword": "[variables('adminPassword')]",
                     "linuxConfiguration": "[variables('linuxConfiguration')]"
@@ -514,7 +503,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('masterVMNamePrefix'), copyIndex(), '/configuremaster')]",
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "vmLoopNode",
@@ -537,7 +526,7 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[concat(variables('storageAccountPrefixes')[mod(copyIndex(),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(copyIndex(),variables('storageAccountPrefixesCount'))],variables('agentStorageAccountName'),copyIndex(1))]",
-            "apiVersion": "[variables('apiVersion').storage]",
+            "apiVersion": "2015-05-01-preview",
             "location": "[variables('storageLocation')]",
             "copy": {
                 "name": "vmLoopNode",
@@ -548,7 +537,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('agentNSGName')]",
             "location": "[resourceGroup().location]",
@@ -600,7 +589,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('agentVMNamePrefix'), 'nic-', copyIndex())]",
             "location": "[resourceGroup().location]",
@@ -631,7 +620,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
             "location": "[resourceGroup().location]",
@@ -681,7 +670,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('agentVMNamePrefix'), copyIndex(), '/configureagent')]",
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "vmLoopNode",

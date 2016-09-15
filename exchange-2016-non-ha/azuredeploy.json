@@ -18,11 +18,6 @@
         }
     },
     "variables": {
-        "apiVersion": {
-            "compute": "2015-06-15",
-            "storage": "2015-06-15",
-            "network": "2015-06-15"
-        },
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "addressPrefix": "10.0.0.0/16",
@@ -63,7 +58,7 @@
     },
     "resources": [
         {
-            "apiVersion": "[variables('apiVersion').storage]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[tolower(variables('uniqueStorageAccountName'))]",
             "location": "[variables('location')]",
@@ -72,7 +67,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
             "location": "[variables('location')]",
@@ -88,7 +83,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('nsgName')]",
             "location": "[variables('location')]",
@@ -112,7 +107,7 @@
         },
         {
 
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[variables('location')]",
@@ -137,7 +132,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').network]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('vmNicName'),copyIndex())]",
             "location": "[variables('location')]",
@@ -167,7 +162,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('vmName'),copyIndex())]",
             "location": "[variables('location')]",
@@ -209,7 +204,7 @@
                                 "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-0','.vhd')]"
                             },
                             "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-0')]",
-                            "createOption": "empty",
+                            "createOption": "Empty",
                             "caching": "None",
                             "diskSizeGB": "[variables('vmDataDiskSize')]",
                             "lun": 0
@@ -219,7 +214,7 @@
                                 "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-1','.vhd')]"
                             },
                             "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-1')]",
-                            "createOption": "empty",
+                            "createOption": "Empty",
                             "caching": "None",
                             "diskSizeGB": "[variables('vmDataDiskSize')]",
                             "lun": 1
@@ -261,7 +256,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersion').compute]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
             "location": "[variables('location')]",
