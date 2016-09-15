@@ -64,9 +64,6 @@
     "subnetName": "[tolower(concat('sn', resourceGroup().name))]",
     "subnetPrefix": "10.0.0.0/24",
     "storageAccountType": "Standard_LRS",
-    "publicIPAddressType": "Dynamic",
-    "publicIPAddressName": "[tolower(concat('ip', resourceGroup().name))]",
-    "uniqueDnsNameForPublicIP": "[tolower(concat('dns', resourceGroup().name))]",
     "uniqueStorageAccountName": "[tolower(concat('sa', resourceGroup().name))]",
     "uniqueStorageAccountContainerName": "[tolower(concat('sc', resourceGroup().name))]",
     "vmAdminUsername": "vmadministrator",
@@ -97,18 +94,6 @@
       "location": "[variables('location')]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('uniqueDnsNameForPublicIP')]"
-        }
       }
     },
     {
@@ -165,18 +150,14 @@
       "name": "[variables('vmNicName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfigpublic",
+            "name": "ipconfigpri",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }

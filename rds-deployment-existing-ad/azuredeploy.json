@@ -44,6 +44,8 @@
   },
     "variables": {
         "dnsLabelPrefix": "[concat('dns', resourceGroup().name)]",
+        "gwdnsLabelPrefix": "[concat('gw', resourceGroup().name)]",
+        "cbdnsLabelPrefix": "[concat('cb', resourceGroup().name)]",
         "rdshVmSize": "Standard_A2",
         "storageAccountName": "[concat('sa', resourceGroup().name)]",
         "storageAccountType": "Standard_LRS",
@@ -80,7 +82,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsLabelPrefix')]"
+                    "domainNameLabel": "[variables('gwdnsLabelPrefix')]"
                 }
             }
         },
@@ -92,7 +94,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsLabelPrefix')]"
+                    "domainNameLabel": "[variables('cbdnsLabelPrefix')]"
                 }
             }
         },

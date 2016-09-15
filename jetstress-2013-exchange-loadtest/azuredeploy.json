@@ -84,11 +84,8 @@
     "imageOffer": "WindowsServer",
     "addressPrefix": "10.0.0.0/16",
     "storageAccountType": "Standard_LRS",
-    "publicIPAddressName": "[tolower(concat('ip', resourceGroup().name))]",
-    "publicIPAddressType": "Dynamic",
     "subnetPrefix": "10.0.0.0/24",
     "subnetName": "[concat('sn', resourceGroup().name)]",
-    "uniqueDnsNameForPublicIP": "[tolower(concat('dns', resourceGroup().name))]",
     "uniqueStorageAccountName": "[tolower(concat('sa', resourceGroup().name))]",
     "uniqueStorageAccountContainerName": "[tolower(concat('sc', resourceGroup().name))]",
     "location": "[resourceGroup().location]",
@@ -123,22 +120,6 @@
       "location": "[variables('location')]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
-      }
-    },
-    {
-      "apiVersion": "2015-05-01-preview",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
-      "location": "[variables('location')]",
-      "copy": {
-        "name": "publicIPLoop",
-        "count": "[parameters('jetstressVMCount')]"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[concat(variables('uniqueDnsNameForPublicIP'),copyIndex())]"
-        }
       }
     },
     {
@@ -200,18 +181,14 @@
         "count": "[parameters('jetstressVMCount')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'),copyIndex())]",
         "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfigpublic",
+            "name": "ipconfigprivate",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'),copyIndex()))]"
-              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
