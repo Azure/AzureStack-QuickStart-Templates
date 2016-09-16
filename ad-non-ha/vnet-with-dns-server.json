@@ -42,7 +42,7 @@
                     ]
                 },
                 "dhcpOptions": {
-                    "dnsServers": [ "[parameters('DNSServerAddress')]" ]
+                    "dnsServers": "[parameters('DNSServerAddress')]"
                 },
                 "subnets": "[parameters('subnets')]"
             }
