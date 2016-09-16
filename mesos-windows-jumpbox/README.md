@@ -13,7 +13,7 @@ Once your cluster has been created you will have a resource group containing 3 p
 
 The following image is an example of a cluster with 1 jumpbox, 3 masters, and 3 agents:
 
-![Image of Mesos cluster on azure Stack](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/101-mesos-windows-jumpbox/images/mesos.png)
+![Image of Mesos cluster on azure Stack](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/mesos-windows-jumpbox/images/mesos.png)
 
 You can see the following parts:
 
@@ -26,9 +26,10 @@ All VMs are on the same private subnet, 10.0.0.0/18, and fully accessible to eac
 
 ## Prerequisites
 
-Follow the below links to create an Ubuntu Image and upload the same to Azure Stack's Platform Image Repository
+Follow the below links to create/download an Ubuntu 14.04 LTS Image and upload the same to Azure Stack's Platform Image Repository(PIR)
 1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/
 2. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-add-image-pir/
+	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating the manifest.json in PIR
 
 ## Deployment steps
 => Deploy to azurestack, using custom deployment in azurestack portal.
@@ -49,10 +50,7 @@ This walk through is based the wonderful digital ocean tutorial: https://www.dig
 
  ![Image of public ip addresses in portal](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/mesos-windows-jumpbox/images/portal-publicipaddresses.png)
 
-2. Connect to your cluster
- 1. linux jumpbox - start a VNC to the jumpbox using instructions https://github.com/anhowe/ubuntu-devbox.  The jumpbox takes an hour to configure.  If the desktop is not ready, you can tail /var/log/azure/cluster-bootstrap.log to watch installation.
- 2. windows jumpbox - remote desktop to the windows jumpbox
- 3. no jumpbox - SSH to port 2200 on your NAT creating a tunnel to port 5050 and port 8080.  Then use the browser of your desktop to browse these ports.
+2. Connect to your windows jumpbox - remote desktop to the windows jumpbox
 
 3. browse to the Mesos UI on the windows jumpbox - open browser , the master URL is set as default page
 
@@ -83,7 +81,7 @@ This walk through is based the wonderful digital ocean tutorial: https://www.dig
 
  ![Image of the new application status](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/mesos-windows-jumpbox/images/marathon-newapp-status.png)
 
-8. browse back to Mesos http://master0:5050.  You will notice the running tasks and the completed tasks.  Click on the host of the completed tasks and also look at the sandbox.
+8. browse back to Mesos http://<MasterHostname>:5050.  You will notice the running tasks and the completed tasks.  Click on the host of the completed tasks and also look at the sandbox.
 
  ![Image of Mesos completed tasks](https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/mesos-windows-jumpbox/images/mesos-completed-tasks.png)
 
@@ -133,5 +131,5 @@ Try the following workloads to test your new mesos cluster.  Run these on Marath
 
  * This version of Mesos is a non-HA(no Loadbalancer or Availabilitysets) with master, Agent node deployment.
  * Refer https://help.ubuntu.com/community/SSH/OpenSSH/Keys#Generating_RSA_Keys for generating sshkeys for ubuntu
- * the installation log for the linux jumpbox, masters, and agents are in /var/log/azure/cluster-bootstrap.log
+ * the installation log for the masters, and agents are in /var/log/azure/cluster-bootstrap.log
  * event though the VMs finish quickly Mesos can take 5-15 minutes to install, check /var/log/azure/cluster-bootstrap.log for the completion status. 

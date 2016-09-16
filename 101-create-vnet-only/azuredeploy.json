@@ -3,9 +3,6 @@
   "contentVersion": "1.0.0.0",
   "parameters": { },
   "variables": {
-    "apiVersion": {
-      "network": { "virtualNetworks": "2015-05-01-preview" }
-    },
     "vnetName": "myVNet",
     "addressPrefix": "10.0.0.0/24",
     "subnetName": "Subnet-1",
@@ -14,7 +11,7 @@
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetName')]",
       "location": "[resourceGroup().location]",

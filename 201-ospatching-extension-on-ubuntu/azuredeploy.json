@@ -2,59 +2,134 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "adminUsername": {
+        "username": {
             "type": "string",
+            "defaultValue": "localadmin",
             "metadata": {
-                "description": "Username for the Virtual Machine."
-            },
-            "defaultValue": "localadmin"
+                "description": "Username for the Virtual Machine. Default value is localadmin"
+            }
         },
-        "adminPassword": {
+        "password": {
             "type": "securestring",
             "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
             "metadata": {
-                "description": "Password for the Virtual Machine.Default value is 'Subscription#<subscription id>'"
+                "description": "Password for the Virtual Machine. Default value is 'Subscription#<subscription id>'"
             }
         },
-        "ubuntuOSVersion": {
+        "rebootAfterPatch": {
             "type": "string",
-            "defaultValue": "14.04.3-LTS",
+            "defaultValue": "Auto",
             "metadata": {
-                "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Default value: 14.04.3-LTS"
+                "description": "The reboot behavior after patching.Default value is Auto"
+            },
+            "allowedValues": [
+                "RebootIfNeed",
+                "Required",
+                "NotRequired",
+                "Auto"
+            ]
+        },
+        "category": {
+            "type": "string",
+            "defaultValue": "ImportantAndRecommended",
+            "metadata": {
+                "description": "Type of patches to install.Default value is ImportantAndRecommended"
+            },
+            "allowedValues": [
+                "Important",
+                "ImportantAndRecommended"
+            ]
+        },
+        "installDuration": {
+            "type": "string",
+            "defaultValue": "01:00",
+            "metadata": {
+                "description": "The allowed total time for installation.Default value is 01:00"
+            }
+        },
+        "oneoff": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Patch the OS immediately.Default value is false"
+            },
+            "allowedValues": [
+                true,
+                false
+            ]
+        },
+        "dayOfWeek": {
+            "type": "string",
+            "defaultValue": "Sunday|Wednesday",
+            "metadata": {
+                "description": "The patching date (of the week)You can specify multiple days in a week."
+            }
+        },
+        "startTime": {
+            "type": "string",
+            "defaultValue": "03:00",
+            "metadata": {
+                "description": "Start time of patching. Default value is 03:00"
+            }
+        },
+        "idleTestScript": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The uri of the VMStatus idle test script"
+            }
+        },
+        "healthyTestScript": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The uri of the VMStatus healthy test script"
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The name of storage account where the VMStatus scripts resides."
+            }
+        },
+        "storageAccountKey": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The access key of storage account where the VMStatus scripts resides."
             }
         }
     },
     "variables": {
-        "dnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
-        "location": "[resourceGroup().location]",
+        "scenarioPrefix": "[concat('ospatchlinux',substring(uniquestring(resourceGroup().id),0,5))]",
         "imagePublisher": "Canonical",
         "imageOffer": "UbuntuServer",
-        "OSDiskName": "osdisk",
-        "nicName": "myVnic",
-        "addressPrefix": "10.0.0.0/24",
-        "subnetName": "mySubnet",
-        "subnetPrefix": "10.0.0.0/24",
-        "storageAccountName": "[concat('sa', resourceGroup().name)]",
-        "storageAccountType": "Standard_LRS",
-        "publicIPAddressName": "myPublicIP",
-        "publicIPAddressType": "Dynamic",
-        "vmStorageAccountContainerName": "vhds",
-        "vmName": "[concat('vm', resourceGroup().name)]",
+        "ubuntuOSVersion": "14.04.3-LTS",
         "vmSize": "Standard_A1",
-        "virtualNetworkName": "myVnet",
+        "OSDiskName": "[concat(variables('scenarioPrefix'),'OSDisk')]",
+        "nicName": "[concat(variables('scenarioPrefix'),'Nic')]",
+        "vnetAddressPrefix": "10.0.0.0/16",
+        "subnetName": "[concat(variables('scenarioPrefix'),'Subnet')]",
+        "subnetPrefix": "10.0.0.0/24",
+        "storageAccountName": "[concat(variables('scenarioPrefix'),'sa')]",
+        "storageAccountType": "Standard_LRS",
+        "publicIPAddressName": "[concat(variables('scenarioPrefix'),'PublicIp')]",
+        "publicIPAddressType": "Dynamic",
+        "dnsNameForPublicIP": "[tolower(concat(variables('scenarioPrefix'),'dns'))]",
+        "vmStorageAccountContainerName": "vhds",
+        "vmName": "[concat(variables('scenarioPrefix'),'VM')]",
+        "virtualNetworkName": "[concat(variables('scenarioPrefix'),'Vnet')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-comprehensive-linux-vm",
-        "scriptFileName": "docker.sh",
-        "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]"        
+        "networkSecurityGroupName": "[tolower(concat(variables('scenarioPrefix'),'nsg'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[toLower(variables('storageAccountName'))]",
+            "name": "[variables('storageAccountName')]",
             "apiVersion": "2015-05-01-preview",
-            "location": "[variables('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }
@@ -87,7 +162,7 @@
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('publicIPAddressName')]",
-            "location": "[variables('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
                 "dnsSettings": {
@@ -99,11 +174,11 @@
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
-            "location": "[variables('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "[variables('addressPrefix')]"
+                        "[variables('vnetAddressPrefix')]"
                     ]
                 },
                 "subnets": [
@@ -120,7 +195,7 @@
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('nicName')]",
-            "location": "[variables('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
@@ -150,7 +225,7 @@
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('vmName')]",
-            "location": "[variables('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
@@ -161,18 +236,18 @@
                 },
                 "osProfile": {
                     "computerName": "[variables('vmName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
+                    "adminUsername": "[parameters('username')]",
+                    "adminPassword": "[parameters('password')]"
                 },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "[variables('imagePublisher')]",
                         "offer": "[variables('imageOffer')]",
-                        "sku": "[parameters('ubuntuOSVersion')]",
+                        "sku": "[variables('ubuntuOSVersion')]",
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "osdisk",
+                        "name": "osdisk1",
                         "vhd": {
                             "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
                         },
@@ -186,70 +261,6 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
                         }
                     ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": "true",
-                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/LinuxCustomScriptExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.3",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "commandToExecute": "touch /test.txt",
-                    "enableInternalDNSCheck": "false"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/LinuxDockerExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "DockerExtension",
-                "typeHandlerVersion": "1.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "fileUris": [ "[variables('scriptFile')]" ],
-                    "commandToExecute": "sh docker.sh"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/LinuxVMAccessExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "VMAccessForLinux",
-                "typeHandlerVersion": "1.3",
-                "autoUpgradeMinorVersion": "true",
-                "settings": { },
-                "protectedSettings": {
-                    "username": "[parameters('adminUsername')]",
-                    "password": "[parameters('adminPassword')]"
                 }
             }
         },
@@ -269,23 +280,24 @@
                 "settings": {
                     "disabled": false,
                     "stop": false,
-                    "rebootAfterPatch": "Auto",
-                    "category": "ImportantAndRecommended",
-                    "installDuration": "01:00",
-                    "oneoff": true,
+                    "rebootAfterPatch": "[parameters('rebootAfterPatch')]",
+                    "category": "[parameters('category')]",
+                    "installDuration": "[parameters('installDuration')]",
+                    "oneoff": "[parameters('oneoff')]",
                     "intervalOfWeeks": "1",
-                    "dayOfWeek": "Sunday",
-                    "startTime": "03:00",
+                    "dayOfWeek": "[parameters('dayOfWeek')]",
+                    "startTime": "[parameters('startTime')]",
                     "vmStatusTest": {
                         "local": false,
-                        "idleTestScript": "",
-                        "healthyTestScript": ""
+                        "idleTestScript": "[parameters('idleTestScript')]",
+                        "healthyTestScript": "[parameters('healthyTestScript')]"
                     }
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[parameters('storageAccountName')]",
+                    "storageAccountKey": "[parameters('storageAccountKey')]"
                 }
             }
         }
-    ],
-
-    "outputs": {
-    }
+    ]
 }

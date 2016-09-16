@@ -1,17 +1,5 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentparameters.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "adminUsername": {
-            "value": "localadmin"
-        },
-
-        "adminPassword": {
-            "value": "GEN-PASSWORD"
-        },
-
-        "ubuntuOSVersion": {
-            "value": "15.10"
-        }
-    }
+    "parameters": { }
 }
