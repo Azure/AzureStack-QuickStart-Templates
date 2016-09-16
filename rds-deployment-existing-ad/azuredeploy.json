@@ -9,6 +9,20 @@
       },
       "defaultValue": "contoso.com"
     },
+    "adVnetName": {
+    "type": "string",
+      "metadata": {
+        "description": "The vnet name of AD domain. For example johnvnet1"
+      },
+    "defaultValue": "[concat('ADVNET',resourceGroup().name)]"
+},
+    "adSubnetName": {
+        "type": "string",
+      "metadata": {
+        "description": "The subnet name of AD domain. For example johnsubnet1"
+      },
+      "defaultValue": "[concat('ADStaticSubnet',resourceGroup().name)]"
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -43,7 +57,7 @@
     }
   },
     "variables": {
-        "dnsLabelPrefix": "[concat('dns', resourceGroup().name)]",
+        "dnsLabelPrefix": "[concat('rdsdns', resourceGroup().name)]",
         "gwdnsLabelPrefix": "[concat('gw', resourceGroup().name)]",
         "cbdnsLabelPrefix": "[concat('cb', resourceGroup().name)]",
         "rdshVmSize": "Standard_A2",
@@ -52,16 +66,14 @@
         "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
-        "adVnetName": "[concat('ADVNET',resourceGroup().name)]",
-        "adSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
         "vnetAddressRange": "10.0.0.0/16",
         "subnetAddressRange": "10.0.0.0/24",
         "dnsServerPrivateIp": "10.0.0.4",
-        "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('adVnetName')),'/subnets/',variables('adSubnetName'))]",
+        "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('adVnetName')),'/subnets/',parameters('adSubnetName'))]",
         "publicIpRef": "publicIp",
         "brokerIpRef": "brokerpublicIp",
         "gatewayIpRef": "gatewaypublicIp",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment-existing-ad/",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/rds-deployment-existing-ad/",
         "apiVersion": "2015-06-15",
         "apiVersionNRP": "2015-06-15"
     },
@@ -375,7 +387,6 @@
         "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
       },
       "dependsOn": [
-        "Microsoft.Compute/virtualMachines/gw-vm/extensions/gateway",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', 'rdsh-availabilityset')]",
         "[concat('Microsoft.Network/networkInterfaces/', 'rdsh-', copyindex(), '-nic')]"
