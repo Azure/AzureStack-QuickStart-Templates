@@ -9,6 +9,13 @@
             },
             "defaultValue": "contoso.com"
         },
+        "sqlInstallationISOUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The Uri to the SQL Server installation ISO. E.g http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+            },
+            "defaultValue": "http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+        },
         "sqlServerServiceAccountUserName": {
             "type": "string",
             "metadata": {
@@ -27,31 +34,15 @@
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs and Domain"
-            }
+            },            
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         }
     },
     "variables": {
-        "apiVersion": {
-            "storage": {
-                "storageAccounts": "2015-06-15"
-            },
-            "compute": {
-                "virtualMachines": "2015-06-15"
-            },
-            "resources": {
-                "deployments": "2015-01-01"
-            },
-            "network": {
-                "virtualNetworks": "2015-05-01-preview",
-                "loadBalancers": "2015-05-01-preview",
-                "publicIPAddresses": "2015-05-01-preview",
-                "networkSecurityGroups": "2015-05-01-preview"
-            }
-        },
-        "sqlassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
-        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
+        "sqlassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/sql-2014-non-ha",
+        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/ad-non-ha",
         "location": "[resourceGroup().location]",
-        "sqlServerServiceAccountPassword": "[parameters('adminPassword')",
+        "sqlServerServiceAccountPassword": "[parameters('adminPassword')]",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
         "primaryIpADAddress": "10.0.0.4",
@@ -59,7 +50,7 @@
         "adVMSize": "Standard_A1",
         "sqlVMSize": "Standard_A3",
         "staticSubnetName": "[concat('SQLSub',resourceGroup().name)]",
-        "dnsPrefix": "[concat('SQLADDNS',resourceGroup().name)]",
+        "dnsPrefix": "[tolower(concat(resourceGroup().name,'dc'))]",
         "virtualNetworkName": "[concat('SQLVNet',resourceGroup().name)]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
@@ -79,23 +70,17 @@
         "updateVNetDNS1": "updateVNetDNS1",
         "updateVNetDNS1ID": "[concat('Microsoft.Resources/deployments/', variables('updateVNetDNS1'))]",
         "sqlClusterVmName": "[concat('SQL',resourceGroup().name)]",
-        "updateSQLCNic1": "updateSQLCNic1",
-        "updateSQLCNic1ID": "[concat('Microsoft.Resources/deployments/', variables('updateSQLCNic1'))]",
-        "nicTemplateURL": "[concat(variables('adAssetLocation'),'/nic.json')]",
         "deploySqlStandalone": "DeploySqlStandalone",
         "deploySqlStandaloneTemplateURL": "[concat(variables('sqlassetLocation'),'/deploySqlStandalone.json')]",
         "publicLBName": "[concat('SQLPLB',resourceGroup().name)]",
         "publicIPAddressName": "[concat('SQLPIP',resourceGroup().name)]",
         "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
         "lbFE": "SQLLBFE",
-        "lbBE": "SQLLBBE",
         "rpdNAT": "SQLRDPNAT",
         "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
         "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
         "rdpPort": 3389,
-        "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-        "azureStackDNSIP": "192.168.100.2",
         "adNICName": "[concat('SQLADNic',resourceGroup().name)]",
         "sqlNICName": "[concat('SQLNic',resourceGroup().name)]",
         "nsgName": "SQLNsg",
@@ -117,7 +102,7 @@
             "name": "[variables('nsgName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "location": "[variables('location')]",
-            "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
+            "apiVersion": "2015-05-01-preview",
             "properties": {
                 "securityRules": [
                     {
@@ -140,7 +125,7 @@
             "name": "[variables('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[variables('location')]",
-            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "apiVersion": "2015-05-01-preview",
             "dependsOn": [
                 "[variables('nsgID')]"
             ],
@@ -160,19 +145,14 @@
                             }
                         }
                     }
-                ],
-                "dhcpOptions": {
-                    "dnsServers": [
-                        "[variables('azureStackDNSIP')]"
-                    ]
-                }
+                ]
             }
         },
         {
             "name": "[variables('publicIPAddressName')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "location": "[variables('location')]",
-            "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+            "apiVersion": "2015-05-01-preview",
             "dependsOn": [
                 "[variables('vnetID')]"
             ],
@@ -186,7 +166,7 @@
         {
             "name": "[variables('publiclbName')]",
             "type": "Microsoft.Network/loadBalancers",
-            "apiVersion": "[variables('apiVersion').network.loadBalancers]",
+            "apiVersion": "2015-05-01-preview",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[variables('publicIPAddressID')]"
@@ -221,7 +201,7 @@
         {
             "name": "[variables('adVmDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('publiclbID')]"
             ],
@@ -268,7 +248,7 @@
         {
             "name": "[variables('deploySqlClusterVms')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('adVmDeploymentID')]"
             ],
@@ -309,7 +289,7 @@
         {
             "name": "[variables('deployPrimaryAd')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('adVmDeploymentID')]"
             ],
@@ -341,7 +321,7 @@
         {
             "name": "[variables('updateVNetDNS1')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('deployPrimaryAdID')]"
             ],
@@ -363,8 +343,7 @@
                     },
                     "dnsServerAddress": {
                         "value": [
-                            "[variables('primaryIpADAddress')]",
-                            "[variables('azureStackDNSIP')]"
+                            "[variables('primaryIpADAddress')]"                            
                         ]
                     }
                 }
@@ -373,7 +352,7 @@
         {
             "name": "[variables('deploySqlStandalone')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('updateVNetDNS1ID')]",
                 "[variables('deploySqlClusterVmsID')]"
@@ -390,6 +369,9 @@
                     },
                     "domainName": {
                         "value": "[parameters('domainName')]"
+                    },
+                    "sqlInstallationISOUri": {
+                        "value": "[parameters('sqlInstallationISOUri')]"
                     },
                     "sqlServerServiceAccountUserName": {
                         "value": "[parameters('sqlServerServiceAccountUserName')]"

@@ -10,9 +10,6 @@
     }
   },
   "variables": {
-    "apiVersion": {
-      "storage": { "storageAccounts": "2015-06-15" }
-    },
     "storage": {
       "storageAccounts": {
         "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
@@ -24,7 +21,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storage').storageAccounts.name]",
-      "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storage').storageAccounts.type]"

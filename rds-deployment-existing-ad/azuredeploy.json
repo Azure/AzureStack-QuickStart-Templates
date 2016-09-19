@@ -9,17 +9,33 @@
       },
       "defaultValue": "contoso.com"
     },
+    "adVnetName": {
+    "type": "string",
+      "metadata": {
+        "description": "The vnet name of AD domain. For example johnvnet1"
+      },
+    "defaultValue": "[concat('ADVNET',resourceGroup().name)]"
+},
+    "adSubnetName": {
+        "type": "string",
+      "metadata": {
+        "description": "The subnet name of AD domain. For example johnsubnet1"
+      },
+      "defaultValue": "[concat('ADStaticSubnet',resourceGroup().name)]"
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
         "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'. For example johnadmin"
-      }
+      },
+      "defaultValue": "vmadmin"
     },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "The password for the administrator account of the new VM and the domain"
-      }
+      },
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
     },
     "imageSKU": {
       "type": "string",
@@ -32,49 +48,72 @@
       },
       "defaultValue": "2012-R2-Datacenter"
     },
-    "numberOfRdshInstances": {
+    "NumberOfRemoteDesktopSessionHosts": {
       "type": "int",
       "defaultValue": 1,
       "metadata": {
-        "description": "Number of RDSH instances"
+        "description": "Number of RemoteDesktopSessionHosts"
       }
     }
   },
-  "variables": {
-    "dnsLabelPrefix": "[concat('dns', resourceGroup().name)]",
-    "rdshVmSize":  "Standard_A2",
-    "storageAccountName": "[concat('sa', resourceGroup().name)]",
-    "storageAccountType": "Standard_LRS",
-    "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-    "imagePublisher": "MicrosoftWindowsServer",
-    "imageOffer": "WindowsServer",
-    "adVnetName": "[concat('ADVNET',resourceGroup().name)]",
-    "adSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
-    "vnetAddressRange": "10.0.0.0/16",
-    "subnetAddressRange": "10.0.0.0/24",
-    "dnsServerPrivateIp": "10.0.0.4",
-    "DNSIP": "192.168.100.2",
-    "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('adVnetName')),'/subnets/',variables('adSubnetName'))]",
-    "publicIpRef": "publicIp",
-    "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/rds-deployment/",
-    "apiVersion": "2015-06-15",
-    "apiVersionNRP": "2015-05-01-preview"
-  },
+    "variables": {
+        "dnsLabelPrefix": "[concat('rdsdns', resourceGroup().name)]",
+        "gwdnsLabelPrefix": "[concat('gw', resourceGroup().name)]",
+        "cbdnsLabelPrefix": "[concat('cb', resourceGroup().name)]",
+        "rdshVmSize": "Standard_A2",
+        "storageAccountName": "[concat('sa', resourceGroup().name)]",
+        "storageAccountType": "Standard_LRS",
+        "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "vnetAddressRange": "10.0.0.0/16",
+        "subnetAddressRange": "10.0.0.0/24",
+        "dnsServerPrivateIp": "10.0.0.4",
+        "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('adVnetName')),'/subnets/',parameters('adSubnetName'))]",
+        "publicIpRef": "publicIp",
+        "brokerIpRef": "brokerpublicIp",
+        "gatewayIpRef": "gatewaypublicIp",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/rds-deployment-existing-ad/"
+    },
     "resources": [
-        {
-            "apiVersion": "[variables('apiVersionNRP')]",
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIpRef')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publicIPAllocationMethod": "Dynamic",
+          "dnsSettings": {
+            "domainNameLabel": "[variables('dnsLabelPrefix')]"
+          }
+        }
+      },
+      {
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIpRef')]",
+            "name": "[variables('gatewayIpRef')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsLabelPrefix')]"
+                    "domainNameLabel": "[variables('gwdnsLabelPrefix')]"
+                }
+            }
+        },
+      {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('brokerIpRef')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('cbdnsLabelPrefix')]"
                 }
             }
         },
         {
-            "apiVersion": "[variables('apiVersion')]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageAccountName')]",
             "location": "[resourceGroup().location]",
@@ -83,25 +122,25 @@
             }
         },
         {
-          "apiVersion": "[variables('apiVersion')]",
+          "apiVersion": "2015-06-15",
           "type": "Microsoft.Compute/availabilitySets",
           "name": "gw-availabilityset",
           "location": "[resourceGroup().location]"
         },
         {
-          "apiVersion": "[variables('apiVersion')]",
+          "apiVersion": "2015-06-15",
           "type": "Microsoft.Compute/availabilitySets",
           "name": "cb-availabilityset",
           "location": "[resourceGroup().location]"
         },
         {
-          "apiVersion": "[variables('apiVersion')]",
+          "apiVersion": "2015-06-15",
           "type": "Microsoft.Compute/availabilitySets",
           "name": "rdsh-availabilityset",
           "location": "[resourceGroup().location]"
         },
         {
-            "apiVersion": "[variables('apiVersionNRP')]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/loadBalancers",
             "name": "loadBalancer",
             "location": "[resourceGroup().location]",
@@ -153,7 +192,7 @@
             }
         },
         {
-            "apiVersion": "[variables('apiVersionNRP')]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "gw-nic",
             "location": "[resourceGroup().location]",
@@ -166,6 +205,9 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayIpRef'))]"
+                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     },
@@ -187,14 +229,13 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
         },
         {
-            "apiVersion": "[variables('apiVersionNRP')]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "cb-nic",
             "location": "[resourceGroup().location]",
@@ -207,6 +248,9 @@
                   "name": "ipconfig",
                   "properties": {
                     "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('brokerIpRef'))]"
+                            },
                     "subnet": {
                       "id": "[variables('subnet-id')]"
                     }
@@ -215,20 +259,19 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
         },
         {
-            "apiVersion": "[variables('apiVersionNRP')]",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat('rdsh-', copyindex(), '-nic')]",
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "rdsh-nic-loop",
-                "count": "[parameters('numberOfRdshInstances')]"
+                "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
             },
             "dependsOn": [
                 "Microsoft.Network/loadBalancers/loadBalancer"
@@ -247,14 +290,13 @@
               ],
               "dnsSettings": {
               "dnsServers": [
-                "[variables('dnsServerPrivateIp')]",
-                "[variables('DNSIP')]"
+                "[variables('dnsServerPrivateIp')]"
               ]
             }
             }
         },
          {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "gw-vm",
       "location": "[resourceGroup().location]",
@@ -301,7 +343,7 @@
       },
       "resources": [
         {
-          "apiVersion": "[variables('apiVersion')]",
+          "apiVersion": "2015-06-15",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "gw-vm/gateway",
           "location": "[resourceGroup().location]",
@@ -334,16 +376,15 @@
       ]
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat('rdsh-', copyindex())]",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "rdsh-vm-loop",
-        "count": "[parameters('numberOfRdshInstances')]"
+        "count": "[parameters('NumberOfRemoteDesktopSessionHosts')]"
       },
       "dependsOn": [
-        "Microsoft.Compute/virtualMachines/gw-vm/extensions/gateway",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', 'rdsh-availabilityset')]",
         "[concat('Microsoft.Network/networkInterfaces/', 'rdsh-', copyindex(), '-nic')]"
@@ -387,7 +428,7 @@
       },
       "resources": [
         {
-          "apiVersion": "[variables('apiVersion')]",
+          "apiVersion": "2015-06-15",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat('rdsh-', copyindex(),'/sessionhost')]",
           "location": "[resourceGroup().location]",
@@ -420,7 +461,7 @@
       ]
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "cb-vm",
       "location": "[resourceGroup().location]",
@@ -470,7 +511,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "cb-vm/rdsdeployment",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Compute/virtualMachines', 'cb-vm')]",
@@ -493,7 +534,7 @@
             "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
             "domainName": "[parameters('adDomainName')]",
             "externalfqdn": "[concat('gateway.',parameters('adDomainName'))]",
-            "numberOfRdshInstances": "[parameters('numberOfRdshInstances')]",
+            "numberOfRdshInstances": "[parameters('NumberOfRemoteDesktopSessionHosts')]",
             "sessionHostNamingPrefix": "rdsh-",
             "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]"
           }

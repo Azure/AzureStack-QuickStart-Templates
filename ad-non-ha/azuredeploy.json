@@ -14,63 +14,42 @@
             "metadata": {
                 "description": "The name of the Administrator of the new VMs and Domain"
             },
-            "defaultValue": "lcladmin"
+            "defaultValue": "vmadmin"
         },
         "adminPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "The password for the Administrator account of the new VMs and Domain"
-            }
+            },
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
         }
     },
     "variables": {
-        "apiVersion": {
-            "storage": {
-                "storageAccounts": "2015-06-15"
-            },
-            "compute": {
-                "virtualMachines": "2015-06-15"
-            },
-            "resources": {
-                "deployments": "2015-01-01"
-            },
-            "network": {
-                "virtualNetworks": "2015-05-01-preview",
-                "loadBalancers": "2015-05-01-preview",
-                "publicIPAddresses": "2015-05-01-preview",
-                "networkSecurityGroups": "2015-05-01-preview"
-            }
-        },
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/ad-non-ha",
         "adVMSize": "Standard_A1",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
         "primaryAdIpAddress": "10.0.0.4",
         "storageAccountType": "Standard_LRS",
-        "azureStackDNSIPAddress": "192.168.100.2",
         "adTemplateURL": "[concat(variables('assetLocation'),'/adVmTemplate.json')]",
         "adStorageName": "[tolower(concat('adsa',resourceGroup().name))]",
-        "dnsPrefix": "[concat('ADDNS',resourceGroup().name)]",
+        "dnsPrefix": "[tolower(concat(resourceGroup().name,'dc'))]",
         "adVmDeployment": "CreateADVMs",
         "adVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment'))]",
         "adPDCVMName": "[concat('AD',resourceGroup().name)]",
         "deployPrimaryAdTemplateURL": "[concat(variables('assetLocation'),'/deployPrimaryAD.json')]",
         "deployPrimaryAd": "ConfigureAD",
         "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",
-        "deploySecondaryAdName": "deploySecondaryAdName",
-        "deploySecondaryAdNameId": "[concat('Microsoft.Resources/deployments/', variables('deploySecondaryAdName'))]",
         "updateVNetDNS1": "UpdateVNetDNS",
         "vnetwithDNSTemplateURL": "[concat(variables('assetLocation'),'/vnet-with-dns-server.json')]",
         "publicLBName": "[concat('ADPLB',resourceGroup().name)]",
         "publicIPAddressName": "[concat('ADlbPublicIP',resourceGroup().name)]",
         "lbFE": "[concat('ADLBFE',resourceGroup().name)]",
-        "lbBE": "[concat('ADLBBE',resourceGroup().name)]",
         "rpdNAT": "[concat('ADRDPNAT',resourceGroup().name)]",
         "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
         "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
         "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
         "rdpPort": 3389,
-        "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
         "nsgName": "[concat('ADNsg',resourceGroup().name)]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
@@ -96,7 +75,7 @@
             "name": "[variables('nsgName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
+            "apiVersion": "2015-06-15",
             "properties": {
                 "securityRules": [
                     {
@@ -119,7 +98,7 @@
             "name": "[variables('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[variables('nsgID')]"
             ],
@@ -132,20 +111,14 @@
                         "id": "[variables('nsgID')]"
                     }
                 },
-                "subnets": "[variables('subnets')]",
-                "dhcpOptions": {
-                    "dnsServers": [
-                      "[variables('primaryAdIpAddress')]",
-                      "[variables('azureStackDNSIPAddress')]"
-                    ]
-                }
+                "subnets": "[variables('subnets')]"
             }
         },
         {
             "name": "[variables('publicIPAddressName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[variables('vnetID')]"
             ],
@@ -160,7 +133,7 @@
             "name": "[variables('publiclbName')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.Network/loadBalancers",
-            "apiVersion": "[variables('apiVersion').network.loadBalancers]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[variables('publicIPAddressID')]"
             ],
@@ -194,7 +167,7 @@
         {
             "name": "[variables('adVmDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('publiclbID')]"
             ],
@@ -241,7 +214,7 @@
         {
             "name": "[variables('deployPrimaryAd')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('adVmDeploymentId')]"
             ],
@@ -273,7 +246,7 @@
         {
             "name": "[variables('updateVNetDNS1')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('deployPrimaryAdId')]"
             ],
@@ -294,8 +267,7 @@
                         "value": "[variables('subnets')]"
                     },
                     "dnsServerAddress": {
-                        "value": [ "[variables('primaryAdIpAddress')]",
-                      "[variables('azureStackDNSIPAddress')]" ]
+                        "value": [ "[variables('primaryAdIpAddress')]" ]
                     }
                 }
             }

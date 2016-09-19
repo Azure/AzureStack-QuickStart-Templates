@@ -99,17 +99,6 @@
         }
     },
     "variables": {
-        "apiVersion": {
-            "storage": {
-                "storageAccounts": "2015-06-15"
-            },
-            "compute": {
-                "virtualMachines": "2015-06-15"
-            },
-            "network": {
-                "virtualNetworks": "2015-05-01-preview"
-            }
-        },
         "vmvhdContainerName": "vhds"
     },
     "resources": [
@@ -117,7 +106,7 @@
             "name": "[parameters('storageAccount')]",
             "type": "Microsoft.Storage/storageAccounts",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
+            "apiVersion": "2015-06-15",
             "properties": {
                 "accountType": "[parameters('storageAccountType')]"
             }
@@ -126,7 +115,7 @@
             "name": "[parameters('adDNicName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "apiVersion": "2015-05-01-preview",
             "properties": {
                 "ipConfigurations": [
                     {
@@ -151,7 +140,7 @@
             "name": "[parameters('vmName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').compute.virtualMachines]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccount'))]",
                 "[resourceId('Microsoft.Network/networkInterfaces',parameters('adDNicName'))]"
@@ -186,7 +175,7 @@
                                 "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmvhdContainerName'),'/', parameters('vmName'), '0','data-1.vhd')]"
                             },
                             "name": "[concat(parameters('vmName'), '0','-data-disk1')]",
-                            "createOption": "empty",
+                            "createOption": "Empty",
                             "caching": "None",
                             "diskSizeGB": "[parameters('dataDiskSize')]",
                             "lun": 0

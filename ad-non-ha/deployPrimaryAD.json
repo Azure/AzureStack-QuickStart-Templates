@@ -35,13 +35,6 @@
         }
     },
     "variables": {
-        "apiVersion": {
-            "compute": {
-                "virtualMachines": {
-                    "extensions": "2015-06-15"
-                }
-            }
-        },
         "adPDCModulesURL": "[concat(parameters('assetLocation'),'/CreateADPDC.ps1.zip')]",
         "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC"
     },
@@ -50,7 +43,7 @@
             "name": "[concat(parameters('primaryADName'),'/InstallDomainController')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').compute.virtualMachines.extensions]",
+            "apiVersion": "2015-06-15",
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",

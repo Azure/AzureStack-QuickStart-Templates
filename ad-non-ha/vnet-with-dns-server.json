@@ -28,18 +28,13 @@
         }
     },
     "variables": {
-        "apiVersion": {
-            "network": {
-                "virtualNetworks": "2015-05-01-preview"
-            }
-        }
     },
     "resources": [
         {
             "name": "[parameters('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiversion').network.virtualNetworks]",
+            "apiVersion": "2015-05-01-preview",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [

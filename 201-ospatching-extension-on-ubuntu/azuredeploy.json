@@ -1,0 +1,303 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "username": {
+            "type": "string",
+            "defaultValue": "localadmin",
+            "metadata": {
+                "description": "Username for the Virtual Machine. Default value is localadmin"
+            }
+        },
+        "password": {
+            "type": "securestring",
+            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]",
+            "metadata": {
+                "description": "Password for the Virtual Machine. Default value is 'Subscription#<subscription id>'"
+            }
+        },
+        "rebootAfterPatch": {
+            "type": "string",
+            "defaultValue": "Auto",
+            "metadata": {
+                "description": "The reboot behavior after patching.Default value is Auto"
+            },
+            "allowedValues": [
+                "RebootIfNeed",
+                "Required",
+                "NotRequired",
+                "Auto"
+            ]
+        },
+        "category": {
+            "type": "string",
+            "defaultValue": "ImportantAndRecommended",
+            "metadata": {
+                "description": "Type of patches to install.Default value is ImportantAndRecommended"
+            },
+            "allowedValues": [
+                "Important",
+                "ImportantAndRecommended"
+            ]
+        },
+        "installDuration": {
+            "type": "string",
+            "defaultValue": "01:00",
+            "metadata": {
+                "description": "The allowed total time for installation.Default value is 01:00"
+            }
+        },
+        "oneoff": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Patch the OS immediately.Default value is false"
+            },
+            "allowedValues": [
+                true,
+                false
+            ]
+        },
+        "dayOfWeek": {
+            "type": "string",
+            "defaultValue": "Sunday|Wednesday",
+            "metadata": {
+                "description": "The patching date (of the week)You can specify multiple days in a week."
+            }
+        },
+        "startTime": {
+            "type": "string",
+            "defaultValue": "03:00",
+            "metadata": {
+                "description": "Start time of patching. Default value is 03:00"
+            }
+        },
+        "idleTestScript": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The uri of the VMStatus idle test script"
+            }
+        },
+        "healthyTestScript": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The uri of the VMStatus healthy test script"
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The name of storage account where the VMStatus scripts resides."
+            }
+        },
+        "storageAccountKey": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The access key of storage account where the VMStatus scripts resides."
+            }
+        }
+    },
+    "variables": {
+        "scenarioPrefix": "[concat('ospatchlinux',substring(uniquestring(resourceGroup().id),0,5))]",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "ubuntuOSVersion": "14.04.3-LTS",
+        "vmSize": "Standard_A1",
+        "OSDiskName": "[concat(variables('scenarioPrefix'),'OSDisk')]",
+        "nicName": "[concat(variables('scenarioPrefix'),'Nic')]",
+        "vnetAddressPrefix": "10.0.0.0/16",
+        "subnetName": "[concat(variables('scenarioPrefix'),'Subnet')]",
+        "subnetPrefix": "10.0.0.0/24",
+        "storageAccountName": "[concat(variables('scenarioPrefix'),'sa')]",
+        "storageAccountType": "Standard_LRS",
+        "publicIPAddressName": "[concat(variables('scenarioPrefix'),'PublicIp')]",
+        "publicIPAddressType": "Dynamic",
+        "dnsNameForPublicIP": "[tolower(concat(variables('scenarioPrefix'),'dns'))]",
+        "vmStorageAccountContainerName": "vhds",
+        "vmName": "[concat(variables('scenarioPrefix'),'VM')]",
+        "virtualNetworkName": "[concat(variables('scenarioPrefix'),'Vnet')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "networkSecurityGroupName": "[tolower(concat(variables('scenarioPrefix'),'nsg'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "ssh",
+                        "properties": {
+                            "description": "Allow RDP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('nicName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[variables('networkSecurityGroupName')]"
+            ],
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('vmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('username')]",
+                    "adminPassword": "[parameters('password')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('ubuntuOSVersion')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk1",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/installospatching')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "OSPatchingForLinux",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "disabled": false,
+                    "stop": false,
+                    "rebootAfterPatch": "[parameters('rebootAfterPatch')]",
+                    "category": "[parameters('category')]",
+                    "installDuration": "[parameters('installDuration')]",
+                    "oneoff": "[parameters('oneoff')]",
+                    "intervalOfWeeks": "1",
+                    "dayOfWeek": "[parameters('dayOfWeek')]",
+                    "startTime": "[parameters('startTime')]",
+                    "vmStatusTest": {
+                        "local": false,
+                        "idleTestScript": "[parameters('idleTestScript')]",
+                        "healthyTestScript": "[parameters('healthyTestScript')]"
+                    }
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[parameters('storageAccountName')]",
+                    "storageAccountKey": "[parameters('storageAccountKey')]"
+                }
+            }
+        }
+    ]
+}

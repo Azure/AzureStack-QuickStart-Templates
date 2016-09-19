@@ -5,8 +5,8 @@
         "exchangeVMCount": {
             "value": 1
         },
-        "exchangeStorageSize": {
-            "value": "10GB"
+        "exchangeStorageSizeInGB": {
+            "value": 10
         }
     }
 }

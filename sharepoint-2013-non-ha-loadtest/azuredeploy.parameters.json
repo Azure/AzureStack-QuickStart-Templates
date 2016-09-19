@@ -2,35 +2,5 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "TestControllerVMName": {
-            "value": "sprg-tc-0"
-        },
-        "TestControllerServiceUserName": {
-            "value": "tcserv"
-        },
-        "TargetSharePointServerVMName": {
-            "value": "sprg-sp-0"
-        },
-        "TargetSQLServerVMName": {
-            "value": "sprg-sql-0"
-        },
-        "TargetSharePointServerAdminUserName": {
-            "value": "Administrator"
-        },
-        "TargetSharePointServerUserPassword": {
-            "value": "GEN-PASSWORD"
-        },
-        "TargetSharePointSiteURL": {
-            "value": "http://sprg-sp-0.contoso.com"
-        },
-        "NumberOfLoadTestUsers": {
-            "value": 15
-        },
-        "LoadTestToRun": {
-            "value": "MySiteHostRW.loadtest"
-        },
-        "VisualStudioVersionNumber": { 
-            "value": 12
-        }
     }
 }

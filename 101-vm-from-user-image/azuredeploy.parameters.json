@@ -23,9 +23,6 @@
     "osType": {
       "value": "windows"
     },
-    "location": {
-      "value": "local"
-    },
     "vmSize": {
       "value": "Standard_A1"
     }  
