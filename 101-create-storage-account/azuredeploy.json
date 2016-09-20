@@ -1,26 +1,26 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-  },
+  "parameters": { },
   "variables": {
     "storage": {
-      "storageAccounts": {
-        "name": "[resourceGroup().id]",
-        "type": "Standard_LRS"
-      }
+        "storageAccounts": {
+            "name": "[concat('sa', uniquestring(resourceGroup().id))]",
+            "type": "Standard_LRS"
+        }
     }
   },
-  "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storage').storageAccounts.name]",
-      "apiVersion": "2015-06-15",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storage').storageAccounts.type]"
-      }
-    }
-  ],
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storage').storageAccounts.name]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourcegroup().Location]",
+            "properties": {
+                "accountType": "[variables('storage').storageAccounts.type]"
+            }
+
+        }
+    ],
   "outputs": { }
 }
