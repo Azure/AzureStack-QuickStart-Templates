@@ -51,7 +51,7 @@
         "publicIPAddressName": "[tolower(concat('pip',uniquestring(resourceGroup().id)))]",
         "publicIPAddressType": "Dynamic",
         "vmStorageAccountContainerName": "vhds",
-        "vmName": "[concat('vm', resourceGroup().name)]",
+        "vmName": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]",
         "vmSize": "Standard_A1",
         "virtualNetworkName": "[tolower(concat('vnet',uniquestring(resourceGroup().id)))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
