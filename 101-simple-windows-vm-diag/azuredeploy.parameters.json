@@ -5,9 +5,6 @@
     "vmsuffix": {
       "value": "myVM"
     },
-    "adminPassword": {
-      "value": "GEN-PASSWORD"
-    },
     "storageAccountNamePrefix": {
       "value": "DiagStor"
     },
