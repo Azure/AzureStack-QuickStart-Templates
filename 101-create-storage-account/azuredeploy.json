@@ -2,17 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "storageAccountNamePrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "Name prefix of the Storage Account. The maximum length of the prefix is 24 characters"
-      }
-    }
   },
   "variables": {
     "storage": {
       "storageAccounts": {
-        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','',resourceGroup().name))]",
+        "name": "[resourceGroup().id]",
         "type": "Standard_LRS"
       }
     }
