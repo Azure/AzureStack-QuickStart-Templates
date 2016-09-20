@@ -5,9 +5,6 @@
     "vmsuffix": {
       "value": "myVM"
     },
-    "storageAccountNamePrefix": {
-      "value": "DiagStor"
-    },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
