@@ -320,7 +320,7 @@
             },
             "StorageAccountName": "[variables('uniqueStorageAccountName')]",
             "StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
-            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').storage.primaryEndpoints['blob']]"
+            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
           }
         },
         "protectedSettings": {
