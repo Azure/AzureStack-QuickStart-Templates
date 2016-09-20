@@ -12,7 +12,7 @@
   "variables": {
     "storage": {
       "storageAccounts": {
-        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
+        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','',resourceGroup().name))]",
         "type": "Standard_LRS"
       }
     }
