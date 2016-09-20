@@ -7,7 +7,7 @@
       "metadata": {
         "description": "Name of the existing VM to apply Linux custom script to"
       },
-      "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]""
+      "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]"
     }    
   },
   "variables": {
