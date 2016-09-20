@@ -56,7 +56,7 @@
         "virtualNetworkName": "[tolower(concat('vnet',uniquestring(resourceGroup().id)))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]"        
+        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]"
     },
     "resources": [
         {

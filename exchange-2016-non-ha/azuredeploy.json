@@ -106,7 +106,6 @@
             }
         },
         {
-
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
