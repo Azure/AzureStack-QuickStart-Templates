@@ -139,7 +139,7 @@
             "metadata": {
                 "description": "The root location for all the configuring scripts"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/docker-swarm-ubuntu/parts/"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/docker-swarm-ubuntu/parts/"
         }
     },
     "variables": {

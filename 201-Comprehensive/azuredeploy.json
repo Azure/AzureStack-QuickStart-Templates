@@ -29,7 +29,7 @@
         "windowsImageSKU": "2012-R2-Datacenter",
         "windowsImageVersion": "latest",
         "dataDiskSize": 2,
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-Comprehensive",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-Comprehensive",
         "staticSubnetName": "vmstaticsubnet",
         "virtualNetworkName": "[tolower(concat('vmvnet',resourceGroup().name))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
