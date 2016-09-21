@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy Ubuntu Docker Swarm clusters on Azure Stack",
+  "description": "Deploy Ubuntu Docker Swarm clusters",
+  "summary": "This template has default values for all the parameters and deploys Ubuntu Docker Swarm clusters",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2016-09-20"
+}
