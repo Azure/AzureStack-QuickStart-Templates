@@ -6,7 +6,7 @@
       "value": 1
     },
     "vmSize": {
-      "value": "Standard_A1"
+      "value": "Standard_A0"
     }
   }
 }
