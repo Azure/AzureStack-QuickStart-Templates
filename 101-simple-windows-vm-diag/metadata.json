@@ -2,6 +2,6 @@
   "itemDisplayName": "Simple Windows VM with Diagnostic Settings",
   "description": "Deploys a simple Windows VM with Diagnostic Settings. This template also deploys a Virtual Network (with DNS), Public IP address, Network Security Group, and a Network Interface.",
   "summary": "For Azure Stack POC TP1, enabling Monitoring for Virtual Machines from the UI is disabled. In order to test this functionality, the end user needs to deploy a Virtual Machine directly from an ARM template with Diagnostic Settings enabled. Once the VM is deployed, the Monitoring Agent that is deployed in the VM will be able to send data to the Storage Account provisioned to it.",
-  "githubUsername": "shriramnat",
-  "dateUpdated": "2015-12-16"
+  "githubUsername": "azurestack",
+  "dateUpdated": "2016-09-20"
 }

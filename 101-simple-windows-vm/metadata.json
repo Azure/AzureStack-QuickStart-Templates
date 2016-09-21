@@ -2,6 +2,6 @@
   "itemDisplayName": "Deploy a simple Windows VM to Azure Stack",
   "description": "Deploys a simple Windows VM. This template also deploys a Virtual Network (with DNS), Public IP address, Network Security Group, and a Network Interface.",
   "summary": "This template takes a minimum amount of parameters and deploys a Windows VM, with the appropriate DNS setting for the Azure Stack POC environment.",
-  "githubUsername": "charlesjoy",
-  "dateUpdated": "2015-12-16"
+  "githubUsername": "azurestack",
+  "dateUpdated": "2016-09-20"
 }

@@ -1,7 +1,7 @@
 {
-  "itemDisplayName": "# Deploy Custom Script VM Extension to existing Windows VM (with command)",
+  "itemDisplayName": "Deploy Custom Script VM Extension to existing Windows VM (with command)",
   "description": "Deploys the Custom Script VM Extension with one paremeter: vmName and hard coded command.",
   "summary": "This template deploys the Custom Script VM Extension to existing Windows VM in the Azure Stack POC environment. It takes a parameter for vmName, and allows for the execution of a command (as seen in the commandToExecute Extension setting).",
-  "githubUsername": "charlesjoy",
-  "dateUpdated": "2015-12-16"
+  "githubUsername": "azurestack",
+  "dateUpdated": "2016-09-20"
 }
