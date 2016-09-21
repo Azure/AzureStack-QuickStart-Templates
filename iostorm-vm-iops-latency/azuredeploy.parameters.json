@@ -4,6 +4,9 @@
   "parameters": {
     "vmCount": {
       "value": 5
+    },
+    "vmSize": {
+      "value": "Standard_A1"
     }
   }
 }
