@@ -36,7 +36,7 @@
         "dnsPrefix": "[tolower(concat(resourceGroup().name,'dc'))]",
         "adVmDeployment": "CreateADVMs",
         "adVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment'))]",
-        "adPDCVMName": "[concat('AD',resourceGroup().name)]",
+        "adPDCVMName": "[substring(replace(replace(tolower(concat('AD',resourceGroup().name)), '-', ''), '.',''),0,8)]",
         "deployPrimaryAdTemplateURL": "[concat(variables('assetLocation'),'/deployPrimaryAD.json')]",
         "deployPrimaryAd": "ConfigureAD",
         "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",
