@@ -2,9 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "vmName": {
-        "value": "myVM001"
-    },
     "scriptFile": {
         "value": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/101-vm-ext-win-cs-scriptfile/VMCustomScriptExtension.ps1"
     },  
