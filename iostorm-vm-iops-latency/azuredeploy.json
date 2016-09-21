@@ -20,6 +20,23 @@
         "description": "The Windows version for the VM."
       }
     },
+	"vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A2",
+      "allowedValues": [
+        "Standard_A0",
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A5",
+        "Standard_A6",
+        "Standard_A7"
+      ],
+      "metadata": {
+        "description": "VM size supported by Azure Stack."
+      }
+	},
     "vmDataDiskSizeInGB": {
       "type": "int",
       "defaultValue": 5,
@@ -71,7 +88,6 @@
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
     "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
-    "vmSize": "Standard_A2",
     "vmNicName": "[tolower(concat('nc', resourceGroup().name))]",
     "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
@@ -203,7 +219,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
@@ -257,7 +273,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
