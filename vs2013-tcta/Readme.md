@@ -9,68 +9,78 @@ This template will create a Visual Studio 2013 test controller/test agent farm u
 The external load balancer creates an RDP NAT rule to allow connectivity to the console VM.
 The components are connected to an existing virtual network to allow connectivity to the target endpoints for load testing.
 
-## Notes
+## Prerequisites
++	An existing Virtual network connected to a domain controller (this is usually the network of the environment to be tested)
++	Visual Studio 2013 Ultimate product key: required for installation of Visual Studio on the test console machine
 
+## Parameters
++	domainName: Name of the existing domain to which the new VMs will join
++	targetResourceGroupName: Name of the resource group that contains the virtual network to which the new VMs will connect to
++	targetVMNetworkName: Name of the existing VM network to connect to
++	targetVMNetworkSubnetName: Name of the exsisting subnet to connect to
++	adminUsername: The name of the Administrator of the new VMs and Domain
++	adminPassword: The password for the Administrator account of the new VMs and Domain
++	serviceAccountUserName: The name of the user account under which the test controller and test agent services will run
++	serviceAccountPassword: The password of the user account under which the test controller and test agent services will run
++	testAgentCount: Number of test agent VMs to create
++	VisualStudioProductKey: Product key (25 characters no spaces) for Visual Studio activation
+
+## Notes
 + 	The image used to create this deployment is
 	+ 	Latest Windows Server 2012 R2 Image with .Net 3.5
 +	The installer bits for SQL 2014 and Visual Studio 2013 Ultimate with Update 5 are downloaded at deployment time but can be pre-loaded into the image.
 	SQL 2014 trial can be downloaded here: https://www.microsoft.com/en-us/evalcenter/evaluate-sql-server-2014. 
 	After downloading the ISO, extract the files to a folder called SQL2014 on the image
-+ 	The image configuration is defined in variables - details below - but the scripts that configure this deployment have only been tested with these versions and may not work on other images.
-+	Required workaround for Azure Stack TP:
-	+	Add a DNS forwarder to address 192.168.100.2 on the DNS server for the network to which the TC/TA farm will be connected to before deploying this template.
-		This can be done via PowerShell by running the following commandlet on the DNS machine: Add-DnsServerForwarder -IPAddress "192.168.100.2"
 
-## Deploying from Portal
+## Deployment steps
+1. Deploy to azure stack portal using custom deployment.
+2. Deploy through Visual Studio using azuredeploy.json and azuredeploy.parameters.json
+2. Deploy the solution from PowerShell with the following PowerShell script 
 
-+	Login into Azurestack portal
-+	Click "New" -> "Custom" -> "Template deployment"
-+	Copy conent in azuredeploy.json, Click "Edit Tempalte" and paste content, then Click "Save"
-+	Fill the parameters
-+	Click "Create new" to create new Resource Group
-+	Click "Create"
+``` PowerShell
+## Specify your AzureAD Tenant in a variable. 
+# If you know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 1)
+# If you do not know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 2)
 
-## Deploying from PowerShell
+# Option 1) If you know the prefix of your <prefix>.onmicrosoft.com AzureAD namespace.
+# You need to set that in the $AadTenantId varibale (e.g. contoso.onmicrosoft.com).
+    $AadTenantId = "contoso"
 
-Download azuredeploy.json and azuredeploy.azurestack.parameters.json to local machine 
+# Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
+# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Technical Preview.
+    $AadTenant = Login-AzureRmAccount
+    $AadTenantId = $AadTenant.Context.Tenant.TenantId
 
-Modify parameter value in azuredeploy.azurestack.parameters.json as needed 
+## Configure the environment with the Add-AzureRmEnvironment cmdlt
+    Add-AzureRmEnvironment -Name 'Azure Stack' `
+        -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
+        -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/"`
+        -ResourceManagerEndpoint ("https://api.azurestack.local/") `
+        -GalleryEndpoint ("https://gallery.azurestack.local/") `
+        -GraphEndpoint "https://graph.windows.net/"
 
-Allow cookies in IE: Open IE at c:\Program Files\Internet Explorer\iexplore.exe -> Internet Options -> Privacy -> Advanced -> Click OK -> Click OK again
+## Authenticate a user to the environment (you will be prompted during authentication)
+    $privateEnv = Get-AzureRmEnvironment 'Azure Stack'
+    $privateAzure = Add-AzureRmAccount -Environment $privateEnv -Verbose
+    Select-AzureRmProfile -Profile $privateAzure
 
-Launch a PowerShell console
+## Select an existing subscription where the deployment will take place
+    Get-AzureRmSubscription -SubscriptionName "SUBSCRIPTION_NAME"  | Select-AzureRmSubscription
 
-Change working folder to the folder containing this template
+# Set Deployment Variables
+$myNum = "001" #Modify this per deployment
+$RGName = "myRG$myNum"
+$myLocation = "local"
 
-```PowerShell
+$templateFile= "azuredeploy.json"
+$templateParameterFile= "azuredeploy.parameters.json"
 
-# Add specific Azure Stack Environment 
+# Create Resource Group for Template Deployment
+New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 
-$AadTenantId = <Tenant Id> #GUID Specific to the AAD Tenant 
-
-Add-AzureRmEnvironment -Name 'Azure Stack' `
-    -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
-    -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/" `
-    -ResourceManagerEndpoint ("https://api.azurestack.local/") `
-    -GalleryEndpoint ("https://gallery.azurestack.local/") `
-    -GraphEndpoint "https://graph.windows.net/"
-
-# Get Azure Stack Environment Information 
-$env = Get-AzureRmEnvironment 'Azure Stack' 
-
-# Authenticate to AAD with Azure Stack Environment 
-Add-AzureRmAccount -Environment $env -Verbose 
-
-# Get Azure Stack Environment Subscription 
-$SubName = <Subscription Name> # The subscription name is the offer name by default 
-Get-AzureRmSubscription -SubscriptionName $SubName | Select-AzureRmSubscription
-
-#Resource group name. Please make sure the resource group does not exist (optional, this template can be deployed to an existing resource group)
-$resourceGroupName = "sqlResourceGroup"
-$deploymentName = "SqlDeployment"
-$location = "Local" 
-New-AzurermResourceGroup -Name $resourceGroupName -Location $location 
-
-#Start new Deployment
-New-AzurermResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName `
-    -TemplateParameterFile .\azuredeploy.azurestack.parameters.json -TemplateFile .\azuredeploy.json
+# Deploy Template 
+New-AzureRmResourceGroupDeployment `
+    -ResourceGroupName $RGName `
+    -TemplateFile $templateFile `
+	-TemplateParameterFile $templateParameterFile
+```
