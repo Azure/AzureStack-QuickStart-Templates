@@ -7,7 +7,7 @@
             "metadata": {
                 "description": "Name of an existing Windows VM to update"
             },
-            "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]",
+            "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
         },
         "userName": {
             "type": "string",

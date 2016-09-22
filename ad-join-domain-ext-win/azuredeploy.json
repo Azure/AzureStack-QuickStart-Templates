@@ -7,7 +7,7 @@
             "metadata": {
                 "description": "Name of the Virtual Machine to be created"
             },
-            "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]",
+            "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
         },
         "adminUsername": {
             "type": "string",
@@ -204,7 +204,7 @@
                 "publisher": "Microsoft.Compute",
                 "type": "JsonADDomainExtension",
                 "typeHandlerVersion": "1.3",
-                "autoUpgradeMinorVersion": "true",
+                "autoUpgradeMinorVersion": true,
                 "settings": {
                     "Name": "[parameters('domainToJoin')]",
                     "OUPath": "[parameters('ouToJoin')]",

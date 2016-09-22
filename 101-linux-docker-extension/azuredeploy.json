@@ -3,13 +3,12 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmName": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the existing VM to apply Docker extension to"
-      },
-      "defaultValue": "[substring(replace(replace(tolower(concat('vm',resourceGroup().name)), '-', ''), '.',''),0,8)]"
+        "type": "string",
+        "metadata": {
+            "description": "Name of the existing VM to apply Docker extension to"
+        },
+        "defaultValue": "[substring(concat('simplelinuxvm',resourceGroup().Name),0,14)]"
     }
-
   },
   "variables": {
   },
