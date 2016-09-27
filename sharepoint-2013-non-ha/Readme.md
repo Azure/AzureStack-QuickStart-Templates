@@ -13,6 +13,50 @@ One external load balancer creates an RDP NAT rule to allow connectivity to the 
 The second external load balancer creates an RDP NAT rule to allow connectivity to the SharePoint VM
 To access the SQL VM use the domain controller or the SharePoint VMs as jumpboxes
 
+## Prerequisites
++	This template requires a SharePoint 2013 with SP1 iso for installing the SharePoint server. If the provided iso does not include SP1 setup will fail.
+	The iso for SharePoint 2013 with SP1 iso is available for download from the internet on MSDN subscriber downloads, Microsoft Partner Network, or Volume Licensing Service Center.
+	If you don't wish to download the iso from the internet at template deployment time, you can download the iso beforehand place it on a local location where it 
+	is reachable for the VMs to download, for example Azure Stack blob storage. You can run the following script on your Azure Stack environment:
+	
+	# Variables
+	$rgname = "isosrg"
+	$saname = "isossa"
+	$containername = "isos"
+	$location = "local"
+	$isoPath = <ISO Path> # File path to the iso to upload, for example C:\isos\myiso.iso
+	
+	# Add specific Azure Stack Environment 
+	$AadTenantId = <Tenant Id> #GUID Specific to the AAD Tenant 
+
+	Add-AzureRmEnvironment -Name 'Azure Stack' `
+    -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
+    -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/" `
+    -ResourceManagerEndpoint ("https://api.azurestack.local/") `
+    -GalleryEndpoint ("https://gallery.azurestack.local/") `
+    -GraphEndpoint "https://graph.windows.net/"
+
+	# Get Azure Stack Environment Information 
+	$env = Get-AzureRmEnvironment 'Azure Stack' 
+
+	# Authenticate to AAD with Azure Stack Environment 
+	Add-AzureRmAccount -Environment $env -Verbose 
+	
+	# Create a resource group, storage account, and storage container
+	New-AzureRmResourceGroup -Name $rgname -Location $location
+	New-AzureRmStorageAccount -ResourceGroupName $rgname -Name $saname -Type Standard_LRS -Location $location
+	Set-AzureRmCurrentStorageAccount -ResourceGroupName $rgname -StorageAccountName $saname
+	$container = New-AzureStorageContainer -Name $containername -Permission Container
+	# Upload the blob
+	$file = Get-ChildItem -Path $isoPath
+	Set-AzureStorageBlobContent -Container $containername -File $file.FullName -Blob $file.Name
+	$isodownloaduri = (Get-AzureStorageBlob -Blob $file.Name -Container $containername).ICloudBlob.uri.AbsoluteUri
+	# This is the value you will use for the sharepoint2013SP1DownloadLink parameter on the SharePoint 2013 template
+	$isodownloaduri
+	
++	This template requires a product key for SharePoint 2013. A trial key for SharePoint 2013 can be found on MSDN subscriber downloads or from the TechNet
+	evaluation center.
+
 ## Parameters
 +	domainName: FQDN of the new domain to be created.
 +	sqlServerServiceAccountUserName: Username of the SQL server service account to create.
@@ -20,13 +64,6 @@ To access the SQL VM use the domain controller or the SharePoint VMs as jumpboxe
 +	adminPassword: Password of the local Administrator account of the new VMs and domain.
 +	sharepoint2013SP1DownloadLink: Direct download link for the SharePoint 2013 with SP1 ISO.
 +	sharepoint2013ProductKey: Product key for SharePoint 2013 with SP1, required for SharePoint setup.
-
-## Notes
-+	This template requires a SharePoint 2013 with SP1 iso for installing the SharePoint server. If the provided iso does not include SP1 setup will fail.
-	A direct link for SharePoint 2013 with SP1 iso can be obtained from MSDN subscriber downloads. Note however that MSDN subscribe downloads links expire
-	after a period of time. If you have an iso available, place it on a location where it is reachable for the VMs to download (Azure blob storage for example)
-+	This template requires a product key for SharePoint 2013. A trial key for SharePoint 2013 can be found on MSDN subscriber downloads or from the TechNet
-	evaluation center.
 	
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fdevelop%2Fsharepoint-2013-non-ha%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
