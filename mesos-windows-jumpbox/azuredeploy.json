@@ -377,7 +377,7 @@
                     "vmSize": "[variables('jumpboxVMSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[variables('jumpboxVMName')]",
+                    "computername": "[variables('jumpboxVMName')]",
                     "adminUsername": "[variables('windowsAdminUsername')]",
                     "adminPassword": "[variables('windowsAdminPassword')]"
                 },

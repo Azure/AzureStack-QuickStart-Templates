@@ -87,6 +87,17 @@
         }
     },
     "variables": {
+        "apiVersion": {
+            "storage": {
+                "storageAccounts": "2015-06-15"
+            },
+            "compute": {
+                "virtualMachines": "2015-06-15"
+            },
+            "network": {
+                "virtualNetworks": "2015-05-01-preview"
+            }
+        },
         "location": "[resourceGroup().location]",
         "vmContainerName": "vhds"
 
@@ -96,7 +107,7 @@
             "name": "[parameters('storageAccount')]",
             "type": "Microsoft.Storage/storageAccounts",
             "location": "[variables('location')]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
             "properties": {
                 "accountType": "[parameters('storageAccountType')]"
             }
@@ -105,7 +116,7 @@
             "name": "[parameters('sqlNicName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "location": "[variables('location')]",
-            "apiVersion": "2015-05-01-preview",
+            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
             "properties": {
                 "ipConfigurations": [
                     {
@@ -124,7 +135,7 @@
             "name": "[parameters('vmName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "location": "[variables('location')]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "[variables('apiVersion').compute.virtualMachines]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccount'))]",
                 "[resourceId('Microsoft.Network/networkInterfaces',parameters('sqlNicName'))]"
@@ -160,7 +171,7 @@
                             },
                             "name": "[concat(parameters('vmName'), '0','data-1.vhd')]",
                             "caching": "None",
-                            "createOption": "Empty",
+                            "createOption": "empty",
                             "diskSizeGB": "[parameters('sqlDiskSize')]",
                             "lun": 0
                         },
@@ -170,7 +181,7 @@
                             },
                             "name": "[concat(parameters('vmName'), '0','log-1.vhd')]",
                             "caching": "None",
-                            "createOption": "Empty",
+                            "createOption": "empty",
                             "diskSizeGB": "[parameters('sqlDiskSize')]",
                             "lun": 1
                         }

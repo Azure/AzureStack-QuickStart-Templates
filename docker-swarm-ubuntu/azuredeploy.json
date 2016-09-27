@@ -637,7 +637,7 @@
                     "vmSize": "[variables('agentVMSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
+                    "computername": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
                     "adminUsername": "[variables('adminUsername')]",
                     "adminPassword": "[variables('adminPassword')]",
                     "linuxConfiguration": "[variables('linuxConfiguration')]"

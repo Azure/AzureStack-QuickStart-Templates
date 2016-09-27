@@ -21,10 +21,9 @@
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.8",
-        "autoUpgradeMinorVersion": true,
+        "autoUpgradeMinorVersion": "true",
         "settings": {
-            "commandToExecute": "powershell -ExecutionPolicy Unrestricted Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses 192.168.100.2, 8.8.8.8",
-            "fileUris": []
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses 192.168.100.2, 8.8.8.8"
         }
       }
     }
