@@ -73,7 +73,7 @@
             },
             "defaultValue": 1
         },
-        "VisualStudioProductKey": {
+        "VisualStudio2013UltimateProductKey": {
             "type": "string",
             "metadata": {
                 "description": "Product key (25 characters no spaces) for Visual Studio activation"
@@ -115,7 +115,7 @@
         "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
         "publiclbBEPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
         "rdpNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/vs2013-tcta"
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/vs2013-tcta"
     },
 
     "resources": [
@@ -270,7 +270,7 @@
                     "controllerServiceUserName": { "value": "[parameters('serviceAccountUserName')]" },
                     "controllerServicePassword": { "value": "[parameters('serviceAccountPassword')]" },
                     "assetLocation": { "value": "[variables('assetLocation')]" },
-                    "VisualStudioProductKey": { "value": "[parameters('VisualStudioProductKey')]" }
+                    "VisualStudioProductKey": { "value": "[parameters('VisualStudio2013UltimateProductKey')]" }
                 }
             }
         },

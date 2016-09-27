@@ -139,7 +139,7 @@
             "metadata": {
                 "description": "The root location for all the configuring scripts"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/docker-swarm-ubuntu/parts/"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/docker-swarm-ubuntu/parts/"
         }
     },
     "variables": {
@@ -620,7 +620,7 @@
             }
         },
         {
-            "apiVersion": "2015-05-01-preview",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
             "location": "[resourceGroup().location]",
@@ -637,7 +637,7 @@
                     "vmSize": "[variables('agentVMSize')]"
                 },
                 "osProfile": {
-                    "computername": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
+                    "computerName": "[concat(variables('agentVMNamePrefix'), copyIndex())]",
                     "adminUsername": "[variables('adminUsername')]",
                     "adminPassword": "[variables('adminPassword')]",
                     "linuxConfiguration": "[variables('linuxConfiguration')]"

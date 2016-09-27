@@ -43,7 +43,7 @@
         "vmSize": "Standard_A1",
         "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-comprehensive-linux-vm",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-comprehensive-linux-vm",
         "scriptFileName": "docker.sh",
         "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",

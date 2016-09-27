@@ -2,6 +2,6 @@
   "itemDisplayName": "Create a Virtual Machine from a User Image",
   "description": "Deploys a simple Windows VM with user images. This template also deploys a Virtual Network (with the appropriate DNS setting for the Azure Stack POC environment), Public IP address, Network Security Group, and a Network Interface.",
   "summary": "Upload existing VHDs to a Storage Account, Deploy a VM with this custom VHDs.",
-  "githubUsername": "charlesjoy",
-  "dateUpdated": "2015-12-16"
+  "githubUsername": "azurestack",
+  "dateUpdated": "2016-09-20"
 }

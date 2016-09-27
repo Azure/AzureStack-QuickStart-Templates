@@ -101,7 +101,7 @@
     "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[tolower(concat(variables('vnetID'),'/subnets/',variables('subnetName')))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/jetstress-2013-exchange-loadtest/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
     "modulesJetstress": "JetstressWorkload.zip",
     "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
     "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
@@ -146,7 +146,6 @@
       }
     },
     {
-
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
@@ -320,7 +319,7 @@
             },
             "StorageAccountName": "[variables('uniqueStorageAccountName')]",
             "StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
-            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').storage.primaryEndpoints['blob']]"
+            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
           }
         },
         "protectedSettings": {

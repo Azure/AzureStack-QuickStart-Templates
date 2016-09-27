@@ -1,0 +1,8 @@
+{
+    "itemDisplayName": "Template that installs Visual Studio 2013 TC/TA farm for load testing on Windows VMs",
+    "description": "Template that installs Visual Studio 2013 TC/TA farm for load testing on Windows VMs",
+    "summary": "This template has default values for all the parameters except for Visual Studio 2013 Ultimate Product Key",
+    "githubUsername": "azurestack",
+    "dateUpdated": "2016-09-22"
+}
+

@@ -29,7 +29,7 @@
         "windowsImageSKU": "2012-R2-Datacenter",
         "windowsImageVersion": "latest",
         "dataDiskSize": 2,
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-Comprehensive",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-Comprehensive",
         "staticSubnetName": "vmstaticsubnet",
         "virtualNetworkName": "[tolower(concat('vmvnet',resourceGroup().name))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -304,7 +304,7 @@
             "location": "[resourceGroup().location]",
             "properties": {
                 "publisher": "Microsoft.Compute",
-                "autoUpgradeMinorVersion": "true",
+                "autoUpgradeMinorVersion": true,
                 "type": "BGInfo",
                 "typeHandlerVersion": "2.1",
                 "settings": {
@@ -324,7 +324,7 @@
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
                 "typeHandlerVersion": "1.4",
-                "autoUpgradeMinorVersion": "true",
+                "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
                         "[variables('scriptFile')]"
@@ -339,4 +339,3 @@
     ],
     "outputs": { }
 }
-

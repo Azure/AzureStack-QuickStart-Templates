@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "Template that simulate Exchange 2016 IaaS workload on a Windows Server VM on Azure Stack",
+    "description": "Template that simulate Exchange 2016 IaaS workload on a Windows Server VM on Azure Stack",
+    "summary": "This template has default values for all the parameters. This template can be used for exchange capacity planning on Azure stack",
+    "githubUsername": "azurestack",
+    "dateUpdated": "2016-09-20"
+}
