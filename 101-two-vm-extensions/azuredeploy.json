@@ -21,9 +21,10 @@
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.8",
-        "autoUpgradeMinorVersion": "true",
+        "autoUpgradeMinorVersion": true,
         "settings": {
-          "commandToExecute": "md c:\\users\\public\\documents\\test"
+            "commandToExecute": "md c:\\users\\public\\documents\\test",
+            "fileUris": []
         }
       }
     },
@@ -36,10 +37,12 @@
         "publisher": "Microsoft.Compute",
         "type": "BGInfo",
         "typeHandlerVersion": "2.1",
-        "autoUpgradeMinorVersion": "true",
+        "autoUpgradeMinorVersion": true,
         "settings": {
-          "Properties": [
-          ]
+            "fileUris": [ ],
+            "commandToExecute": "",
+            "Properties": [
+            ]
         }
       }
     }

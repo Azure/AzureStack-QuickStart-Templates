@@ -248,7 +248,7 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "xmlCfg": "[base64(concat(variables('wadcfgxstart'), variables('wadmetricsresourceid'), variables('vmName'), variables('wadcfgxend')))]",
-              "storageAccount": "[variables('existingdiagnosticsStorageAccountName')]"
+              "StorageAccount": "[variables('existingdiagnosticsStorageAccountName')]"
             },
             "protectedSettings": {
               "storageAccountName": "[variables('existingdiagnosticsStorageAccountName')]",
