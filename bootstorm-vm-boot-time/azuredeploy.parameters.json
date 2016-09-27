@@ -12,7 +12,10 @@
       "value": "AZURE-AD-ACCOUNT-TENANT-ID"
     },
     "vmCount": {
-      "value": 5
+      "value": 2
+    },
+    "vmSize": {
+      "value": "Standard_A1"
     }
   }
 }
