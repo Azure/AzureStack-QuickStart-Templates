@@ -220,7 +220,7 @@
 							},
 							"name": "[concat(parameters('vmNamePrefix'), '0','data-1.vhd')]",
 							"caching": "None",
-							"createOption": "empty",
+							"createOption": "Empty",
 							"diskSizeGB": "[parameters('dataDiskSize')]",
 							"lun": 0
 						},
@@ -230,7 +230,7 @@
 							},
 							"name": "[concat(parameters('vmNamePrefix'), '0','log-1.vhd')]",
 							"caching": "None",
-							"createOption": "empty",
+							"createOption": "Empty",
 							"diskSizeGB": "[parameters('dataDiskSize')]",
 							"lun": 1
 						}
