@@ -2,12 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "storageAccountNamePrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "Name prefix of the Storage Account. The maximum length of the prefix is 24 characters"
-      }
-    },
     "vmsuffix": {
       "type": "string",
       "metadata": {
@@ -45,12 +39,8 @@
     }
   },
   "variables": {
-    "storage": {
-    "storageAccounts": {
-        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
-        "type": "Standard_LRS"
-      }
-    },
+    "storageAccountName": "[concat(uniqueString(resourceGroup().id), 'storage')]",
+    "storageAccountType": "Standard_LRS",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
@@ -63,7 +53,6 @@
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[concat('myvm', parameters('vmsuffix'))]",
     "vmSize": "Standard_A1",
-    "dnsNameForPublicIP": "[concat('myvmdns', parameters('vmsuffix'))]",
     "virtualNetworkName": "MyVNET",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
@@ -79,9 +68,9 @@
   },
   "resources": [
     {
-      "apiVersion":"2015-05-01-preview",
-      "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "tags": {
         "displayName": "NetworkSecurityGroup"
@@ -105,30 +94,27 @@
       }
     },
     {
+      "name": "[variables('storageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storage').storageAccounts.name]",
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
-        "accountType": "[variables('storage').storageAccounts.type]"
+        "accountType": "[variables('storageAccountType')]"
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
-      "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('dnsNameForPublicIP')]"
-        }
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
-      "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
@@ -149,16 +135,13 @@
               }
             }
           }
-        ],
-        "dhcpOptions": {
-          "dnsServers": [ "192.168.100.2" ]
-        }
+        ]
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
-      "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
@@ -182,12 +165,12 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name)]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
@@ -209,7 +192,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), '2015-06-15').primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2015-06-15').primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -225,7 +208,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storage').storageAccounts.name), '2015-06-15').primaryEndpoints.blob)]"
+            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2015-06-15').primaryEndpoints.blob)]"
           }
         }
       },
@@ -233,8 +216,8 @@
         {
           "name": "Microsoft.Insights.VMDiagnosticsSettings",
           "type": "extensions",
-          "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
+          "location": "[resourceGroup().location]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
           ],
@@ -248,11 +231,11 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "xmlCfg": "[base64(concat(variables('wadcfgxstart'), variables('wadmetricsresourceid'), variables('vmName'), variables('wadcfgxend')))]",
-              "storageAccount": "[variables('existingdiagnosticsStorageAccountName')]"
+              "StorageAccount": "[variables('existingdiagnosticsStorageAccountName')]"
             },
             "protectedSettings": {
               "storageAccountName": "[variables('existingdiagnosticsStorageAccountName')]",
-              "storageAccountKey": "[listkeys(variables('accountid'), '2015-05-01-preview').key1]",
+              "storageAccountKey": "[listkeys(variables('accountid'), '2015-06-15').key1]",
               "storageAccountEndPoint": "http://azurestack.local"
             }
           }
@@ -260,5 +243,5 @@
       ]
     }
   ],
-  "outputs": { }
+  "outputs": {}
 }
