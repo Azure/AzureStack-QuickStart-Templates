@@ -7,6 +7,10 @@
       "metadata": {
         "description": "Name of the existing VM to apply the VM Extensions to"
       }
+    },
+    "_assetLocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/101-two-vm-extensions"
     }
   },
   "variables": {
@@ -21,9 +25,10 @@
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.8",
-        "autoUpgradeMinorVersion": "true",
+        "autoUpgradeMinorVersion": true,
         "settings": {
-          "commandToExecute": "md c:\\users\\public\\documents\\test"
+          "fileUris": [ "[concat(parameters('_assetLocation'),'/scripts/example.ps1')]" ],
+          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -example.ps1"
         }
       }
     },
@@ -44,5 +49,5 @@
       }
     }
   ],
-  "outputs": { }
+  "outputs": {}
 }
