@@ -11,9 +11,6 @@
     "dataDiskUrlParam": {
       "value": "https://mystorageacct001.blob.azurestack.local/mycontainer/dataDiskName.vhd"
     },
-    "dnsNameForPublicIP": {
-      "value": "mydns001"
-    },
     "adminUsername": {
       "value": "admin123"
     },
