@@ -9,333 +9,335 @@
             },
             "defaultValue": "vmadmin"
         },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
-            },
-            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+      "adminPassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+        },
+        "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+      },
+      "_assetLocation": {
+        "type": "string",
+        "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-Comprehensive",
+        "metadata": {
+          "description": "The default path that contains all the template artifacts"
         }
+      }
     },
-    "variables": {
-        "storageAccountType": "Standard_LRS",
-        "vmName": "[tolower(concat('vm', resourceGroup().name))]",
-        "VMSize": "Standard_A2",
-        "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
-        "vmNetworkSubnet": "10.0.0.0/24",
-        "virtualNetworkAddressRange": "10.0.0.0/16",
-        "windowsImagePublisher": "MicrosoftWindowsServer",
-        "windowsImageOffer": "WindowsServer",
-        "windowsImageSKU": "2012-R2-Datacenter",
-        "windowsImageVersion": "latest",
-        "dataDiskSize": 2,
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-Comprehensive",
-        "staticSubnetName": "vmstaticsubnet",
-        "virtualNetworkName": "[tolower(concat('vmvnet',resourceGroup().name))]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-        "staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
-        "storageName": "[tolower(concat('vmsa', resourceGroup().name))]",
-        "publicLBName": "[tolower(concat('vmplb', resourceGroup().name))]",
-        "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
-        "lbFE": "[tolower(concat('vmlbfe',resourceGroup().name))]",
-        "rpdNAT": "[tolower(concat('vmrdpnat',resourceGroup().name))]",
-        "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
-        "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
-        "rdpPort": 3389,
-        "rDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
-        "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
-        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-        "NICPrefix": "[tolower(concat('vmnic', resourceGroup().name))]",
-        "vmContainerName": "vhds",
-        "WindowsFeatureName": "Web-Server",
-        "ModulesURL": "[concat(variables('assetLocation'),'/windowsFeature.zip')]",
-        "ConfigurationFunction": "windowsFeature.ps1\\EnalbeWindowsFeature",
-        "scriptFileName": "ValidateWindowsFeature.ps1",
-        "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]"
-    },
+  "variables": {
+    "storageAccountName": "[concat(uniqueString(resourceGroup().id), 'storage')]",
+    "storageAccountType": "Standard_LRS",
+    "vmName": "[tolower(concat('vm', resourceGroup().name))]",
+    "VMSize": "Standard_A2",
+    "vmNetworkSubnet": "10.0.0.0/24",
+    "virtualNetworkAddressRange": "10.0.0.0/16",
+    "windowsImagePublisher": "MicrosoftWindowsServer",
+    "windowsImageOffer": "WindowsServer",
+    "windowsImageSKU": "2012-R2-Datacenter",
+    "windowsImageVersion": "latest",
+    "dataDiskSize": 2,
+    "staticSubnetName": "vmstaticsubnet",
+    "virtualNetworkName": "[tolower(concat('vmvnet',resourceGroup().name))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+    "publicLBName": "[tolower(concat('vmplb', resourceGroup().name))]",
+    "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
+    "lbFE": "[tolower(concat('vmlbfe',resourceGroup().name))]",
+    "rpdNAT": "[tolower(concat('vmrdpnat',resourceGroup().name))]",
+    "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
+    "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
+    "rdpPort": 3389,
+    "rDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
+    "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+    "NICPrefix": "[tolower(concat('vmnic', resourceGroup().name))]",
+    "vmContainerName": "vhds",
+    "WindowsFeatureName": "Web-Server",
+    "ModulesURL": "[concat(parameters('_assetLocation'),'scripts/windowsFeature.zip')]",
+    "ConfigurationFunction": "windowsFeature.ps1\\EnalbeWindowsFeature",
+    "scriptFileName": "ValidateWindowsFeature.ps1",
+    "scriptFile": "[concat(parameters('_assetLocation'),'/scripts/',variables('scriptFileName'))]"
+  },
     "resources": [
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('nsgName')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "rule1",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 101,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
+      {
+        "name": "[variables('nsgName')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "securityRules": [
+            {
+              "name": "rule1",
+              "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 101,
+                "direction": "Inbound"
+              }
             }
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[variables('virtualNetworkName')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('virtualNetworkAddressRange')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('staticSubnetName')]",
-                        "properties": {
-                            "addressPrefix": "[variables('vmNetworkSubnet')]",
-                            "networkSecurityGroup": {
-                                "id": "[variables('nsgID')]"
-                            }
-                        }
-                    }
-                ]
-            },
-            "dependsOn": [
-                "[variables('nsgID')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIPAddressName')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic",
-                "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsPrefix')]"
-                }
-            },
-            "dependsOn": [
-                "[variables('vnetID')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/loadBalancers",
-            "name": "[variables('publiclbName')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "frontendIPConfigurations": [
-                    {
-                        "name": "[variables('lbFE')]",
-                        "properties": {
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-                            }
-                        }
-                    }
-                ],
-                "inboundNatRules": [
-                    {
-                        "name": "[variables('rpdNAT')]",
-                        "properties": {
-                            "frontendIPConfiguration": {
-                                "id": "[variables('publiclbFEConfigID')]"
-                            },
-                            "protocol": "tcp",
-                            "frontendPort": "[variables('rdpPort')]",
-                            "backendPort": 3389,
-                            "enableFloatingIP": false
-                        }
-                    }
-                ]
-            },
-            "dependsOn": [
-                "[variables('publicIPAddressName')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('storageName')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
-            },
-            "dependsOn": [
-                "[variables('publiclbName')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('NICPrefix'), '0')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[variables('staticSubnetRef')]"
-                            },
-                            "loadBalancerInboundNatRules": [
-                                {
-                                    "id": "[variables('rDPNATRuleID')]"
-                                }
-                            ]
-                        }
-                    }
-                ]
-            },
-            "dependsOn": [
-                "[variables('vnetID')]",
-                "[variables('publiclbName')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('NICPrefix'), '1')]",
-            "apiVersion": "2015-05-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[variables('staticSubnetRef')]"
-                            }
-                        }
-                    }
-                ]
-            },
-            "dependsOn": [
-                "[variables('vnetID')]",
-                "[variables('publiclbName')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(variables('vmName'), '0')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[variables('vmSize')]"
-                },
-                "osProfile": {
-                    "computerName": "[concat(variables('vmName'), '0')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "[variables('windowsImagePublisher')]",
-                        "offer": "[variables('windowsImageOffer')]",
-                        "sku": "[variables('windowsImageSKU')]",
-                        "version": "[variables('windowsImageVersion')]"
-                    },
-                    "osDisk": {
-                        "name": "osdisk",
-                        "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', variables('vmName'), '0','-osdisk.vhd')]"
-                        },
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage"
-                    },
-                    "dataDisks": [
-                        {
-                            "vhd": {
-                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',  variables('vmName'), '0','data-1.vhd')]"
-                            },
-                            "name": "[concat(variables('vmName'), '0','-data-disk1')]",
-                            "createOption": "Empty",
-                            "caching": "None",
-                            "diskSizeGB": "[variables('dataDiskSize')]",
-                            "lun": 0
-                        }
-                    ]
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "properties": {
-                                "primary": true
-                            },
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]"
-                        }
-                    ]
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]",
-                "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '1'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/DSCExtension-EnableWindowsFeature')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publisher": "Microsoft.Powershell",
-                "type": "DSC",
-                "typeHandlerVersion": "2.8",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "modulesUrl": "[variables('ModulesURL')]",
-                    "configurationFunction": "[variables('ConfigurationFunction')]",
-                    "properties": {
-                        "featureName": "[variables('WindowsFeatureName')]"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('vmName'), '0')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/BGInfoExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "autoUpgradeMinorVersion": true,
-                "type": "BGInfo",
-                "typeHandlerVersion": "2.1",
-                "settings": {
-                    "Properties": [ ]
-                }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'), '0','/extensions/DSCExtension-EnableWindowsFeature')]"
-            ]
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'), '0','/CustomScriptExtension-VerifyWindowsFeature')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.4",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[variables('scriptFile')]"
-                    ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFileName'), ' ', variables('WindowsFeatureName'))]"
-                }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'), '0','/extensions/BGInfoExtension')]"
-            ]
+          ]
         }
+      },
+      {
+        "name": "[variables('virtualNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[variables('virtualNetworkAddressRange')]"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "[variables('staticSubnetName')]",
+              "properties": {
+                "addressPrefix": "[variables('vmNetworkSubnet')]",
+                "networkSecurityGroup": {
+                  "id": "[variables('nsgID')]"
+                }
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[variables('nsgID')]"
+        ]
+      },
+      {
+        "name": "[variables('publicIPAddressName')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publicIPAllocationMethod": "Dynamic"
+        },
+        "dependsOn": [
+          "[variables('vnetID')]"
+        ]
+      },
+      {
+        "name": "[variables('publiclbName')]",
+        "type": "Microsoft.Network/loadBalancers",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "frontendIPConfigurations": [
+            {
+              "name": "[variables('lbFE')]",
+              "properties": {
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                }
+              }
+            }
+          ],
+          "inboundNatRules": [
+            {
+              "name": "[variables('rpdNAT')]",
+              "properties": {
+                "frontendIPConfiguration": {
+                  "id": "[variables('publiclbFEConfigID')]"
+                },
+                "protocol": "tcp",
+                "frontendPort": "[variables('rdpPort')]",
+                "backendPort": 3389,
+                "enableFloatingIP": false
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[variables('publicIPAddressName')]"
+        ]
+      },
+      {
+        "name": "[variables('storageAccountName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "accountType": "[variables('storageAccountType')]"
+        },
+        "dependsOn": [
+          "[variables('publiclbName')]"
+        ]
+      },
+      {
+        "name": "[concat(variables('NICPrefix'), '0')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('staticSubnetRef')]"
+                },
+                "loadBalancerInboundNatRules": [
+                  {
+                    "id": "[variables('rDPNATRuleID')]"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[variables('vnetID')]",
+          "[variables('publiclbName')]"
+        ]
+      },
+      {
+        "name": "[concat(variables('NICPrefix'), '1')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('staticSubnetRef')]"
+                }
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[variables('vnetID')]",
+          "[variables('publiclbName')]"
+        ]
+      },
+      {
+        "name": "[concat(variables('vmName'), '0')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[variables('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[concat(variables('vmName'), '0')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('windowsImagePublisher')]",
+              "offer": "[variables('windowsImageOffer')]",
+              "sku": "[variables('windowsImageSKU')]",
+              "version": "[variables('windowsImageVersion')]"
+            },
+            "osDisk": {
+              "name": "osdisk",
+              "vhd": {
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-06-15').primaryEndpoints.blob, variables('vmContainerName'),'/', variables('vmName'), '0','-osdisk.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            },
+            "dataDisks": [
+              {
+                "vhd": {
+                  "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-06-15').primaryEndpoints.blob, variables('vmContainerName'),'/',  variables('vmName'), '0','data-1.vhd')]"
+                },
+                "name": "[concat(variables('vmName'), '0','-data-disk1')]",
+                "createOption": "Empty",
+                "caching": "None",
+                "diskSizeGB": "[variables('dataDiskSize')]",
+                "lun": 0
+              }
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "properties": {
+                  "primary": true
+                },
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]"
+              }
+            ]
+          }
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]",
+          "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '1'))]"
+        ]
+      },
+      {
+        "name": "[concat(variables('vmName'), '0','/DSCExtension-EnableWindowsFeature')]",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publisher": "Microsoft.Powershell",
+          "type": "DSC",
+          "typeHandlerVersion": "2.8",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "modulesUrl": "[variables('ModulesURL')]",
+            "configurationFunction": "[variables('ConfigurationFunction')]",
+            "properties": {
+              "featureName": "[variables('WindowsFeatureName')]"
+            }
+          }
+        },
+        "dependsOn": [
+          "[concat(variables('vmName'), '0')]"
+        ]
+      },
+      {
+        "name": "[concat(variables('vmName'), '0','/BGInfoExtension')]",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publisher": "Microsoft.Compute",
+          "autoUpgradeMinorVersion": true,
+          "type": "BGInfo",
+          "typeHandlerVersion": "2.1",
+          "settings": {
+            "Properties": []
+          }
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'), '0','/extensions/DSCExtension-EnableWindowsFeature')]"
+        ]
+      },
+      {
+        "name": "[concat(variables('vmName'), '0','/CustomScriptExtension-VerifyWindowsFeature')]",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "publisher": "Microsoft.Compute",
+          "type": "CustomScriptExtension",
+          "typeHandlerVersion": "1.4",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "fileUris": [
+              "[variables('scriptFile')]"
+            ],
+            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFileName'), ' ', variables('WindowsFeatureName'))]"
+          }
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'), '0','/extensions/BGInfoExtension')]"
+        ]
+      }
     ],
     "outputs": { }
 }
