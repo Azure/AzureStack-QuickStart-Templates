@@ -73,7 +73,7 @@
             },
             "defaultValue": 1
         },
-        "VisualStudio2013UltimateProductKey": {
+        "VisualStudioProductKey": {
             "type": "string",
             "metadata": {
                 "description": "Product key (25 characters no spaces) for Visual Studio activation"
@@ -270,7 +270,7 @@
                     "controllerServiceUserName": { "value": "[parameters('serviceAccountUserName')]" },
                     "controllerServicePassword": { "value": "[parameters('serviceAccountPassword')]" },
                     "assetLocation": { "value": "[variables('assetLocation')]" },
-                    "VisualStudioProductKey": { "value": "[parameters('VisualStudio2013UltimateProductKey')]" }
+                    "VisualStudioProductKey": { "value": "[parameters('VisualStudioProductKey')]" }
                 }
             }
         },
