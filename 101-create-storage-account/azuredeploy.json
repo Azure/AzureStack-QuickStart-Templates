@@ -1,26 +1,33 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": { },
-  "variables": {
-    "storage": {
-        "storageAccounts": {
-            "name": "[concat('sa', uniquestring(resourceGroup().id))]",
-            "type": "Standard_LRS"
-        }
+  "parameters": {
+    "storageAccountType": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS"
+      ],
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "Type of redundancy for your storage account"
+      }
     }
   },
-    "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('storage').storageAccounts.name]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourcegroup().Location]",
-            "properties": {
-                "accountType": "[variables('storage').storageAccounts.type]"
-            }
-
-        }
-    ],
-  "outputs": { }
+  "variables": {
+    "storageAccountName": "[concat(uniqueString(resourceGroup().id),'storage')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "accountType": "[parameters('storageAccountType')]"
+      }
+    }
+  ],
+  "outputs": {}
 }
