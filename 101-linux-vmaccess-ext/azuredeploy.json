@@ -19,7 +19,8 @@
       "type": "securestring",
       "metadata": {
         "description": "Password for new or existing user"
-      }
+      },
+      "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
     }
   },
   "variables": {
