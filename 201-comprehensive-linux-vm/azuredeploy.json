@@ -43,7 +43,7 @@
         "vmSize": "Standard_A1",
         "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/201-comprehensive-linux-vm",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-comprehensive-linux-vm",
         "scriptFileName": "docker.sh",
         "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
@@ -220,7 +220,7 @@
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxCustomScriptExtension')]"
             ],
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -239,7 +239,7 @@
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxDockerExtension')]"
             ],
             "properties": {
                 "publisher": "Microsoft.OSTCExtensions",
@@ -259,7 +259,7 @@
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxVMAccessExtension')]"
             ],
             "properties": {
                 "publisher": "Microsoft.OSTCExtensions",

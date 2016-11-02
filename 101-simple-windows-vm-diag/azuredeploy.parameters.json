@@ -5,12 +5,6 @@
     "vmsuffix": {
       "value": "myVM"
     },
-    "adminPassword": {
-      "value": "GEN-PASSWORD"
-    },
-    "storageAccountNamePrefix": {
-      "value": "DiagStor"
-    },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },

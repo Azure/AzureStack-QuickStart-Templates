@@ -25,7 +25,7 @@
         }
     },
     "variables": {
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/ad-non-ha",
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
         "adVMSize": "Standard_A1",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
@@ -36,7 +36,7 @@
         "dnsPrefix": "[tolower(concat(resourceGroup().name,'dc'))]",
         "adVmDeployment": "CreateADVMs",
         "adVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment'))]",
-        "adPDCVMName": "[concat('AD',resourceGroup().name)]",
+        "adPDCVMName": "[substring(concat('ADVM',resourceGroup().Name),0,5)]",
         "deployPrimaryAdTemplateURL": "[concat(variables('assetLocation'),'/deployPrimaryAD.json')]",
         "deployPrimaryAd": "ConfigureAD",
         "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",

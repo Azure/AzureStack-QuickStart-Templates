@@ -2,12 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "storageAccountNamePrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "Name prefix of the Storage Account. The maximum length of the prefix is 24 characters"
-      }
-    },
     "vmsuffix": {
       "type": "string",
       "metadata": {
@@ -31,7 +25,8 @@
       "type": "securestring",
       "metadata": {
         "description": "Password for the Virtual Machine"
-      }
+      },            
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
     },
     "windowsOSVersion": {
       "type": "string",
@@ -47,7 +42,7 @@
   "variables": {
     "storage": {
     "storageAccounts": {
-        "name": "[replace(replace(tolower(parameters('storageAccountNamePrefix')), '-',''),'.','')]",
+        "name": "[concat('sa', uniquestring(resourceGroup().id))]",
         "type": "Standard_LRS"
       }
     },
@@ -58,8 +53,6 @@
     "addressPrefix": "10.0.0.0/24",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
-    "publicIPAddressName": "[concat('myip', parameters('vmsuffix'))]",
-    "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[concat('myvm', parameters('vmsuffix'))]",
     "vmSize": "Standard_A1",
@@ -115,18 +108,6 @@
     },
     {
       "apiVersion": "2015-05-01-preview",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('dnsNameForPublicIP')]"
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[resourceGroup().location]",
@@ -161,7 +142,6 @@
       "name": "[variables('nicName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties": {
@@ -170,9 +150,6 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }

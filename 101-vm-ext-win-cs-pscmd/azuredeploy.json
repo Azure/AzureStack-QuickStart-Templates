@@ -3,10 +3,11 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmName": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the existing VM to apply the custom script to"
-      }
+        "type": "string",
+        "metadata": {
+            "description": "Name of the existing VM to apply the custom script to"
+        },
+        "defaultvalue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
     }
   },
   "variables": {

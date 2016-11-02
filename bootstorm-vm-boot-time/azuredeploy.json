@@ -27,6 +27,23 @@
       "metadata": {
         "description": "Number of VMs to create."
       }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A2",
+      "allowedValues": [
+        "Standard_A0",
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A5",
+        "Standard_A6",
+        "Standard_A7"
+      ],
+      "metadata": {
+        "description": "VM size supported by Azure Stack."
+      }
     }
   },
   "variables": {
@@ -44,14 +61,13 @@
     "vmAdminPassword": "pwd0a!8b7",
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
-    "vmSize": "Standard_A2",
     "vmNicName": "[concat('nc', resourceGroup().name)]",
     "virtualNetworkName": "[concat('vn', resourceGroup().name)]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "nsgName": "[concat('ng', resourceGroup().name)]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/bootstorm-vm-boot-time/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll"
@@ -173,7 +189,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
@@ -226,7 +242,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",

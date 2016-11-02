@@ -139,7 +139,7 @@
             "metadata": {
                 "description": "The root location for all the configuring scripts"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/mesos-windows-jumpbox/parts/"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/mesos-windows-jumpbox/parts/"
         }
     },
     "variables": {
@@ -418,7 +418,7 @@
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
                 "typeHandlerVersion": "1.4",
-                "autoUpgradeMinorVersion": "true",
+                "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [],
                     "commandToExecute": "[variables('jumpboxWindowsCustomScript')]"

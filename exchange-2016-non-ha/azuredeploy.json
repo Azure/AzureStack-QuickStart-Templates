@@ -43,7 +43,7 @@
         "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/exchange-2016-non-ha/",
+        "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/exchange-2016-non-ha/",
         "modulesExchange": "ExchangeWorkload.zip",
         "modulesUrlExchange": "[concat(variables('modulesPath'),variables('modulesExchange'))]",
         "modulesExchangeData": "ExchangeWorkload.psd1",
@@ -106,7 +106,6 @@
             }
         },
         {
-
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
