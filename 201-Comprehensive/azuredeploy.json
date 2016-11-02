@@ -34,7 +34,7 @@
         "virtualNetworkName": "[tolower(concat('vmvnet',resourceGroup().name))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "staticSubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
-        "storageName": "[tolower(concat('vmsa', resourceGroup().name))]",
+        "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
         "publicLBName": "[tolower(concat('vmplb', resourceGroup().name))]",
         "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
         "lbFE": "[tolower(concat('vmlbfe',resourceGroup().name))]",

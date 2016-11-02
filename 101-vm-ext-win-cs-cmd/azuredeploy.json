@@ -3,10 +3,11 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmName": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the existing VM to apply the custom script to"
-      }
+        "type": "string",
+        "metadata": {
+            "description": "Name of the existing VM to apply the custom script to"
+        },
+        "defaultvalue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
     }
   },
   "variables": {
@@ -21,7 +22,7 @@
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.8",
-        "autoUpgradeMinorVersion": "true",
+        "autoUpgradeMinorVersion": true,
         "settings": {
           "commandToExecute": "md c:\\users\\public\\documents\\test"
         }

@@ -4,9 +4,6 @@
   "parameters": {
     "username": {
         "value": "Test"
-    },
-    "password": {
-      "value": "GEN-PASSWORD"
     }
   }
 }
