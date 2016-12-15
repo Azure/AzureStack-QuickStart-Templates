@@ -19,7 +19,7 @@
     },
     "variables": {
         "storageAccountType": "Standard_LRS",
-        "vmName": "[concat('CVM', resourceGroup().name)]",
+        "vmName": "[concat('cvm', resourceGroup().name)]",
         "VMSize": "Standard_A2",
         "dnsPrefix": "[concat('CVM', resourceGroup().name)]",
         "vmNetworkSubnet": "10.0.0.0/24",
