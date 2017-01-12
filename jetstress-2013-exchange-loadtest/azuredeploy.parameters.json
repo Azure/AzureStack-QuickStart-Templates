@@ -24,7 +24,7 @@
             "value": 10
         },
         "exchangeIopsPerMailbox": {
-            "value": 1
+            "value": 10
         },
         "exchangeMailboxSizeInMB": {
             "value": 200

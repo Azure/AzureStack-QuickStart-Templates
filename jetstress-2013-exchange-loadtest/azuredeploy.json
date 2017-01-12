@@ -66,7 +66,7 @@
     },
     "exchangeIopsPerMailbox": {
       "type": "int",
-      "defaultValue": 1,
+      "defaultValue": 10,
       "metadata": {
         "description": "IOPS per Mailbox to use for Exchange Mailbox Profile test"
       }
@@ -91,7 +91,7 @@
     "location": "[resourceGroup().location]",
     "vmOsSku": "2012-R2-Datacenter",
     "vmAdminUsername": "vmadministrator",
-    "vmAdminPassword": "[subscription().subscriptionId]",
+    "vmAdminPassword": "[concat('S#', subscription().subscriptionId)]",
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
     "vmDatabaseDiskName": "[concat('db', resourceGroup().name)]",
