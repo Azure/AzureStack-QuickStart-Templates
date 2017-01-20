@@ -11,7 +11,7 @@
     },
     "testExecutionTimeInMinutes": {
       "type": "int",
-      "defaultValue": 60,
+      "defaultValue": 15,
       "metadata": {
         "description": "Duration to run Jetstress load test."
       }
@@ -34,7 +34,7 @@
     },
     "testType": {
       "type": "string",
-      "defaultValue": "DiskSubsystemThroughput",
+      "defaultValue": "ExchangeMailboxProfile",
       "allowedValues": [
         "DiskSubsystemThroughput",
         "ExchangeMailboxProfile"
@@ -73,7 +73,7 @@
     },
     "exchangeMailboxSizeInMB": {
       "type": "int",
-      "defaultValue": 200,
+      "defaultValue": 100,
       "metadata": {
         "description": "Mailbox size in MBs to use for Exchange Mailbox Profile test"
       }
