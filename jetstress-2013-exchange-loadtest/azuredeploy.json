@@ -42,7 +42,14 @@
       "metadata": {
         "description": "Jetstress load test type - 1. Disk Subsystem Throughput (Recommended) 2. Exchange Mailbox Profile"
       }
-    },
+    },    
+    "diskSizeInGB": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": {
+        "description": "Size in GB of the datadisk to use for testing."
+      }
+    },    
     "storageDiskCapacityPercentage": {
       "type": "int",
       "defaultValue": 80,
@@ -95,8 +102,7 @@
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
     "vmDatabaseDiskName": "[concat('db', resourceGroup().name)]",
-    "vmSize": "Standard_A2",
-    "vmDatabaseDiskSizeInGB": "10",
+    "vmSize": "Standard_A2",    
     "vmNicName": "[tolower(concat('nc', resourceGroup().name))]",
     "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
@@ -241,7 +247,7 @@
               "name": "[concat(variables('vmDatabaseDiskName'),copyIndex())]",
               "createOption": "Empty",
               "caching": "None",
-              "diskSizeGB": "[variables('vmDatabaseDiskSizeInGB')]",
+              "diskSizeGB": "[parameters('diskSizeInGB')]",
               "lun": 0
             }
           ]
