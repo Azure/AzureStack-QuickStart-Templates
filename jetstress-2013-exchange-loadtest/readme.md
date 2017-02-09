@@ -1,4 +1,4 @@
-# JETSTRESS 2013 WORKLoAD FOR EXCHANGE 2016 CU1 ON AZURESTACK
+# JETSTRESS 2013 WORKLOAD FOR EXCHANGE 2016 CU1 ON AZURESTACK
 
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fmaster%2Fjetstress-2013-exchange-loadtest%2Fazuredeploy.json" target="_blank">
