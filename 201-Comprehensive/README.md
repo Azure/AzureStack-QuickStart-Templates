@@ -67,7 +67,6 @@ New-AzureRmResourceGroupDeployment `
     -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
     -TemplateFile "c:\templates\azuredeploy-101-simple-windows-vm-withDNS.json" `
-    -deploymentLocation $myLocation `
     -blobStorageEndpoint $myBlobStorageEndpoint `
     -newStorageAccountName "mystorage$myNum" `
     -dnsNameForPublicIP "mydns$myNum" `
