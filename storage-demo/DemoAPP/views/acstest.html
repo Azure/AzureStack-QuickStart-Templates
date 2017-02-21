@@ -1,0 +1,44 @@
+<% include header.html %>
+
+	<h4>Testing Progress on
+		<%=account%>@<strong><%=host%></strong>:</h4>
+	<div class="progress">
+		<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+			style="width: 0%;"> 0%
+</div>
+</div>
+
+<div class="row">
+	<div class="col-sm-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				Testing Cases
+			</div>
+			<ul class="panel-body list-group" id="cases">
+				<% cases.forEach(function(nm){ %>
+					<li class="list-group-item" case="<%=nm.name%>">
+						<span class="glyphicon glyphicon-ok status-ok hidden" aria-hidden=true></span>
+						<span class="glyphicon glyphicon-remove status-error hidden" aria-hidden=true></span>
+						<span class="desc" case="<%=nm.name%>"><%=nm.desc%></span>
+					</li>
+					<% }) %>
+			</ul>
+		</div>
+	</div>
+	<div class="col-sm-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Output
+			</div>
+			<div class="panel-body">
+				<pre id="output">Click on the finished test cases on the left to view the output.</pre>
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="account" value="<%=account%>">
+<input type="hidden" id="key" value="<%=key%>">
+<input type="hidden" id="host" value="<%=host%>">
+
+<% include footer.html %>
+	<script src="/javascripts/acstest.js"></script>
