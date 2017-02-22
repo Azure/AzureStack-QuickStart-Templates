@@ -208,8 +208,8 @@
       },
       "resources": [
         {
-          "name": "Microsoft.Insights.VMDiagnosticsSettings",
-          "type": "extensions",
+          "name": "Microsoft.Azure.Diagnostics.IaasDiagnostics",
+          "type": "Microsoft.Compute/VirtualMachines/extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
