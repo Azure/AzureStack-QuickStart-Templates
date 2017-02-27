@@ -344,7 +344,7 @@
       "resources": [
         {
           "apiVersion": "2015-06-15",
-          "type": "extensions",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "gw-vm/gateway",
           "location": "[resourceGroup().location]",
           "dependsOn": [
@@ -429,7 +429,7 @@
       "resources": [
         {
           "apiVersion": "2015-06-15",
-          "type": "extensions",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat('rdsh-', copyindex(),'/sessionhost')]",
           "location": "[resourceGroup().location]",
           "dependsOn": [
