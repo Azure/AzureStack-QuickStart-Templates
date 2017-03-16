@@ -1,6 +1,6 @@
 # [IaaS Linux VM Comprehensive Resources]
 
-This template deploys a Linux VM and also uses customscript, VMLinuxAccess, Docker, Linux Diagnostic and OSPatchingforLinux Extensions
+This template deploys a Linux VM and also uses customscript, VMLinuxAccess, Linux Diagnostic and OSPatchingforLinux Extensions
 
 ## Prerequisites
 
