@@ -43,9 +43,6 @@
         "vmSize": "Standard_A1",
         "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-comprehensive-linux-vm",
-        "scriptFileName": "docker.sh",
-        "scriptFile": "[concat(variables('assetLocation'),'/',variables('scriptFileName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]"        
     },
@@ -216,30 +213,11 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/LinuxDockerExtension')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxCustomScriptExtension')]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "DockerExtension",
-                "typeHandlerVersion": "1.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "fileUris": [ "[variables('scriptFile')]" ],
-                    "commandToExecute": "sh docker.sh"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmName'),'/LinuxVMAccessExtension')]",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxDockerExtension')]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxCustomScriptExtension')]"
             ],
             "properties": {
                 "publisher": "Microsoft.OSTCExtensions",
