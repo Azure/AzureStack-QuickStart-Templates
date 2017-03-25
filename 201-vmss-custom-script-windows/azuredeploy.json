@@ -36,7 +36,7 @@
       }
     },
     "vmssName": {
-      "defaultValue": "[substring(concat('winvmss', resourceGroup().Name), 0, 10)]",
+      "defaultValue": "[substring(concat('winvmss', resourceGroup().Name), 0, 9)]",
       "minLength": 3,
       "maxLength": 10,
       "type": "String",
