@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vmSize": { 
-            "defaultValue": "Standard_A0",
+            "defaultValue": "Standard_D1",
             "type": "String",
             "metadata": {
                 "description": "Size of VMs in the VM Scale Set."
