@@ -1,0 +1,22 @@
+body {
+	padding: 50px;
+	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+a {
+	color: #00b7ff;
+}
+
+.status-error {
+	color: red;
+	float: right;
+}
+
+.status-ok {
+	color: green;
+	float: right;
+}
+
+.a {
+	cursor:pointer;
+	text-decoration:underline;
+}

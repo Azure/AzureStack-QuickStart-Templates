@@ -11,7 +11,7 @@
     },
     "testExecutionTimeInMinutes": {
       "type": "int",
-      "defaultValue": 60,
+      "defaultValue": 15,
       "metadata": {
         "description": "Duration to run Jetstress load test."
       }
@@ -34,7 +34,7 @@
     },
     "testType": {
       "type": "string",
-      "defaultValue": "DiskSubsystemThroughput",
+      "defaultValue": "ExchangeMailboxProfile",
       "allowedValues": [
         "DiskSubsystemThroughput",
         "ExchangeMailboxProfile"
@@ -42,7 +42,14 @@
       "metadata": {
         "description": "Jetstress load test type - 1. Disk Subsystem Throughput (Recommended) 2. Exchange Mailbox Profile"
       }
-    },
+    },    
+    "diskSizeInGB": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": {
+        "description": "Size in GB of the datadisk to use for testing."
+      }
+    },    
     "storageDiskCapacityPercentage": {
       "type": "int",
       "defaultValue": 80,
@@ -66,14 +73,14 @@
     },
     "exchangeIopsPerMailbox": {
       "type": "int",
-      "defaultValue": 1,
+      "defaultValue": 10,
       "metadata": {
         "description": "IOPS per Mailbox to use for Exchange Mailbox Profile test"
       }
     },
     "exchangeMailboxSizeInMB": {
       "type": "int",
-      "defaultValue": 200,
+      "defaultValue": 100,
       "metadata": {
         "description": "Mailbox size in MBs to use for Exchange Mailbox Profile test"
       }
@@ -91,17 +98,16 @@
     "location": "[resourceGroup().location]",
     "vmOsSku": "2012-R2-Datacenter",
     "vmAdminUsername": "vmadministrator",
-    "vmAdminPassword": "[subscription().subscriptionId]",
+    "vmAdminPassword": "[concat('S#', subscription().subscriptionId)]",
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
     "vmDatabaseDiskName": "[concat('db', resourceGroup().name)]",
-    "vmSize": "Standard_A2",
-    "vmDatabaseDiskSizeInGB": "10",
+    "vmSize": "Standard_A2",    
     "vmNicName": "[tolower(concat('nc', resourceGroup().name))]",
     "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[tolower(concat(variables('vnetID'),'/subnets/',variables('subnetName')))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/jetstress-2013-exchange-loadtest/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/develop/jetstress-2013-exchange-loadtest/",
     "modulesJetstress": "JetstressWorkload.zip",
     "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
     "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
@@ -241,7 +247,7 @@
               "name": "[concat(variables('vmDatabaseDiskName'),copyIndex())]",
               "createOption": "Empty",
               "caching": "None",
-              "diskSizeGB": "[variables('vmDatabaseDiskSizeInGB')]",
+              "diskSizeGB": "[parameters('diskSizeInGB')]",
               "lun": 0
             }
           ]

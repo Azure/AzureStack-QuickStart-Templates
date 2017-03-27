@@ -1,0 +1,42 @@
+﻿<% include header.html %>
+<div class="panel panel-info">
+	<div class="panel-heading">
+		Your Azure (Stack) Storage Account Information
+	</div>
+	<form class="form-horizontal panel-body" data-toggle="validator" role="form" method="post" target="_blank" action="/acstest">
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="account">Host</label>
+			<div class="col-sm-6">
+				<label class="radio-inline">
+					<input type="radio" name="host" value="AzureStack.local"> Microsoft Azure Stack
+				</label>
+				<label class="radio-inline">
+					<input type="radio" name="host" value="core.windows.net"> Microsoft Azure Global 
+				</label>
+				<label class="radio-inline">
+					<input type="radio" name="host" value="core.chinacloudapi.cn"> Microsoft Azure China 
+				</label>
+			</div>
+		</div>
+		<div class="form-group form-group-lg">
+			<label class="col-sm-2 control-label" for="account">Account Name</label>
+			<div class="col-xs-3">
+				<input class="form-control" type="text" id="account" name="account" placeholder="Account Name" required pattern="^[a-z0-9]{3,24}$" maxlength="24">
+			</div>
+		</div>
+		<div class="form-group form-group-sm">
+			<label class="col-sm-2 control-label" for="key1">Access Key</label>
+			<div class="col-sm-7">
+				<input class="form-control" type="text" id="key" name="key" placeholder="Access Key" pattern=".*==$"  required>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-2"></div>
+			<div class="col-sm-2">
+				<button class="btn btn-lg btn-primary" type="submit">Run Storage Tests</button>
+			</div>
+		</div>
+	</form>
+</div>
+<% include footer.html %>
+	<script src="/javascripts/index.js"></script>

@@ -181,7 +181,7 @@
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
             "sku": "[parameters('windowsOSVersion')]",
-            "version": "1.0.0"
+            "version": "latest"
           },
           "osDisk": {
             "name": "osdisk",
@@ -208,7 +208,7 @@
       },
       "resources": [
         {
-          "name": "Microsoft.Insights.VMDiagnosticsSettings",
+          "name": "Microsoft.Azure.Diagnostics.IaasDiagnostics",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
