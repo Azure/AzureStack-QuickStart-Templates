@@ -11,12 +11,13 @@
     },
     "osImageUrl": {
       "type": "string",
+      "defaultValue": "https://uservmssci-sa.blob.local.ext-s11r1701.masd.stbtest.microsoft.com/uservmssci-con/WindowsServer2012R2DatacenterEval.vhd"
       "metadata": {
         "description": "The source of the blob containing the custom image."
       }
     },
     "vmssName": {
-      "defaultValue": "[substring(concat('winvmss', resourceGroup().Name), 0, 9)]",
+      "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
       "minLength": 3,
       "maxLength": 10,
       "type": "String",
@@ -40,7 +41,7 @@
       }
     },
     "adminPassword": {
-      "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
+      "defaultValue": "[concat('Subscription#', substring(subscription().subscriptionId, 15, 36))]",
       "type": "SecureString",
       "metadata": {
         "description": "Admin password on all VMs."
