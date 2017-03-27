@@ -33,7 +33,7 @@
         },
         "adminPassword": {
             "type": "SecureString",
-            "defaultValue": "[concat('Subscription#', substring(subscription().subscriptionId, 15, 36))]",
+            "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
             "metadata": {
                 "description": "Admin password on all VMs."
             }
