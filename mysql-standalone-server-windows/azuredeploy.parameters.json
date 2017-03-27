@@ -1,0 +1,15 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
+  "contentVersion": "1.16.08.15",
+  "parameters": {
+	"vmName": {
+      "value": "MySqlServerVM"
+    },
+    "vmTimeZone": {
+      "value": "Pacific Standard Time"
+    },
+    "vmSize": {
+      "value": "Standard_A1"
+    }
+  }
+}
