@@ -101,7 +101,7 @@
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "OSDiskName": "[concat(parameters('vmName'), '-osdisk')]",
-    "deploySqlStandaloneModulesURL": "[concat(parameters('assetLocation'),'/deploySqlStandalone_NonDomain.zip')]",
+    "deploySqlStandaloneModulesURL": "[concat(parameters('assetLocation'),'/deploySqlStandalone_NonDomain.ps1.zip')]",
     "deploySqlStandaloneConfigurationFunction": "deploySqlStandalone_NonDomain.ps1\\deploySqlStandalone"
   },
   "resources": [
