@@ -9,30 +9,10 @@
         "description": "Size of VMs in the VM Scale Set."
       }
     },
-    "osImageSku": {
+    "osImageUrl": {
       "type": "string",
-      "defaultValue": "2016-Datacenter",
-      "allowedValues": [
-        "2012-R2-Datacenter",
-        "2016-Datacenter-Core",
-        "2016-Datacenter"
-      ],
       "metadata": {
-        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
-      }
-    },
-    "osImagePublisher": {
-      "type": "string",
-      "defaultValue": "MicrosoftWindowsServer",
-      "metadata": {
-        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
-      }
-    },
-    "osImageOffer": {
-      "type": "string",
-      "defaultValue": "WindowsServer",
-      "metadata": {
-        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+        "description": "The source of the blob containing the custom image."
       }
     },
     "vmssName": {
@@ -64,20 +44,6 @@
       "type": "SecureString",
       "metadata": {
         "description": "Admin password on all VMs."
-      }
-    },
-    "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/201-vmss-custom-script-windows",
-      "type": "String",
-      "metadata": {
-        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
-      }
-    },
-    "_artifactsLocationSasToken": {
-      "defaultValue": "",
-      "type": "SecureString",
-      "metadata": {
-        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
       }
     }
   },
@@ -231,18 +197,13 @@
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
-              "vhdContainers": [
-                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]"
-              ],
               "name": "[variables('OSDiskName')]",
               "caching": "ReadOnly",
-              "createOption": "FromImage"
-            },
-            "imageReference": {
-              "publisher": "[parameters('osImagePublisher')]",
-              "offer": "[parameters('osImageOffer')]",
-              "sku": "[parameters('osImageSku')]",
-              "version": "latest"
+              "createOption": "FromImage",
+              "osType": "Windows",
+              "image": {
+                "uri": "[parameters('osImageUrl')]"
+              }
             }
           },
           "osProfile": {
@@ -276,27 +237,6 @@
                       }
                     }
                   ]
-                }
-              }
-            ]
-          },
-          "extensionProfile": {
-            "extensions": [
-              {
-                "name": "customScript",
-                "properties": {
-                  "publisher": "Microsoft.Compute",
-                  "settings": {
-                    "fileUris": [
-                      "[concat(parameters('_artifactsLocation'), '/scripts/helloWorld.ps1')]"
-                    ]
-                  },
-                  "typeHandlerVersion": "1.8",
-                  "autoUpgradeMinorVersion": true,
-                  "protectedSettings": {
-                    "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File helloWorld.ps1"
-                  },
-                  "type": "CustomScriptExtension"
                 }
               }
             ]
