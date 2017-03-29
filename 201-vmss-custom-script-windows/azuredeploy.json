@@ -46,10 +46,10 @@
     },
     "instanceCount": {
       "defaultValue": 2,
-      "maxValue": 100,
+      "maxValue": 20,
       "type": "Int",
       "metadata": {
-        "description": "Number of VM instances (100 or less)."
+        "description": "Number of VM instances (20 or less)."
       }
     },
     "adminUsername": {
@@ -204,7 +204,7 @@
               },
               "protocol": "tcp",
               "frontendPortRangeStart": "50000",
-              "frontendPortRangeEnd": "50099",
+              "frontendPortRangeEnd": "50019",
               "backendPort": "3389"
             }
           }

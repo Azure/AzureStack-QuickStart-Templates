@@ -2,7 +2,7 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "vmSize": { 
+        "vmSku": { 
             "defaultValue": "Standard_A1",
             "type": "String",
             "metadata": {
@@ -18,10 +18,10 @@
         },
         "instanceCount": {
             "defaultValue": 2,
-            "maxValue": 100,
+            "maxValue": 20,
             "type": "Int",
             "metadata": {
-                "description": "Number of VM instances (100 or less)."
+                "description": "Number of VM instances (20 or less)."
             }
         },
         "adminUsername": {
@@ -188,7 +188,7 @@
                             },
                             "protocol": "tcp",
                             "frontendPortRangeStart": "50000",
-                            "frontendPortRangeEnd": "50099",
+                            "frontendPortRangeEnd": "50019",
                             "backendPort": "3389"
                         }
                     }
@@ -201,7 +201,7 @@
         {
             "type": "Microsoft.Compute/virtualMachineScaleSets",
             "sku": {
-                "name": "[parameters('vmSize')]",
+                "name": "[parameters('vmSku')]",
                 "tier": "Standard",
                 "capacity": "[parameters('instanceCount')]"
             },
