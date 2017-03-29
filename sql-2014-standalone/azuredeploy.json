@@ -40,11 +40,8 @@
         },
         "vmSize": {
             "type": "string",
-            "defaultValue": "Standard_A2",
+            "defaultValue": "Standard_A3",
             "allowedValues": [
-                "Standard_A0",
-                "Standard_A1",
-                "Standard_A2",
                 "Standard_A3",
                 "Standard_A4"
             ],
@@ -101,7 +98,7 @@
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "OSDiskName": "[concat(parameters('vmName'), '-osdisk')]",
-    "deploySqlStandaloneModulesURL": "[concat(parameters('assetLocation'),'/deploySqlStandalone_NonDomain.ps1.zip')]",
+    "deploySqlStandaloneModulesURL": "[concat(parameters('assetLocation'),'/deploySqlStandalone_NonDomain.zip')]",
     "deploySqlStandaloneConfigurationFunction": "deploySqlStandalone_NonDomain.ps1\\deploySqlStandalone"
   },
   "resources": [
