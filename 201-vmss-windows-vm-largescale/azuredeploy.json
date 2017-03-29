@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -9,41 +9,59 @@
         "description": "Size of VMs in the VM Scale Set."
       }
     },
-    "osImageUrl": {
-      "type": "string",
-      "metadata": {
-        "description": "The source of the blob containing the custom image."
-      }
-    },
     "vmssName": {
-      "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
-      "minLength": 3,
-      "maxLength": 10,
       "type": "String",
+      "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
       "metadata": {
         "description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure Stack. A hash is prepended to this string for some resources, and resource-specific information is appended."
       }
     },
     "instanceCount": {
       "defaultValue": 2,
-      "maxValue": 20,
+      "maxValue": 100,
       "type": "Int",
       "metadata": {
-        "description": "Number of VM instances (20 or less)."
+        "description": "Number of VM instances (100 or less)."
       }
     },
     "adminUsername": {
-      "defaultValue": "azureuser",
       "type": "String",
+      "defaultValue": "azureuser",
       "metadata": {
         "description": "Admin username on all VMs."
       }
     },
     "adminPassword": {
-      "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
       "type": "SecureString",
+      "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
       "metadata": {
         "description": "Admin password on all VMs."
+      }
+    },
+    "osImagePublisher": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageOffer": {
+      "type": "string",
+      "defaultValue": "WindowsServer",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageSku": {
+      "type": "string",
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter-Core",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
       }
     }
   },
@@ -51,10 +69,18 @@
     "location": "[resourceGroup().location]",
     "vnetName": "[toLower(concat('vnet', uniqueString(resourceGroup().id)))]",
     "subnetName": "[toLower(concat('subnet', uniqueString(resourceGroup().id)))]",
-    "storageAccountName": "[toLower(concat('SA', uniqueString(resourceGroup().id)))]",
-    "storageAccountContainerName": "[toLower(concat('SC', uniqueString(resourceGroup().id)))]",
     "storageAccountType": "Standard_LRS",
-    "OSDiskName": "osdisk",
+    "saCount": 5,
+    "storageAccountSuffix": "[concat('sa', toLower(uniqueString(resourceGroup().id)))]",
+    "uniqueStringArray": [
+      "[concat(variables('storageAccountSuffix'), '0')]",
+      "[concat(variables('storageAccountSuffix'), '1')]",
+      "[concat(variables('storageAccountSuffix'), '2')]",
+      "[concat(variables('storageAccountSuffix'), '3')]",
+      "[concat(variables('storageAccountSuffix'), '4')]"
+    ],
+    "storageAccountContainerName": "[concat(toLower(uniqueString(resourceGroup().id)), 'vhd')]",
+    "osDiskName": "[concat(toLower(uniqueString(resourceGroup().id)), 'osdisk')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('subnetName'))]",
     "publicIPAddressName": "[toLower(concat('pip', uniqueString(resourceGroup().id)))]",
@@ -68,9 +94,13 @@
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageAccountName')]",
-      "apiVersion": "2015-06-15",
+      "name": "[concat(variables('storageAccountSuffix'), copyIndex())]",
       "location": "[variables('location')]",
+      "apiVersion": "2015-06-15",
+      "copy": {
+        "name": "storageLoop",
+        "count": "[variables('saCount')]"
+      },
       "properties": {
         "accountType": "[variables('storageAccountType')]"
       }
@@ -170,7 +200,7 @@
               },
               "protocol": "tcp",
               "frontendPortRangeStart": "50000",
-              "frontendPortRangeEnd": "50019",
+              "frontendPortRangeEnd": "50099",
               "backendPort": "3389"
             }
           }
@@ -197,13 +227,22 @@
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
-              "name": "[variables('OSDiskName')]",
+              "vhdContainers": [
+                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[0]), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]",
+                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[1]), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]",
+                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[2]), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]",
+                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[3]), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]",
+                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[4]), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]"
+              ],
+              "name": "[variables('osDiskName')]",
               "caching": "ReadOnly",
-              "createOption": "FromImage",
-              "osType": "Windows",
-              "image": {
-                "uri": "[parameters('osImageUrl')]"
-              }
+              "createOption": "FromImage"
+            },
+            "imageReference": {
+              "publisher": "[parameters('osImagePublisher')]",
+              "offer": "[parameters('osImageOffer')]",
+              "sku": "[parameters('osImageSku')]",
+              "version": "latest"
             }
           },
           "osProfile": {
@@ -244,7 +283,11 @@
         }
       },
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[0])]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[1])]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[2])]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[3])]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[4])]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
         "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
       ]

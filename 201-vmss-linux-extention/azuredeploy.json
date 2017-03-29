@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -9,17 +9,9 @@
         "description": "Size of VMs in the VM Scale Set."
       }
     },
-    "osImageUrl": {
-      "type": "string",
-      "metadata": {
-        "description": "The source of the blob containing the custom image."
-      }
-    },
     "vmssName": {
-      "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
-      "minLength": 3,
-      "maxLength": 10,
       "type": "String",
+      "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
       "metadata": {
         "description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure Stack. A hash is prepended to this string for some resources, and resource-specific information is appended."
       }
@@ -33,17 +25,38 @@
       }
     },
     "adminUsername": {
-      "defaultValue": "azureuser",
       "type": "String",
+      "defaultValue": "azureuser",
       "metadata": {
         "description": "Admin username on all VMs."
       }
     },
     "adminPassword": {
-      "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
       "type": "SecureString",
+      "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
       "metadata": {
         "description": "Admin password on all VMs."
+      }
+    },
+    "osImagePublisher": {
+      "type": "string",
+      "defaultValue": "Canonical",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageOffer": {
+      "type": "string",
+      "defaultValue": "UbuntuServer",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageSku": {
+      "type": "string",
+      "defaultValue": "14.04.3-LTS",
+      "metadata": {
+        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Default value: 14.04.3-LTS"
       }
     }
   },
@@ -197,13 +210,18 @@
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
+              "vhdContainers": [
+                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]"
+              ],
               "name": "[variables('OSDiskName')]",
               "caching": "ReadOnly",
-              "createOption": "FromImage",
-              "osType": "Windows",
-              "image": {
-                "uri": "[parameters('osImageUrl')]"
-              }
+              "createOption": "FromImage"
+            },
+            "imageReference": {
+              "publisher": "[parameters('osImagePublisher')]",
+              "offer": "[parameters('osImageOffer')]",
+              "sku": "[parameters('osImageSku')]",
+              "version": "latest"
             }
           },
           "osProfile": {
@@ -237,6 +255,24 @@
                       }
                     }
                   ]
+                }
+              }
+            ]
+          },
+          "extensionProfile": {
+            "extensions": [
+              {
+                "type": "Microsoft.Compute/virtualMachines/extensions",
+                "name": "[concat(parameters('vmssName'),'-LinuxCustomScriptExtension')]",
+                "properties": {
+                  "publisher": "Microsoft.OSTCExtensions",
+                  "type": "CustomScriptForLinux",
+                  "typeHandlerVersion": "1.3",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "commandToExecute": "touch /test.txt",
+                    "enableInternalDNSCheck": "false"
+                  }
                 }
               }
             ]

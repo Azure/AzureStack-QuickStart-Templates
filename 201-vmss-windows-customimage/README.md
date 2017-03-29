@@ -8,4 +8,4 @@ PARAMETER RESTRICTIONS
 ======================
 
 vmssName must be 3-10 characters in length. It should also be globally unique across all of AzureStack. If it isn't globally unique, it is possible that this template will still deploy properly, but we don't recommend relying on this pseudo-probabilistic behavior.
-instanceCount must be 100 or less.
+instanceCount must be 20 or less. VM Scale Set supports upto 100 VMs and one should add more storage accounts to support this number.
