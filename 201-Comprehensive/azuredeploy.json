@@ -20,7 +20,7 @@
     "variables": {
         "storageAccountType": "Standard_LRS",
         "vmName": "[tolower(concat('vm', resourceGroup().name))]",
-        "VMSize": "Standard_A2",
+        "VMSize": "Standard_A3",
         "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
@@ -247,25 +247,41 @@
                         "createOption": "FromImage"
                     },
                     "dataDisks": [
-                        {
+                      {
+                        "vhd": {
+                          "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',  variables('vmName'), '0','data-1.vhd')]"
+                        },
+                        "name": "[concat(variables('vmName'), '0','-data-disk1')]",
+                        "createOption": "Empty",
+                        "caching": "None",
+                        "diskSizeGB": "[variables('dataDiskSize')]",
+                        "lun": 0
+                      },
+                      {
                             "vhd": {
-                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',  variables('vmName'), '0','data-1.vhd')]"
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',  variables('vmName'), '0','data-2.vhd')]"
                             },
-                            "name": "[concat(variables('vmName'), '0','-data-disk1')]",
+                            "name": "[concat(variables('vmName'), '0','-data-disk2')]",
                             "createOption": "Empty",
                             "caching": "None",
                             "diskSizeGB": "[variables('dataDiskSize')]",
-                            "lun": 0
+                            "lun": 1
                         }
                     ]
                 },
                 "networkProfile": {
                     "networkInterfaces": [
-                        {
+                      {
+                        "properties": {
+                          "primary": true
+                        },
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]"
+                      },
+                      {
                             "properties": {
-                                "primary": true
+                                "primary": false
                             },
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '0'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefix'), '1'))]"
                         }
                     ]
                 }
