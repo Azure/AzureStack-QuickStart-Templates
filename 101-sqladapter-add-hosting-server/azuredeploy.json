@@ -1,0 +1,55 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "hostingServerName": {
+            "type": "string",
+            "metadata": {
+              "description": "SQL Server FQDN or IPv4[,Port] of an existing SQL server to be added as a SQL Adapter hosting server."
+            }
+        },
+        "totalSpaceMB": {
+            "type": "int",
+            "metadata": {
+              "description": "The total space in MB to be allocated for creation of databases on the hosting server."
+            }
+        },
+        "hostingServerSQLLoginName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of a SQL login to be used for connecting to the SQL database engine on the hosting server using SQL authentication."
+            }
+        },
+        "hostingServerSQLLoginPassword": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Password for the given SQL login."
+            }
+        },
+        "skuName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the SQL Adapter SKU to associate the hosting server to."
+            }
+        }
+    },
+    "variables": {
+      "connectionString": "[concat('Data Source=', parameters('hostingServerName'),';User ID=', parameters('hostingServerSQLLoginName'), ';Password=', parameters('hostingServerSQLLoginPassword'), ';Asynchronous Processing=True')]",
+      "alwaysOnEnabled" : false
+    },
+    "resources": [
+        {
+            "type": "Microsoft.SQLAdapter.Admin/hostingServers",
+            "name": "[parameters('hostingServerName')]",
+            "apiVersion": "2014-04-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[parameters('hostingServerName')]",
+                "totalSpaceMB": "[parameters('totalSpaceMB')]",
+                "alwaysOnEnabled": "[variables('alwaysOnEnabled')]",
+                "connectionString": "[variables('connectionString')]",
+                "skuName": "[parameters('skuName')]"
+            }
+        }
+    ]
+}
