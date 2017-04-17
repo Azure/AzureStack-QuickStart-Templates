@@ -266,127 +266,122 @@
       "defaultValue": "i"
     }
   },
-  "variables": {
-    "lbSettings": {
-      "rdpLBFE": "rdpLBFE",
-      "sqlLBFE": "sqlLBFE",
-      "adLBBE": "adLBBE",
-      "sqlLBBE": "sqlLBBE",
-      "rdpLBName": "rdpLoadBalancer",
-      "sqlLBName": "sqlLoadBalancer"
-    },
-    "subnetNames": {
-      "staticSubnetName": "staticSubnet",
-      "sqlSubnetName": "sqlSubnet"
-    },
-    "RDPNAT": "RDP",
-    "SQLAOProbe": "SQLAlwaysOnEndPointProbe",
-    "primaryDCIPAddressName": "primaryDCIP",
-    "backupDCIPAddressName": "backupDCIP",
-    "sql1AddressName": "sql1IP",
-    "sql0AddressName": "sql0IP",
-    "vmSettings": {
-      "availabilitySets": {
-        "sqlAvailabilitySetName": "sqlAvailabilitySet",
-        "adAvailabilitySetName": "adAvailabilitySet"
-      },
-      "noOfSqlVMs": 2,
-      "vmContainerName": "vhds",
-      "adPDCVMName": "ad-primary-dc",
-      "adBDCVMName": "ad-secondry-dc",
-      "sqlVMName": "sqlserver-",
-      "sqlwVMName": "cluster-fsw",
-      "windowsImagePublisher": "MicrosoftWindowsServer",
-      "windowsImageOffer": "WindowsServer",
-      "windowsImageSKU": "2012-R2-Datacenter",
-      "sqlImagePublisher": "MicrosoftSQLServer",
-      "rdpPort": 3389,
-      "windowsDiskSize": 128,
-      "sqlDiskSize": 1000
-    },
-    "sqlAOEPName": "[concat(parameters('deploymentPrefix'),'-hadr')]",
-    "sharePath": "[concat(parameters('deploymentPrefix'),'-fsw')]",
-    "clusterName": "[concat(parameters('deploymentPrefix'),'-fc')]",
-    "adPDCNicName": "[concat(variables('vmSettings').adPDCVMName,'-nic')]",
-    "adBDCNicName": "[concat(variables('vmSettings').adBDCVMName,'-nic')]",
-    "sqlwNicName": "[concat(variables('vmSettings').sqlwVMName,'-nic')]",
-    "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkNameWithSuffix'))]",
-    "staticSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
-    "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
-    "ids": {
-      "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
-      "rdplbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').rdpLBName)]",
-      "sqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').sqlLBName)]"
-    },
-    "derivedIds": {
-      "adIPConfigID": "[concat(variables('ids').adNicId,'/ipConfigurations/ipconfig1')]",
-      "rdplbFEConfigID": "[concat(variables('ids').rdplbID,'/frontendIPConfigurations/',variables('lbSettings').rdpLBFE)]",
-      "adRDPNATRuleID": "[concat(variables('ids').rdplbID,'/inboundNatRules/',variables('RDPNAT'))]",
-      "adBEAddressPoolID": "[concat(variables('ids').rdplbID,'/backendAddressPools/',variables('lbSettings').adLBBE)]",
-      "sqlBEAddressPoolID": "[concat(variables('ids').sqllbID,'/backendAddressPools/',variables('lbSettings').sqlLBBE)]",
-      "sqllbFEConfigID": "[concat(variables('ids').sqllbID,'/frontendIPConfigurations/',variables('lbSettings').sqlLBFE)]",
-      "sqllbProbeID": "[concat(variables('ids').sqllbID,'/probes/',variables('SQLAOProbe'))]"
-    },
-    "SQL2012SP2-WS2012R2-ENT": "Enterprise",
-    "SQL2012SP3-WS2012R2-ENT": "Enterprise",
-    "SQL2014-WS2012R2-ENT": "Enterprise",
-    "SQL2014SP1-WS2012R2-ENT": "Enterprise",
-    "SQL2016-WS2012R2-ENT": "Enterprise",
-    "SQL2016-WS2012R2-DEV": "SQLDEV",
-    "Monday": true,
-    "Tuesday": true,
-    "Wednesday": true,
-    "Thursday": true,
-    "Friday": true,
-    "Saturday": true,
-    "Sunday": true,
-    "Never": false,
-    "Everyday": true,
-    "subnets": [
-      {
-        "name": "[variables('subnetNames').staticSubnetName]",
-        "properties": {
-          "addressPrefix": "[parameters('staticSubnet')]"
+    "variables": {
+        "lbSettings": {
+            "rdpLBFE": "rdpLBFE",
+            "sqlLBFE": "sqlLBFE",
+            "adLBBE": "adLBBE",
+            "sqlLBBE": "sqlLBBE",
+            "rdpLBName": "rdpLoadBalancer",
+            "sqlLBName": "sqlLoadBalancer"
+        },
+        "subnetNames": {
+            "staticSubnetName": "staticSubnet",
+            "sqlSubnetName": "sqlSubnet"
+        },
+        "RDPNAT": "RDP",
+        "SQLAOProbe": "SQLAlwaysOnEndPointProbe",
+        "primaryDCIPAddressName": "primaryDCIP",
+        "backupDCIPAddressName": "backupDCIP",
+        "sql1AddressName": "sql1IP",
+        "sql0AddressName": "sql0IP",
+        "vmSettings": {
+            "availabilitySets": {
+                "sqlAvailabilitySetName": "sqlAvailabilitySet",
+                "adAvailabilitySetName": "adAvailabilitySet"
+            },
+            "noOfSqlVMs": 2,
+            "vmContainerName": "vhds",
+            "adPDCVMName": "ad-primary-dc",
+            "adBDCVMName": "ad-secondry-dc",
+            "sqlVMName": "sqlserver-",
+            "sqlwVMName": "cluster-fsw",
+            "windowsImagePublisher": "MicrosoftWindowsServer",
+            "windowsImageOffer": "WindowsServer",
+            "windowsImageSKU": "2016-Datacenter",
+            "sqlImagePublisher": "MicrosoftSQLServer",
+            "rdpPort": 3389,
+            "windowsDiskSize": 128,
+            "sqlDiskSize": 1000
+        },
+        "sqlAOEPName": "[concat(parameters('deploymentPrefix'),'-hadr')]",
+        "sharePath": "[concat(parameters('deploymentPrefix'),'-fsw')]",
+        "clusterName": "[concat(parameters('deploymentPrefix'),'-fc')]",
+        "adPDCNicName": "[concat(variables('vmSettings').adPDCVMName,'-nic')]",
+        "adBDCNicName": "[concat(variables('vmSettings').adBDCVMName,'-nic')]",
+        "sqlwNicName": "[concat(variables('vmSettings').sqlwVMName,'-nic')]",
+        "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkNameWithSuffix'))]",
+        "staticSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
+        "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
+        "ids": {
+            "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
+            "rdplbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').rdpLBName)]",
+            "sqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').sqlLBName)]"
+        },
+        "derivedIds": {
+            "adIPConfigID": "[concat(variables('ids').adNicId,'/ipConfigurations/ipconfig1')]",
+            "rdplbFEConfigID": "[concat(variables('ids').rdplbID,'/frontendIPConfigurations/',variables('lbSettings').rdpLBFE)]",
+            "adRDPNATRuleID": "[concat(variables('ids').rdplbID,'/inboundNatRules/',variables('RDPNAT'))]",
+            "adBEAddressPoolID": "[concat(variables('ids').rdplbID,'/backendAddressPools/',variables('lbSettings').adLBBE)]",
+            "sqlBEAddressPoolID": "[concat(variables('ids').sqllbID,'/backendAddressPools/',variables('lbSettings').sqlLBBE)]",
+            "sqllbFEConfigID": "[concat(variables('ids').sqllbID,'/frontendIPConfigurations/',variables('lbSettings').sqlLBFE)]",
+            "sqllbProbeID": "[concat(variables('ids').sqllbID,'/probes/',variables('SQLAOProbe'))]"
+        },
+        "SQL2016SP1-WS2016": "Enterprise",
+        "Monday": true,
+        "Tuesday": true,
+        "Wednesday": true,
+        "Thursday": true,
+        "Friday": true,
+        "Saturday": true,
+        "Sunday": true,
+        "Never": false,
+        "Everyday": true,
+        "subnets": [
+            {
+                "name": "[variables('subnetNames').staticSubnetName]",
+                "properties": {
+                    "addressPrefix": "[parameters('staticSubnet')]"
+                }
+            },
+            {
+                "name": "[variables('subnetNames').sqlSubnetName]",
+                "properties": {
+                    "addressPrefix": "[parameters('sqlSubnet')]"
+                }
+            }
+        ],
+        "virtualNetworkNameWithSuffix": "[substring(concat(parameters('virtualNetworkName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
+        "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
+        "backupDCIPAddressNameWithSuffix": "[substring(concat(variables('backupDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
+        "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
+        "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
+        "dcStorageAccountName": "[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
+        "dcStorageAccountType": "Standard_LRS",
+        "configuration": {
+            "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
+            "nicTemplateURL": "[concat(parameters('templatesBaseUrl'),'/nic.json')]",
+            "rdpIPAdressSetupURL": "[concat(parameters('templatesBaseUrl'),'/publicip-rdp.json')]",
+            "vnetSetupURL": "[concat(parameters('templatesBaseUrl'),'/vnet-new.json')]",
+            "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs-',parameters('loadBalancersType'),'.json')]",
+            "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
+            "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
+            "provisioningVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',parameters('numberOfSqlVMDisks'),'.json')]",
+            "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
+            "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
+            "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
+            "adPDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADPDC.ps1.zip')]",
+            "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
+            "adBDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADBDC.ps1.zip')]",
+            "adBDCConfigurationFunction": "CreateADBDC.ps1\\CreateADBDC",
+            "fswModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFileShareWitness.ps1.zip')]",
+            "fswConfigurationFunction": "CreateFileShareWitness.ps1\\CreateFileShareWitness",
+            "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
+            "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
+            "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
+            "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
         }
-      },
-      {
-        "name": "[variables('subnetNames').sqlSubnetName]",
-        "properties": {
-          "addressPrefix": "[parameters('sqlSubnet')]"
-        }
-      }
-    ],
-    "virtualNetworkNameWithSuffix": "[substring(concat(parameters('virtualNetworkName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-    "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-    "backupDCIPAddressNameWithSuffix": "[substring(concat(variables('backupDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-    "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-    "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-    "dcStorageAccountName":"[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
-    "dcStorageAccountType":"Standard_LRS",
-    "configuration": {
-      "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
-      "nicTemplateURL": "[concat(parameters('templatesBaseUrl'),'/nic.json')]",
-      "rdpIPAdressSetupURL": "[concat(parameters('templatesBaseUrl'),'/publicip-rdp.json')]",
-      "vnetSetupURL": "[concat(parameters('templatesBaseUrl'),'/vnet-new.json')]",
-      "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs-',parameters('loadBalancersType'),'.json')]",
-      "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
-      "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
-      "provisioningVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',parameters('numberOfSqlVMDisks'),'.json')]",
-      "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
-      "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
-      "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
-      "adPDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADPDC.ps1.zip')]",
-      "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-      "adBDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADBDC.ps1.zip')]",
-      "adBDCConfigurationFunction": "CreateADBDC.ps1\\CreateADBDC",
-      "fswModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFileShareWitness.ps1.zip')]",
-      "fswConfigurationFunction": "CreateFileShareWitness.ps1\\CreateFileShareWitness",
-      "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
-      "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
-      "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
-      "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
-    }
-  },
+    },
   "resources": [
     {
       "name": "StorageAccountVirtualNetworkPublicIP",

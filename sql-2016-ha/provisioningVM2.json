@@ -97,18 +97,13 @@
       "type": "string"
     }
   },
-  "variables": {
-    "sqlstorageName": "[parameters('sqlStorageAccountName')]",
-    "dcstorageName": "[parameters('dcStorageAccountName')]",
-    "fwstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
-    "diagstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
-    "SQL2012SP2-WS2012R2-ENT": "SQL2012SP2-WS2012R2",
-    "SQL2012SP3-WS2012R2-ENT": "SQL2012SP3-WS2012R2",
-    "SQL2014-WS2012R2-ENT": "SQL2014-WS2012R2",
-    "SQL2014SP1-WS2012R2-ENT": "SQL2014SP1-WS2012R2",
-    "SQL2016-WS2012R2-ENT": "SQL2016-WS2012R2",
-    "SQL2016-WS2012R2-DEV": "SQL2016-WS2012R2"
-  },
+    "variables": {
+        "sqlstorageName": "[parameters('sqlStorageAccountName')]",
+        "dcstorageName": "[parameters('dcStorageAccountName')]",
+        "fwstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
+        "diagstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
+        "SQL2016SP1-WS2016": "SQL2016SP1-WS2016"
+    },
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
@@ -122,8 +117,8 @@
       "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "properties": {
-        "platformFaultDomainCount": "3",
-        "platformUpdateDomainCount": "3"
+        "platformFaultDomainCount": "1",
+        "platformUpdateDomainCount": "1"
       }
     },
     {
@@ -156,16 +151,16 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('dcstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adPDCVMName'),'-osdisk.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('dcStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,parameters('vmContainerName'),'/', parameters('adPDCVMName'), '0','-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
-              "vhd": {
-                "uri": "[concat('http://',variables('dcstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adPDCVMName'),'data-1.vhd')]"
-              },
+                "vhd": {
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('dcStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmContainerName'),'/', parameters('adPDCVMName'), '0','data-1.vhd')]"
+                },
               "name": "[concat(parameters('adPDCVMName'),'-data-disk1')]",
               "createOption": "empty",
               "caching": "None",
@@ -180,12 +175,6 @@
               "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',parameters('adPDCNicName'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('diagstorageName'),'.blob.core.windows.net')]"
-          }
         }
       },
       "resources": [
@@ -252,16 +241,16 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('dcstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adBDCVMName'),'-osdisk.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('dcstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,parameters('vmContainerName'),'/', parameters('adBDCVMName'), '0','-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
-              "vhd": {
-                "uri": "[concat('http://',variables('dcstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adBDCVMName'),'data-1.vhd')]"
-              },
+                "vhd": {
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('dcstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmContainerName'),'/', parameters('adBDCVMName'), '0','data-1.vhd')]"
+                },
               "name": "[concat(parameters('adBDCVMName'),'-data-disk1')]",
               "createOption": "empty",
               "caching": "None",
@@ -276,12 +265,6 @@
               "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',parameters('adBDCNicName'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('diagstorageName'),'.blob.core.windows.net')]"
-          }
         }
       }
     },
@@ -319,26 +302,26 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('sqlstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('sqlVMName'), copyindex(), '-osdisk.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
-              "vhd": {
-                "uri": "[concat('http://',variables('sqlstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(), '-Data-1.vhd')]"
-              },
+                "vhd": {
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-1.vhd')]"
+                },
               "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk1')]",
               "caching": "ReadOnly",
               "createOption": "empty",
-              "diskSizeGB": 1000,
+              "diskSizeGB": 127,
               "lun": 0
             },
             {
-              "vhd": {
-                "uri": "[concat('http://',variables('sqlstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(), '-Data-2.vhd')]"
-              },
+                "vhd": {
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-2.vhd')]"
+                },
               "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk2')]",
               "caching": "ReadOnly",
               "createOption": "empty",
@@ -353,12 +336,6 @@
               "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',concat(parameters('sqlVMName'), copyindex(),'-nic'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('diagstorageName'),'.blob.core.windows.net')]"
-          }
         }
       }
     },
@@ -392,16 +369,16 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('fwstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('sqlwVMName'),'-osdisk.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('fwstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,parameters('vmContainerName'),'/', parameters('sqlwVMName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
-              "vhd": {
-                "uri": "[concat('http://',variables('fwstorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('sqlwVMName'),'-data-1.vhd')]"
-              },
+                "vhd": {
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('fwstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,parameters('vmContainerName'),'/', parameters('sqlwVMName'), '-data-1.vhd')]"
+                },
               "name": "[concat(parameters('sqlwVMName'),'-data-disk1')]",
               "caching": "None",
               "createOption": "empty",
@@ -416,12 +393,6 @@
               "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',parameters('sqlwNicName'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('diagstorageName'),'.blob.core.windows.net')]"
-          }
         }
       }
     }
