@@ -159,7 +159,7 @@
           "dataDisks": [
             {
                 "vhd": {
-                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('dcStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmContainerName'),'/', parameters('adPDCVMName'), '0','data-1.vhd')]"
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('dcStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,parameters('vmContainerName'),'/', parameters('adPDCVMName'), '0','data-1.vhd')]"
                 },
               "name": "[concat(parameters('adPDCVMName'),'-data-disk1')]",
               "createOption": "empty",
@@ -249,7 +249,7 @@
           "dataDisks": [
             {
                 "vhd": {
-                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('dcstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmContainerName'),'/', parameters('adBDCVMName'), '0','data-1.vhd')]"
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('dcstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,parameters('vmContainerName'),'/', parameters('adBDCVMName'), '0','data-1.vhd')]"
                 },
               "name": "[concat(parameters('adBDCVMName'),'-data-disk1')]",
               "createOption": "empty",
@@ -302,7 +302,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-osdisk.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -310,7 +310,7 @@
           "dataDisks": [
             {
                 "vhd": {
-                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-1.vhd')]"
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-1.vhd')]"
                 },
               "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk1')]",
               "caching": "ReadOnly",
@@ -320,7 +320,7 @@
             },
             {
                 "vhd": {
-                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-2.vhd')]"
+                    "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-2.vhd')]"
                 },
               "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk2')]",
               "caching": "ReadOnly",
