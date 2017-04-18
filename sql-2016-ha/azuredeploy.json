@@ -580,6 +580,9 @@
                     },
                     "sql0AddressNameWithSuffix": {
                         "value": "[variables('sql0AddressNameWithSuffix')]"
+                    },
+                    "nsgID": {
+                        "value": "[variables('nsgID')]"
                     }
                 }
             }

@@ -1,56 +1,59 @@
 {  
    "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
    "contentVersion":"1.0.0.0",
-   "parameters":{  
-      "location":{  
-         "type":"string"
-      },
-      "adPDCNicName":{  
-         "type":"string"
-      },
-      "adPDCNICIPAddress":{  
-         "type":"string"
-      },
-      "staticSubnetRef":{  
-         "type":"string"
-      },
-      "adBEAddressPoolID":{  
-         "type":"string"
-      },
-      "adRDPNATRuleID":{  
-         "type":"string"
-      },
-      "adBDCNicName":{  
-         "type":"string"
-      },
-      "adBDCNICIPAddress":{  
-         "type":"string"
-      },
-      "sqlVMName":{  
-         "type":"string"
-      },
-      "sqlSubnetRef":{  
-         "type":"string"
-      },
-      "sqlBEAddressPoolID":{  
-         "type":"string"
-      },
-      "sqlwNicName":{  
-         "type":"string"
-      },
-      "primaryDCIPAddressNameWithSuffix":{  
-         "type":"string"
-      },
-      "backupDCIPAddressNameWithSuffix":{  
-         "type":"string"
-      },
-      "sql1AddressNameWithSuffix":{  
-         "type":"string"
-      },
-      "sql0AddressNameWithSuffix":{  
-         "type":"string"
-      }
-   },
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "adPDCNicName": {
+            "type": "string"
+        },
+        "adPDCNICIPAddress": {
+            "type": "string"
+        },
+        "staticSubnetRef": {
+            "type": "string"
+        },
+        "adBEAddressPoolID": {
+            "type": "string"
+        },
+        "adRDPNATRuleID": {
+            "type": "string"
+        },
+        "adBDCNicName": {
+            "type": "string"
+        },
+        "adBDCNICIPAddress": {
+            "type": "string"
+        },
+        "sqlVMName": {
+            "type": "string"
+        },
+        "sqlSubnetRef": {
+            "type": "string"
+        },
+        "sqlBEAddressPoolID": {
+            "type": "string"
+        },
+        "sqlwNicName": {
+            "type": "string"
+        },
+        "primaryDCIPAddressNameWithSuffix": {
+            "type": "string"
+        },
+        "backupDCIPAddressNameWithSuffix": {
+            "type": "string"
+        },
+        "sql1AddressNameWithSuffix": {
+            "type": "string"
+        },
+        "sql0AddressNameWithSuffix": {
+            "type": "string"
+        },
+        "nsgID": {
+            "type": "string"
+        }
+    },
    "resources":[  
       {  
          "name":"[parameters('adPDCNicName')]",
@@ -61,16 +64,19 @@
             "ipConfigurations":[  
                {  
                   "name":"ipconfig1",
-                  "properties":{  
-                     "privateIPAllocationMethod":"Static",
-                     "privateIPAddress":"[parameters('adPDCNICIPAddress')]",
-                     "subnet":{  
-                        "id":"[parameters('staticSubnetRef')]"
-                     },
-                     "publicIpAddress":{  
-                        "id":"[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('primaryDCIPAddressNameWithSuffix'))]"
-                     }
-                  }
+                "properties": {
+                    "networkSecurityGroup": {
+                        "id": "[parameters('nsgID')]"
+                    },
+                    "privateIPAllocationMethod": "Static",
+                    "privateIPAddress": "[parameters('adPDCNICIPAddress')]",
+                    "subnet": {
+                        "id": "[parameters('staticSubnetRef')]"
+                    },
+                    "publicIpAddress": {
+                        "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('primaryDCIPAddressNameWithSuffix'))]"
+                    }
+                }
                }
             ]
          }
@@ -84,16 +90,19 @@
             "ipConfigurations":[  
                {  
                   "name":"ipconfig1",
-                  "properties":{  
-                     "privateIPAllocationMethod":"Static",
-                     "privateIPAddress":"[parameters('adBDCNICIPAddress')]",
-                     "subnet":{  
-                        "id":"[parameters('staticSubnetRef')]"
-                     },
-                     "publicIpAddress":{  
-                        "id":"[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('backupDCIPAddressNameWithSuffix'))]"
-                     }
-                  }
+                "properties": {
+                    "networkSecurityGroup": {
+                        "id": "[parameters('nsgID')]"
+                    },
+                    "privateIPAllocationMethod": "Static",
+                    "privateIPAddress": "[parameters('adBDCNICIPAddress')]",
+                    "subnet": {
+                        "id": "[parameters('staticSubnetRef')]"
+                    },
+                    "publicIpAddress": {
+                        "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('backupDCIPAddressNameWithSuffix'))]"
+                    }
+                }
                }
             ]
          }
@@ -107,20 +116,23 @@
             "ipConfigurations":[  
                {  
                   "name":"ipconfig1",
-                  "properties":{  
-                     "privateIPAllocationMethod":"Dynamic",
-                     "subnet":{  
-                        "id":"[parameters('sqlSubnetRef')]"
-                     },
-                     "publicIpAddress":{  
-                        "id":"[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql1AddressNameWithSuffix'))]"
-                     },
-                     "loadBalancerBackendAddressPools":[  
-                        {  
-                           "id":"[parameters('sqlBEAddressPoolID')]"
+                "properties": {
+                    "networkSecurityGroup": {
+                        "id": "[parameters('nsgID')]"
+                    },
+                    "privateIPAllocationMethod": "Dynamic",
+                    "subnet": {
+                        "id": "[parameters('sqlSubnetRef')]"
+                    },
+                    "publicIpAddress": {
+                        "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql1AddressNameWithSuffix'))]"
+                    },
+                    "loadBalancerBackendAddressPools": [
+                        {
+                            "id": "[parameters('sqlBEAddressPoolID')]"
                         }
-                     ]
-                  }
+                    ]
+                }
                }
             ]
          }
@@ -134,20 +146,23 @@
             "ipConfigurations":[  
                {  
                   "name":"ipconfig1",
-                  "properties":{  
-                     "privateIPAllocationMethod":"Dynamic",
-                     "subnet":{  
-                        "id":"[parameters('sqlSubnetRef')]"
-                     },
-                     "publicIpAddress":{  
-                        "id":"[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql0AddressNameWithSuffix'))]"
-                     },
-                     "loadBalancerBackendAddressPools":[  
-                        {  
-                           "id":"[parameters('sqlBEAddressPoolID')]"
+                "properties": {
+                    "networkSecurityGroup": {
+                        "id": "[parameters('nsgID')]"
+                    },
+                    "privateIPAllocationMethod": "Dynamic",
+                    "subnet": {
+                        "id": "[parameters('sqlSubnetRef')]"
+                    },
+                    "publicIpAddress": {
+                        "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql0AddressNameWithSuffix'))]"
+                    },
+                    "loadBalancerBackendAddressPools": [
+                        {
+                            "id": "[parameters('sqlBEAddressPoolID')]"
                         }
-                     ]
-                  }
+                    ]
+                }
                }
             ]
          }
@@ -161,18 +176,20 @@
             "ipConfigurations":[  
                {  
                   "name":"ipconfig1",
-                  "properties":{  
-                     "privateIPAllocationMethod":"Dynamic",
-                     "subnet":{  
-                        "id":"[parameters('sqlSubnetRef')]"
-                     }
-                  }
+                "properties": {
+                    "networkSecurityGroup": {
+                        "id": "[parameters('nsgID')]"
+                    },
+                    "privateIPAllocationMethod": "Dynamic",
+                    "subnet": {
+                        "id": "[parameters('sqlSubnetRef')]"
+                    }
+                }
                }
             ]
          }
       }
    ],
-   "outputs":{  
-
+   "outputs":{
    }
 }
