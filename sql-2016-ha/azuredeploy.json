@@ -419,6 +419,9 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
             "comments": "This resource will create storage accounts for Active Directory, SQL Server, File Share Witness and Diagnostics. It will also create the Virtual Network and public IP addresses",
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
