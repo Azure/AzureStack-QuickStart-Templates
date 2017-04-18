@@ -1,44 +1,47 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-    "sqlStorageAccountName": {
-      "type": "string"
+    "parameters": {
+        "sqlStorageAccountName": {
+            "type": "string"
+        },
+        "dcStorageAccountName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "SqlStorageAccountType": {
+            "type": "string"
+        },
+        "DcStorageAccountType": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "virtualNetworkAddressRange": {
+            "type": "string"
+        },
+        "subnets": {
+            "type": "array"
+        },
+        "primaryDCIPAddressNameWithSuffix": {
+            "type": "string"
+        },
+        "backupDCIPAddressNameWithSuffix": {
+            "type": "string"
+        },
+        "sql1AddressNameWithSuffix": {
+            "type": "string"
+        },
+        "sql0AddressNameWithSuffix": {
+            "type": "string"
+        },
+        "nsgID": {
+            "type": "string"
+        }
     },
-    "dcStorageAccountName": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "SqlStorageAccountType": {
-      "type": "string"
-    },
-    "DcStorageAccountType": {
-      "type": "string"
-    },
-    "virtualNetworkName": {
-      "type": "string"
-    },
-    "virtualNetworkAddressRange": {
-      "type": "string"
-    },
-    "subnets": {
-      "type": "array"
-    },
-    "primaryDCIPAddressNameWithSuffix": {
-      "type": "string"
-    },
-    "backupDCIPAddressNameWithSuffix": {
-      "type": "string"
-    },
-    "sql1AddressNameWithSuffix": {
-      "type": "string"
-    },
-    "sql0AddressNameWithSuffix": {
-      "type": "string"
-    }
-  },
   "resources": [
     {
       "name": "[parameters('sqlStorageAccountName')]",
@@ -119,9 +122,12 @@
       "apiVersion": "2015-06-15",
       "properties": {
         "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('virtualNetworkAddressRange')]"
-          ]
+            "addressPrefixes": [
+                "[parameters('virtualNetworkAddressRange')]"
+            ],
+            "networkSecurityGroup": {
+                "id": "[parameters('nsgID')]"
+            }
         },
         "subnets": "[parameters('subnets')]"
       }
