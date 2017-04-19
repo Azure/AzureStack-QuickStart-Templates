@@ -67,12 +67,6 @@
         "description": "The SQL Server Service Account password"
       }
     },
-    "sqlStorageAccountName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of Sql Server Storage Account"
-      }
-    },
     "sqlStorageAccountType": {
         "type": "string",
         "allowedValues": [
@@ -359,12 +353,13 @@
                 }
             }
         ],
-        "virtualNetworkNameWithSuffix": "[substring(concat(parameters('virtualNetworkName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "backupDCIPAddressNameWithSuffix": "[substring(concat(variables('backupDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "dcStorageAccountName": "[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
+        "sqlStorageAccountName": "[tolower(concat(take(uniqueString(resourceGroup().id),8),'sql'))]",
+        "virtualNetworkNameWithSuffix": "[substring(concat(parameters('virtualNetworkName'), uniqueString(variables('sqlStorageAccountName'))),0,15)]",
+        "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(variables('sqlStorageAccountName'))),0,15)]",
+        "backupDCIPAddressNameWithSuffix": "[substring(concat(variables('backupDCIPAddressName'), uniqueString(variables('sqlStorageAccountName'))),0,15)]",
+        "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(variables('sqlStorageAccountName'))),0,15)]",
+        "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(variables('sqlStorageAccountName'))),0,15)]",
+        "dcStorageAccountName": "[concat(substring(concat(variables('sqlStorageAccountName'), uniqueString(variables('sqlStorageAccountName'))),0,18),'dc')]",
         "dcStorageAccountType": "Standard_LRS",
         "configuration": {
             "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
@@ -433,7 +428,7 @@
                         "value": "[resourceGroup().location]"
                     },
                     "sqlStorageAccountName": {
-                        "value": "[parameters('sqlStorageAccountName')]"
+                        "value": "[variables('sqlStorageAccountName')]"
                     },
                     "dcStorageAccountName": {
                         "value": "[variables('dcStorageAccountName')]"
@@ -611,7 +606,7 @@
                         "value": "[variables('vmSettings').availabilitySets.sqlAvailabilitySetName]"
                     },
                     "sqlStorageAccountName": {
-                        "value": "[parameters('sqlStorageAccountName')]"
+                        "value": "[variables('sqlStorageAccountName')]"
                     },
                     "dcStorageAccountName": {
                         "value": "[variables('dcStorageAccountName')]"
