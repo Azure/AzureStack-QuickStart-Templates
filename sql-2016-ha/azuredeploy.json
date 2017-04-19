@@ -296,7 +296,7 @@
             "sqlImagePublisher": "MicrosoftSQLServer",
             "rdpPort": 3389,
             "windowsDiskSize": 128,
-            "sqlDiskSize": 1000
+            "sqlDiskSize": 128
         },
         "sqlAOEPName": "[concat(parameters('deploymentPrefix'),'-hadr')]",
         "sharePath": "[concat(parameters('deploymentPrefix'),'-fsw')]",
