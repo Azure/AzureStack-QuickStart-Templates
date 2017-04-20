@@ -38,9 +38,6 @@
         "sql0AddressNameWithSuffix": {
             "type": "string"
         },
-        "sqlwAddressNameWithSuffix": {
-            "type": "string"
-        },
         "nsgID": {
             "type": "string"
         }
@@ -113,15 +110,6 @@
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[parameters('sql0AddressNameWithSuffix')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publicIPAllocationMethod": "dynamic"
-            }
-        },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[parameters('sqlwAddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
                 "publicIPAllocationMethod": "dynamic"

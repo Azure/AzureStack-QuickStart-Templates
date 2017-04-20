@@ -50,9 +50,6 @@
         "sql0AddressNameWithSuffix": {
             "type": "string"
         },
-        "sqlwAddressNameWithSuffix": {
-            "type": "string"
-        },
         "nsgID": {
             "type": "string"
         }
@@ -186,9 +183,6 @@
                     "privateIPAllocationMethod": "Dynamic",
                     "subnet": {
                         "id": "[parameters('sqlSubnetRef')]"
-                    },
-                    "publicIpAddress": {
-                        "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sqlwAddressNameWithSuffix'))]"
                     }
                 }
                }
