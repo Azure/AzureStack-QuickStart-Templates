@@ -29,9 +29,6 @@
         "primaryDCIPAddressNameWithSuffix": {
             "type": "string"
         },
-        "backupDCIPAddressNameWithSuffix": {
-            "type": "string"
-        },
         "sql1AddressNameWithSuffix": {
             "type": "string"
         },
@@ -83,15 +80,6 @@
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[parameters('primaryDCIPAddressNameWithSuffix')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publicIPAllocationMethod": "dynamic"
-            }
-        },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[parameters('backupDCIPAddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
                 "publicIPAllocationMethod": "dynamic"
