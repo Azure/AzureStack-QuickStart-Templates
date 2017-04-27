@@ -281,7 +281,7 @@
             "adPDCVMName": "[concat(resourceGroup().name, '-priDC')]",
             "sqlVMName": "[concat(resourceGroup().name, '-sql')]",
             "sqlwVMName": "[concat(resourceGroup().name, '-fsw')]",
-            "windowsImagePublisher": "MicrosoftWindowsServer",
+            "windowsImagePublisher": "Microsoft",
             "windowsImageOffer": "WindowsServer",
             "windowsImageSKU": "2016-Datacenter",
             "sqlImagePublisher": "MicrosoftSQLServer",
