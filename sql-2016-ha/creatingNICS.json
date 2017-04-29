@@ -40,9 +40,6 @@
         },
         "sql0AddressNameWithSuffix": {
             "type": "string"
-        },
-        "nsgID": {
-            "type": "string"
         }
     },
    "resources":[  
@@ -56,9 +53,6 @@
                {  
                   "name":"ipconfig1",
                 "properties": {
-                    "networkSecurityGroup": {
-                        "id": "[parameters('nsgID')]"
-                    },
                     "privateIPAllocationMethod": "Static",
                     "privateIPAddress": "[parameters('adPDCNICIPAddress')]",
                     "subnet": {
@@ -82,9 +76,6 @@
                {  
                   "name":"ipconfig1",
                 "properties": {
-                    "networkSecurityGroup": {
-                        "id": "[parameters('nsgID')]"
-                    },
                     "privateIPAllocationMethod": "Dynamic",
                     "subnet": {
                         "id": "[parameters('sqlSubnetRef')]"
@@ -112,9 +103,6 @@
                {  
                   "name":"ipconfig1",
                 "properties": {
-                    "networkSecurityGroup": {
-                        "id": "[parameters('nsgID')]"
-                    },
                     "privateIPAllocationMethod": "Dynamic",
                     "subnet": {
                         "id": "[parameters('sqlSubnetRef')]"
@@ -142,9 +130,6 @@
                {  
                   "name":"ipconfig1",
                 "properties": {
-                    "networkSecurityGroup": {
-                        "id": "[parameters('nsgID')]"
-                    },
                     "privateIPAllocationMethod": "Dynamic",
                     "subnet": {
                         "id": "[parameters('sqlSubnetRef')]"
