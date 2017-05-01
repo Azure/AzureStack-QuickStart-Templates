@@ -77,12 +77,13 @@
         "sqlStorageAccountType": {
             "type": "string",
             "allowedValues": [
-                "Premium_LRS"
+                "Premium_LRS",
+                "Standard_LRS"
             ],
             "metadata": {
                 "description": "The type of the Sql Server Storage Account created"
             },
-            "defaultValue": "Premium_LRS"
+            "defaultValue": "Standard_LRS"
         },
         "virtualNetworkAddressRange": {
             "type": "string",
