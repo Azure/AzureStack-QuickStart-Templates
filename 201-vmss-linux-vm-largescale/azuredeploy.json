@@ -38,27 +38,31 @@
         "description": "Admin password on all VMs."
       }
     },
-        "osImagePublisher": {
-            "type": "string",
-            "defaultValue": "Canonical",
-            "metadata": {
-                "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
-            }
-        },
-        "osImageOffer": {
-            "type": "string",
-            "defaultValue": "UbuntuServer",
-            "metadata": {
-                "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
-            }
-        },
-        "osImageSku": {
-            "type": "string",
-            "defaultValue": "14.04.3-LTS",
-            "metadata": {
-                "description": "Maps to the sku in the Azure Stack Platform Image Repository."
-            }
-        }
+    "osImagePublisher": {
+      "type": "string",
+      "defaultValue": "Canonical",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageOffer": {
+      "type": "string",
+      "defaultValue": "UbuntuServer",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageSku": {
+      "type": "string",
+      "defaultValue": "16.04-LTS",
+      "allowedValues": [
+        "14.04-LTS",
+        "16.04-LTS"
+      ],
+      "metadata": {
+        "description": "Maps to the sku in the Azure Stack Platform Image Repository."
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
