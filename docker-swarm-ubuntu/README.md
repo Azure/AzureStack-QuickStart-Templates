@@ -27,7 +27,7 @@ Follow the below links to create/download an Ubuntu 14.04 LTS Image and upload t
 
 ## Deployment steps
 => Deploy to azurestack, using custom deployment in azurestack portal.
-=> or use Deployswarm.ps1 to deploy to azurestack via powershell.
+=>For SSHKeys use azuredeploy-sshkeys.parameters.json. Fix the GEN-* values before deploying.
 
 ## Usage
 1. Get your endpoints to cluster
