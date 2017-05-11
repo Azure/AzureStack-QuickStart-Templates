@@ -54,7 +54,11 @@
     },
     "osImageSku": {
       "type": "string",
-      "defaultValue": "14.04.3-LTS",
+      "defaultValue": "16.04-LTS",
+      "allowedValues": [
+        "14.04-LTS",
+        "16.04-LTS"
+      ],
       "metadata": {
         "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Default value: 14.04.3-LTS"
       }
