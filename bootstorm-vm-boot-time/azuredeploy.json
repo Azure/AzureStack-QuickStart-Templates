@@ -44,6 +44,17 @@
       "metadata": {
         "description": "VM size supported by Azure Stack."
       }
+    },
+    "vmOsSku": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "VM size supported by Azure Stack."
+      }   
     }
   },
   "variables": {
@@ -52,11 +63,11 @@
     "addressPrefix": "10.0.0.0/16",
     "location": "[resourceGroup().location]",
     "subnetName": "[concat('vsn', resourceGroup().name)]",
-    "subnetPrefix": "10.0.0.0/24",
+    "subnetPrefix": "10.0.0.0/16",
     "storageAccountType": "Standard_LRS",
     "uniqueStorageAccountName": "[concat('sa', resourceGroup().name)]",
     "uniqueStorageAccountContainerName": "[concat('sc', resourceGroup().name)]",
-    "vmOsSku": "2012-R2-Datacenter",
+    "vmOsSku": "[parameters('vmOsSku')]",
     "vmAdminUsername": "vmadministrator",
     "vmAdminPassword": "pwd0a!8b7",
     "vmName": "[concat('vm', resourceGroup().name)]",
@@ -70,7 +81,8 @@
     "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
-    "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll"
+    "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
+    "controllerVmSize": "Standard_A2"
   },
   "resources": [
     {
@@ -189,7 +201,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[variables('controllerVmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
@@ -259,7 +271,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex(),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -311,7 +323,8 @@
             },
             "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
             "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
-            "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+            "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]",
+            "AzureSubscription": "[subscription().subscriptionId]"
           }
         },
         "protectedSettings": {
