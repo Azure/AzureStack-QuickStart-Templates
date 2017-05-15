@@ -26,7 +26,7 @@
         "virtualNetworkAddressRange": "10.0.0.0/16",
         "windowsImagePublisher": "MicrosoftWindowsServer",
         "windowsImageOffer": "WindowsServer",
-        "windowsImageSKU": "2012-R2-Datacenter",
+        "windowsImageSKU": "2016-Datacenter",
         "windowsImageVersion": "latest",
         "dataDiskSize": 2,
         "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-vm-windows-comprehensive",

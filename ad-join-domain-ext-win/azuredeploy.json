@@ -88,7 +88,7 @@
         "vmSize": "Standard_A2",
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
-        "imageSKU": "2012-R2-Datacenter",
+        "imageSKU": "2016-Datacenter",
         "imageVersion": "latest",
         "OSDiskName": "osdisk",
         "publicIPAddressName": "[concat(parameters('vmName'),'-pip')]",
@@ -124,7 +124,7 @@
             "name": "[variables('nicName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"                
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -212,8 +212,8 @@
                     "Restart": "true",
                     "Options": "[parameters('domainJoinOptions')]"
                 },
-                "protectedsettings": { 
-                    "Password": "[parameters('domainPassword')]"    
+                "protectedsettings": {
+                    "Password": "[parameters('domainPassword')]"
                 }
             }
         }
