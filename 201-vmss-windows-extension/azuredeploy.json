@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -9,9 +9,37 @@
         "description": "Size of VMs in the VM Scale Set."
       }
     },
+    "osImageSku": {
+      "type": "string",
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter-Core",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
+      }
+    },
+    "osImagePublisher": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageOffer": {
+      "type": "string",
+      "defaultValue": "WindowsServer",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
     "vmssName": {
-      "type": "String",
       "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
+      "minLength": 3,
+      "maxLength": 10,
+      "type": "String",
       "metadata": {
         "description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure Stack. A hash is prepended to this string for some resources, and resource-specific information is appended."
       }
@@ -25,38 +53,31 @@
       }
     },
     "adminUsername": {
-      "type": "String",
       "defaultValue": "azureuser",
+      "type": "String",
       "metadata": {
         "description": "Admin username on all VMs."
       }
     },
     "adminPassword": {
-      "type": "SecureString",
       "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
+      "type": "SecureString",
       "metadata": {
         "description": "Admin password on all VMs."
       }
     },
-    "osImagePublisher": {
-      "type": "string",
-      "defaultValue": "Canonical",
+    "_artifactsLocation": {
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/201-vmss-windows-extension",
+      "type": "String",
       "metadata": {
-        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
       }
     },
-    "osImageOffer": {
-      "type": "string",
-      "defaultValue": "UbuntuServer",
+    "_artifactsLocationSasToken": {
+      "defaultValue": "",
+      "type": "SecureString",
       "metadata": {
-        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
-      }
-    },
-    "osImageSku": {
-      "type": "string",
-      "defaultValue": "14.04.3-LTS",
-      "metadata": {
-        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Default value: 14.04.3-LTS"
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
       }
     }
   },
@@ -262,17 +283,20 @@
           "extensionProfile": {
             "extensions": [
               {
-                "type": "Microsoft.Compute/virtualMachines/extensions",
-                "name": "[concat(parameters('vmssName'),'-LinuxCustomScriptExtension')]",
+                "name": "customScript",
                 "properties": {
-                  "publisher": "Microsoft.OSTCExtensions",
-                  "type": "CustomScriptForLinux",
-                  "typeHandlerVersion": "1.3",
-                  "autoUpgradeMinorVersion": true,
+                  "publisher": "Microsoft.Compute",
                   "settings": {
-                    "commandToExecute": "touch /test.txt",
-                    "enableInternalDNSCheck": "false"
-                  }
+                    "fileUris": [
+                      "[concat(parameters('_artifactsLocation'), '/scripts/helloWorld.ps1')]"
+                    ]
+                  },
+                  "typeHandlerVersion": "1.8",
+                  "autoUpgradeMinorVersion": true,
+                  "protectedSettings": {
+                    "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File helloWorld.ps1"
+                  },
+                  "type": "CustomScriptExtension"
                 }
               }
             ]

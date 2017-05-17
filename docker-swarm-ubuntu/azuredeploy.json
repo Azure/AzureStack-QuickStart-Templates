@@ -86,7 +86,7 @@
         },
         "linuxSku": {
             "type": "string",
-            "defaultValue": "14.04.3-LTS",
+            "defaultValue": "14.04-LTS",
             "metadata": {
                 "description": "This is the linux sku used by the linux cluster"
             }
