@@ -9,6 +9,13 @@
         "description": "Number of VMs to create and run IO simulation in determining the maximum IOPS reached without exceeding specified latency thresholds as acceptable performance limit."
       }
     },
+    "vmAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]",      
+      "metadata": {
+        "description": "Admin password for the VMs"
+      }
+    },    
     "vmOsSku": {
       "type": "string",
       "defaultValue": "2012-R2-Datacenter",
@@ -43,12 +50,26 @@
       "metadata": {
         "description": "VM IO workload target data disk size in GB."
       }
+    },    
+    "WaitForIoStormCompletion": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If true template will not complete deployment until IO test is complete."
+      }
     },
     "vmIoLatencyThresholdInMS": {
       "type": "int",
       "defaultValue": 60,
       "metadata": {
         "description": "VM IO workload latency threshold in milliseconds."
+      }
+    },
+    "vmIoStartOperations": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Operations per file per thread to start goal seeking at."
       }
     },
     "vmIoDurationInSec": {
@@ -71,7 +92,14 @@
       "metadata": {
         "description": "VM IO workload read percentage."
       }
-    }
+    },
+    "vmFixedIops": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "If non-0 each VM will perform vmFixedIops indefinitely."
+      }
+    }        
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
@@ -83,8 +111,7 @@
     "storageAccountType": "Standard_LRS",
     "uniqueStorageAccountName": "[tolower(concat('sa', resourceGroup().name))]",
     "uniqueStorageAccountContainerName": "[tolower(concat('sc', resourceGroup().name))]",
-    "vmAdminUsername": "vmadministrator",
-    "vmAdminPassword": "[subscription().subscriptionId]",
+    "vmAdminUsername": "vmadministrator",    
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
     "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
@@ -100,7 +127,9 @@
     "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
     "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
     "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
-    "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO"
+    "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO",
+    "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",    
+    "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]"
   },
   "resources": [
     {
@@ -161,12 +190,28 @@
       }
     },
     {
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIPAddressName')]",
+        "apiVersion": "2015-05-01-preview",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "publicIPAllocationMethod": "Dynamic",
+            "dnsSettings": {
+                "domainNameLabel": "[variables('dnsPrefix')]"
+            }
+        },
+        "dependsOn": [
+            "[variables('vnetID')]"
+        ]
+    },    
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('vmNicName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -176,6 +221,9 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"              
               }
             }
           }
@@ -219,12 +267,12 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "Standard_A4"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[variables('vmAdminUsername')]",
-          "adminPassword": "[variables('vmAdminPassword')]"
+          "adminPassword": "[parameters('vmAdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -278,7 +326,7 @@
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[variables('vmAdminUsername')]",
-          "adminPassword": "[variables('vmAdminPassword')]"
+          "adminPassword": "[parameters('vmAdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -290,7 +338,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex(),'/',concat(variables('vmOsDiskName'),copyIndex()),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -298,7 +346,7 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-0','.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex(),'/',variables('vmDataDiskName'),copyIndex(),'-0','.vhd')]"
               },
               "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-0')]",
               "createOption": "Empty",
@@ -308,7 +356,7 @@
             },
             {
               "vhd": {
-                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-1','.vhd')]"
+                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex(),'/',variables('vmDataDiskName'),copyIndex(),'-1','.vhd')]"
               },
               "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-1')]",
               "createOption": "Empty",
@@ -353,12 +401,15 @@
             "VMName": "[variables('vmName')]",
             "VMCount": "[parameters('vmCount')]",
             "VMAdminUserName": "[variables('vmAdminUsername')]",
-            "VMAdminPassword": "[variables('vmAdminPassword')]",
+            "VMAdminPassword": "[parameters('vmAdminPassword')]",
             "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
+            "VMIoStartOperations": "[parameters('vmIoStartOperations')]",           
             "Location": "[variables('location')]",
             "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
             "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
-            "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+            "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]",
+            "WaitForIoStormCompletion" : "[parameters('WaitForIoStormCompletion')]",
+            "FixedIops": "[parameters('vmFixedIops')]" 
           }
         }
       }
@@ -388,11 +439,12 @@
             "ControllerVMPrivateIP": "[reference(variables('vmNicName')).ipConfigurations[0].properties.privateIPAddress]",
             "VMName": "[concat(variables('vmName'),copyIndex())]",
             "VMAdminUserName": "[variables('vmAdminUsername')]",
-            "VMAdminPassword": "[variables('vmAdminPassword')]",
+            "VMAdminPassword": "[parameters('vmAdminPassword')]",
             "VMIoBlockSize": "[parameters('vmIoBlockSizeInBytes')]",
             "VMIoDuration": "[parameters('vmIoDurationInSec')]",
             "VMIoReadPercentage": "[parameters('vmIoReadPercentage')]",
-            "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]"
+            "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
+            "FixedIops": "[parameters('vmFixedIops')]"             
           }
         }
       }
