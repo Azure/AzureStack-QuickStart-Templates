@@ -31,7 +31,7 @@
         },
         "vmNamePrefix": {
             "type": "string",
-            "defaultValue": "vm-set-",
+            "defaultValue": "vmset-",
             "metadata": {
                 "description": "VM name prefix"
             }
@@ -49,7 +49,7 @@
         }
     },
   "variables": {
-    "availabilitySetName": "wc-avset",
+    "availabilitySetName": "vmavset",
     "storageAccountType": "Standard_LRS",
     "VMSize": "Standard_A1",
     "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
@@ -72,12 +72,12 @@
 
     "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
 
-    "publicLBName": "[tolower(concat('wc-external-lb-', resourceGroup().name))]",
+    "publicLBName": "[tolower(concat('external-lb-', resourceGroup().name))]",
     "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
-    "lbFE": "[tolower(concat('wc-external-lb-fe-',resourceGroup().name))]",
+    "lbFE": "[tolower(concat('external-lb-fe-',resourceGroup().name))]",
     "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
 
-    "publicIPAddressName": "[tolower(concat('wc-public-ip',resourceGroup().name))]",
+    "publicIPAddressName": "[tolower(concat('public-ip',resourceGroup().name))]",
     "rdpPort": 3389,
     "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
