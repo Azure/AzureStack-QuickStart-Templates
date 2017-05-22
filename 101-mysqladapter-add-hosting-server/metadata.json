@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "MySql Adapter add hosting server",
+  "description": "This template adds an existing MySql server as a MySql Adapter hosting server",
+  "summary": "Adds an existing MySql server as a MySql Adapter hosting server",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2017-05-16"
+}
