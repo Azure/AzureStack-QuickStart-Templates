@@ -139,14 +139,14 @@
             "metadata": {
                 "description": "Linked Templates base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlAlwaysOn_Staging/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlAlwaysOn_Stg_2/sql-2016-ha"
         },
         "scriptsBaseUrl": {
             "type": "string",
             "metadata": {
                 "description": "DSC Scripts base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlAlwaysOn_Staging/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlAlwaysOn_Stg_2/sql-2016-ha"
         },
         "autoPatchingDay": {
             "type": "string",
@@ -232,12 +232,6 @@
         },
         "numberOfSqlVMDisks": {
             "type": "string",
-            "allowedValues": [
-                "1",
-                "2",
-                "3",
-                "4"
-            ],
             "metadata": {
                 "description": "The Sql VM Disk Size"
             },
@@ -246,12 +240,10 @@
         "workloadType": {
             "type": "string",
             "allowedValues": [
-                "GENERAL",
-                "OLTP",
-                "DW"
+                "GENERAL"
             ],
             "metadata": {
-                "description": "The Sql VM work load type: GENERAL - general work load; DW - datawear house work load; OLTP - Transactional processing work load"
+                "description": "The Sql VM work load type: GENERAL - general work load"
             },
             "defaultValue": "GENERAL"
         },
