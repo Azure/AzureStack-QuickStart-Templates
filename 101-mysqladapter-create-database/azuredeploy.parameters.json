@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "value": "mynewdatabase"
+        },
+        "userName": {
+            "value": "mynewdatabasesa"
+        },
+        "password": {
+            "value": ""
+        },
+        "maxSizeMB": {
+            "value": "2048"
+        },
+        "collation": {
+            "value": "utf8_general_ci"
+        },
+        "edition": {
+            "value": "Web"
+        }
+    }
+}

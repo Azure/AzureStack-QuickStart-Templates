@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "MySql Adapter create database",
+  "description": "This template creates a new MySql database of the specified size and SKU",
+  "summary": "Creates a new MySql database of the specified size and SKU",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2017-05-16"
+}
