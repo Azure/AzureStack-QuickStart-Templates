@@ -5,9 +5,6 @@
     "vmsuffix": {
       "value": "myVM"
     },
-    "windowsOSVersion": {
-      "value": "2012-R2-Datacenter"
-    },
     "DiagnosticResourceGroup": {
       "value": "DiagRg"
     }

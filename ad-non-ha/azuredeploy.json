@@ -27,6 +27,7 @@
     "variables": {
         "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
         "adVMSize": "Standard_A1",
+        "adOSVersion": "2016-Datacenter",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
         "primaryAdIpAddress": "10.0.0.4",
@@ -195,6 +196,9 @@
                     },
                     "storageAccountType": {
                         "value": "[variables('storageAccountType')]"
+                    },
+                    "windowsImageSKU": {
+                        "value": "[variables('adOSVersion')]"
                     },
                     "vmName": {
                         "value": "[variables('adPDCVMName')]"
