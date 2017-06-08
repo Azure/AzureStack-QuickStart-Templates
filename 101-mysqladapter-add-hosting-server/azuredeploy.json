@@ -1,34 +1,34 @@
 {
-    $schema: "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    contentVersion: "1.0.0.0",
-    parameters: {
-        name: {
-            type: "string"
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
         },
-        username: {
-            type: "string"
+        "username": {
+            "type": "string"
         },
-        password: {
-            type: "secureString"
+        "password": {
+            "type": "secureString"
         },
-        totalSpaceMB: {
-            type: "int"
+        "totalSpaceMB": {
+            "type": "int"
         },
-        location: {
-            type: "string"
+        "location": {
+            "type": "string"
         }
     },
-    resources: [
+    "resources": [
         {
-            apiVersion: "2017-02-15-preview",
-            type: "Microsoft.MySqlAdapter.Admin/hostingServers",
-            name: "[parameters('name')]",
-            location: "[parameters('location')]",
-            properties: {
-                name: "[parameters('name')]",
-                username: "[parameters('username')]",
-                password: "[parameters('password')]",
-                totalSpaceMB: "[parameters('totalSpaceMB')]"
+            "apiVersion": "2017-02-15-preview",
+            "type": "Microsoft.MySqlAdapter.Admin/hostingServers",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "name": "[parameters('name')]",
+                "username": "[parameters('username')]",
+                "password": "[parameters('password')]",
+                "totalSpaceMB": "[parameters('totalSpaceMB')]"
             }
         }
     ]
