@@ -39,7 +39,7 @@
         }
     },
     "variables": {
-        "sqlassetLocation": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
+        "sqlassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
         "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
         "location": "[resourceGroup().location]",
         "sqlServerServiceAccountPassword": "[parameters('adminPassword')]",
