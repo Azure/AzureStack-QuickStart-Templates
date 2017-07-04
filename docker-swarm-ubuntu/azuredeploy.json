@@ -114,7 +114,7 @@
         },
         "windowsJumpboxSku": {
             "type": "string",
-            "defaultValue": "2012-R2-Datacenter",
+            "defaultValue": "2016-Datacenter",
             "metadata": {
                 "description": "This is the windows sku used by the windows jumpbox"
             }
@@ -240,7 +240,7 @@
         "agentStorageAccountName": "[concat(variables('storageAccountBaseName'),'agent', variables('nameSuffix'))]",
         "jumpboxNSGName": "[concat(variables('orchestratorName'), '-jumpbox-nsg-', variables('nameSuffix'))]",
         "jumpboxNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('jumpboxNSGName'))]",
-        "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('adminUsername'),' ',' ', ' ', variables('baseSubnet'))]",        
+        "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddr'), ' ',variables('adminUsername'), ' ','disabled', ' ', variables('baseSubnet'))]",        
         "jumpboxAddr": 4,
         "jumpboxVMName": "[concat('jumpboxVM-', variables('nameSuffix'))]",
         "jumpboxVMSize": "Standard_A1",
