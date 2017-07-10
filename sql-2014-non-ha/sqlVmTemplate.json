@@ -21,7 +21,7 @@
             "metadata": {
                 "description": "The SKU Name of Windows Image"
             },
-            "defaultValue": "2012-R2-Datacenter"
+            "defaultValue": "2016-Datacenter"
         },
         "windowsImageVersion": {
             "type": "string",
@@ -54,7 +54,7 @@
             "metadata": {
                 "description": "The type of the Storage Account created"
             },
-            "defaultValue": "Standard_LRS" 
+            "defaultValue": "Standard_LRS"
         },
         "adminUsername": {
             "type": "string",

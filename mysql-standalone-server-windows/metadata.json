@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "Template that installs MySql server on a Windows Server VM on Azure Stack",
+    "description": "Template that installs MySql server on a Windows Server VM on Azure Stack",
+    "summary": "This template deploys Windows Server, install given MySql server and configures it",
+    "githubUsername": "azurestack",
+    "dateUpdated": "2017-06-08"
+}
