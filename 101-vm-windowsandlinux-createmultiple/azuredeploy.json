@@ -46,7 +46,7 @@
             "Standard_D14"
           ]
         },
-		"windowsVMName": {
+        "windowsVMName": {
             "type": "string",
             "defaultValue": "WindowsVM",
             "minLength": 1
@@ -89,7 +89,7 @@
             }
         }
     },
-	"variables": {
+    "variables": {
         "windowsImagePublisher": "MicrosoftWindowsServer",
         "windowsImageOffer": "WindowsServer",
         "windowsOSDiskName": "windowsOSDisk",

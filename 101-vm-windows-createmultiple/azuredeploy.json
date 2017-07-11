@@ -69,7 +69,7 @@
           ]
         }
     },
-	"variables": {
+    "variables": {
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "osDiskName": "osDisk",
