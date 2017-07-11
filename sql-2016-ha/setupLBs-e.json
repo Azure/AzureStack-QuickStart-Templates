@@ -42,7 +42,7 @@
             {
                 "name": "[variables('publicIPAddressName')]",
                 "type": "Microsoft.Network/publicIPAddresses",
-                "location": "[variables('location')]",
+                "location": "[parameters('location')]",
                 "apiVersion": "2015-05-01-preview",
                 "properties": {
                     "publicIPAllocationMethod": "Dynamic",
