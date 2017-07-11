@@ -30,13 +30,6 @@
             },
             "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
         },
-        "dnsNameForPublicIP": {
-            "type": "string",
-            "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-            },
-            "defaultValue": "[replace(replace(tolower(concat('dns',resourceGroup().name)), '-', ''), '.','')]"
-        },
         "windowsOSVersion": {
             "type": "string",
             "defaultValue": "2016-Datacenter",
