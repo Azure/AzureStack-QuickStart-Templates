@@ -564,6 +564,9 @@
                     "dcStorageAccountName": {
                         "value": "[variables('dcStorageAccountName')]"
                     },
+                    "sqlStorageAccountName": {
+                        "value": "[parameters('sqlStorageAccountName')]"
+                    },
                     "location": {
                         "value": "[resourceGroup().location]"
                     },

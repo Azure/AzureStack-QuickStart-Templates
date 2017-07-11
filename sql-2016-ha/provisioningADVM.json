@@ -1,55 +1,59 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-    "adPDCVMName": {
-      "type": "string"
+    "parameters": {
+        "adPDCVMName": {
+            "type": "string"
+        },
+        "adAvailabilitySetName": {
+            "type": "string"
+        },
+        "adVMSize": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "adImagePublisher": {
+            "type": "string"
+        },
+        "adImageOffer": {
+            "type": "string"
+        },
+        "adImageSKU": {
+            "type": "string"
+        },
+        "adPDCNicName": {
+            "type": "string"
+        },
+        "adPDCConfigurationFunction": {
+            "type": "string"
+        },
+        "adPDCModulesURL": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "dcStorageAccountName": {
+            "type": "string"
+        },
+        "sqlStorageAccountName": {
+            "type": "string"
+        },
+        "vmContainerName": {
+            "type": "string"
+        },
+        "domainName": {
+            "type": "string"
+        }
     },
-    "adAvailabilitySetName": {
-      "type": "string"
-    },
-    "adVMSize": {
-      "type": "string"
-    },
-    "adminUsername": {
-      "type": "string"
-    },
-    "adminPassword": {
-      "type": "securestring"
-    },
-    "adImagePublisher": {
-      "type": "string"
-    },
-    "adImageOffer": {
-      "type": "string"
-    },
-    "adImageSKU": {
-      "type": "string"
-    },
-    "adPDCNicName": {
-      "type": "string"
-    },
-    "adPDCConfigurationFunction": {
-      "type": "string"
-    },
-    "adPDCModulesURL": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "dcStorageAccountName": {
-      "type": "string"
-    },
-    "vmContainerName": {
-      "type": "string"
-    },
-    "domainName": {
-      "type": "string"
-    }
-  },
     "variables": {
-        "dcstorageName": "[parameters('dcStorageAccountName')]"
+        "dcstorageName": "[parameters('dcStorageAccountName')]",
+        "diagstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]"
     },
   "resources": [
     {
