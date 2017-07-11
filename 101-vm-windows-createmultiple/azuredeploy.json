@@ -202,5 +202,5 @@
                 "accountType": "[parameters('storageAccountType')]"
             }
         }
-    ]    
+    ]
 }
