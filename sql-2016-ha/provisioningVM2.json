@@ -128,7 +128,7 @@
                         "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk1')]",
                         "caching": "ReadOnly",
                         "createOption": "empty",
-                        "diskSizeGB": 1000,
+                        "diskSizeGB": 128,
                         "lun": 0
                     },
                     {
@@ -138,7 +138,7 @@
                         "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk2')]",
                         "caching": "ReadOnly",
                         "createOption": "empty",
-                        "diskSizeGB": 1000,
+                        "diskSizeGB": 128,
                         "lun": 1
                     }
                 ]
