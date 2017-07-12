@@ -13,34 +13,53 @@
         },
         "maxSizeMB": {
             "type": "string",
-            "defaultValue": "2048"
+            "defaultValue": "100"
         },
         "collation": {
             "type": "string",
             "defaultValue": "utf8_general_ci"
         },
-        "edition": {
-            "type": "string",
-            "defaultValue": "Web"
+        "skuName": {
+            "type": "string"
         },
-        "location": {
+        "skuTier": {
+            "type": "string"
+        },	
+        "skuFamily": {
             "type": "string"
         }
     },
     "resources": [
         {
             "apiVersion": "2017-02-15-preview",
-            "location": "[parameters('location')]",
+            "type": "Microsoft.MySQLAdapter/logins",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('userName')]",
+            "properties": {
+                "userName": "[parameters('userName')]",
+                "password": "[parameters('password')]",
+                "skuName": "[parameters('skuName')]"
+                }
+            },
+        {
+            "apiVersion": "2017-02-15-preview",
+            "location": "[resourceGroup().location]",
             "name": "[parameters('databaseName')]",
+            "dependsOn": [
+            "[concat('Microsoft.MySQLAdapter/logins/', parameters('userName'))]"
+            ],
             "properties": {
                 "databaseName": "[parameters('databaseName')]",
-                "username": "[parameters('userName')]",
-                "password": "[parameters('password')]",
+                "loginUserName": "[parameters('userName')]",
                 "maxSizeMB": "[parameters('maxSizeMB')]",
-                "collation": "[parameters('collation')]",
-                "edition": "[parameters('edition')]"
+                "collation": "[parameters('collation')]"
             },
-            "type": "Microsoft.MySqlAdapter/databases"
+            "type": "Microsoft.MySqlAdapter/databases",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]",
+                "family": "[parameters('skuFamily')]"
+            }
         }
     ],
     "variables": {}

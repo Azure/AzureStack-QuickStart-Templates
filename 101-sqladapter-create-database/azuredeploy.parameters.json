@@ -9,7 +9,7 @@
             "value": "mynewdatabasesa"
         },
         "databaseLoginPassword": {
-            "value": ""
+            "value": "GEN-PASSWORD"
         },
         "collation": {
             "value": "SQL_Latin1_General_CP1_CI_AS"

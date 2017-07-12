@@ -1,18 +1,12 @@
 #!/bin/bash
 
 ###########################################################
-# Configure Mesos One Box
-#
-# This installs the following components
-# - zookeepr
-# - mesos master
-# - marathon
-# - mesos agent
+# Configure Docker Swarm Master and Agent(s)
 ###########################################################
 
 set -x
 
-echo "starting mesos cluster configuration"
+echo "starting Docker Swarm cluster configuration"
 date
 ps ax
 
@@ -275,4 +269,4 @@ fi
 echo "processes at end of script"
 ps ax
 date
-echo "completed mesos cluster configuration"
+echo "completed Docker Swarm cluster configuration"
