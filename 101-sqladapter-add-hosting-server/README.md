@@ -24,20 +24,14 @@ Click 'Create New' to create a new 'Resource Group'
 
 Click 'Create'
 
-Wait for results to appear in 'Storage Account' of a given 'Resource Group' parameter name resource
-
-
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fmaster%2Fsqladapter-hosting-server%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2FAzureStack-QuickStart-Templates%2Fmaster%2Fsqladapter-hosting-server%2Fazuredeploy.json" target="_blank">
-    <img src="http://armviz.io/visualizebutton.png"/>
-</a>
-
 
 <b>PARAMETERS</b>
 ```Poweshell
-Hosting Server Name: <SQL Server FQDN or IPv4[,Port] of an existing SQL server to be added as a SQL Adapter hosting server>
+Hosting Server Name: <SQL Server FQDN or IPv4 of an existing SQL server to be added as a SQL Adapter hosting server>
+
+Port: <Optional parameter for SQL Server Port, default is 1433>
+
+InstanceName: <Optional parameter for SQL Server Instance>
 
 Total Space MB: <The total space in MB to be allocated for creation of databases on the hosting server>
 

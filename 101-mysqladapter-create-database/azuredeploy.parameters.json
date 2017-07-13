@@ -12,13 +12,19 @@
             "value": ""
         },
         "maxSizeMB": {
-            "value": "2048"
+            "value": "100"
         },
         "collation": {
             "value": "utf8_general_ci"
         },
-        "edition": {
-            "value": "Web"
+        "skuName": {
+            "value": "MySQLSKU"
+        },
+        "skuTier": {
+            "value": "Standalone"
+        },
+        "skuFamily": {
+            "value": "Enterprise"
         }
     }
 }
