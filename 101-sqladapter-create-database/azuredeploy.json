@@ -55,37 +55,36 @@
         }
     },
     "resources": [
-        {
-            "type": "Microsoft.SQLAdapter/servers",
-            "name": "[parameters('databaseName')]",
-            "apiVersion": "2014-04-01-preview",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "administratorLogin": "[parameters('databaseLoginName')]",
-                "administratorLoginPassword": "[parameters('databaseLoginPassword')]",
-                "SkuName": "[parameters('skuName')]"
-            },
-            "resources": [
-                {
-                    "type": "databases",
-                    "sku": {
-                        "name": "[parameters('skuName')]",
-                        "tier": "[parameters('skuTier')]",
-                        "family": "[parameters('skuFamily')]"
-                    },
-                    "name": "[parameters('databaseName')]",
-                    "apiVersion": "2014-04-01-preview",
-                    "location": "[resourceGroup().location]",
-                    "properties": {
-                        "databaseName": "[parameters('databaseName')]",
-                        "collation": "[parameters('collation')]",
-                        "maxSize": "[parameters('databaseSizeMB')]"
-                    },
-                    "dependsOn": [
-                        "[concat('Microsoft.SQLAdapter/servers/', parameters('databaseName'))]"
-                    ]
-                }
-            ]
-        }
+    {
+      "apiVersion": "2017-02-15-preview",
+      "type": "Microsoft.SQLAdapter/logins",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('databaseLoginName')]",
+      "properties": {
+        "userName": "[parameters('databaseLoginName')]",
+        "password": "[parameters('databaseLoginPassword')]",
+        "skuName": "[parameters('skuName')]"
+      }
+    }, 
+    {
+        "apiVersion": "2017-02-15-preview",
+        "type": "Microsoft.SQLAdapter/databases",
+        "dependsOn": [
+          "[concat('Microsoft.SQLAdapter/logins/', parameters('databaseLoginName'))]"
+        ],
+        "location": "[resourceGroup().location]",
+        "name": "[parameters('databaseName')]",
+        "properties": {
+          "databaseName": "[parameters('databaseName')]",
+          "loginUserName": "[parameters('databaseLoginName')]",
+          "collation": "[parameters('collation')]",            
+          "maxSizeMb": "[parameters('databaseSizeMB')]"
+        },
+      "sku": {
+            "name": "[parameters('skuName')]",
+            "tier": "[parameters('skuTier')]",
+            "family": "[parameters('skuFamily')]"
+          }
+      }
     ]
 }

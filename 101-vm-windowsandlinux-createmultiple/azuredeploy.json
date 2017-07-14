@@ -1,0 +1,306 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "minLength": 1
+        },
+        "adminPassword": {
+          "type": "securestring",
+          "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]"
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Premium_LRS"
+            ]
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A1",
+          "allowedValues": [
+            "Basic_A0",
+            "Basic_A1",
+            "Basic_A2",
+            "Basic_A3",
+            "Basic_A4",
+            "Standard_A0",
+            "Standard_A1",
+            "Standard_A2",
+            "Standard_A3",
+            "Standard_A4",
+            "Standard_A5",
+            "Standard_A6",
+            "Standard_A7",
+            "Standard_D1",
+            "Standard_D2",
+            "Standard_D3",
+            "Standard_D4",
+            "Standard_D11",
+            "Standard_D12",
+            "Standard_D13",
+            "Standard_D14"
+          ]
+        },
+        "windowsVMName": {
+            "type": "string",
+            "defaultValue": "WindowsVM",
+            "minLength": 1
+        },
+        "windowsImageSku": {
+            "type": "string",
+            "defaultValue": "2016-Datacenter",
+            "allowedValues": [
+                "2008-R2-SP1",
+                "2012-Datacenter",
+                "2012-R2-Datacenter",
+                "2016-Datacenter"
+            ]
+        },
+        "windowsVMCount": {
+            "type": "int",
+            "defaultValue": 25,
+            "metadata": {
+                "description": "Number of Windows VMs to create."
+            }
+        },
+        "linuxVMName": {
+            "type": "string",
+            "defaultValue": "LinuxVM",
+            "minLength": 1
+        },
+        "linuxImageSku": {
+            "type": "string",
+            "defaultValue": "16.04-LTS",
+            "allowedValues": [
+                "14.04-LTS",
+                "16.04-LTS"
+            ]
+        },
+        "linuxVMCount": {
+            "type": "int",
+            "defaultValue": 25,
+            "metadata": {
+                "description": "Number of Linux VMs to create."
+            }
+        }
+    },
+    "variables": {
+        "windowsImagePublisher": "MicrosoftWindowsServer",
+        "windowsImageOffer": "WindowsServer",
+        "windowsOSDiskName": "windowsOSDisk",
+        "windowsVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'virtualnetwork')]",
+        "windowsSubnetRef": "[concat(variables('windowsVnetID'), '/subnets/', variables('virtualnetworkSubnet1Name'))]",
+        "windowsVMStorageAccountContainerName": "wvhds",
+        "windowsNicName": "[concat(parameters('windowsVMName'), 'NetworkInterface')]",
+        "virtualnetworkPrefix": "10.0.0.0/16",
+        "virtualnetworkSubnet1Name": "Subnet-1",
+        "virtualnetworkSubnet1Prefix": "10.0.0.0/24",
+        "virtualnetworkSubnet2Name": "Subnet-2",
+        "virtualnetworkSubnet2Prefix": "10.0.1.0/24",
+        "storageAccountName": "[concat('sa', uniqueString(resourceGroup().id))]",
+        "linuxImagePublisher": "Canonical",
+        "linuxImageOffer": "UbuntuServer",
+        "linuxOSDiskName": "linuxOSDisk",
+        "linuxVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'virtualnetwork')]",
+        "LinuxVMSubnetRef": "[concat(variables('linuxVnetID'), '/subnets/', variables('virtualnetworkSubnet1Name'))]",
+        "linuxVMStorageAccountContainerName": "lvhds",
+        "linuxNicName": "[concat(parameters('linuxVMName'), 'NetworkInterface')]"
+    },
+    "resources": [
+        {
+            "name": "[concat(variables('windowsNicName'),copyIndex())]",
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "windowsNicLoop",
+                "count": "[parameters('windowsVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/','virtualnetwork')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('windowsSubnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(parameters('windowsVMName'), copyIndex())]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "copy": {
+                "name": "windowsVmLoop",
+                "count": "[parameters('windowsVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('windowsNicName'), copyIndex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('windowsVMName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('windowsImagePublisher')]",
+                        "offer": "[variables('windowsImageOffer')]",
+                        "sku": "[parameters('windowsImageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "WindowsVMOSDisk",
+                      "vhd": {
+                        "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('windowsVMStorageAccountContainerName'),'/',concat(variables('windowsOSDiskName'),copyIndex()),'.vhd')]"
+                      },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('windowsNicName'),copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "virtualnetwork",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "virtualnetwork"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('virtualnetworkPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('virtualnetworkSubnet1Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualnetworkSubnet1Prefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('virtualnetworkSubnet2Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualnetworkSubnet2Prefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "sa"
+            },
+            "properties": {
+                "accountType": "[parameters('storageAccountType')]"
+            }
+        },
+        {
+            "name": "[concat(variables('linuxNicName'), copyIndex())]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "copy": {
+                "name": "linuxNicLoop",
+                "count": "[parameters('linuxVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', 'virtualnetwork')]"
+            ],            
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('LinuxVMSubnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(parameters('linuxVMName'), copyIndex())]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "copy": {
+                "name": "linuxVmLoop",
+                "count": "[parameters('linuxVMCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('linuxNicName'), copyIndex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('linuxVMName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('linuxImagePublisher')]",
+                        "offer": "[variables('linuxImageOffer')]",
+                        "sku": "[parameters('linuxImageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "LinuxVMOSDisk",
+                      "vhd": {
+                        "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('linuxVMStorageAccountContainerName'),'/',concat(variables('linuxOSDiskName'),copyIndex()),'.vhd')]"
+                      },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('linuxNicName'), copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

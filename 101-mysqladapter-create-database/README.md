@@ -23,8 +23,6 @@ Click 'Create New' to create a new 'Resource Group'
 
 Click 'Create'
 
-Wait for results to appear in 'Storage Account' of a given 'Resource Group' parameter name resource
-
 <b>PARAMETERS</b>
 ```Poweshell
 Database Name: <Name of the MySql database to be created>
@@ -37,4 +35,8 @@ Max Size MB: <Maximum Size in MB of the MySql database>
 
 Collation: <Collation of the new MySql database>
 
-Edition: <Edition of MySql Server>
+SKU Name: <Name of the requested database SKU>
+
+SKU Tier: <Tier of the requested database SKU>
+
+SKU Family: <Family of the requested database SKU>
