@@ -299,7 +299,7 @@
         "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkNameWithSuffix'))]",
         "staticSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
         "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
-        "dnsPrefix": "[tolower(concat(resourceGroup().name,'-dc'))]",
+        "dnsPrefix": "[tolower(concat(parameters('deploymentPrefix'),'-dns', resourceGroup().name))]",
         "publicIPAddressName": "[concat('SQLPIP',resourceGroup().name)]",
         "ids": {
             "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
@@ -461,7 +461,7 @@
         {
             "name": "[variables('publicIPAddressName')]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "apiVersion": "2015-05-01-preview",
             "dependsOn": [
                 "Microsoft.Resources/deployments/StorageAccountVirtualNetworkPublicIP"
@@ -479,8 +479,8 @@
             "apiVersion": "2015-01-01",
             "comments": "Create Load Balancers for SQL",
             "dependsOn": [
-                    "[variables('publicIPAddressID')]"
-                ],
+                "[variables('ids').publicIPAddressID]"
+            ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -907,7 +907,7 @@
                         "value": "[variables('lbSettings').sqlLBName]"
                     },
                     "sqlLBIPAddress": {
-                        "value": "[reference(variables('publicIPAddressID')).ipAddress]"
+                        "value": "[reference(variables('ids').publicIPAddressID).ipAddress]"
                     },
                     "adPDCVMName": {
                         "value": "[variables('vmSettings').adPDCVMName]"
