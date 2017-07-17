@@ -139,14 +139,14 @@
             "metadata": {
                 "description": "Linked Templates base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_disk/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_disk2/sql-2016-ha"
         },
         "scriptsBaseUrl": {
             "type": "string",
             "metadata": {
                 "description": "DSC Scripts base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_disk/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_disk2/sql-2016-ha"
         },
         "autoPatchingDay": {
             "type": "string",
@@ -299,10 +299,13 @@
         "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkNameWithSuffix'))]",
         "staticSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
         "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
+        "dnsPrefix": "[tolower(concat(resourceGroup().name,'-dc'))]",
+        "publicIPAddressName": "[concat('SQLPIP',resourceGroup().name)]",
         "ids": {
             "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
             "rdplbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').rdpLBName)]",
-            "sqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').sqlLBName)]"
+            "sqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').sqlLBName)]",
+            "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
         },
         "derivedIds": {
             "adIPConfigID": "[concat(variables('ids').adNicId,'/ipConfigurations/ipconfig1')]",
@@ -349,8 +352,8 @@
         "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "dcStorageAccountName":"[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
-        "dcStorageAccountType":"Standard_LRS",
+        "dcStorageAccountName": "[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
+        "dcStorageAccountType": "Standard_LRS",
         "configuration": {
             "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
             "nicTemplateURL": "[concat(parameters('templatesBaseUrl'),'/nic.json')]",
@@ -456,13 +459,28 @@
             }
         },
         {
-            "name": "LoadBalancers",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
-            "comments": "Create Load Balancers for SQL and DC",
+            "name": "[variables('publicIPAddressName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "location": "[parameters('location')]",
+            "apiVersion": "2015-05-01-preview",
             "dependsOn": [
                 "Microsoft.Resources/deployments/StorageAccountVirtualNetworkPublicIP"
             ],
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsPrefix')]"
+                }
+            }
+        },
+        {
+            "name": "LoadBalancers",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "comments": "Create Load Balancers for SQL",
+            "dependsOn": [
+                    "[variables('publicIPAddressID')]"
+                ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -480,7 +498,7 @@
                         "value": "[variables('lbSettings').sqlLBFE]"
                     },
                     "sqlLBIPAddress": {
-                        "value": "[parameters('sqlLBIPAddress')]"
+                        "value": "[variables('ids').publicIPAddressID]"
                     },
                     "staticSubnetRef": {
                         "value": "[variables('sqlSubnetRef')]"
@@ -889,7 +907,7 @@
                         "value": "[variables('lbSettings').sqlLBName]"
                     },
                     "sqlLBIPAddress": {
-                        "value": "[parameters('sqlLBIPAddress')]"
+                        "value": "[reference(variables('publicIPAddressID')).ipAddress]"
                     },
                     "adPDCVMName": {
                         "value": "[variables('vmSettings').adPDCVMName]"

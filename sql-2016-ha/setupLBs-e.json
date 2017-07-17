@@ -33,80 +33,60 @@
             "type": "string"
         }
     },
-    "variables": {
-        "dnsPrefix": "[tolower(concat(resourceGroup().name,'-dc'))]",
-        "publicIPAddressName": "[concat('SQLPIP',resourceGroup().name)]",
-        "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-    },
-        "resources": [
-            {
-                "name": "[variables('publicIPAddressName')]",
-                "type": "Microsoft.Network/publicIPAddresses",
-                "location": "[parameters('location')]",
-                "apiVersion": "2015-05-01-preview",
-                "properties": {
-                    "publicIPAllocationMethod": "Dynamic",
-                    "dnsSettings": {
-                        "domainNameLabel": "[variables('dnsPrefix')]"
+    "resources": [
+        {
+            "apiVersion": "2015-06-15",
+            "name": "[parameters('sqlLBName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[parameters('location')]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[parameters('sqlLBFE')]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[parameters('sqlLBIPAddress')]"
+                            }
+                        }
                     }
-                }
-            },
-            {
-                "apiVersion": "2015-06-15",
-                "name": "[parameters('sqlLBName')]",
-                "type": "Microsoft.Network/loadBalancers",
-                "location": "[parameters('location')]",
-                "dependsOn": [
-                    "[variables('publicIPAddressID')]"
                 ],
-                "properties": {
-                    "frontendIPConfigurations": [
-                        {
-                            "name": "[parameters('sqlLBFE')]",
-                            "properties": {
-                                "publicIPAddress": {
-                                    "id": "[variables('publicIPAddressID')]"
-                                }
-                            }
+                "backendAddressPools": [
+                    {
+                        "name": "[parameters('sqlLBBE')]"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "SQLAlwaysOnEndPointListener",
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[parameters('sqlLBBEID')]"
+                            },
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('sqllbFEConfigID')]"
+                            },
+                            "probe": {
+                                "id": "[parameters('sqllbProbeID')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 1433,
+                            "backendPort": 1433,
+                            "enableFloatingIP": true
                         }
-                    ],
-                    "backendAddressPools": [
-                        {
-                            "name": "[parameters('sqlLBBE')]"
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "[parameters('SQLAOProbe')]",
+                        "properties": {
+                            "protocol": "tcp",
+                            "port": 59999,
+                            "intervalInSeconds": "5",
+                            "numberOfProbes": "2"
                         }
-                    ],
-                    "loadBalancingRules": [
-                        {
-                            "name": "SQLAlwaysOnEndPointListener",
-                            "properties": {
-                                "backendAddressPool": {
-                                    "id": "[parameters('sqlLBBEID')]"
-                                },
-                                "frontendIPConfiguration": {
-                                    "id": "[parameters('sqllbFEConfigID')]"
-                                },
-                                "probe": {
-                                    "id": "[parameters('sqllbProbeID')]"
-                                },
-                                "protocol": "tcp",
-                                "frontendPort": 1433,
-                                "backendPort": 1433,
-                                "enableFloatingIP": true
-                            }
-                        }
-                    ],
-                    "probes": [
-                        {
-                            "name": "[parameters('SQLAOProbe')]",
-                            "properties": {
-                                "protocol": "tcp",
-                                "port": 59999,
-                                "intervalInSeconds": "5",
-                                "numberOfProbes": "2"
-                            }
-                        }
-                    ]
-                }
+                    }
+                ]
             }
-        ]
-    }
+        }
+    ]
+}
