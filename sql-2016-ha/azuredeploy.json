@@ -467,7 +467,7 @@
                 "Microsoft.Resources/deployments/StorageAccountVirtualNetworkPublicIP"
             ],
             "properties": {
-                "publicIPAllocationMethod": "Dynamic",
+                "publicIPAllocationMethod": "Static",
                 "dnsSettings": {
                     "domainNameLabel": "[variables('dnsPrefix')]"
                 }
