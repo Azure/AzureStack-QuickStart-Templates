@@ -18,17 +18,19 @@
             "type": "string",
             "allowedValues": [
                 "Standard_A1",
+                "Standard_A2",
                 "Standard_A3"
             ],
             "metadata": {
                 "description": "The size of the AD VMs Created"
             },
-            "defaultValue": "Standard_A1"
+            "defaultValue": "Standard_A2"
         },
         "sqlVMSize": {
             "type": "string",
             "allowedValues": [
                 "Standard_A1",
+                "Standard_A2",
                 "Standard_A3"
             ],
             "metadata": {
@@ -40,6 +42,7 @@
             "type": "string",
             "allowedValues": [
                 "Standard_A1",
+                "Standard_A2",
                 "Standard_A3"
             ],
             "metadata": {
