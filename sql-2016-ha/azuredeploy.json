@@ -258,8 +258,7 @@
                 "sqlAvailabilitySetName": "sqlAvailabilitySet",
                 "adAvailabilitySetName": "adAvailabilitySet"
             },
-            "noOfSqlVMs": 2,
-            "numberOfSqlVMDisks": 2,
+            "numberOfSqlVMDisks": "2",
             "vmContainerName": "vhds",
             "adPDCVMName": "[substring(concat('priDC-', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
             "sqlVMName": "[substring(concat('sql-', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
@@ -267,10 +266,7 @@
             "windowsImagePublisher": "MicrosoftWindowsServer",
             "windowsImageOffer": "WindowsServer",
             "windowsImageSKU": "2016-Datacenter",
-            "sqlImagePublisher": "MicrosoftSQLServer",
-            "rdpPort": 3389,
-            "windowsDiskSize": 128,
-            "sqlDiskSize": 128
+            "sqlImagePublisher": "MicrosoftSQLServer"
         },
         "sqlAOEPName": "[concat(parameters('deploymentPrefix'),'-hadr')]",
         "sharePath": "[concat(parameters('deploymentPrefix'),'-fsw')]",
@@ -339,12 +335,12 @@
         "configuration": {
             "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
             "rdpIPAdressSetupURL": "[concat(parameters('templatesBaseUrl'),'/publicip-rdp.json')]",
-            "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs-','setupLBs-e.json')]",
+            "setupLBsUrl": "[concat(parameters('templatesBaseUrl'), '/setupLBs-e.json')]",
             "creatingADNICUrl": "[concat(parameters('templatesBaseUrl'),'/creatingADNIC.json')]",
             "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
             "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
             "provisioningADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningADVM','.json')]",
-            "provisioningSQLVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',variables('numberOfSqlVMDisks'),'.json')]",
+            "provisioningSQLVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',variables('vmSettings').numberOfSqlVMDisks,'.json')]",
             "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
             "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
             "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
@@ -816,7 +812,7 @@
                         "value": "[variables(parameters('autoPatchingDay'))]"
                     },
                     "numberOfDisks": {
-                        "value": "[variables('numberOfSqlVMDisks')]"
+                        "value": "[variables('vmSettings').numberOfSqlVMDisks]"
                     },
                     "workloadType": {
                         "value": "[parameters('workloadType')]"
@@ -896,7 +892,7 @@
                         "value": "[variables('vmSettings').sqlwVMName]"
                     },
                     "numberOfDisks": {
-                        "value": "[variables('numberOfSqlVMDisks')]"
+                        "value": "[variables('vmSettings').numberOfSqlVMDisks]"
                     },
                     "workloadType": {
                         "value": "[parameters('workloadType')]"
