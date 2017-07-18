@@ -113,13 +113,6 @@
             },
             "defaultValue": "10.0.0.4"
         },
-        "sqlLBIPAddress": {
-            "type": "string",
-            "metadata": {
-                "description": "The IP address of the new SQL Server Internal Load Balancer"
-            },
-            "defaultValue": "10.0.1.9"
-        },
         "deploymentPrefix": {
             "type": "string",
             "metadata": {
@@ -164,7 +157,7 @@
             "metadata": {
                 "description": "The day of a week for auto patching"
             },
-            "defaultValue": "Sunday"
+            "defaultValue": "Never"
         },
         "autoPatchingStartHour": {
             "type": "string",
@@ -223,19 +216,13 @@
         "sqlServerVersion": {
             "type": "string",
             "allowedValues": [
-                "SQL2016SP1-WS2016"
+                "SQL2016SP1-WS2016-ENT",
+                "SQL2016SP1-WS2016-DEV"
             ],
             "metadata": {
                 "description": "The Sql Server Version"
             },
-            "defaultValue": "SQL2016SP1-WS2016"
-        },
-        "numberOfSqlVMDisks": {
-            "type": "string",
-            "metadata": {
-                "description": "The Sql VM Disk Size"
-            },
-            "defaultValue": "2"
+            "defaultValue": "SQL2016SP1-WS2016-ENT"
         },
         "workloadType": {
             "type": "string",
@@ -246,13 +233,6 @@
                 "description": "The Sql VM work load type: GENERAL - general work load"
             },
             "defaultValue": "GENERAL"
-        },
-        "loadBalancersType": {
-            "type": "string",
-            "metadata": {
-                "description": "The Sql VM load balancer type"
-            },
-            "defaultValue": "e"
         }
     },
     "variables": {
@@ -279,6 +259,7 @@
                 "adAvailabilitySetName": "adAvailabilitySet"
             },
             "noOfSqlVMs": 2,
+            "numberOfSqlVMDisks": 2,
             "vmContainerName": "vhds",
             "adPDCVMName": "[substring(concat('priDC-', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
             "sqlVMName": "[substring(concat('sql-', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
@@ -316,7 +297,8 @@
             "sqllbFEConfigID": "[concat(variables('ids').sqllbID,'/frontendIPConfigurations/',variables('lbSettings').sqlLBFE)]",
             "sqllbProbeID": "[concat(variables('ids').sqllbID,'/probes/',variables('SQLAOProbe'))]"
         },
-        "SQL2016SP1-WS2016": "Enterprise",
+        "SQL2016SP1-WS2016-ENT": "Enterprise",
+        "SQL2016SP1-WS2016-DEV": "Developer",
         "Monday": true,
         "Tuesday": true,
         "Wednesday": true,
@@ -356,15 +338,13 @@
         "dcStorageAccountType": "Standard_LRS",
         "configuration": {
             "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
-            "nicTemplateURL": "[concat(parameters('templatesBaseUrl'),'/nic.json')]",
             "rdpIPAdressSetupURL": "[concat(parameters('templatesBaseUrl'),'/publicip-rdp.json')]",
-            "vnetSetupURL": "[concat(parameters('templatesBaseUrl'),'/vnet-new.json')]",
-            "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs-',parameters('loadBalancersType'),'.json')]",
+            "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs-','setupLBs-e.json')]",
             "creatingADNICUrl": "[concat(parameters('templatesBaseUrl'),'/creatingADNIC.json')]",
             "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
             "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
             "provisioningADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningADVM','.json')]",
-            "provisioningSQLVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',parameters('numberOfSqlVMDisks'),'.json')]",
+            "provisioningSQLVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',variables('numberOfSqlVMDisks'),'.json')]",
             "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
             "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
             "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
@@ -836,7 +816,7 @@
                         "value": "[variables(parameters('autoPatchingDay'))]"
                     },
                     "numberOfDisks": {
-                        "value": "[parameters('numberOfSqlVMDisks')]"
+                        "value": "[variables('numberOfSqlVMDisks')]"
                     },
                     "workloadType": {
                         "value": "[parameters('workloadType')]"
@@ -916,7 +896,7 @@
                         "value": "[variables('vmSettings').sqlwVMName]"
                     },
                     "numberOfDisks": {
-                        "value": "[parameters('numberOfSqlVMDisks')]"
+                        "value": "[variables('numberOfSqlVMDisks')]"
                     },
                     "workloadType": {
                         "value": "[parameters('workloadType')]"

@@ -62,13 +62,8 @@
         "sqlstorageName": "[parameters('sqlStorageAccountName')]",
         "fwstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
         "diagstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
-        "SQL2012SP2-WS2012R2-ENT": "SQL2012SP2-WS2012R2",
-        "SQL2012SP3-WS2012R2-ENT": "SQL2012SP3-WS2012R2",
-        "SQL2014-WS2012R2-ENT": "SQL2014-WS2012R2",
-        "SQL2014SP1-WS2012R2-ENT": "SQL2014SP1-WS2012R2",
-        "SQL2016-WS2012R2-ENT": "SQL2016-WS2012R2",
-        "SQL2016-WS2012R2-DEV": "SQL2016-WS2012R2",
-        "SQL2016SP1-WS2016": "SQL2016SP1-WS2016"
+        "SQL2016SP1-WS2016-ENT": "SQL2016SP1-WS2016",
+        "SQL2016SP1-WS2016-DEV": "SQL2016SP1-WS2016"
     },
   "resources": [
     {
