@@ -13,7 +13,8 @@ This template deploys two SQL Server 2016 SP1 Enterprise/ Developer instances in
 
 ## Notes
 
-The images used to create this deployment are
-	+ 	AD - Windows Server 2016 Image
-	+ 	SQL Server - SQL Server 2016 SP1 on Windows Server 2016 Image
-    + 	SQL IAAS Extension 1.2.18
+The images used to create this deployment are:
+
++	AD - Windows Server 2016 Image
++	SQL Server - SQL Server 2016 SP1 on Windows Server 2016 Image
++	SQL IAAS Extension 1.2.18
