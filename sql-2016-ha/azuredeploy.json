@@ -441,7 +441,7 @@
             "name": "[variables('publicIPAddressName')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "location": "[resourceGroup().location]",
-            "apiVersion": "2015-05-01-preview",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "Microsoft.Resources/deployments/StorageAccountVirtualNetworkPublicIP"
             ],
