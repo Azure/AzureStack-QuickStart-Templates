@@ -67,27 +67,27 @@
     },
   "resources": [
     {
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[parameters('sqlAvailabilitySetName')]",
-      "apiVersion": "2015-06-15",
-      "location": "[parameters('location')]",
-      "properties": {
-        "platformFaultDomainCount": "1",
-        "platformUpdateDomainCount": "1"
-      }
+        "type": "Microsoft.Compute/availabilitySets",
+        "name": "[parameters('sqlAvailabilitySetName')]",
+        "apiVersion": "2016-03-30",
+        "location": "[parameters('location')]",
+        "properties": {
+            "platformFaultDomainCount": "1",
+            "platformUpdateDomainCount": "1"
+        }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('sqlVMName'), copyindex())]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/availabilitySets/',parameters('sqlAvailabilitySetName'))]"
-      ],
-      "copy": {
-        "name": "sqlvirtualMachineLoop",
-        "count": 2
-      },
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[concat(parameters('sqlVMName'), copyindex())]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Compute/availabilitySets/',parameters('sqlAvailabilitySetName'))]"
+        ],
+        "copy": {
+            "name": "sqlvirtualMachineLoop",
+            "count": 2
+        },
         "properties": {
             "hardwareProfile": {
                 "vmSize": "[parameters('sqlVMSize')]"
@@ -154,13 +154,13 @@
         }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('sqlwVMName')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/availabilitySets/',parameters('sqlAvailabilitySetName'))]"
-      ],
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('sqlwVMName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Compute/availabilitySets/',parameters('sqlAvailabilitySetName'))]"
+        ],
         "properties": {
             "hardwareProfile": {
                 "vmSize": "[parameters('witnessVMSize')]"
