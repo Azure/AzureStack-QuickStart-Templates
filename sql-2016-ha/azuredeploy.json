@@ -135,14 +135,14 @@
             "metadata": {
                 "description": "Linked Templates base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage_child/sql-2016-ha"
         },
         "scriptsBaseUrl": {
             "type": "string",
             "metadata": {
                 "description": "DSC Scripts base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/suantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage_child/sql-2016-ha"
         },
         "autoPatchingDay": {
             "type": "string",
@@ -214,7 +214,7 @@
             "metadata": {
                 "description": "The Sql AG Listener Name"
             },
-            "defaultValue": "alwayson-ag-listener"
+            "defaultValue": "[tolower(concat(parameters('aon-listener'),'-', resourceGroup().name))]"
         },
         "sqlServerVersion": {
             "type": "string",
@@ -279,7 +279,7 @@
         "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkNameWithSuffix'))]",
         "staticSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
         "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
-        "dnsPrefix": "[tolower(concat(parameters('deploymentPrefix'),'-dns', resourceGroup().name))]",
+        "dnsPrefix": "[parameters('sqlAOListenerName')]",
         "publicIPAddressName": "[concat('SQLPIP',resourceGroup().name)]",
         "ids": {
             "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
@@ -415,6 +415,9 @@
                     },
                     "primaryDCIPAddressNameWithSuffix": {
                         "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
+                    },
+                    "sqlVMName": {
+                        "value": "[variables('vmSettings').sqlVMName]"
                     },
                     "sql1AddressNameWithSuffix": {
                         "value": "[variables('sql1AddressNameWithSuffix')]"

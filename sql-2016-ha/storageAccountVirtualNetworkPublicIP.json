@@ -29,6 +29,9 @@
         "primaryDCIPAddressNameWithSuffix": {
             "type": "string"
         },
+        "sqlVMName": {
+            "type": "string"
+        },
         "sql1AddressNameWithSuffix": {
             "type": "string"
         },
@@ -95,7 +98,10 @@
             "name": "[parameters('sql1AddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
-                "publicIPAllocationMethod": "dynamic"
+                "publicIPAllocationMethod": "dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(parameters('sqlVMName'), '1')]"
+                }
             }
         },
         {
@@ -104,7 +110,10 @@
             "name": "[parameters('sql0AddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
-                "publicIPAllocationMethod": "dynamic"
+                "publicIPAllocationMethod": "dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(parameters('sqlVMName'), '0')]"
+                }
             }
         },
         {
