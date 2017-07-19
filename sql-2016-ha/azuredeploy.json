@@ -214,7 +214,7 @@
             "metadata": {
                 "description": "The Sql AG Listener Name"
             },
-            "defaultValue": "[tolower(concat(parameters('aon-listener'),'-', resourceGroup().name))]"
+            "defaultValue": "[tolower(concat('aon-listener-' , resourceGroup().name))]"
         },
         "sqlServerVersion": {
             "type": "string",
