@@ -55,10 +55,6 @@
     "osImageSku": {
       "type": "string",
       "defaultValue": "16.04-LTS",
-      "allowedValues": [
-        "14.04-LTS",
-        "16.04-LTS"
-      ],
       "metadata": {
         "description": "Maps to the sku in the Azure Stack Platform Image Repository."
       }
