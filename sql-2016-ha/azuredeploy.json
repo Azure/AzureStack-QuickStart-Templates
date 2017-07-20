@@ -135,14 +135,14 @@
             "metadata": {
                 "description": "Linked Templates base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage_publicfsw/sql-2016-ha"
         },
         "scriptsBaseUrl": {
             "type": "string",
             "metadata": {
                 "description": "DSC Scripts base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage_publicfsw/sql-2016-ha"
         },
         "autoPatchingDay": {
             "type": "string",
@@ -256,6 +256,7 @@
         "primaryDCIPAddressName": "primaryDCIP",
         "sql1AddressName": "sql1IP",
         "sql0AddressName": "sql0IP",
+        "fswAddressName": "fswIP",
         "vmSettings": {
             "availabilitySets": {
                 "sqlAvailabilitySetName": "sqlAvailabilitySet",
@@ -333,6 +334,7 @@
         "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
+        "fswAddressNameWithSuffix": "[substring(concat(variables('fswAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "dcStorageAccountName": "[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
         "dcStorageAccountType": "Standard_LRS",
         "configuration": {
@@ -419,11 +421,17 @@
                     "sqlVMName": {
                         "value": "[variables('vmSettings').sqlVMName]"
                     },
+                    "sqlwVMName": {
+                        "value": "[variables('vmSettings').sqlwVMName]"
+                    },
                     "sql1AddressNameWithSuffix": {
                         "value": "[variables('sql1AddressNameWithSuffix')]"
                     },
                     "sql0AddressNameWithSuffix": {
                         "value": "[variables('sql0AddressNameWithSuffix')]"
+                    },
+                    "fswAddressNameWithSuffix": {
+                        "value": "[variables('fswAddressNameWithSuffix')]"
                     },
                     "virtualNetworkName": {
                         "value": "[variables('virtualNetworkNameWithSuffix')]"
@@ -677,6 +685,9 @@
                     },
                     "sql0AddressNameWithSuffix": {
                         "value": "[variables('sql0AddressNameWithSuffix')]"
+                    },
+                    "fswAddressNameWithSuffix": {
+                        "value": "[variables('fswAddressNameWithSuffix')]"
                     }
                 }
             }
