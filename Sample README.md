@@ -14,7 +14,7 @@ This template deploys a **solution name**. The **solution name** is a **descript
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
 | Microsoft Azure      | - | no |
-| Microsoft Azure Stack      | TP1      |  no |
+| Microsoft Azure Stack      | - |  no |
 
 ## Solution overview and deployed resources
 

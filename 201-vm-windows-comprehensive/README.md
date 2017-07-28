@@ -14,7 +14,7 @@ This template deploys a [solution name]. The [solution name] is a [description]
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
 | Microsoft Azure      | - | no |
-| Microsoft Azure Stack      | TP1      |  no |
+| Microsoft Azure Stack      |       |  no |
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ You can either click the "deploy to Azure" button at the beginning of this docum
     $AadTenantId = "contoso"
 
 # Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
-# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Technical Preview.
+# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Development Kit.
     $AadTenant = Login-AzureRmAccount
     $AadTenantId = $AadTenant.Context.Tenant.TenantId
 

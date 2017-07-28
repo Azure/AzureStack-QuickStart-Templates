@@ -27,9 +27,9 @@ The contribution guide also explains how to ensure that your deployment template
 
 You can use all kind of template functions within your deployment template. You can find a description of these template functions here: https://azure.microsoft.com/en-us/documentation/articles/resource-group-template-functions/
 
-To ensure that the templates that you create will deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, you must be aware of a couple of limitations related to Azure Resource Manager in the Microsoft Azure Stack Development Kit. Some functions of Azure Resource Manager are not yet available in this Technical Preview release of Microsoft Azure Stack. 
+To ensure that the templates that you create will deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, you must be aware of a couple of limitations related to Azure Resource Manager in the Microsoft Azure Stack Development Kit. Some functions of Azure Resource Manager are not yet available in this  release of Microsoft Azure Stack. 
 
-The following template functions are not available in Microsoft Azure Stack Technical Preview yet.
+The following template functions are not available in Microsoft Azure Stack Development Kit yet.
 
  * skip
  * take

@@ -9,7 +9,7 @@ This template deploys a simple Linux VM such as ubuntu 14.04, ubuntu 15.10, sles
 
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
-| Microsoft Azure Stack      | TP2      |  yes|
+| Microsoft Azure Stack      | - |  yes|
 
 ## Prerequisites
 
