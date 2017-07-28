@@ -93,7 +93,7 @@
             "publisher":"Microsoft.Powershell",
             "type":"DSC",
             "typeHandlerVersion":"2.19",
-            "autoUpgradeMinorVersion":false,
+            "autoUpgradeMinorVersion":true,
             "settings":{  
                "modulesURL":"[parameters('fswModulesURL')]",
                "configurationFunction":"[parameters('fswConfigurationFunction')]",
