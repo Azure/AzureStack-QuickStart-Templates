@@ -57,6 +57,13 @@
             },
             "defaultValue": "contoso.local"
         },
+        "dnsSuffix": {
+            "type": "string",
+            "metadata": {
+                "description": "The DNS Suffix for reverse lookup of public IPAddresses "
+            },
+            "defaultValue": "azurestack.external"
+        },
         "sqlServerServiceAccountUserName": {
             "type": "string",
             "metadata": {
@@ -444,6 +451,9 @@
                     },
                     "nsgID": {
                         "value": "[variables('nsgID')]"
+                    },
+                    "dnsSuffix": {
+                        "value": "[parameters('dnsSuffix')]"
                     }
                 }
             }
@@ -459,7 +469,8 @@
             "properties": {
                 "publicIPAllocationMethod": "Static",
                 "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsPrefix')]"
+                    "domainNameLabel": "[variables('dnsPrefix')]",
+                    "reverseFqdn": "[concat(variables('dnsPrefix'), '.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"
                 }
             }
         },
