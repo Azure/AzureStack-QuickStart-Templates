@@ -5,7 +5,7 @@ This template will create a Remote Desktop Sesson Collection farm using the Powe
 +	One external load balancer
 +	One VM configured as RDS Connection Broker and Licensing Server role
 +	One VM configured as RDS Gateway and Web access Server role
-+	One (or more) VMs configured as RDSH host role. NOTE: Because HA is not supported on AzureStack TP2, please use only one VM or it will fail.
++	One (or more) VMs configured as RDSH host role. NOTE: Because HA is not supported on Azure Stack Development Kit, please use only one VM or it will fail.
 + 	The imageSKU is choice in parameter and rest of image configuration is defined in variables - but the scripts that configure this deployment have only been tested with windows server 2012 R2 data center image and may not work on other images.
 
 ## Deploying from Portal
@@ -37,11 +37,11 @@ Change working folder to the folder containing this template
 $AadTenantId = <Tenant Id> #GUID Specific to the AAD Tenant 
 
 Add-AzureRmEnvironment -Name 'Azure Stack' `
-    -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
-    -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/" `
-    -ResourceManagerEndpoint ("https://api.azurestack.local/") `
-    -GalleryEndpoint ("https://gallery.azurestack.local/") `
-    -GraphEndpoint "https://graph.windows.net/"
+ï¿½ï¿½ï¿½ -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
+ï¿½ï¿½ï¿½ -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/" `
+ï¿½ï¿½ï¿½ -ResourceManagerEndpoint ("https://api.azurestack.local/") `
+ï¿½ï¿½ï¿½ -GalleryEndpoint ("https://gallery.azurestack.local/") `
+ï¿½ï¿½ï¿½ -GraphEndpoint "https://graph.windows.net/"
 
 # Get Azure Stack Environment Information 
 $env = Get-AzureRmEnvironment 'Azure Stack' 
@@ -61,4 +61,4 @@ New-AzurermResourceGroup -Name $resourceGroupName -Location $location
 
 #Start new Deployment
 New-AzurermResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName `
-    -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json
+ï¿½ï¿½ï¿½ -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json

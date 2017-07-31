@@ -23,7 +23,7 @@ This template requires an existing Windows VM
     $AadTenantId = "contoso"
 
 # Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
-# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Technical Preview.
+# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Development Kit.
     $AadTenant = Login-AzureRmAccount
     $AadTenantId = $AadTenant.Context.Tenant.TenantId
 
