@@ -16,11 +16,25 @@
         "description": "Password for the Virtual Machine.Default value is 'Subscription#<subscription id>'"
       }
     },
-    "ubuntuOSVersion": {
+    "imagePublisher": {
+      "type": "string",
+      "defaultValue": "Canonical",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file Eg: Canonical, Suse, OpenLogic "
+      }
+    },
+    "imageOffer": {
+      "type": "string",
+      "defaultValue": "UbuntuServer",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file Eg: UbuntuServer, SlesServer, CentOS "
+      }
+    },
+    "imageSku": {
       "type": "string",
       "defaultValue": "16.04-LTS",
       "metadata": {
-        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Default value: 14.04.3-LTS"
+        "description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 16.04-LTS, 14.04.5-LTS."
       }
     },
     "_artifactsLocation": {
@@ -34,8 +48,6 @@
   "variables": {
     "dnsNameForPublicIP": "[concat('dns', resourceGroup().name)]",
     "location": "[resourceGroup().location]",
-    "imagePublisher": "Canonical",
-    "imageOffer": "UbuntuServer",
     "OSDiskName": "osdisk",
     "nicName": "myVnic",
     "addressPrefix": "10.0.0.0/24",
@@ -171,9 +183,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('ubuntuOSVersion')]",
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('imageSku')]",
             "version": "latest"
           },
           "osDisk": {
