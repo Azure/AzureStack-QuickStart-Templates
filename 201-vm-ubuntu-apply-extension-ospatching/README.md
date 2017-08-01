@@ -15,7 +15,7 @@ This template shows a simple example to deploy OSPatching Extension on an Linux 
 
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
-| Microsoft Azure Stack      | TP2      |  yes|
+| Microsoft Azure Stack      | - |  yes|
 | Microsoft Azure      |       |  yes|
 
 ## Prerequisites for Azure Stack
