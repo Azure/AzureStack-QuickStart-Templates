@@ -36,7 +36,7 @@ The following template functions are not available in Microsoft Azure Stack Deve
 
 ### API Versions for Resource Providers
 
-Each resource provider in Microsoft Azure has its own API version. Microsoft Azure Statck Development Kit supports the current API versions for the available resource providers, with some minor exceptions. To ensure your template will succesfully deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, use the latest API versions that are available in Microsoft Azure Stack Development Kit for all resources in your template. To retrieve a list of the available API versions connect to your Microsoft Azure Stack Development Kit environment by following the **Authenticate PowerShell with Microsoft Azure Stack** procedure described in this article.
+Each resource provider in Microsoft Azure has its own API version. Microsoft Azure Stack Development Kit supports the current API versions for the available resource providers, with some minor exceptions. To ensure your template will succesfully deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, use the latest API versions that are available in Microsoft Azure Stack Development Kit for all resources in your template. To retrieve a list of the available API versions connect to your Microsoft Azure Stack Development Kit environment by following the **Authenticate PowerShell with Microsoft Azure Stack** procedure described in this article.
 
 https://azure.microsoft.com/en-us/documentation/articles/azure-stack-deploy-template-powershell/
 
