@@ -77,6 +77,19 @@
                 "description": "The SQL Server Service Account password"
             }
         },
+        "sqlAuthUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "The SQL Server Auth Account name"
+            },
+            "defaultValue": "sqlsa"
+        },
+        "sqlAuthPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The SQL Server Auth Account password"
+            }
+        },
         "sqlStorageAccountName": {
             "type": "string",
             "metadata": {
@@ -814,6 +827,12 @@
                     },
                     "sqlServerServiceAccountPassword": {
                         "value": "[parameters('sqlServerServiceAccountPassword')]"
+                    },
+                    "sqlAuthUserName": {
+                        "value": "[parameters('sqlAuthUserName')]"
+                    },
+                    "sqlAuthPassword": {
+                        "value": "[parameters('sqlAuthPassword')]"
                     },
                     "sharePath": {
                         "value": "[variables('sharePath')]"
