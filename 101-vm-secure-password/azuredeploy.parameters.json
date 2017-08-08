@@ -3,7 +3,7 @@
     "contentVersion":  "1.0.0.0",
     "parameters":  {
                        "adminUsername":  {
-                                             "value":  "azurestackuser"
+                                             "value":  "azureuser"
                                          },
                        "adminPassword":  {
                                              "reference":  {
@@ -14,7 +14,7 @@
                                                            }
                                          },
                        "dnsLabelPrefix":  {
-                                              "value":  "mydns123456"
+                                              "value":  "mydns882017"
                                           },
                        "windowsOSVersion":  {
                                                 "value":  "2016-Datacenter"

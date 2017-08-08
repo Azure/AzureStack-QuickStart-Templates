@@ -11,11 +11,8 @@
                        "vmSize":  {
                                       "value":  "Standard_D1_v2"
                                   },
-                       "adminUserName":  {
-                                             "value":  "admin123456"
-                                         },
-                       "adminPassword":  {
-                                             "value":  "mypassword123!"
+                       "adminUsername":  {
+                                             "value":  "azureuser"
                                          },
                        "vaultName":  {
                                          "value":  "testkv001"

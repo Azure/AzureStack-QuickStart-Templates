@@ -52,7 +52,7 @@
         "description": "Resource Group of Key Vault that has a secret"
       }
     },
-    "secretUrlWithVersion": {
+    "secretUrl": {
       "type": "string",
       "metadata": {
         "description": "Url of the certificate in Key Vault"
@@ -67,9 +67,9 @@
     "subnet1Name": "Subnet-1",
     "virtualNetworkName": "certVNET",
     "addressPrefix": "10.0.0.0/16",
-    "imagePublisher": "MicrosoftWindowsServer",
-    "imageOffer": "WindowsServer",
-    "imageSKU": "2016-Datacenter",
+    "osImagePublisher": "MicrosoftWindowsServer",
+    "osImageOffer": "WindowsServer",
+    "osImageSKU": "2016-Datacenter",
     "publicIPName": "certPublicIP",
     "publicIPAddressType": "Dynamic"    
   },
@@ -163,7 +163,7 @@
               },
               "vaultCertificates": [
                 {
-                  "certificateUrl": "[parameters('secretUrlWithVersion')]",
+                  "certificateUrl": "[parameters('secretUrl')]",
                   "certificateStore": "My"
                 }
               ]
@@ -172,9 +172,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('imageSKU')]",
+            "publisher": "[variables('osImagePublisher')]",
+            "offer": "[variables('osImageOffer')]",
+            "sku": "[variables('osImageSKU')]",
             "version": "latest"
           },
           "osDisk": {
