@@ -20,6 +20,18 @@
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
     },
+    "osImageSku": {
+      "type": "string",
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter-Core",
+	      "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, 2016-Datacenter."
+      }
+    },
      "osImagePublisher": {
             "type": "string",
             "defaultValue": "MicrosoftWindowsServer",
@@ -33,20 +45,7 @@
             "metadata": {
                 "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
             }
-
-        },
-    "osImageSku": {
-      "type": "string",
-      "defaultValue": "2016-Datacenter",
-      "allowedValues": [
-        "2012-R2-Datacenter",
-        "2016-Datacenter-Core",
-	      "2016-Datacenter"
-      ],
-      "metadata": {
-        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, 2016-Datacenter."
-      }
-    }
+        }
   },
   "variables": {
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sawinvm')]",
@@ -157,7 +156,7 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "[variables('osImagePublisher')]",
-            "offer": "[variables('osImageOffer')]",
+            "offer": "[variables('osImageOfferosImageOffer')]",
             "sku": "[parameters('osImageSku')]",
             "version": "latest"
           },
