@@ -57,7 +57,21 @@
       "metadata": {
         "description": "Url of the certificate in Key Vault"
       }
-    }
+    },
+     "osImagePublisher": {
+            "type": "string",
+            "defaultValue": "MicrosoftWindowsServer",
+            "metadata": {
+                "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+            }
+        },
+        "osImageOffer": {
+            "type": "string",
+            "defaultValue": "WindowsServer",
+            "metadata": {
+                "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+            }
+        }
   },
   "variables": {
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
