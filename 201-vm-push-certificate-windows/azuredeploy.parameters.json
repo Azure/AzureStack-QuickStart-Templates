@@ -1,0 +1,30 @@
+{
+    "$schema":  "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion":  "1.0.0.0",
+    "parameters":  {
+                       "newStorageAccountName":  {
+                                                     "value":  "teststg0002kv"
+                                                 },
+                       "vmName":  {
+                                      "value":  "testkvvm0002"
+                                  },
+                       "vmSize":  {
+                                      "value":  "Standard_D1_v2"
+                                  },
+                       "adminUserName":  {
+                                             "value":  "admin123456"
+                                         },
+                       "adminPassword":  {
+                                             "value":  "mypassword123!"
+                                         },
+                       "vaultName":  {
+                                         "value":  "testkv001"
+                                     },
+                       "vaultResourceGroup":  {
+                                                  "value":  "testkv0001rg"
+                                              },
+                       "secretUrlWithVersion":  {
+                                                    "value":  "https://testkv001.vault.local.azurestack.external:443/secrets/testcert002/82afeeb84f4442329ce06593502e7840"
+                                                }
+                   }
+}
