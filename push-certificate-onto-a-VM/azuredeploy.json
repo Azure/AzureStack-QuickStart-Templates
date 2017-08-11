@@ -58,6 +58,18 @@
         "description": "Url of the certificate in Key Vault"
       }
     },
+    "osImageSku": {
+      "type": "string",
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter-Core",
+	      "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, 2016-Datacenter."
+      }
+    },
      "osImagePublisher": {
             "type": "string",
             "defaultValue": "MicrosoftWindowsServer",
@@ -81,7 +93,6 @@
     "subnet1Name": "Subnet-1",
     "virtualNetworkName": "certVNET",
     "addressPrefix": "10.0.0.0/16",
-    "osImageSKU": "2016-Datacenter",
     "publicIPName": "certPublicIP",
     "publicIPAddressType": "Dynamic"    
   },
@@ -186,7 +197,7 @@
           "imageReference": {
             "publisher": "[parameters('osImagePublisher')]",
             "offer": "[parameters('osImageOffer')]",
-            "sku": "[variables('osImageSKU')]",
+            "sku": "[parameters('osImageSKU')]",
             "version": "latest"
           },
           "osDisk": {
