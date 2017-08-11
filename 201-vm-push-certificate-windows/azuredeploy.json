@@ -81,8 +81,6 @@
     "subnet1Name": "Subnet-1",
     "virtualNetworkName": "certVNET",
     "addressPrefix": "10.0.0.0/16",
-    "osImagePublisher": "MicrosoftWindowsServer",
-    "osImageOffer": "WindowsServer",
     "osImageSKU": "2016-Datacenter",
     "publicIPName": "certPublicIP",
     "publicIPAddressType": "Dynamic"    
@@ -186,7 +184,7 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('osImagePublisher')]",
+            "publisher": "[parameters('osImagePublisher')]",
             "offer": "[variables('osImageOffer')]",
             "sku": "[variables('osImageSKU')]",
             "version": "latest"
