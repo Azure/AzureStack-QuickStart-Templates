@@ -185,7 +185,7 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "[parameters('osImagePublisher')]",
-            "offer": "[variables('osImageOffer')]",
+            "offer": "[parameters('osImageOffer')]",
             "sku": "[variables('osImageSKU')]",
             "version": "latest"
           },
