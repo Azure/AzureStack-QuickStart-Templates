@@ -49,8 +49,6 @@
   },
   "variables": {
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sawinvm')]",
-    "osImagePublisher": "MicrosoftWindowsServer",
-    "osImageOffer": "WindowsServer",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
@@ -58,13 +56,11 @@
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
-    "vmStorageAccountContainerName": "vhds",
     "vmName": "SimpleWindowsVM",
     "vmSize": "Standard_A1",
     "virtualNetworkName": "MyVNET",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "apiVersion": "2015-06-15"
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
   },
   "resources": [
     {
@@ -155,8 +151,8 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('osImagePublisher')]",
-            "offer": "[variables('osImageOfferosImageOffer')]",
+            "publisher": "[parameters('osImagePublisher')]",
+            "offer": "[parameters('osImageOffer')]",
             "sku": "[parameters('osImageSku')]",
             "version": "latest"
           },
