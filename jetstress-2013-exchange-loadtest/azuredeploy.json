@@ -111,7 +111,7 @@
     "modulesJetstress": "JetstressWorkload.zip",
     "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
     "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
-    "ExchangeInstallerDriveLetter": "J",
+    "ExchangeInstallerDriveLetter": "J:",
     "nsgName": "[tolower(concat('ng', resourceGroup().name))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "exchangeInstallerPath": "InstallerExchange",
