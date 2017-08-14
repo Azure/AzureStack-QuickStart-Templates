@@ -66,16 +66,18 @@ function DownloadISO {
 		$drive = Get-WmiObject -Class win32_volume -Filter "DriveLetter = '$($driveLetter):'"
 		Set-WmiInstance -input $drive -Arguments @{DriveLetter="J:"}
 		"$(timestamp) Successfully set the mounted ISO image drive letter to J" | Tee-Object -FilePath $logFilePath -Append
-		<#
+		
         "$(timestamp) Copy files to destination directory: $destination" | Tee-Object -FilePath $logFilePath -Append
-        Robocopy.exe ("{0}:" -f $driveLetter) $destination /E | Out-Null
+		#Robocopy.exe ("{0}:" -f $driveLetter) $destination /E | Out-Null
+		Robocopy.exe J:\Setup\ServerRoles\Common\perf\amd64 $destination eseperf*
+		Robocopy.exe J:\Setup\ServerRoles\Common $destination ese.dll
     
         "$(timestamp) Dismount the image from $destinationFile" | Tee-Object -FilePath $logFilePath -Append
         Dismount-DiskImage -ImagePath $destinationFile
     
         "$(timestamp) Delete the temp file: $destinationFile" | Tee-Object -FilePath $logFilePath -Append
 		Remove-Item -Path $destinationFile -Force
-		#>
+		
     }
     else
     {
