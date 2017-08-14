@@ -6,7 +6,8 @@
       "type": "string",
       "metadata": {
         "description": "Name of the storage account"
-      }
+      },
+      "defaultValue": "[substring(concat('vm',uniquestring(replace(resourceGroup().Id,'-',''))),0,8)]"
     },
     "storageAccountType": {
       "type": "string",
@@ -19,11 +20,12 @@
       "type": "string",
       "metadata": {
         "description": "Name of the VM"
-      }
+      },
+      "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_D2",
+      "defaultValue": "Standard_D1_v2",
       "metadata": {
         "description": "Size of the VM"
       }
@@ -32,7 +34,8 @@
       "type": "string",
       "metadata": {
         "description": "Admin Username"
-      }
+      },
+      "defaultValue": "vmadmin1"
     },
     "adminPassword": {
       "type": "securestring",
@@ -44,19 +47,22 @@
       "type": "string",
       "metadata": {
         "description": "Name of Key Vault that has a secret"
-      }
+      },
+      "defaultValue": "testkv001"
     },
     "vaultResourceGroup": {
       "type": "string",
       "metadata": {
         "description": "Resource Group of Key Vault that has a secret"
-      }
+      },
+      "defaultValue": "testkv0001rg"
     },
     "secretUrl": {
       "type": "string",
       "metadata": {
         "description": "Url of the certificate in Key Vault"
-      }
+      }, 
+      "defaultValue": "https://testkv001.vault.local.azurestack.external:443/secrets/testcert002/xxxx"
     },
     "osImageSku": {
       "type": "string",

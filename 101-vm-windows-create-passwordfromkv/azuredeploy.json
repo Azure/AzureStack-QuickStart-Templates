@@ -5,20 +5,23 @@
     "adminUsername": {
       "type": "string",
       "metadata": {
-        "description": "User name for the Virtual Machine."
-      }
+        "description": "Username for the Virtual Machine."
+      },
+      "defaultValue": "vmadmin1"
     },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the Virtual Machine."
-      }
+      },
+      "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
     },
     "dnsLabelPrefix": {
       "type": "string",
       "metadata": {
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-      }
+      },
+      "defaultValue": "mydns882017"
     },
     "osImageSku": {
       "type": "string",

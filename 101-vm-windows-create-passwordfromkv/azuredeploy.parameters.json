@@ -3,7 +3,7 @@
     "contentVersion":  "1.0.0.0",
     "parameters":  {
                        "adminUsername":  {
-                                             "value":  "azureuser"
+                                             "value":  "vmadmin1"
                                          },
                        "adminPassword":  {
                                              "reference":  {

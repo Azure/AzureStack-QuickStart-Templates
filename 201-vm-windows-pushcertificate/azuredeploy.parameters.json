@@ -3,16 +3,16 @@
     "contentVersion":  "1.0.0.0",
     "parameters":  {
                        "newStorageAccountName":  {
-                                                     "value":  "teststg0002kv"
+                                                     "value":  "[substring(concat('vm',uniquestring(replace(resourceGroup().Id,'-',''))),0,8)]"
                                                  },
                        "vmName":  {
-                                      "value":  "testkvvm0002"
+                                      "value":  "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
                                   },
                        "vmSize":  {
                                       "value":  "Standard_D1_v2"
                                   },
                        "adminUsername":  {
-                                             "value":  "azureuser"
+                                             "value":  "vmadmin1"
                                          },
                        "vaultName":  {
                                          "value":  "testkv001"
@@ -20,8 +20,8 @@
                        "vaultResourceGroup":  {
                                                   "value":  "testkv0001rg"
                                               },
-                       "secretUrlWithVersion":  {
-                                                    "value":  "https://testkv001.vault.local.azurestack.external:443/secrets/testcert002/82afeeb84f4442329ce06593502e7840"
+                       "secretUrl":  {
+                                                    "value":  "https://testkv001.vault.local.azurestack.external:443/secrets/testcert002/xxxx"
                                                 }
                    }
 }
