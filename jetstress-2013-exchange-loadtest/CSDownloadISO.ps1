@@ -69,8 +69,8 @@ function DownloadISO {
 		
         "$(timestamp) Copy files to destination directory: $destination" | Tee-Object -FilePath $logFilePath -Append
 		#Robocopy.exe ("{0}:" -f $driveLetter) $destination /E | Out-Null
-		Robocopy.exe J:\Setup\ServerRoles\Common\perf\amd64 $destination eseperf*
-		Robocopy.exe J:\Setup\ServerRoles\Common $destination ese.dll
+		Robocopy.exe J:\Setup\ServerRoles\Common\perf\amd64 "$destination\Setup\ServerRoles\Common\perf\amd64" eseperf*
+		Robocopy.exe J:\Setup\ServerRoles\Common "$destination\Setup\ServerRoles\Common" ese.dll
     
         "$(timestamp) Dismount the image from $destinationFile" | Tee-Object -FilePath $logFilePath -Append
         Dismount-DiskImage -ImagePath $destinationFile

@@ -111,7 +111,6 @@
     "modulesJetstress": "JetstressWorkload.zip",
     "modulesUrlJetstress": "[concat(variables('modulesPath'),variables('modulesJetstress'))]",
     "configurationFunctionJetstress": "JetstressWorkload.ps1\\InstallAndConfigureJetstress",
-    "ExchangeInstallerDriveLetter": "J:",
     "nsgName": "[tolower(concat('ng', resourceGroup().name))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "exchangeInstallerPath": "InstallerExchange",
@@ -326,8 +325,7 @@
             },
             "StorageAccountName": "[variables('uniqueStorageAccountName')]",
             "StorageAccountKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
-            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]",
-            "ExchangeInstallerDriveLetter": "[variables('ExchangeInstallerDriveLetter')]"
+            "StorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
           }
         },
         "protectedSettings": {
