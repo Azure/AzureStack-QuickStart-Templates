@@ -378,7 +378,10 @@
             "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
             "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
             "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
-            "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
+            "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster",
+            "grantShareAccessTemplateURL": "[concat(parameters('scriptsBaseUrl'),'/GrantFileShareAccess.json')]",
+            "grantShareAccessScriptName": "GrantFileShareAccess.ps1",
+            "grantShareAccessScripts": [ "[concat(parameters('scriptsBaseUrl'), '/', variables('grantShareAccessScriptName'))]"]
         }
     },
     "resources": [
@@ -943,6 +946,41 @@
                     },
                     "workloadType": {
                         "value": "[parameters('workloadType')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "GrantShareAccess",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/ConfiguringAlwaysOn"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('grantShareAccessTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[variables('vmSettings').sqlwVMName]"
+                    },
+                    "scriptFiles": {
+                        "value": "[variables('grantShareAccessScripts')]"
+                    },
+                    "scriptName": {
+                        "value": "[variables('grantShareAccessScriptName')]"
+                    },
+                    "domainName": {
+                        "value": "[parameters('domainName')]"
+                    },
+                    "shareName": {
+                        "value": "[variables('sharePath')]"
+                    },
+                    "accessAccountName": {
+                        "value": "[parameters('sqlServerServiceAccountUserName')]"
                     }
                 }
             }
