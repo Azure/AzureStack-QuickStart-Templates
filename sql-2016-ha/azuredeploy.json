@@ -381,7 +381,7 @@
             "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster",
             "grantShareAccessTemplateURL": "[concat(parameters('scriptsBaseUrl'),'/GrantFileShareAccess.json')]",
             "grantShareAccessScriptName": "GrantFileShareAccess.ps1",
-            "grantShareAccessScripts": [ "[concat(parameters('scriptsBaseUrl'), '/', variables('grantShareAccessScriptName'))]"]
+            "grantShareAccessScripts": [ "[concat(parameters('scriptsBaseUrl'), '/GrantFileShareAccess.ps1')]" ]
         }
     },
     "resources": [
@@ -960,7 +960,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[variables('grantShareAccessTemplateURL')]",
+                    "uri": "[variables('configuration').grantShareAccessTemplateURL]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -968,10 +968,10 @@
                         "value": "[variables('vmSettings').sqlwVMName]"
                     },
                     "scriptFiles": {
-                        "value": "[variables('grantShareAccessScripts')]"
+                        "value": "[variables('configuration').grantShareAccessScripts]"
                     },
                     "scriptName": {
-                        "value": "[variables('grantShareAccessScriptName')]"
+                        "value": "[variables('configuration').grantShareAccessScriptName]"
                     },
                     "domainName": {
                         "value": "[parameters('domainName')]"
