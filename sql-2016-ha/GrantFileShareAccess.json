@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing VM to apply the custom script to"
+            }
+        },
+        "scriptFiles": {
+            "type": "array",
+            "metadata": {
+                "description": "Full path of the script file to setup Azbet database."
+            }
+        },
+        "scriptName": {
+            "type": "string",
+            "metadata": {
+                "description": "Full name of the script file (with extension) to run in order to setup Azbet database."
+            }
+        },
+        "domainName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Domain."
+            }
+        },
+        "shareName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the file share."
+            }
+        },
+        "accessAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the account to grant access."
+            }
+        }
+    },
+    "variables": {
+        "domainNameParam": "[concat(' -DomainName ', parameters('domainName') )]",
+        "shareNameParam": "[concat(' -LocalShareName ', parameters('shareName') )]",
+        "accessAccountNameParam": "[concat(' -AccessAccountName ', parameters('accessAccountName') )]",
+        "commandParam": "[concat(variables('domainNameParam'), variables('shareNameParam'), variables('accessAccountNameParam'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmName'),'/CustomScriptExtension')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "fileUris": "[parameters('scriptFiles')]",
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',parameters('scriptName'), variables('commandParam'))]"
+                }
+            }
+        }
+    ],
+    "outputs": { }
+    }
