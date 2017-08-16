@@ -3,10 +3,10 @@
     "contentVersion":  "1.0.0.0",
     "parameters":  {
                        "newStorageAccountName":  {
-                                                     "value":  "[substring(concat('vm',uniquestring(replace(resourceGroup().Id,'-',''))),0,8)]"
+                                                     "value":  "mystorage"
                                                  },
                        "vmName":  {
-                                      "value":  "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
+                                      "value":  "myvm"
                                   },
                        "vmSize":  {
                                       "value":  "Standard_D1_v2"
@@ -21,7 +21,7 @@
                                                   "value":  "testkv0001rg"
                                               },
                        "secretUrl":  {
-                                                    "value":  "https://testkv001.vault.local.azurestack.external:443/secrets/testcert002/xxxx"
+                                                    "value":  "https://testkv001.vault.local.azurestack.external/secrets/testcert002/xxxx"
                                                 }
                    }
 }
