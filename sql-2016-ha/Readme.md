@@ -5,7 +5,7 @@ This template deploys two SQL Server 2016 SP1 Enterprise/ Developer instances in
 +	A network security group
 +	A Virtual Network
 +	Four Storage Accounts (One for AD, One for SQL, One for File Share witness and One for VM diagnostic)
-+ Five public IP address (One for AD, Two for each SQL VM, One for the file share witness and One for Public LB bound to SQL Always On Listener)
++ Four public IP address (One for AD, Two for each SQL VM and One for Public LB bound to SQL Always On Listener)
 +	One external load balancer for SQL VMs with Public IP bound to SQL always On Listener
 +	One VM (WS2016) configured as Domain Controller for a new forest with a single domain
 +	Two VM (WS2016) configured as SQL Server 2016 SP1 Enterprise/ Developer and clustered.
