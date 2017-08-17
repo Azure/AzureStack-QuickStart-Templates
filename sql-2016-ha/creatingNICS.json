@@ -25,9 +25,6 @@
         },
         "sql0AddressNameWithSuffix": {
             "type": "string"
-        },
-        "fswAddressNameWithSuffix": {
-            "type": "string"
         }
     },
     "resources": [
@@ -108,9 +105,6 @@
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[parameters('sqlSubnetRef')]"
-                            },
-                            "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('fswAddressNameWithSuffix'))]"
                             }
                         }
                     }

@@ -354,7 +354,6 @@
         "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "sql1AddressNameWithSuffix": "[substring(concat(variables('sql1AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "sql0AddressNameWithSuffix": "[substring(concat(variables('sql0AddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
-        "fswAddressNameWithSuffix": "[substring(concat(variables('fswAddressName'), uniqueString(parameters('sqlStorageAccountName'))),0,15)]",
         "dcStorageAccountName": "[concat(substring(concat(parameters('sqlStorageAccountName'), uniqueString(parameters('sqlStorageAccountName'))),0,18),'dc')]",
         "dcStorageAccountType": "Standard_LRS",
         "configuration": {
@@ -444,17 +443,11 @@
                     "sqlVMName": {
                         "value": "[variables('vmSettings').sqlVMName]"
                     },
-                    "sqlwVMName": {
-                        "value": "[variables('vmSettings').sqlwVMName]"
-                    },
                     "sql1AddressNameWithSuffix": {
                         "value": "[variables('sql1AddressNameWithSuffix')]"
                     },
                     "sql0AddressNameWithSuffix": {
                         "value": "[variables('sql0AddressNameWithSuffix')]"
-                    },
-                    "fswAddressNameWithSuffix": {
-                        "value": "[variables('fswAddressNameWithSuffix')]"
                     },
                     "virtualNetworkName": {
                         "value": "[variables('virtualNetworkNameWithSuffix')]"
@@ -712,9 +705,6 @@
                     },
                     "sql0AddressNameWithSuffix": {
                         "value": "[variables('sql0AddressNameWithSuffix')]"
-                    },
-                    "fswAddressNameWithSuffix": {
-                        "value": "[variables('fswAddressNameWithSuffix')]"
                     }
                 }
             }
