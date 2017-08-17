@@ -50,6 +50,19 @@
             },
             "defaultValue": "Standard_A1"
         },
+        "vmDiskSize": {
+            "type": "string",
+            "allowedValues": [
+                "128",
+                "256",
+                "512",
+                "1000"
+            ],
+            "metadata": {
+                "description": "The size of the VMs data disk in GB."
+            },
+            "defaultValue": "128"
+        },
         "domainName": {
             "type": "string",
             "metadata": {
@@ -746,6 +759,9 @@
                     },
                     "sqlVMSize": {
                         "value": "[parameters('sqlVMSize')]"
+                    },
+                    "vmDiskSize": {
+                        "value": "[parameters('vmDiskSize')]"
                     },
                     "fswImagePublisher": {
                         "value": "[variables('vmSettings').windowsImagePublisher]"
