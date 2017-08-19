@@ -1,63 +1,66 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-    "adminUsername": {
-      "type": "string"
+    "parameters": {
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "sqlVMName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "sqlStorageAccountName": {
+            "type": "string"
+        },
+        "sqlAvailabilitySetName": {
+            "type": "string"
+        },
+        "sqlVMSize": {
+            "type": "string"
+        },
+        "fswImagePublisher": {
+            "type": "string"
+        },
+        "fswImageOffer": {
+            "type": "string"
+        },
+        "fswImageSKU": {
+            "type": "string"
+        },
+        "vmContainerName": {
+            "type": "string"
+        },
+        "sqlImagePublisher": {
+            "type": "string"
+        },
+        "sqlImageOffer": {
+            "type": "string"
+        },
+        "sqlImageSKU": {
+            "type": "string"
+        },
+        "sqlImageVersion": {
+            "type": "string",
+            "defaultValue": "latest"
+        },
+        "vmDiskSize": {
+            "type": "string"
+        },
+        "witnessVMSize": {
+            "type": "string"
+        },
+        "sqlwVMName": {
+            "type": "string"
+        },
+        "sqlwNicName": {
+            "type": "string"
+        }
     },
-    "adminPassword": {
-      "type": "securestring"
-    },
-    "sqlVMName": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "sqlStorageAccountName": {
-      "type": "string"
-    },
-    "sqlAvailabilitySetName": {
-      "type": "string"
-    },
-    "sqlVMSize": {
-      "type": "string"
-    },
-    "fswImagePublisher": {
-      "type": "string"
-    },
-    "fswImageOffer": {
-      "type": "string"
-    },
-    "fswImageSKU": {
-      "type": "string"
-    },
-    "vmContainerName": {
-      "type": "string"
-    },
-    "sqlImagePublisher": {
-      "type": "string"
-    },
-    "sqlImageOffer": {
-      "type": "string"
-    },
-    "sqlImageSKU": {
-      "type": "string"
-    },
-    "sqlImageVersion": {
-      "type": "string",
-      "defaultValue": "latest"
-    },
-    "witnessVMSize": {
-      "type": "string"
-    },
-    "sqlwVMName": {
-      "type": "string"
-    },
-    "sqlwNicName": {
-      "type": "string"
-    }
-  },
     "variables": {
         "sqlstorageName": "[parameters('sqlStorageAccountName')]",
         "fwstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
@@ -123,7 +126,7 @@
                         "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk1')]",
                         "caching": "ReadOnly",
                         "createOption": "empty",
-                        "diskSizeGB": 128,
+                        "diskSizeGB": "[parameters('vmDiskSize')]",
                         "lun": 0
                     },
                     {
@@ -133,7 +136,7 @@
                         "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk2')]",
                         "caching": "ReadOnly",
                         "createOption": "empty",
-                        "diskSizeGB": 128,
+                        "diskSizeGB": "[parameters('vmDiskSize')]",
                         "lun": 1
                     }
                 ]
@@ -196,7 +199,7 @@
                         "name": "[concat(parameters('sqlwVMName'),'-data-disk1')]",
                         "caching": "None",
                         "createOption": "empty",
-                        "diskSizeGB": 128,
+                        "diskSizeGB": "[parameters('vmDiskSize')]",
                         "lun": 0
                     }
                 ]

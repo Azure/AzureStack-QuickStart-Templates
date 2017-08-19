@@ -1,68 +1,74 @@
 {  
    "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
    "contentVersion":"1.0.0.0",
-   "parameters":{  
-      "sqlVMName":{  
-         "type":"string"
-      },
-      "location":{  
-         "type":"string"
-      },
-      "adminUsername":{  
-         "type":"string"
-      },
-      "adminPassword":{  
-         "type":"securestring"
-      },
-      "domainName":{  
-         "type":"string"
-      },
-      "sqlAOPrepareModulesURL":{  
-         "type":"string"
-      },
-      "sqlAOPrepareConfigurationFunction":{  
-         "type":"string"
-      },
-      "sqlAOEPName":{  
-         "type":"string"
-      },
-      "sqlServerServiceAccountUserName":{  
-         "type":"string"
-      },
-      "sqlServerServiceAccountPassword":{  
-         "type":"securestring"
-      },
-      "sharePath":{  
-         "type":"string"
-      },
-      "adPDCVMName":{  
-         "type":"string"
-      },
-      "sqlwVMName":{  
-         "type":"string"
-      },
-      "fswModulesURL":{  
-         "type":"string"
-      },
-      "fswConfigurationFunction":{  
-         "type":"string"
-      },
-      "autoPatchingEnable":{  
-         "type":"bool"
-      },
-      "autoPatchingDay":{  
-         "type":"string"
-      },
-      "autoPatchingStartHour":{  
-         "type":"string"
-      },
-      "numberOfDisks":{  
-         "type":"string"
-      },
-      "workloadType":{  
-         "type":"string"
-      }
-   },
+    "parameters": {
+        "sqlVMName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "domainName": {
+            "type": "string"
+        },
+        "sqlAOPrepareModulesURL": {
+            "type": "string"
+        },
+        "sqlAOPrepareConfigurationFunction": {
+            "type": "string"
+        },
+        "sqlAOEPName": {
+            "type": "string"
+        },
+        "sqlServerServiceAccountUserName": {
+            "type": "string"
+        },
+        "sqlServerServiceAccountPassword": {
+            "type": "securestring"
+        },
+        "sqlAuthUserName": {
+            "type": "string"
+        },
+        "sqlAuthPassword": {
+            "type": "securestring"
+        },
+        "sharePath": {
+            "type": "string"
+        },
+        "adPDCVMName": {
+            "type": "string"
+        },
+        "sqlwVMName": {
+            "type": "string"
+        },
+        "fswModulesURL": {
+            "type": "string"
+        },
+        "fswConfigurationFunction": {
+            "type": "string"
+        },
+        "autoPatchingEnable": {
+            "type": "bool"
+        },
+        "autoPatchingDay": {
+            "type": "string"
+        },
+        "autoPatchingStartHour": {
+            "type": "string"
+        },
+        "numberOfDisks": {
+            "type": "string"
+        },
+        "workloadType": {
+            "type": "string"
+        }
+    },
    "variables":{  
       "Monday":"[mod(div(add(add(24,int(parameters('autoPatchingStartHour'))),2),24),7)]",
       "Tuesday":"[mod(div(add(add(48,int(parameters('autoPatchingStartHour'))),2),24),7)]",
@@ -93,7 +99,7 @@
             "publisher":"Microsoft.Powershell",
             "type":"DSC",
             "typeHandlerVersion":"2.19",
-            "autoUpgradeMinorVersion":false,
+            "autoUpgradeMinorVersion":true,
             "settings":{  
                "modulesURL":"[parameters('fswModulesURL')]",
                "configurationFunction":"[parameters('fswConfigurationFunction')]",
@@ -118,58 +124,66 @@
          "type":"Microsoft.Compute/virtualMachines/extensions",
          "name":"[concat(parameters('sqlVMName'),'0/SqlVmIaasExtension')]",
          "location":"[parameters('location')]",
-         "properties":{  
-            "type":"SqlIaaSAgent",
-            "publisher":"Microsoft.SqlServer.Management",
-            "typeHandlerVersion":"1.2",
-            "autoUpgradeMinorVersion":"true",
-            "settings":{  
-               "AutoTelemetrySettings":{  
-                  "Region":"[parameters('location')]"
-               },
-               "AutoPatchingSettings":{  
-                  "PatchCategory":"WindowsMandatoryUpdates",
-                  "Enable":"[parameters('autoPatchingEnable')]",
-                  "DayOfWeek":"[parameters('autoPatchingDay')]",
-                  "MaintenanceWindowStartingHour":"[int(parameters('autoPatchingStartHour'))]",
-                  "MaintenanceWindowDuration":"60"
-               },
-               "AutoBackupSettings":{  
-                  "Enable":false,
-                  "RetentionPeriod":"30",
-                  "EnableEncryption":false
-               }
+        "properties": {
+            "type": "SqlIaaSAgent",
+            "publisher": "Microsoft.SqlServer.Management",
+            "typeHandlerVersion": "1.2",
+            "autoUpgradeMinorVersion": "true",
+            "settings": {
+                "AutoTelemetrySettings": {
+                    "Region": "[parameters('location')]"
+                },
+                "AutoPatchingSettings": {
+                    "PatchCategory": "WindowsMandatoryUpdates",
+                    "Enable": "[parameters('autoPatchingEnable')]",
+                    "DayOfWeek": "[parameters('autoPatchingDay')]",
+                    "MaintenanceWindowStartingHour": "[int(parameters('autoPatchingStartHour'))]",
+                    "MaintenanceWindowDuration": "60"
+                },
+                "AutoBackupSettings": {
+                    "Enable": false,
+                    "RetentionPeriod": "30",
+                    "EnableEncryption": false
+                }
+            },
+            "protectedSettings": {
+                "SQLAuthUpdateUserName": "[parameters('sqlAuthUserName')]",
+                "SQLAuthUpdatePassword": "[parameters('sqlAuthPassword')]"
             }
-         }
+        }
       },
       {  
          "apiVersion":"2015-06-15",
          "type":"Microsoft.Compute/virtualMachines/extensions",
          "name":"[concat(parameters('sqlVMName'),'1/SqlVmIaasExtension')]",
          "location":"[parameters('location')]",
-         "properties":{  
-            "type":"SqlIaaSAgent",
-            "publisher":"Microsoft.SqlServer.Management",
-            "typeHandlerVersion":"1.2",
-            "autoUpgradeMinorVersion":"true",
-            "settings":{  
-               "AutoTelemetrySettings":{  
-                  "Region":"[parameters('location')]"
-               },
-               "AutoPatchingSettings":{  
-                  "PatchCategory":"WindowsMandatoryUpdates",
-                  "Enable":"[parameters('autoPatchingEnable')]",
-                  "DayOfWeek":"[variables(string(variables(parameters('autoPatchingDay'))))]",
-                  "MaintenanceWindowStartingHour":"[mod(add(int(parameters('autoPatchingStartHour')),2),24)]",
-                  "MaintenanceWindowDuration":"60"
-               },
-               "AutoBackupSettings":{  
-                  "Enable":false,
-                  "RetentionPeriod":"30",
-                  "EnableEncryption":false
-               }
+        "properties": {
+            "type": "SqlIaaSAgent",
+            "publisher": "Microsoft.SqlServer.Management",
+            "typeHandlerVersion": "1.2",
+            "autoUpgradeMinorVersion": "true",
+            "settings": {
+                "AutoTelemetrySettings": {
+                    "Region": "[parameters('location')]"
+                },
+                "AutoPatchingSettings": {
+                    "PatchCategory": "WindowsMandatoryUpdates",
+                    "Enable": "[parameters('autoPatchingEnable')]",
+                    "DayOfWeek": "[variables(string(variables(parameters('autoPatchingDay'))))]",
+                    "MaintenanceWindowStartingHour": "[mod(add(int(parameters('autoPatchingStartHour')),2),24)]",
+                    "MaintenanceWindowDuration": "60"
+                },
+                "AutoBackupSettings": {
+                    "Enable": false,
+                    "RetentionPeriod": "30",
+                    "EnableEncryption": false
+                }
+            },
+            "protectedSettings": {
+                "SQLAuthUpdateUserName": "[parameters('sqlAuthUserName')]",
+                "SQLAuthUpdatePassword": "[parameters('sqlAuthPassword')]"
             }
-         }
+        }
       },
       {  
          "type":"Microsoft.Compute/virtualMachines/extensions",
@@ -184,7 +198,7 @@
             "publisher":"Microsoft.Powershell",
             "type":"DSC",
             "typeHandlerVersion":"2.19",
-            "autoUpgradeMinorVersion":false,
+            "autoUpgradeMinorVersion":true,
             "settings":{  
                "modulesURL":"[parameters('sqlAOPrepareModulesURL')]",
                "configurationFunction":"[parameters('sqlAOPrepareConfigurationFunction')]",

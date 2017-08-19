@@ -40,6 +40,9 @@
         },
         "nsgID": {
             "type": "string"
+        },
+        "dnsSuffix": {
+            "type": "string"
         }
     },
     "resources": [
@@ -100,7 +103,8 @@
             "properties": {
                 "publicIPAllocationMethod": "dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(parameters('sqlVMName'), '1')]"
+                    "domainNameLabel": "[concat(parameters('sqlVMName'), '1')]",
+                    "reverseFqdn": "[concat(parameters('sqlVMName'), '1.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"
                 }
             }
         },
@@ -112,7 +116,8 @@
             "properties": {
                 "publicIPAllocationMethod": "dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(parameters('sqlVMName'), '0')]"
+                    "domainNameLabel": "[concat(parameters('sqlVMName'), '0')]",
+                    "reverseFqdn": "[concat(parameters('sqlVMName'), '0.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"
                 }
             }
         },
