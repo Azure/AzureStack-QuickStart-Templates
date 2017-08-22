@@ -18,6 +18,7 @@ The images used to create this deployment are:
 +	AD - Windows Server 2016 Image
 +	SQL Server - SQL Server 2016 SP1 on Windows Server 2016 Image
 +	SQL IAAS Extension 1.2.18
++	Latest DSC Extension (2.26.0 or higher)
 
 Each SQL VMs will have two 128GB data disks.
 
