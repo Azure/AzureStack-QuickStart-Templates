@@ -37,6 +37,13 @@
         "description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 16.04-LTS, 14.04.5-LTS."
       }
     },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "metadata": {
+        "description": "The size of the Virtual Machine."
+      }
+    },
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
@@ -59,7 +66,6 @@
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[concat('vm', resourceGroup().name)]",
-    "vmSize": "Standard_A1",
     "virtualNetworkName": "myVnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
@@ -174,7 +180,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
