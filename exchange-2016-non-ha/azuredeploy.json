@@ -11,7 +11,7 @@
         }
     },
     "variables": {
-	"exchangeVMCount": 1,    
+        "exchangeVMCount": 1,
         "imagePublisher": "MicrosoftWindowsServer",
         "imageOffer": "WindowsServer",
         "addressPrefix": "10.0.0.0/16",
@@ -31,7 +31,7 @@
         "vmName": "[concat('vm', resourceGroup().name)]",
         "vmOsDiskName": "[concat('od', resourceGroup().name)]",
         "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
-        "vmSize": "Standard_A2",
+        "vmSize": "Standard_D2",
         "vmDataDiskSize": "15",
         "vmNicName": "[tolower(concat('nc', resourceGroup().name))]",
         "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
@@ -45,7 +45,7 @@
         "configurationFunctionExchange": "ExchangeWorkload.ps1\\InstallAndConfigureExchange",
         "nsgName": "[tolower(concat('ng', resourceGroup().name))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-		"exchangeInstallerPath": "InstallerExchange",
+        "exchangeInstallerPath": "InstallerExchange",
         "exchangeISOUri": "https://download.microsoft.com/download/6/4/8/648EB83C-00F9-49B2-806D-E46033DA4AE6/ExchangeServer2016-CU1.iso",
         "modulesExchangeISODownload": "CSDownloadISO.ps1",
         "modulesUrlExchangeISODownload": "[concat(variables('modulesPath'),variables('modulesExchangeISODownload'))]"
