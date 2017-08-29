@@ -7,11 +7,11 @@
         },
 
         "imageOffer": {
-            "value": "SlesServer"
+            "value": "SLES-BYOS"
         },
 
         "imageSku": {
-            "value": "11.SP4"
+            "value": "11-SP4"
         }
     }
 }
