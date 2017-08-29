@@ -168,14 +168,14 @@
             "metadata": {
                 "description": "Linked Templates base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage2/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage2_github/sql-2016-ha"
         },
         "scriptsBaseUrl": {
             "type": "string",
             "metadata": {
                 "description": "DSC Scripts base url"
             },
-            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage2/sql-2016-ha"
+            "defaultValue": "https://raw.githubusercontent.com/sumantshiv/AzureStack-QuickStart-Templates/sqlImprov_stage2_github/sql-2016-ha"
         },
         "autoPatchingDay": {
             "type": "string",
@@ -390,10 +390,7 @@
             "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
             "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
             "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
-            "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster",
-            "grantShareAccessTemplateURL": "[concat(parameters('scriptsBaseUrl'),'/GrantFileShareAccess.json')]",
-            "grantShareAccessScriptName": "GrantFileShareAccess.ps1",
-            "grantShareAccessScripts": [ "[concat(parameters('scriptsBaseUrl'), '/GrantFileShareAccess.ps1')]" ]
+            "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
         }
     },
     "resources": [
@@ -952,41 +949,6 @@
                     },
                     "workloadType": {
                         "value": "[parameters('workloadType')]"
-                    }
-                }
-            }
-        },
-        {
-            "name": "GrantShareAccess",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
-            "dependsOn": [
-                "Microsoft.Resources/deployments/ConfiguringAlwaysOn"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('configuration').grantShareAccessTemplateURL]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "vmName": {
-                        "value": "[variables('vmSettings').sqlwVMName]"
-                    },
-                    "scriptFiles": {
-                        "value": "[variables('configuration').grantShareAccessScripts]"
-                    },
-                    "scriptName": {
-                        "value": "[variables('configuration').grantShareAccessScriptName]"
-                    },
-                    "domainName": {
-                        "value": "[parameters('domainName')]"
-                    },
-                    "shareName": {
-                        "value": "[variables('sharePath')]"
-                    },
-                    "accessAccountName": {
-                        "value": "[parameters('sqlServerServiceAccountUserName')]"
                     }
                 }
             }
