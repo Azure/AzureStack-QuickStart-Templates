@@ -19,7 +19,7 @@ NOTE: There is a 90 minutes Azure time-out which you can hit if large number of 
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
 | Microsoft Azure      | - | yes |
-| Microsoft Azure Stack      | TP2      |  yes |
+| Microsoft Azure Stack      | - |  yes |
 
 
 ## Deployed resources

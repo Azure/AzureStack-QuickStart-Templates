@@ -3,15 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "imagePublisher": {
-            "value": "Canonical"
+            "value": "SUSE"
         },
 
         "imageOffer": {
-            "value": "UbuntuServer"
+            "value": "SLES-BYOS"
         },
 
         "imageSku": {
-            "value": "16.04-LTS"
+            "value": "12-SP2"
         }
     }
 }

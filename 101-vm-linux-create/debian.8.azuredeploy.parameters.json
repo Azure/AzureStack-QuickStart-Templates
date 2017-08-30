@@ -3,15 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "imagePublisher": {
-            "value": "OpenLogic"
+            "value": "credativ"
         },
 
         "imageOffer": {
-            "value": "CentOS"
+            "value": "Debian"
         },
 
         "imageSku": {
-            "value": "7.2"
+            "value": "8"
         }
     }
 }

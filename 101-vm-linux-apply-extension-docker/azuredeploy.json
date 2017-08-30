@@ -21,7 +21,7 @@
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
         "type": "DockerExtension",
-        "typeHandlerVersion": "1.0",
+        "typeHandlerVersion": "1.2",
         "autoUpgradeMinorVersion": true,
         "settings": { },
         "protectedSettings": { }

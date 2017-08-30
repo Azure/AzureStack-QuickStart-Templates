@@ -3,15 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "imagePublisher": {
-            "value": "OpenLogic"
+            "value": "SUSE"
         },
 
         "imageOffer": {
-            "value": "CentOS"
+            "value": "SLES-BYOS"
         },
 
         "imageSku": {
-            "value": "6.7"
+            "value": "11-SP4"
         }
     }
 }

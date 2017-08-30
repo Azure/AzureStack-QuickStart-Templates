@@ -14,7 +14,7 @@ This template deploys Exchange 2016.
 | Endpoint        | Version           | Validated  |
 | ------------- |:-------------:| -----:|
 | Microsoft Azure      | - | YES |
-| Microsoft Azure Stack      | TP2      |  YES |
+| Microsoft Azure Stack      | - |  YES |
 
 ## Deployed resources
 
