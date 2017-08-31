@@ -36,6 +36,13 @@
       "metadata": {
         "description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 12.SP1, 6.7 , 7.2"
       }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "metadata": {
+        "description": "The size of the Virtual Machine."
+      }
     }
   },
   "variables": {
@@ -50,7 +57,6 @@
     "storageAccountType": "Standard_LRS",
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[substring(concat('simplelinuxvm',resourceGroup().Name),0,14)]",
-    "vmSize": "Standard_A1",
     "virtualNetworkName": "[tolower(concat('vnet',uniquestring(resourceGroup().id)))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
@@ -148,7 +154,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
