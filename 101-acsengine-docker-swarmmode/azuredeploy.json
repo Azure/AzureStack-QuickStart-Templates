@@ -105,7 +105,7 @@
         99,
         100
       ],
-      "defaultValue": 3,
+      "defaultValue": 2,
       "metadata": {
         "description": "The number of agents for the cluster.  This value can be from 1 to 100"
       },
@@ -155,17 +155,25 @@
         "Standard_D14_v2",
         "Standard_D14_v2_Promo",
         "Standard_D15_v2",
+        "Standard_D16_v3",
+        "Standard_D16s_v3",
         "Standard_D2",
         "Standard_D2_v2",
         "Standard_D2_v2_Promo",
+        "Standard_D2_v3",
+        "Standard_D2s_v3",
         "Standard_D3",
         "Standard_D3_v2",
         "Standard_D3_v2_Promo",
         "Standard_D4",
         "Standard_D4_v2",
         "Standard_D4_v2_Promo",
+        "Standard_D4_v3",
+        "Standard_D4s_v3",
         "Standard_D5_v2",
         "Standard_D5_v2_Promo",
+        "Standard_D8_v3",
+        "Standard_D8s_v3",
         "Standard_DS11",
         "Standard_DS11_v2",
         "Standard_DS11_v2_Promo",
@@ -190,6 +198,18 @@
         "Standard_DS4_v2_Promo",
         "Standard_DS5_v2",
         "Standard_DS5_v2_Promo",
+        "Standard_E16_v3",
+        "Standard_E16s_v3",
+        "Standard_E2_v3",
+        "Standard_E2s_v3",
+        "Standard_E32_v3",
+        "Standard_E32s_v3",
+        "Standard_E4_v3",
+        "Standard_E4s_v3",
+        "Standard_E64_v3",
+        "Standard_E64s_v3",
+        "Standard_E8_v3",
+        "Standard_E8s_v3",
         "Standard_F16",
         "Standard_F16s",
         "Standard_F2",
@@ -218,6 +238,8 @@
         "Standard_L32s",
         "Standard_L4s",
         "Standard_L8s",
+        "Standard_M128s",
+        "Standard_M64ms",
         "Standard_NC12",
         "Standard_NC24",
         "Standard_NC24r",
@@ -229,6 +251,20 @@
       "defaultValue": "Standard_D2_v2",
       "metadata": {
         "description": "The size of the Virtual Machine."
+      },
+      "type": "string"
+    },
+    "dockerComposeDownloadURL": {
+      "defaultValue": "https://github.com/docker/compose/releases/download",
+      "metadata": {
+        "description": "Docker compose download URL."
+      },
+      "type": "string"
+    },
+    "dockerEngineDownloadRepo": {
+      "defaultValue": "https://aptdocker.azureedge.net/repo",
+      "metadata": {
+        "description": "Docker engine download repo."
       },
       "type": "string"
     },
@@ -290,17 +326,25 @@
         "Standard_D14_v2",
         "Standard_D14_v2_Promo",
         "Standard_D15_v2",
+        "Standard_D16_v3",
+        "Standard_D16s_v3",
         "Standard_D2",
         "Standard_D2_v2",
         "Standard_D2_v2_Promo",
+        "Standard_D2_v3",
+        "Standard_D2s_v3",
         "Standard_D3",
         "Standard_D3_v2",
         "Standard_D3_v2_Promo",
         "Standard_D4",
         "Standard_D4_v2",
         "Standard_D4_v2_Promo",
+        "Standard_D4_v3",
+        "Standard_D4s_v3",
         "Standard_D5_v2",
         "Standard_D5_v2_Promo",
+        "Standard_D8_v3",
+        "Standard_D8s_v3",
         "Standard_DS11",
         "Standard_DS11_v2",
         "Standard_DS11_v2_Promo",
@@ -325,6 +369,18 @@
         "Standard_DS4_v2_Promo",
         "Standard_DS5_v2",
         "Standard_DS5_v2_Promo",
+        "Standard_E16_v3",
+        "Standard_E16s_v3",
+        "Standard_E2_v3",
+        "Standard_E2s_v3",
+        "Standard_E32_v3",
+        "Standard_E32s_v3",
+        "Standard_E4_v3",
+        "Standard_E4s_v3",
+        "Standard_E64_v3",
+        "Standard_E64s_v3",
+        "Standard_E8_v3",
+        "Standard_E8s_v3",
         "Standard_F16",
         "Standard_F16s",
         "Standard_F2",
@@ -353,6 +409,8 @@
         "Standard_L32s",
         "Standard_L4s",
         "Standard_L8s",
+        "Standard_M128s",
+        "Standard_M64ms",
         "Standard_NC12",
         "Standard_NC24",
         "Standard_NC24r",
@@ -361,8 +419,37 @@
         "Standard_NV24",
         "Standard_NV6"
       ],
+      "defaultValue": "Standard_D2_v2",
       "metadata": {
         "description": "The size of the Virtual Machine."
+      },
+      "type": "string"
+    },
+    "osImageOffer": {
+      "defaultValue": "UbuntuServer",
+      "metadata": {
+        "description": "Linux OS image type."
+      },
+      "type": "string"
+    },
+    "osImagePublisher": {
+      "defaultValue": "Canonical",
+      "metadata": {
+        "description": "OS image publisher."
+      },
+      "type": "string"
+    },
+    "osImageSKU": {
+      "defaultValue": "16.04-LTS",
+      "metadata": {
+        "description": "OS image SKU."
+      },
+      "type": "string"
+    },
+    "osImageVersion": {
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "OS image version."
       },
       "type": "string"
     },
@@ -371,28 +458,12 @@
         "description": "SSH public key used for auth to all Linux machines.  Not Required.  If not set, you must provide a password key."
       },
       "type": "string"
-    },
-    "osImageSku": {
-      "type": "string",
-      "defaultValue": "16.04-LTS",
-      "metadata": {
-        "description": "Maps to the sku in the Azure Stack Platform Image Repository."
-      }
-    },
-    "osImageVersion": {
-      "type": "string",
-      "defaultValue": "latest",
-      "metadata": {
-        "description": "Maps to the sku in the Azure Stack Platform Image Repository."
-      }
     }
   },
   "variables": {
     "adminUsername": "[parameters('linuxAdminUsername')]",
     "agentCustomScript": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash /opt/azure/containers/',variables('configureClusterScriptFile'), ' ',variables('clusterInstallParameters'),' >> /var/log/azure/cluster-bootstrap.log 2>&1 &\" &')]",
     "agentMaxVMs": 100,
-    "agentRunCmd": "[concat('runcmd:\n -  [ /bin/bash, /opt/azure/containers/install-cluster.sh ]\n\n')]",
-    "agentRunCmdFile": "[concat(' -  content: |\n        #!/bin/bash\n        ','sudo mkdir -p /var/log/azure\n        ',variables('agentCustomScript'),'\n    path: /opt/azure/containers/install-cluster.sh\n    permissions: \"0744\"\n')]",
     "agentpublicAccountName": "[concat(variables('storageAccountBaseName'), 'agnt0')]",
     "agentpublicCount": "[parameters('agentpublicCount')]",
     "agentpublicEndpointDNSNamePrefix": "[tolower(parameters('agentpublicEndpointDNSNamePrefix'))]",
@@ -405,6 +476,12 @@
     "agentpublicLbName": "[concat(variables('orchestratorName'), '-agentpublic-', variables('nameSuffix'))]",
     "agentpublicStorageAccountOffset": "[mul(variables('maxStorageAccountsPerAgent'),0)]",
     "agentpublicStorageAccountsCount": "[variables('maxStorageAccountsPerAgent')]",
+    "agentpublicOSImageOffer": "[parameters('osImageOffer')]",
+    "agentpublicOSImagePublisher": "[parameters('osImagePublisher')]",
+    "agentpublicOSImageSKU": "[parameters('osImageSKU')]",
+    "agentpublicOSImageVersion": "[parameters('osImageVersion')]",
+    "agentpublicRunCmd": "[concat('runcmd:\n  \n-  [ /bin/bash, /opt/azure/containers/install-cluster.sh ]\n\n')]",
+    "agentpublicRunCmdFile": "[concat(' -  content: |\n        #!/bin/bash\n        ','sudo mkdir -p /var/log/azure\n        ',variables('agentCustomScript'),'\n    path: /opt/azure/containers/install-cluster.sh\n    permissions: \"0744\"\n')]",
     "agentpublicSubnet": "[parameters('agentpublicSubnet')]",
     "agentpublicSubnetName": "[concat(variables('orchestratorName'), '-agentpublicsubnet')]",
     "agentpublicVMNamePrefix": "[concat(variables('orchestratorName'), '-agentpublic-', variables('nameSuffix'))]",
@@ -413,9 +490,10 @@
     "agentpublicVnetSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('agentpublicSubnetName'))]",
     "apiVersionDefault": "2015-06-15",
     "apiVersionStorage": "2015-06-15",
-    "clusterInstallParameters": "[concat(variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddrOctet4'), ' ',variables('adminUsername'),' ',variables('postInstallScriptURI'),' ',variables('masterFirstAddrPrefix'))]",
+    "clusterInstallParameters": "[concat(variables('orchestratorVersion'), ' ',variables('dockerComposeVersion'), ' ',variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddrOctet4'), ' ',variables('adminUsername'),' ',variables('postInstallScriptURI'),' ',variables('masterFirstAddrPrefix'),' ', parameters('dockerEngineDownloadRepo'), ' ', parameters('dockerComposeDownloadURL'))]",
     "configureClusterScriptFile": "configure-swarmmode-cluster.sh",
     "dataStorageAccountPrefixSeed": 97,
+    "dockerComposeVersion": "1.14.0",
     "location": "[resourceGroup().location]",
     "masterAvailabilitySet": "[concat(variables('orchestratorName'), '-master-availabilitySet-', variables('nameSuffix'))]",
     "masterCount": 1,
@@ -459,6 +537,10 @@
       ]
     ],
     "masterLbName": "[concat(variables('orchestratorName'), '-master-lb-', variables('nameSuffix'))]",
+    "masterOSImageOffer": "[parameters('osImageOffer')]",
+    "masterOSImagePublisher": "[parameters('osImagePublisher')]",
+    "masterOSImageSKU": "[parameters('osImageSKU')]",
+    "masterOSImageVersion": "[parameters('osImageVersion')]",
     "masterPublicIPAddressName": "[concat(variables('orchestratorName'), '-master-ip-', variables('masterEndpointDNSNamePrefix'), '-', variables('nameSuffix'))]",
     "masterSshInboundNatRuleIdPrefix": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'))]",
     "masterSshPort22InboundNatRuleIdPrefix": "[concat(variables('masterLbID'),'/inboundNatRules/SSHPort22-',variables('masterVMNamePrefix'))]",
@@ -474,10 +556,7 @@
     "maxVMsPerStorageAccount": 20,
     "nameSuffix": "[uniqueString(resourceGroup().id)]",
     "orchestratorName": "swarmm",
-    "osImageOffer": "UbuntuServer",
-    "osImagePublisher": "Canonical",
-    "osImageSKU": "[parameters('osImageSku')]",
-    "osImageVersion": "[parameters('osImageVersion')]",
+    "orchestratorVersion": "17.03.*",
     "postInstallScriptURI": "disabled",
     "sshKeyPath": "[concat('/home/', variables('adminUsername'), '/.ssh/authorized_keys')]",
     "sshRSAPublicKey": "[parameters('sshRSAPublicKey')]",
@@ -876,7 +955,7 @@
             }
           }
         ],
-        "inboundNatRules": [ ],
+        "inboundNatRules": [],
         "loadBalancingRules": [
           {
             "name": "LBRule80",
@@ -972,14 +1051,9 @@
       "type": "Microsoft.Network/loadBalancers"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "[variables('apiVersionStorage')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(add(0,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(0,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(add(1,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(1,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(add(2,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(2,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(add(3,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(3,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(add(4,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(4,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
         "[variables('vnetID')]",
         "[variables('agentpublicLbID')]"
       ],
@@ -1018,7 +1092,7 @@
           "osProfile": {
             "adminUsername": "[variables('adminUsername')]",
             "computerNamePrefix": "[variables('agentpublicVMNamePrefix')]",
-            "customData": "[base64(concat('#cloud-config\n\nwrite_files:\n -  encoding: gzip\n    content: !!binary |\n        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\n    path: /opt/azure/containers/configure-swarmmode-cluster.sh\n    permissions: \"0744\"\n\n',variables('agentRunCmdFile'),variables('agentRunCmd')))]",
+            "customData": "[base64(concat('#cloud-config\n\nwrite_files:\n -  encoding: gzip\n    content: !!binary |\n        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\n    path: /opt/azure/containers/configure-swarmmode-cluster.sh\n    permissions: \"0744\"\n\n',variables('agentpublicRunCmdFile'),variables('agentpublicRunCmd')))]",
             "linuxConfiguration": {
               "disablePasswordAuthentication": "true",
               "ssh": {
@@ -1033,10 +1107,10 @@
           },
           "storageProfile": {
             "imageReference": {
-              "offer": "[variables('osImageOffer')]",
-              "publisher": "[variables('osImagePublisher')]",
-              "sku": "[variables('osImageSKU')]",
-              "version": "[variables('osImageVersion')]"
+              "offer": "[variables('agentpublicOSImageOffer')]",
+              "publisher": "[variables('agentpublicOSImagePublisher')]",
+              "sku": "[variables('agentpublicOSImageSKU')]",
+              "version": "[variables('agentpublicOSImageVersion')]"
             },
             "osDisk": {
               "caching": "ReadWrite",
@@ -1104,7 +1178,7 @@
       "type": "Microsoft.Network/virtualNetworks"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "[variables('apiVersionStorage')]",
       "location": "[variables('location')]",
       "name": "[variables('masterAvailabilitySet')]",
       "properties": { },
@@ -1225,7 +1299,7 @@
       "type": "Microsoft.Network/networkInterfaces"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "[variables('apiVersionStorage')]",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "vmLoopNode"
@@ -1254,7 +1328,7 @@
         "osProfile": {
           "adminUsername": "[variables('adminUsername')]",
           "computername": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
-          "customData": "[base64('#cloud-config\n\nwrite_files:\n -  encoding: gzip\n    content: !!binary |\n        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\n    path: /opt/azure/containers/configure-swarmmode-cluster.sh\n    permissions: \"0744\"\n\n')]",
+          "customData": "[base64(concat('#cloud-config\n\nwrite_files:\n -  encoding: gzip\n    content: !!binary |\n        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\n    path: /opt/azure/containers/configure-swarmmode-cluster.sh\n    permissions: \"0744\"\n\n'))]",
           "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
             "ssh": {
@@ -1269,10 +1343,10 @@
         },
         "storageProfile": {
           "imageReference": {
-            "offer": "[variables('osImageOffer')]",
-            "publisher": "[variables('osImagePublisher')]",
-            "sku": "[variables('osImageSKU')]",
-            "version": "[variables('osImageVersion')]"
+            "offer": "[variables('masterOSImageOffer')]",
+            "publisher": "[variables('masterOSImagePublisher')]",
+            "sku": "[variables('masterOSImageSKU')]",
+            "version": "[variables('masterOSImageVersion')]"
           },
           "osDisk": {
             "caching": "ReadWrite",
