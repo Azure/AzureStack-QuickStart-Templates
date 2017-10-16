@@ -20,7 +20,6 @@ Standalone file server is not HA and should only be used in dev and test scenari
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
-
 ## Deploying from Portal
 
 +   Login into Azurestack portal

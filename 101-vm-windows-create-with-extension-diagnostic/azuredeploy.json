@@ -209,7 +209,7 @@
       },
       "resources": [
         {
-          "name": "Microsoft.Azure.Diagnostics.IaasDiagnostics",
+          "name": "IaasDiagnosticsExtesnion",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
