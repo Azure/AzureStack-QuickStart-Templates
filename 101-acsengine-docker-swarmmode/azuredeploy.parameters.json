@@ -3,16 +3,22 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "agentpublicCount": {
-      "value": 3
+      "value": 2
     },
     "agentpublicEndpointDNSNamePrefix": {
-      "value": "sma-20170605"
+      "value": "sma-20170210"
     },
     "agentpublicSubnet": {
       "value": "10.0.0.0/16"
     },
     "agentpublicVMSize": {
       "value": "Standard_D2_v2"
+    },
+    "dockerComposeDownloadURL": {
+      "value": "https://github.com/docker/compose/releases/download"
+    },
+    "dockerEngineDownloadRepo": {
+      "value": "https://aptdocker.azureedge.net/repo"
     },
     "firstConsecutiveStaticIP": {
       "value": "172.16.0.5"
@@ -21,13 +27,25 @@
       "value": "azureuser"
     },
     "masterEndpointDNSNamePrefix": {
-      "value": "smm-20170605"
+      "value": "smm-20170210"
     },
     "masterSubnet": {
       "value": "172.16.0.0/24"
     },
     "masterVMSize": {
       "value": "Standard_D2_v2"
+    },
+    "osImageOffer": {
+      "value": "UbuntuServer"
+    },
+    "osImagePublisher": {
+      "value": "Canonical"
+    },
+    "osImageSKU": {
+      "value": "16.04-LTS"
+    },
+    "osImageVersion": {
+      "value": "latest"
     },
     "sshRSAPublicKey": {
       "value": "GEN-SSH-PUB-KEY"
