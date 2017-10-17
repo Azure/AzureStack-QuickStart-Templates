@@ -19,6 +19,24 @@
         "description": "Size of vm"
       }
     },
+    "imageReference": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer | WindowsServer | 2016-Datacenter | latest",
+      "allowedValues": [
+        "MicrosoftWindowsServer | WindowsServer | 2016-Datacenter | latest"
+      ],
+      "metadata": {
+        "description": "Please ensure the image is available. publisher: MicrosoftWindowsServer | offer: WindowsServer | sku: 2016-Datacenter"
+      }
+    },
+    "dnsNameForPublicIP": {
+      "type": "string",
+      "defaultValue": "appservicefileshare",
+      "maxLength": 63,
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the file share.It must be lowercase. It should match the following regular expression, or it will raise an error: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$"
+      }
+    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "fileshareowner",
@@ -115,7 +133,10 @@
       "name": "[variables('publicIPAddressName')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
       }
     },
     {
@@ -238,6 +259,10 @@
     }
   ],
   "outputs": {
+    "fqdn": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName')), '2015-06-15').dnsSettings.fqdn]",
+      "type": "string"
+    },
     "ipaddress": {
       "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName')), '2015-06-15').ipAddress]",
       "type": "string"
