@@ -14,7 +14,7 @@
       "defaultValue": "2016-Datacenter",
       "allowedValues": [
         "2012-R2-Datacenter",
-        "2016-Datacenter-Core",
+        "2016-Datacenter-Server-Core",
         "2016-Datacenter"
       ],
       "metadata": {
