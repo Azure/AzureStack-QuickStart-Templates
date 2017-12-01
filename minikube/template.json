@@ -77,7 +77,7 @@
 
 			},
 
-			"defaultValue": "https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/minikube/"
+			"defaultValue": "https://raw.githubusercontent.com/vpatelsj/AzureStack-QuickStart-Templates/master/minikube/"
 
 		}
     },
