@@ -94,7 +94,7 @@
 
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
-    "dnsNameForPublicIP": "[tolower(concat(resourceGroup().name, parameters('vmName')))]",
+    "dnsNameForPublicIP": "[tolower(parameters('vmName'))]",
     "OSDiskName": "[concat('osdisk-', parameters('vmName'))]",
 	"assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/mysql-standalone-server-windows/",
     "cseBlobNameScript": "MySql.Setup.CustomScriptExtension.ps1",
