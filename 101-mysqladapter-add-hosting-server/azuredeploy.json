@@ -27,7 +27,7 @@
     },
     "resources": [
         {
-            "apiVersion": "2017-02-15-preview",
+            "apiVersion": "2017-08-28",
             "type": "Microsoft.MySqlAdapter.Admin/hostingServers",
             "name": "[parameters('hostingServerName')]",
             "location": "[resourceGroup().location]",
