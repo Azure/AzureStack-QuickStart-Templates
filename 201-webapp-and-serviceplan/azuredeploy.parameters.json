@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "value": "mywebapp"
+        },
+        "hostingPlanName": {
+            "value": "azurestackappplan"
+        },
+        "hostingEnvironment": {
+            "value": ""
+        },
+        "location": {
+            "value": "local"
+        },
+        "sku": {
+            "value": "Shared"
+        },
+        "skuCode": {
+            "value": "D1"
+        },
+        "workerSize": {
+            "value": "0"
+        },
+        "serverFarmResourceGroup": {
+            "value": "azurestack"
+        },
+        "subscriptionId": {
+            "value": "3c2392c6-cc42-4021-8825-b0f70b69aae2"
+        }
+    }
+}
