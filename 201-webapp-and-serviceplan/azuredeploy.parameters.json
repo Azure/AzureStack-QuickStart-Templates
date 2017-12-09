@@ -3,16 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
-            "value": "mywebapp"
+            "value": ""
         },
         "hostingPlanName": {
-            "value": "azurestackappplan"
+            "value": ""
         },
         "hostingEnvironment": {
             "value": ""
         },
         "location": {
-            "value": "local"
+            "value": ""
         },
         "sku": {
             "value": "Shared"
@@ -27,7 +27,7 @@
             "value": "azurestack"
         },
         "subscriptionId": {
-            "value": "3c2392c6-cc42-4021-8825-b0f70b69aae2"
+            "value": ""
         }
     }
 }
