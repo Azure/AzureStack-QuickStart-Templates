@@ -2,7 +2,7 @@
     "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "name": {
+        "appname": {
             "type": "String"
         },
         "hostingPlanName": {
@@ -33,14 +33,14 @@
     "resources": [
         {
             "type": "Microsoft.Web/sites",
-            "name": "[parameters('name')]",
+            "name": "[parameters('appname')]",
             "apiVersion": "2016-03-01",
             "location": "[parameters('location')]",
             "tags": {
                 "[concat('hidden-related:', '/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "empty"
             },
             "properties": {
-                "name": "[parameters('name')]",
+                "name": "[parameters('appname')]",
                 "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
                 "hostingEnvironment": "[parameters('hostingEnvironment')]"
             },
