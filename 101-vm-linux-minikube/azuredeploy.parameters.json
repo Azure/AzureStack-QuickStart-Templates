@@ -9,7 +9,7 @@
             "value": "minikube"
         },
         "virtualMachineSize": {
-            "value": "Standard_DS14_v2"
+            "value": "Standard_A4"
         },
         "adminUsername": {
             "value": "localadmin"

@@ -7,7 +7,7 @@
         },
         "virtualMachineSize": {
             "type": "String",
-			"defaultValue" : "Standard_DS14_v2"
+			"defaultValue" : "Standard_A4"
         },
         "adminUsername": {
             "type": "String"
@@ -77,7 +77,7 @@
 
 			},
 
-			"defaultValue": "https://raw.githubusercontent.com/vpatelsj/AzureStack-QuickStart-Templates/master/minikube/"
+			"defaultValue": "https://raw.githubusercontent.com/vpatelsj/AzureStack-QuickStart-Templates/master/101-vm-linux-minikube/"
 
 		}
     },
@@ -105,7 +105,7 @@
                     "imageReference": {
                         "publisher": "Canonical",
                         "offer": "UbuntuServer",
-                        "sku": "14.04.5-LTS",
+                        "sku": "16.04-LTS",
                         "version": "latest"
                     },
                     "osDisk": {
