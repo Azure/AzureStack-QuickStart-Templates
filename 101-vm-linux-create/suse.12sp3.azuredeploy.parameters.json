@@ -3,15 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "imagePublisher": {
-            "value": "Suse"
+            "value": "SUSE"
         },
 
         "imageOffer": {
-            "value": "SlesServer"
+            "value": "SLES-BYOS"
         },
 
         "imageSku": {
-            "value": "12.SP1"
+            "value": "12-SP3"
         }
     }
 }
