@@ -1,0 +1,271 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "fileServerVirtualMachineSize": {
+      "type": "string",
+      "defaultValue": "Standard_A2",
+      "allowedValues": [
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4"
+      ],
+      "metadata": {
+        "description": "Size of vm"
+      }
+    },
+    "imageReference": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer | WindowsServer | 2016-Datacenter | latest",
+      "allowedValues": [
+        "MicrosoftWindowsServer | WindowsServer | 2016-Datacenter | latest"
+      ],
+      "metadata": {
+        "description": "Please ensure the image is available. publisher: MicrosoftWindowsServer | offer: WindowsServer | sku: 2016-Datacenter"
+      }
+    },
+    "dnsNameForPublicIP": {
+      "type": "string",
+      "defaultValue": "appservicefileshare",
+      "maxLength": 63,
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the file share.It must be lowercase. It should match the following regular expression, or it will raise an error: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "fileshareowner",
+      "metadata": {
+        "description": "File server Admin user"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "File server Admin password"
+      }
+    },
+    "fileShareOwner": {
+      "type": "string",
+      "defaultValue": "fileshareowner",
+      "metadata": {
+        "description": "fileshare owner username"
+      }
+    },
+    "fileShareOwnerPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "fileshare owner password"
+      }
+    },
+    "fileShareUser": {
+      "type": "string",
+      "defaultValue": "fileshareuser",
+      "metadata": {
+        "description": "fileshare user"
+      }
+    },
+    "fileShareUserPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "fileshare user password"
+      }
+    },
+    "vmExtensionScriptLocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/appservice-fileserver-standalone",
+      "metadata": {
+        "description": "File Server extension script Url"
+      }
+    }
+  },
+  "variables": {
+    "scenarioPrefix": "FileServer",
+
+    "powershell_fileShareOwner": "[concat('base64:', base64(parameters('fileShareOwner')))]",
+    "powershell_fileShareOwnerPassword": "[concat('base64:', base64(parameters('fileShareOwnerPassword')))]",
+    "powershell_fileShareUser": "[concat('base64:', base64(parameters('fileShareUser')))]",
+    "powershell_fileShareUserPassword": "[concat('base64:', base64(parameters('fileShareUserPassword')))]",
+
+    "publicIPAddressName": "[concat(variables('scenarioPrefix'),'PublicIp')]",
+    "publicIPAddressType": "Static",
+
+    "virtualNetworkName": "[concat(variables('scenarioPrefix'),'Vnet')]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "vnetAddressPrefix": "10.100.0.0/16",
+
+    "subnetName": "[concat(variables('scenarioPrefix'),'Subnet')]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "subnetPrefix": "10.100.0.0/24",
+
+    "publisher": "MicrosoftWindowsServer",
+    "offer": "WindowsServer",
+    "sku": "2016-Datacenter",
+    "version": "latest",
+
+    "storageAccountType": "Standard_LRS",
+    "uniqueStorageString": "[uniqueString(toLower(resourceGroup().id),variables('scenarioPrefix'))]",
+    "namingInfix": "[toLower(take(trim(variables('scenarioPrefix')), 10))]",
+    "storageAccountName": "[concat(variables('namingInfix'), variables('uniqueStorageString'))]",
+
+    "nicName": "[concat(variables('scenarioPrefix'),'Nic')]",
+    "vmName": "[concat(variables('scenarioPrefix'),'VM')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-01-01",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "Storage",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "Standalone file server Virtual Machines"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('fileServerVirtualMachineSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('publisher')]",
+            "offer": "[variables('offer')]",
+            "sku": "[variables('sku')]",
+            "version": "[variables('version')]"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2015-06-15').primaryEndpoints.blob,'vhds/fileserverosdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),'/Customscript')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[concat(parameters('vmExtensionScriptLocation'), '/scripts/OnStartAzureVirtualMachineFileServer.ps1')]",
+            "[concat(parameters('vmExtensionScriptLocation'), '/scripts/fileserver.cr.zip')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\OnStartAzureVirtualMachineFileServer.ps1 -fileServerAdminUserName \"', variables('powershell_fileShareOwner'), '\" -fileServerAdminPassword \"', variables('powershell_fileShareOwnerPassword'), '\" -fileShareOwnerUserName \"', variables('powershell_fileShareOwner'), '\" -fileShareOwnerPassword \"', variables('powershell_fileShareOwnerPassword'), '\" -fileShareUserUserName \"', variables('powershell_fileShareUser'), '\" -fileShareUserPassword \"', variables('powershell_fileShareUserPassword'), '\" -ZipFiles fileserver.cr')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "fqdn": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName')), '2015-06-15').dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "ipaddress": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName')), '2015-06-15').ipAddress]",
+      "type": "string"
+    }
+  }
+}
