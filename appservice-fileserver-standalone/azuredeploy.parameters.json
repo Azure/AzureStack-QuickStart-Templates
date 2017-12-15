@@ -9,7 +9,7 @@
             "value": "MicrosoftWindowsServer | WindowsServer | 2016-Datacenter | latest"
         },
         "dnsNameForPublicIP": {
-            "value": "appServiceFileShare"
+            "value": "appservicefileshare"
         },
         "adminUsername": {
             "value": "fileshareowner"
