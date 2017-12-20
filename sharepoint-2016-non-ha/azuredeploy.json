@@ -41,7 +41,8 @@
             "type": "string",
             "metadata": {
                 "description": "Direct download link for the SharePoint 2016 trial ISO. For example: http://download.msdn.microsoft.com/pr/en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso?t=XXXXXXXXXXXXXXX"
-            }
+            },
+            "defaultValue": "https://download.microsoft.com/download/0/0/4/004EE264-7043-45BF-99E3-3F74ECAE13E5/officeserver.img"
         },
         "sharepoint2016ProductKey": {
             "type": "string",
@@ -55,9 +56,9 @@
         "adVMSize": "Standard_A1",
         "sqlVMSize": "Standard_A2",
         "spVMSize": "Standard_A3",
-        "spassetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2016-non-ha",
-        "adAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ad-non-ha",
-        "sqlAssetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
+        "spassetLocation": "https://raw.githubusercontent.com/NikCharlebois/AzureStack-QuickStart-Templates/master/sharepoint-2016-non-ha",
+        "adAssetLocation": "https://raw.githubusercontent.com/NikCharlebois/AzureStack-QuickStart-Templates/master/ad-non-ha",
+        "sqlAssetLocation": "https://raw.githubusercontent.com/NikCharlebois/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
         "location": "[resourceGroup().location]",
         "vmNetworkSubnet": "10.0.0.0/24",
         "virtualNetworkAddressRange": "10.0.0.0/16",
