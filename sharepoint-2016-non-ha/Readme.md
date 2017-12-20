@@ -65,7 +65,7 @@ To access the SQL VM use the domain controller or the SharePoint VMs as jumpboxe
 +	sharepoint2016DownloadLink: Direct download link for the SharePoint 2016 with SP1 ISO.
 +	sharepoint2016ProductKey: Product key for SharePoint 2016 with SP1, required for SharePoint setup.
 	
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fgithub.com%2FNikCharlebois%2FAzureStack-QuickStart-Templates%2Fraw%2Fmaster%2Fsharepoint-2016-non-ha%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fgithub.com%2FNikCharlebois%2FAzureStack-QuickStart-Templates%2Fraw%2FTest%2Fsharepoint-2016-non-ha%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
