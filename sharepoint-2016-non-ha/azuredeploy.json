@@ -56,7 +56,7 @@
         "adVMSize": "Standard_A1",
         "sqlVMSize": "Standard_A2",
         "spVMSize": "Standard_A3",
-        "spassetLocation": "https://raw.githubusercontent.com/NikCharlebois/AzureStack-QuickStart-Templates/test/sharepoint-2016-non-ha",
+        "spassetLocation": "https://github.com/NikCharlebois/AzureStack-QuickStart-Templates/raw/Test/sharepoint-2016-non-ha/spVMTemplate.json",
         "adAssetLocation": "https://raw.githubusercontent.com/NikCharlebois/AzureStack-QuickStart-Templates/master/ad-non-ha",
         "sqlAssetLocation": "https://raw.githubusercontent.com/NikCharlebois/AzureStack-QuickStart-Templates/master/sql-2014-non-ha",
         "location": "[resourceGroup().location]",
