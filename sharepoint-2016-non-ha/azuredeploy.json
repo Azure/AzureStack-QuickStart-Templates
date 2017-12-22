@@ -40,8 +40,9 @@
         "sharepoint2016DownloadLink": {
             "type": "string",
             "metadata": {
-                "description": "Direct download link for the SharePoint 2016 trial ISO. For example: http://download.msdn.microsoft.com/pr/en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso?t=XXXXXXXXXXXXXXX"
-            }
+                "description": "Direct download link for the SharePoint 2016 trial ISO. For example: http://download.msdn.microsoft.com/pr/en_sharepoint_server_2016_x64_dvd_3823428.iso?t=XXXXXXXXXXXXXXX"
+            },
+            "defaultValue": "https://download.microsoft.com/download/0/0/4/004EE264-7043-45BF-99E3-3F74ECAE13E5/officeserver.img"
         },
         "sharepoint2016ProductKey": {
             "type": "string",
