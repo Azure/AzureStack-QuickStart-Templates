@@ -276,7 +276,6 @@
           "fileUris": [
             "[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"
           ],
-          "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]",
 		  "commandToExecute": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash ', variables('scriptName'), '.sh ' , variables('scriptParameters'), ' >> /var/log/azure/minikube.log 2>&1 &\" &')]",
           "timestamp": "(Get-Date).Ticks",
           "enableInternalDNSCheck": "false"
