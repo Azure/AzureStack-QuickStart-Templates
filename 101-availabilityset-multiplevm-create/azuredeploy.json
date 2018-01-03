@@ -72,6 +72,18 @@
                 "2012-R2-Datacenter",
                 "2016-Datacenter"
             ],
+        "vmSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_A1",
+                "Standard_A3",
+                "Standard_A7"
+            ],
+            "metadata": {
+                "description": "The size of the AD VMs Created"
+            },
+            "defaultValue": "Standard_A1"
+        },          
             "metadata": {
                 "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
             }
@@ -80,7 +92,6 @@
     "variables": {
         "availabilitySetName": "[toLower(concat('aSet-', resourceGroup().name))]",
         "storageAccountType": "Standard_LRS",
-        "VMSize": "Standard_A1",
         "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
         "windowsImageVersion": "latest",
         "dataDiskSize": 2,
@@ -301,7 +312,7 @@
                 "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
             },
             "hardwareProfile": {
-                "vmSize": "[variables('vmSize')]"
+                "vmSize": "[parameters('vmSize')]"
             },
             "osProfile": {
                 "computerName": "[concat(parameters('vmNamePrefix'), copyIndex())]",
