@@ -2,59 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "value": "local"
-        },
-        "virtualMachineName": {
-            "value": "minikube"
-        },
         "virtualMachineSize": {
-            "value": "Standard_A4"
+            "value": "Standard_D2"
         },
         "adminUsername": {
-            "value": "localadmin"
-        },
-        "virtualNetworkName": {
-            "value": "kubeRG-vnet"
-        },
-        "networkInterfaceName": {
-            "value": "minikube504"
-        },
-        "networkSecurityGroupName": {
-            "value": "minikube-nsg"
+            "value": "azureuser"
         },
         "adminPassword": {
             "value": null
         },
-        "storageAccountName": {
-            "value": "kubergdisks151"
-        },
-        "storageAccountType": {
-            "value": "Standard_LRS"
-        },
-        "diagnosticsStorageAccountName": {
-            "value": "kubergdiag386"
-        },
-        "diagnosticsStorageAccountId": {
-            "value": "Microsoft.Storage/storageAccounts/kubergdiag386"
-        },
-        "diagnosticsStorageAccountType": {
-            "value": "Standard_LRS"
-        },
-        "addressPrefix": {
-            "value": "10.0.0.0/24"
-        },
-        "subnetName": {
-            "value": "default"
-        },
-        "subnetPrefix": {
-            "value": "10.0.0.0/24"
-        },
-        "publicIpAddressName": {
-            "value": "minikube-ip"
-        },
-        "publicIpAddressType": {
-            "value": "Dynamic"
-        }
     }
 }

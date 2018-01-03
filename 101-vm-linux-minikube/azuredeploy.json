@@ -2,70 +2,15 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "virtualMachineName": {
-            "type": "String"
-        },
         "virtualMachineSize": {
             "type": "String",
-			"defaultValue" : "Standard_A4"
+			"defaultValue" : "Standard_D2"
         },
         "adminUsername": {
             "type": "String"
         },
-        "virtualNetworkName": {
-            "type": "String",
-			"defaultValue" : "[concat(resourceGroup().Name,'-vnet')]"
-        },
-        "networkInterfaceName": {
-            "type": "String",
-			"defaultValue" : "[concat(parameters('virtualMachineName'), '504')]"
-        },
-        "networkSecurityGroupName": {
-            "type": "String",
-			"defaultValue" : "[concat(parameters('virtualMachineName'), '-nsg')]"
-        },
         "adminPassword": {
             "type": "SecureString"
-        },
-        "storageAccountName": {
-            "type": "String",
-			"defaultValue" : "[concat(resourceGroup().Name,'gdisks151')]"
-        },
-        "storageAccountType": {
-            "type": "String",
-			"defaultValue" : "Standard_LRS"
-        },
-        "diagnosticsStorageAccountName": {
-            "type": "String",
-			"defaultValue": "[concat(resourceGroup().Name,'gdiag386')]"
-        },
-        "diagnosticsStorageAccountId": {
-            "type": "String",
-			"defaultValue" : "Microsoft.Storage/storageAccounts/[concat(resourceGroup().Name,'gdiag386')]"
-        },
-        "diagnosticsStorageAccountType": {
-            "type": "String",
-			"defaultValue" : "Standard_LRS"
-        },
-        "addressPrefix": {
-            "type": "String",
-			"defaultValue" : "10.0.0.0/24"
-        },
-        "subnetName": {
-            "type": "String",
-			"defaultValue" : "default"
-        },
-        "subnetPrefix": {
-            "type": "String",
-			"defaultValue" : "10.0.0.0/24"
-        },
-        "publicIpAddressName": {
-            "type": "String",
-			"defaultValue" : "[concat(parameters('virtualMachineName'), '-ip')]"
-        },
-        "publicIpAddressType": {
-            "type": "String",
-			"defaultValue" : "Dynamic"
         },
 		"_artifactsLocation": {
 
@@ -79,145 +24,128 @@
 
 			"defaultValue": "https://raw.githubusercontent.com/vpatelsj/AzureStack-QuickStart-Templates/master/101-vm-linux-minikube/"
 
+		},
+		"imagePublisher": {
+		  "type": "string",
+		  "defaultValue": "Canonical",
+		  "metadata": {
+			"description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file Eg: Canonical, Suse, OpenLogic "
+		  }
+		},
+		"imageOffer": {
+		  "type": "string",
+		  "defaultValue": "UbuntuServer",
+		  "metadata": {
+			"description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file Eg: UbuntuServer, SlesServer, CentOS "
+		  }
+		},
+		"imageSku": {
+		  "type": "string",
+		  "allowedValues":
+		  [
+			"16.04-LTS",
+			"14.04.5-LTS"
+		  ],
+		  "defaultValue": "16.04-LTS",
+		  "metadata": {
+			"description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 16.04-LTS, 14.04.5-LTS."
+		  }
+		},
+		"minikubeLink": {
+		  "type": "string",
+		  "defaultValue": "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64",
+		  "metadata": {
+			"description": "Minikube installation download link"
+		  }
+		},
+		"kubectlLink": {
+		  "type": "string",
+		  "defaultValue": "https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl",
+		  "metadata": {
+			"description": "kubernetes installation download link"
+		  }
+		},
+		"dockerLink": {
+		  "type": "string",
+		  "defaultValue": "https://download.docker.com/linux/ubuntu",
+		  "metadata": {
+			"description": "Docker installation download link"
+		  }
 		}
     },
     "variables": {
-        "vnetId": "[resourceId(resourceGroup().Name,'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-		"scriptName": "script"
+		"virtualMachineName" : "[concat('vm', resourceGroup().name)]",
+		"virtualNetworkName": "kubeRG-vnet",
+		"networkInterfaceName" : "minikube504",
+		"networkSecurityGroupName" : "[concat(variables('virtualMachineName'), '-nsg')]",
+		"storageAccountName" : "[concat(resourceGroup().Name,'gdisks151')]",
+		"storageAccountType" : "Standard_LRS",
+		"diagnosticsStorageAccountName" : "[concat(resourceGroup().Name,'gdiag386')]",
+		"diagnosticsStorageAccountId" : "Microsoft.Storage/storageAccounts/[concat(resourceGroup().Name,'gdiag386')]",
+		"diagnosticsStorageAccountType" : "Standard_LRS",
+		"addressPrefix" : "10.0.0.0/24",
+		"subnetName" : "default",
+		"subnetPrefix" : "10.0.0.0/24",
+		"publicIpAddressName" : "[concat(variables('virtualMachineName'), '-ip')]",
+		"publicIpAddressType" : "Dynamic",
+        "vnetId": "[resourceId(resourceGroup().Name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+		"scriptName": "script",
+		"scriptParameters": "[concat(parameters('minikubeLink'),' ',parameters('kubectlLink'),' ',parameters('dockerLink'))]"
+		
     },
     "resources": [
         {
-            "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('virtualMachineName')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "osProfile": {
-                    "computerName": "[parameters('virtualMachineName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
-                },
-                "hardwareProfile": {
-                    "vmSize": "[parameters('virtualMachineSize')]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "Canonical",
-                        "offer": "UbuntuServer",
-                        "sku": "16.04-LTS",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        "createOption": "fromImage",
-                        "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().Name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), parameters('virtualMachineName'), '20171129145808.vhd')]"
-                        },
-                        "name": "[parameters('virtualMachineName')]"
-                    },
-                    "dataDisks": []
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
-                        }
-                    ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": true,
-                        "storageUri": "[reference(resourceId(resourceGroup().Name, 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]"
-            ]
-        },
-        {
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[parameters('storageAccountName')]",
+            "name": "[variables('storageAccountName')]",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "properties": {
-                "accountType": "[parameters('storageAccountType')]"
+                "accountType": "[variables('storageAccountType')]"
             }
         },
-        {
+		{
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[parameters('diagnosticsStorageAccountName')]",
+            "name": "[variables('diagnosticsStorageAccountName')]",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "properties": {
-                "accountType": "[parameters('diagnosticsStorageAccountType')]"
+                "accountType": "[variables('diagnosticsStorageAccountType')]"
             }
         },
-        {
+		{
+            "type": "Microsoft.Network/publicIpAddresses",
+            "name": "[variables('publicIpAddressName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+            }
+        },
+		{
             "type": "Microsoft.Network/virtualNetworks",
-            "name": "[parameters('virtualNetworkName')]",
+            "name": "[variables('virtualNetworkName')]",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "[parameters('addressPrefix')]"
+                        "[variables('addressPrefix')]"
                     ]
                 },
                 "subnets": [
                     {
-                        "name": "[parameters('subnetName')]",
+                        "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetPrefix')]"
+                            "addressPrefix": "[variables('subnetPrefix')]"
                         }
                     }
                 ]
             }
         },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[parameters('networkInterfaceName')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
-                            }
-                        }
-                    }
-                ],
-                "networkSecurityGroup": {
-                    "id": "[resourceId(resourceGroup().Name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-                }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/publicIpAddresses",
-            "name": "[parameters('publicIpAddressName')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
-            }
-        },
-        {
+		{
             "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[parameters('networkSecurityGroupName')]",
+            "name": "[variables('networkSecurityGroupName')]",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "properties": {
@@ -239,12 +167,92 @@
             }
         },
 		{
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('networkInterfaceName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId(resourceGroup().Name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ]
+        },
+		{
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('virtualMachineName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+						"publisher": "[parameters('imagePublisher')]",
+						"offer": "[parameters('imageOffer')]",
+						"sku": "[parameters('imageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "vhd": {
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().Name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('virtualMachineName'), '20171129145808.vhd')]"
+                        },
+                        "name": "[variables('virtualMachineName')]"
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId(resourceGroup().Name, 'Microsoft.Storage/storageAccounts', variables('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]"
+            ]
+        },
+		{
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('virtualMachineName'),'/LinuxCustomScriptExtension')]",
+      "name": "[concat(variables('virtualMachineName'),'/LinuxCustomScriptExtension')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
@@ -256,6 +264,7 @@
             "[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"
           ],
           "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]",
+		  "commandToExecute": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash ', variables('scriptName'), '.sh ' , variables('scriptParameters'), ' >> /var/log/azure/minikube.log 2>&1 &\" &')]",
           "timestamp": "(Get-Date).Ticks",
           "enableInternalDNSCheck": "false"
         }
@@ -263,9 +272,5 @@
     }
     ],
     "outputs": {
-        "adminUsername": {
-            "type": "String",
-            "value": "[parameters('adminUsername')]"
-        }
     }
 }
