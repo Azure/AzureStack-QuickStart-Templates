@@ -63,7 +63,7 @@ New-AzurermResourceGroupDeployment -Name $deploymentName -ResourceGroupName $res
 
 ```
 
-## Getting Started
+## About Minikube
 Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day.
 
 Here is a brief overview of the minikube deployment on azurestack
@@ -76,6 +76,7 @@ Minikube creates a simple kubernetes cluster that consists of one master node an
 * Minikube from https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 * xFCE4 and xRDP
 
+## Getting Started
 + This template deploys a linux virtual machine and generates a PublicIP resource so that users can RDP to it. 
   ![Image of Minikube ResourceGroup](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/ResourceGroup.PNG)
 
