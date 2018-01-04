@@ -40,7 +40,7 @@ $Credential= New-Object PSCredential($UserName,$Password)
 Login-AzureRmAccount -EnvironmentName "AzureStackUser" -TenantId $TenantID -Credential $Credential 
 Select-AzureRmSubscription -SubscriptionId "YOUR_SUBSCRIPTION_ID"
 
-$resourceGroupName = "minikube-RG"
+$resourceGroupName = "minikuberg"
 $resourceGroupDeploymentName = "$($resourceGroupName)Deployment"
 
 # Create a resource group:
