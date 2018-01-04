@@ -94,6 +94,7 @@ Minikube creates a simple kubernetes cluster that consists of one master node an
   ![Image of Terminal](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/terminal.PNG)
 ```
 sudo minikube start --vm-driver=none
+sudo minikube addons enable dashboard
 sudo minikube dashboard --url
 ```
 
