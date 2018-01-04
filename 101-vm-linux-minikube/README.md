@@ -71,6 +71,7 @@ Here is a brief overview of the minikube deployment on azurestack
 
 Minikube creates a simple kubernetes cluster that consists of one master node and one slave node. Additionally, Minikube packages and configures a linux VM, the contrainer runtime and all kubernetes components optimized for local development. Our template installs following components:
 
+* Ubuntu 16.04 LTS VM
 * Docker-CE from https://download.docker.com/linux/ubuntu 
 * Kubectl from https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
 * Minikube from https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
