@@ -36,15 +36,6 @@ sudo apt-get -y update
 echo "install docker"
 sudo apt-get -y install docker-ce
 
-echo "start minikube"
-sudo minikube start --vm-driver=none
-sleep 20
-
-sudo kubectl cluster-info | grep 'running' &> /dev/null
-if [ $? == 0 ]; then
-   echo "Minikube started successfully"
-fi
-
 echo "Install xfce4"
 sudo apt-get -y update
 
