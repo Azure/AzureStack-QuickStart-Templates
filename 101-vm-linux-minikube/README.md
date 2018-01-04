@@ -1,12 +1,6 @@
 # Minikube on AzureStack
 This template deploys a Ubuntu 16.04 virtual machine on AzureStack running Minikube to manage kubenetes cluster.
 
-## What is Minikube
-Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day.
-
-Here is a brief overview of the minikube deployment on azurestack
-![Image of Minikube architecture](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/minikubearch.png)
-
 ## Prerequisites
 Follow the below links to create/download an Ubuntu 16.04 LTS Image and upload the same to Azure Stack's Platform Image Repository(PIR)
 1. https://azure.microsoft.com/en-us/documentation/articles/azure-stack-linux/
@@ -66,3 +60,11 @@ New-AzurermResourceGroup -Name $resourceGroupName -Location $location
 #Start new Deployment
 New-AzurermResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName `
 ��� -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json
+
+```
+
+## What is Minikube
+Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day.
+
+Here is a brief overview of the minikube deployment on azurestack
+![Image of Minikube architecture](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/minikubearch.png)
