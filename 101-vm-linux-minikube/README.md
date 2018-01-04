@@ -75,7 +75,8 @@ Minikube creates a simple kubernetes cluster that consists of one master node an
 * Docker-CE from https://download.docker.com/linux/ubuntu 
 * Kubectl from https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
 * Minikube from https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-* xFCE4 and xRDP
+* xFCE4
+* xRDP
 
 ## Getting Started
 + This template deploys a linux virtual machine and generates a PublicIP resource so that users can RDP to it. 
