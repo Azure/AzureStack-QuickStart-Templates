@@ -96,3 +96,7 @@ sudo minikube dashboard --url
 ```
 
 + Open browser and visit the url to see the kubernetes dashboard. Congratulations, you now have a fully working kubernetes installation using minikube.
+
+## Deploying Applications
+If you would like to deploy a sample application, please visit the official documentation page of kubernetes, skip the ```"Create Minikube Cluster"``` section as you have already created one above. Simply jump to the section ```"Create your Node.js application"```  at https://kubernetes.io/docs/tutorials/stateless-application/hello-minikube/
+
