@@ -32,7 +32,7 @@ echo "add docker repo key"
 retrycmd_if_failure sudo curl -fsSL $DOCKERLINK/gpg | sudo apt-key add -
 
 echo "add docker repo" 
-retrycmd_if_failure sudo add-apt-repository "deb [arch=amd64] $DOCKERLINK $(lsb_release -cs) stable"
+sudo add-apt-repository "deb [arch=amd64] $DOCKERLINK $(lsb_release -cs) stable"
 
 echo "re-update the system"
 retrycmd_if_failure sudo apt-get -y update
