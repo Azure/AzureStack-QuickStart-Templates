@@ -8,6 +8,7 @@ Follow the below links to create/download an Ubuntu 16.04 LTS Image and upload t
 	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating the manifest.json in PIR
 
 ## Deploying from Portal
+If at any point you run into trouble, please don't forget to check out FAQ section for known issues/workarounds.
 
 +	Login into Azurestack portal
 +	Click "New" -> "Custom" -> "Template deployment -> "Edit Template" -> "Load File" -> Select azure.deploy.json from the local drive -> "Save"
@@ -94,3 +95,25 @@ sudo minikube dashboard --url
 ## Deploying Applications
 If you would like to deploy a sample application, please visit the official documentation page of kubernetes, skip the ```"Create Minikube Cluster"``` section as you have already created one above. Simply jump to the section ```"Create your Node.js application"```  at https://kubernetes.io/docs/tutorials/stateless-application/hello-minikube/
 
+## FAQ
+### RDP Does not work
++ We install xRDP on the Ubuntu VM to enable RDP access. Some users have reported that xRDP takes upto 5minutes to come up and start listening on the port 3389 after deployment is reported completed. During the first 5 minutes after deployment completes, you might experience RDP connection issues. In that case wait for 5 minutes and try again.
+
++ We have also seen instances where RDP login screen gets stuck at message: "Connecting to port 3350". While we are still trying to understand the root cause of this failure, there is a workaround identified that is helps eradicate this error. Open ssh Terminal to the VM using putty or any of your fav ssh client and issue following commands and retry RDP to the VM again.
+
+```
+sudo echo xfce4-session >~/.xsession
+sudo service xrdp restart
+```
+
+### Dashboard does not come up
++ Dashboard is a service that gets deployed when we issue the command "sudo minikube addons enable dashboard". It takes a bit of a time until the container image gets downloaded and the pod gets fired up when dashboard is enabled for the first time. Until the dashboard service is not up, "sudo minikube dashboard --url" will return error. It shouldn't take more than few seconds the dashboard service to come up.
+
+### Firefox Certificates error
++ Minikube generates all the necessary certificates required to communicate with the Kubernetes cluster. If you run into certificates problem, it could point to faulty minikube startup. Try deleting cluster and start minikube again using following commands:
+
+```
+sudo minikube delete
+sudo minikube start --vm-driver=none
+```
+```
