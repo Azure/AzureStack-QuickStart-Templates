@@ -8,8 +8,9 @@ Follow the below links to create/download an Ubuntu 16.04 LTS Image and upload t
 	Note: please use the default values for linuxPublisher,linuxOffer,linuxSku,linuxVersion found in azuredeploy.json while creating the manifest.json in PIR
 
 ## Deploying from Portal
-If at any point you run into trouble, please don't forget to check out FAQ section for known issues/workarounds.
-
+``` diff
++ Running into issues? Check out FAQ section for known issues/workarounds.
+```
 +	Login into Azurestack portal
 +	Click "New" -> "Custom" -> "Template deployment -> "Edit Template" -> "Load File" -> Select azure.deploy.json from the local drive -> "Save"
 + Click "Edit Parameters" and 	Fill the parameters. Please note down the admin name and password for later use
