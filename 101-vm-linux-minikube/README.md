@@ -57,12 +57,17 @@ New-AzureRmResourceGroupDeployment  -Name $resourceGroupDeploymentName -Resource
 ```
 
 ## About Minikube
-Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day.
+Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day. It allows to run a very simplistic one node Kubernetes cluster on a Linux VM. It’s the fastest and most straight forward way to get a fully functional Kubernetes cluster running in no time. It allows developers to develop and test their Kubernetes based application deployments on their local machines. 
+Architecturally, Minikube VM runs both Master and Agent Node Components locally.
+* Master Node components such as API Server, Scheduler, etcd Server, etc are ran in a single uber Linux process called LocalKube. 
+* Agent Node components are ran inside docker containers - exactly as they would run on a normal Agent Node. Hence, from a application deployment standpoint, the application does not see any difference when it is deployed on a Minikube or regular Kubernetes cluster.
 
 Here is a brief overview of the minikube deployment on azurestack
-![Image of Minikube architecture](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/minikubearch.png)
+![Image of Minikube architecture](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/minikub.png)
 
-Minikube creates a simple kubernetes cluster that consists of one master node and one slave node. Additionally, Minikube packages and configures a linux VM, the contrainer runtime and all kubernetes components optimized for local development. Our template installs following components:
+
+
+. Our template installs following components:
 
 * Ubuntu 16.04 LTS VM
 * Docker-CE from https://download.docker.com/linux/ubuntu 
