@@ -63,7 +63,7 @@ Architecturally, Minikube VM runs both Master and Agent Node Components locally.
 * Agent Node components are ran inside docker containers - exactly as they would run on a normal Agent Node. Hence, from a application deployment standpoint, the application does not see any difference when it is deployed on a Minikube or regular Kubernetes cluster.
 
 Here is a brief overview of the minikube deployment on azurestack
-![Image of Minikube architecture](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/minikub.png)
+![Image of Minikube architecture](https://github.com/vpatelsj/AzureStack-QuickStart-Templates/blob/master/101-vm-linux-minikube/images/minikube.png)
 
 
 
