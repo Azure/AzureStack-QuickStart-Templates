@@ -1,0 +1,283 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachineSize": {
+            "type": "String",
+			"defaultValue" : "Standard_D2"
+        },
+        "adminUsername": {
+            "type": "String"
+        },
+        "adminPassword": {
+            "type": "SecureString"
+        },
+		"_artifactsLocation": {
+
+			"type": "string",
+
+			"metadata": {
+
+				"description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+
+			},
+
+			"defaultValue": "https://raw.githubusercontent.com/vpatelsj/AzureStack-QuickStart-Templates/master/101-vm-linux-minikube/"
+
+		},
+		"imagePublisher": {
+		  "type": "string",
+		  "defaultValue": "Canonical",
+		  "metadata": {
+			"description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file Eg: Canonical, Suse, OpenLogic "
+		  }
+		},
+		"imageOffer": {
+		  "type": "string",
+		  "defaultValue": "UbuntuServer",
+		  "metadata": {
+			"description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file Eg: UbuntuServer, SlesServer, CentOS "
+		  }
+		},
+		"imageSku": {
+		  "type": "string",
+		  "defaultValue": "16.04-LTS",
+		  "metadata": {
+			"description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 16.04-LTS, 14.04.5-LTS."
+		  }
+		},
+		"minikubeLink": {
+		  "type": "string",
+		  "defaultValue": "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64",
+		  "metadata": {
+			"description": "Minikube installation download link"
+		  }
+		},
+		"kubectlLink": {
+		  "type": "string",
+		  "defaultValue": "https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl",
+		  "metadata": {
+			"description": "kubernetes installation download link"
+		  }
+		},
+		"dockerLink": {
+		  "type": "string",
+		  "defaultValue": "https://download.docker.com/linux/ubuntu",
+		  "metadata": {
+			"description": "Docker installation download link"
+		  }
+		}
+    },
+    "variables": {
+		"virtualMachineName" : "[toLower(concat('vm', uniqueString(resourceGroup().id)))]",
+		"virtualNetworkName": "[toLower(concat('vnet', uniqueString(resourceGroup().id)))]",
+		"networkInterfaceName" : "[toLower(concat('nic', uniqueString(resourceGroup().id)))]",
+		"networkSecurityGroupName" : "[toLower(concat('nsg', uniqueString(resourceGroup().id)))]",
+		"storageAccountName" : "[toLower(concat('sa', uniqueString(resourceGroup().id)))]",
+		"storageAccountType" : "Standard_LRS",
+		"diagnosticsStorageAccountName" : "[toLower(concat('dsa', uniqueString(resourceGroup().id)))]",
+		"diagnosticsStorageAccountId" : "Microsoft.Storage/storageAccounts/[toLower(concat('dsa', uniqueString(resourceGroup().id)))]",
+		"diagnosticsStorageAccountType" : "Standard_LRS",
+		"addressPrefix" : "10.0.0.0/24",
+		"subnetName" : "default",
+		"subnetPrefix" : "10.0.0.0/24",
+		"publicIpAddressName" : "[toLower(concat('pip', uniqueString(resourceGroup().id)))]",
+		"publicIpAddressType" : "Dynamic",
+        "vnetId": "[resourceId(resourceGroup().Name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+		"scriptName": "script",
+		"scriptParameters": "[concat(parameters('minikubeLink'),' ',parameters('kubectlLink'),' ',parameters('dockerLink'))]"
+		
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+		{
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('diagnosticsStorageAccountName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('diagnosticsStorageAccountType')]"
+            }
+        },
+		{
+            "type": "Microsoft.Network/publicIpAddresses",
+            "name": "[variables('publicIpAddressName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+            }
+        },
+		{
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+		{
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('networkSecurityGroupName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "priority": 1000,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "22",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+					{
+                        "name": "default-allow-remotedesktop",
+                        "properties": {
+                            "priority": 1010,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "3389",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+		{
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('networkInterfaceName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId(resourceGroup().Name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ]
+        },
+		{
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('virtualMachineName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+						"publisher": "[parameters('imagePublisher')]",
+						"offer": "[parameters('imageOffer')]",
+						"sku": "[parameters('imageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "vhd": {
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().Name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('virtualMachineName'), '20171129145808.vhd')]"
+                        },
+                        "name": "[variables('virtualMachineName')]"
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId(resourceGroup().Name, 'Microsoft.Storage/storageAccounts', variables('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]"
+            ]
+        },
+		{
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('virtualMachineName'),'/LinuxCustomScriptExtension')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.3",
+        "autoUpgradeMinorVersion": "true",
+        "settings": {
+          "fileUris": [
+            "[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"
+          ],
+		  "commandToExecute": "[concat('/usr/bin/nohup /bin/bash -c \"/bin/bash ', variables('scriptName'), '.sh ' , variables('scriptParameters'), ' >> /var/log/azure/minikube.log 2>&1 &\" &')]",
+          "timestamp": "(Get-Date).Ticks",
+          "enableInternalDNSCheck": "false"
+        }
+      }
+    }
+    ],
+    "outputs": {
+    }
+}

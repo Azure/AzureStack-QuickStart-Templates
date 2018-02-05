@@ -48,7 +48,7 @@
 	{
 		"type": "Microsoft.SQLAdapter.Admin/hostingServers",
 		"name": "[parameters('hostingServerName')]",
-		"apiVersion": "2017-02-15-preview",
+		"apiVersion": "2017-08-28",
 		"location": "[resourceGroup().location]",
 		"properties": {
 			"name": "[parameters('hostingServerName')]",

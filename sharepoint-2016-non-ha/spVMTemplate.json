@@ -1,0 +1,216 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "windowsImagePublisher": {
+            "type": "string",
+            "metadata": {
+                "description": "The Publisher of Windows Image"
+            },
+            "defaultValue": "MicrosoftWindowsServer"
+        },
+        "windowsImageOffer": {
+            "type": "string",
+            "metadata": {
+                "description": "The offer of Windows Image"
+            },
+            "defaultValue": "WindowsServer"
+        },
+        "windowsImageSKU": {
+            "type": "string",
+            "metadata": {
+                "description": "The SKU Name of Windows Image"
+            },
+            "defaultValue": "2016-Datacenter"
+        },
+        "windowsImageVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "The Version of Windows Image"
+            },
+            "defaultValue": "latest"
+        },
+        "dataDiskSize": {
+            "type": "int",
+            "metadata": {
+                "description": "The Size of SharePoint VM data disk. Default 10 GB"
+            },
+            "defaultValue": 10
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The Prefix of the VM Name"
+            }
+        },
+        "storageAccount": {
+            "type": "string",
+            "metadata": {
+                "description": "The Storage Account Name"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "metadata": {
+                "description": "The type of the Storage Account created"
+            },
+            "defaultValue": "Standard_LRS"
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The size of the AD VMs Created"
+            },
+            "defaultValue": "Standard_A2"
+        },
+        "subnetResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "the resource id to the subnet"
+            }
+        },
+
+
+        "rdpNATRuleID": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id for the RDP NAT rule"
+            }
+        },
+
+        "lbBEPool": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id for the SharePoint load balancer back end pool"
+            }
+        }
+
+    },
+    "variables": {
+
+        "spNicName": "[concat('SPNic',resourceGroup().name)]",
+        "vmContainerName": "vhds"
+
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccount')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[parameters('storageAccountType')]"
+            }
+        },
+        {
+            "name": "[variables('spNicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-05-01-preview",
+            "dependsOn": [
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('subnetResourceId')]"
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[parameters('lbBEPool')]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                { 
+                                    "id": "[parameters('rdpNATRuleID')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccount'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces',variables('spNicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('windowsImagePublisher')]",
+                        "offer": "[parameters('windowsImageOffer')]",
+                        "sku": "[parameters('windowsImageSKU')]",
+                        "version": "[parameters('windowsImageVersion')]"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('vmName'), '0','-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage','storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/',parameters('vmName'),'0','-data-1.vhd')]"
+                            },
+                            "name": "[concat(parameters('vmName'), '0','data-1.vhd')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "diskSizeGB": "[parameters('dataDiskSize')]",
+                            "lun": 0
+                        },
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage','storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('vmContainerName'),'/', parameters('vmName'), '0','log-1.vhd')]"
+                            },
+                            "name": "[concat(parameters('vmName'), '0','log-1.vhd')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "diskSizeGB": "[parameters('dataDiskSize')]",
+                            "lun": 1
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('spNicName'))]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
