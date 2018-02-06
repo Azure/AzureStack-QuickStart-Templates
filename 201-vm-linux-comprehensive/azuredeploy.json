@@ -234,8 +234,7 @@
         "settings": {
           "fileUris": ["[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"],
           "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]",
-          "timestamp": "(Get-Date).Ticks",
-          "enableInternalDNSCheck": "false"
+          "timestamp": "(Get-Date).Ticks"
         }
       }
     },
