@@ -233,8 +233,7 @@
         "autoUpgradeMinorVersion": "true",
         "settings": {
           "fileUris": ["[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"],
-          "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]",
-          "timestamp": "(Get-Date).Ticks"
+          "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]"
         }
       }
     },
