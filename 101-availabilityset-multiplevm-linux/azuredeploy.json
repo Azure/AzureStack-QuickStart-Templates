@@ -1,96 +1,132 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-    "parameters": {
-        "adminUsername": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the Administrator of the new VMs"
-            },
-            "defaultValue": "vmadmin"
-        },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
-            },
-            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
-        },
-        "numberOfInstances": {
-            "type": "int",
-            "defaultValue": 3,
-            "allowedValues": [
-                2,
-                3,
-                4,
-                5
-            ],
-            "metadata": {
-                "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
-            }
-        },
-        "vmNamePrefix": {
-            "type": "string",
-            "defaultValue": "vmset-",
-            "metadata": {
-                "description": "VM name prefix"
-            }
-        },
-        "osImagePublisher": {
-            "type": "string",
-            "defaultValue": "MicrosoftWindowsServer",
-            "metadata": {
-                "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
-            }
-        },
-        "osImageOffer": {
-            "type": "string",
-            "defaultValue": "Linux",
-            "metadata": {
-                "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
-            }
-        },
-        "osImageSKU": {
-            "type": "string",
-            "defaultValue": "Centos-7.4",
-            "allowedValues": [
-                "Centos-7.4"
-            ],
-            "metadata": {
-                "description": "The Linux version for the VM. This will pick a fully patched image of this given Centos"
-            }
-        }
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Administrator of the new VMs"
+      },
+      "defaultValue": "vmadmin"
     },
-    "variables": {
-        "availabilitySetName": "[toLower(concat('aSet-', resourceGroup().name))]",
-        "storageAccountType": "Standard_LRS",
-        "VMSize": "Standard_A1",
-        "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
-        "windowsImageVersion": "latest",
-        "dataDiskSize": 2,
-
-        "addressPrefix": "10.0.0.0/16",
-        "virtualNetworkName": "[tolower(concat('vNet-',resourceGroup().name))]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-
-        "NICPrefix": "vnic-",
-        "subnetPrefix": "10.0.0.0/24",
-        "subnetName": "vmstaticsubnet",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-
-        "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
-
-        "publicLBName": "[tolower(concat('external-lb-', resourceGroup().name))]",
-        "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
-        "lbFE": "[tolower(concat('external-lb-fe-',resourceGroup().name))]",
-        "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
-
-        "publicIPAddressName": "[tolower(concat('public-ip',resourceGroup().name))]",
-        "rdpPort": 3389,
-        "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
-        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-        "vmContainerName": "vhds"
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+      },
+      "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
     },
+    "numberOfInstances": {
+      "type": "int",
+      "defaultValue": 3,
+      "allowedValues": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "metadata": {
+        "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
+      }
+    },
+    "dataDiskSIze": {
+      "type": "int",
+      "defaultValue": 1000,
+      "allowedValues": [
+        100,
+        500,
+        750,
+        1000
+      ],
+      "metadata": {
+        "description": "Size of the Data Disk"
+      }
+    },
+    "vmNamePrefix": {
+      "type": "string",
+      "defaultValue": "vmset-",
+      "metadata": {
+        "description": "VM name prefix"
+      }
+    },
+    "vmSize": {
+      "allowedValues": [
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4"
+      ],
+      "defaultValue": "Standard_A1",
+      "metadata": {
+        "description": "This is the size of your VM"
+      },
+      "type": "string"
+    },
+    "dnsPrefix": {
+      "type": "string",
+      "defaultValue": "vmdns",
+      "metadata": {
+        "description": "dns name prefix"
+      }
+    },
+    "osImagePublisher": {
+      "type": "string",
+      "defaultValue": "Centos",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageOffer": {
+      "type": "string",
+      "defaultValue": "Centos-7",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageSKU": {
+      "type": "string",
+      "defaultValue": "Centos-7.4",
+      "allowedValues": [
+        "Centos-7.4"
+      ],
+      "metadata": {
+        "description": "The Linux version for the VM. This will pick a fully patched image of this given Centos"
+      }
+    }
+  },
+  "variables": {
+    "availabilitySetName": "[toLower(concat('aSet-', resourceGroup().name))]",
+    "storageAccountType": "Standard_LRS",
+    "vmSize": "[parameters('vmSize')]",
+    "dnsPrefix": "[parameters('dnsPrefix')]",
+    "osImageVersion": "latest",
+    "dataDiskSize": "[parameters('dataDiskSize')]",
+    "addressPrefix": "10.0.0.0/16",
+    "virtualNetworkName": "[tolower(concat('vNet-',resourceGroup().name))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+
+    "NICPrefix": "vnic-",
+    "subnetPrefix": "10.0.0.0/24",
+    "subnetName": "vmstaticsubnet",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+
+    "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
+
+    "publicLBName": "[tolower(concat('external-lb-', resourceGroup().name))]",
+    "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
+    "lbFE": "[tolower(concat('external-lb-fe-',resourceGroup().name))]",
+    "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
+
+    "publicIPAddressName": "[tolower(concat('public-ip',resourceGroup().name))]",
+    "rdpPort": 22,
+    "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+    "vmContainerName": "vhds"
+  },
   "resources": [
     {
         "type": "Microsoft.Storage/storageAccounts",
@@ -209,7 +245,7 @@
     {
         "apiVersion": "2015-06-15",
         "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-        "name": "[concat(variables('publicLBName'), '/RDP-VM', copyIndex())]",
+        "name": "[concat(variables('publicLBName'), '/ssh-VM', copyIndex())]",
         "location": "[resourceGroup().location]",
         "copy": {
             "name": "lbNatLoop",
@@ -240,7 +276,7 @@
         "dependsOn": [
             "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
             "[concat('Microsoft.Network/loadBalancers/', variables('publicLBName'))]",
-            "[concat('Microsoft.Network/loadBalancers/', variables('publicLBName'), '/inboundNatRules/', 'RDP-VM', copyIndex())]"
+            "[concat('Microsoft.Network/loadBalancers/', variables('publicLBName'), '/inboundNatRules/', 'ssh-VM', copyIndex())]"
         ],
         "properties": {
             "ipConfigurations": [
@@ -258,7 +294,7 @@
                         ],
                         "loadBalancerInboundNatRules": [
                             {
-                                "id": "[concat(variables('publiclbID'), '/inboundNatRules/RDP-VM', copyIndex())]"
+                                "id": "[concat(variables('publiclbID'), '/inboundNatRules/ssh-VM', copyIndex())]"
                             }
                         ]
                     }
@@ -297,7 +333,7 @@
                     "publisher": "[parameters('osImagePublisher')]",
                     "offer": "[parameters('osImageOffer')]",
                     "sku": "[parameters('osImageSKU')]",
-                    "version": "[variables('windowsImageVersion')]"
+                    "version": "[variables('osImageVersion')]"
                 },
                 "osDisk": {
                     "name": "osdisk",
