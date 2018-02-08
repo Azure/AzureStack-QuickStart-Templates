@@ -101,7 +101,7 @@
     },
     "vmIoLatencyThresholdInMS": {
       "type": "int",
-      "defaultValue": 60,
+      "defaultValue": 30,
       "metadata": {
         "description": "VM IO workload latency threshold in milliseconds."
       }
