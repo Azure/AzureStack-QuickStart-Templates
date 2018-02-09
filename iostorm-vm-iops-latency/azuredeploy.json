@@ -11,11 +11,11 @@
     },
     "vmAdminPassword": {
       "type": "securestring",
-      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]",      
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]",
       "metadata": {
         "description": "Admin password for the VMs"
       }
-    },    
+    },
     "vmOsSku": {
       "type": "string",
       "defaultValue": "2012-R2-Datacenter",
@@ -38,7 +38,41 @@
         "Standard_A4",
         "Standard_A5",
         "Standard_A6",
-        "Standard_A7"
+        "Standard_A7",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D11",
+        "Standard_D12",
+        "Standard_D13",
+        "Standard_D14",
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D11_v2",
+        "Standard_D12_v2",
+        "Standard_D13_v2",
+        "Standard_D14_v2",
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2"
       ],
       "metadata": {
         "description": "VM size supported by Azure Stack."
@@ -50,7 +84,14 @@
       "metadata": {
         "description": "VM IO workload target data disk size in GB."
       }
-    },    
+    },
+    "vmDataDiskCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of data disks per VM to perform IO on."
+      }
+    },
     "WaitForIoStormCompletion": {
       "type": "bool",
       "defaultValue": true,
@@ -60,7 +101,7 @@
     },
     "vmIoLatencyThresholdInMS": {
       "type": "int",
-      "defaultValue": 60,
+      "defaultValue": 30,
       "metadata": {
         "description": "VM IO workload latency threshold in milliseconds."
       }
@@ -88,7 +129,7 @@
     },
     "vmIoReadPercentage": {
       "type": "int",
-      "defaultValue": 90,
+      "defaultValue": 70,
       "metadata": {
         "description": "VM IO workload read percentage."
       }
@@ -99,7 +140,14 @@
       "metadata": {
         "description": "If non-0 each VM will perform vmFixedIops indefinitely."
       }
-    }        
+    },
+    "vmRunFixedIoLatencyTestAfterGoalSeek": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Run fixed IO test after goalseek using vmFixedIops per VM."
+      }
+    }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
@@ -111,7 +159,7 @@
     "storageAccountType": "Standard_LRS",
     "uniqueStorageAccountName": "[tolower(concat('sa', resourceGroup().name))]",
     "uniqueStorageAccountContainerName": "[tolower(concat('sc', resourceGroup().name))]",
-    "vmAdminUsername": "vmadministrator",    
+    "vmAdminUsername": "vmadministrator",
     "vmName": "[concat('vm', resourceGroup().name)]",
     "vmOsDiskName": "[concat('od', resourceGroup().name)]",
     "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
@@ -128,7 +176,7 @@
     "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
     "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
     "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO",
-    "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",    
+    "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
     "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]"
   },
   "resources": [
@@ -203,7 +251,7 @@
         "dependsOn": [
             "[variables('vnetID')]"
         ]
-    },    
+    },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
@@ -223,7 +271,7 @@
                 "id": "[variables('subnetRef')]"
               },
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"              
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
               }
             }
           }
@@ -267,7 +315,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_A4"
+            "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
@@ -343,26 +391,20 @@
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
-          "dataDisks": [
+          "copy": [
             {
-              "vhd": {
-                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex(),'/',variables('vmDataDiskName'),copyIndex(),'-0','.vhd')]"
-              },
-              "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-0')]",
-              "createOption": "Empty",
-              "caching": "None",
-              "diskSizeGB": "[parameters('vmDataDiskSizeInGB')]",
-              "lun": 0
-            },
-            {
-              "vhd": {
-                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex(),'/',variables('vmDataDiskName'),copyIndex(),'-1','.vhd')]"
-              },
-              "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-1')]",
-              "createOption": "Empty",
-              "caching": "None",
-              "diskSizeGB": "[parameters('vmDataDiskSizeInGB')]",
-              "lun": 1
+              "name": "dataDisks",
+              "count": "[parameters('vmDataDiskCount')]",
+              "input": {
+                "vhd": {
+                  "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),copyIndex('vmLoop'),'/',variables('vmDataDiskName'),copyIndex('vmLoop'),'-',copyIndex('dataDisks'),'.vhd')]"
+                },
+                "name": "[concat(variables('vmDataDiskName'),copyIndex('vmLoop'),'-',copyIndex('dataDisks'))]",
+                "diskSizeGB": "[parameters('vmDataDiskSizeInGB')]",
+                "lun": "[copyIndex('dataDisks')]",
+                "createOption": "Empty",
+                "caching": "None"
+              }
             }
           ]
         },
@@ -403,13 +445,15 @@
             "VMAdminUserName": "[variables('vmAdminUsername')]",
             "VMAdminPassword": "[parameters('vmAdminPassword')]",
             "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
-            "VMIoStartOperations": "[parameters('vmIoStartOperations')]",           
+            "VMIoStartOperations": "[parameters('vmIoStartOperations')]",
             "Location": "[variables('location')]",
             "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
             "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
             "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]",
             "WaitForIoStormCompletion" : "[parameters('WaitForIoStormCompletion')]",
-            "FixedIops": "[parameters('vmFixedIops')]" 
+            "FixedIops": "[parameters('vmFixedIops')]",
+            "RunFixedIoLatencyTestAfterGoalSeek": "[parameters('vmRunFixedIoLatencyTestAfterGoalSeek')]",
+            "DataDisks": "[parameters('vmDataDiskCount')]"
           }
         }
       }
@@ -444,7 +488,9 @@
             "VMIoDuration": "[parameters('vmIoDurationInSec')]",
             "VMIoReadPercentage": "[parameters('vmIoReadPercentage')]",
             "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
-            "FixedIops": "[parameters('vmFixedIops')]"             
+            "FixedIops": "[parameters('vmFixedIops')]",
+            "RunFixedIoLatencyTestAfterGoalSeek": "[parameters('vmRunFixedIoLatencyTestAfterGoalSeek')]",
+            "DataDisks": "[parameters('vmDataDiskCount')]"
           }
         }
       }
