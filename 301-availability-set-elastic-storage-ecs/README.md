@@ -13,7 +13,7 @@ To deploy this template using the scripts from the root of this repo: (change th
 .\Deploy-AzureResourceGroup.ps1 -ResourceGroupLocation 'local' -ArtifactsStagingDirectory '301-availability-set-elastic-storage-ecs'
 ```
 ```bash
-azure-group-deploy.sh -a '301-availability-set-elastic-storage-ecs' -l eastus 
+azure-group-deploy.sh -a '301-availability-set-elastic-storage-ecs' -l local
 ```
 
 This template deploys a **multinode dellemc ecs community edition**. The **ecs community edition** is a **elastic cloud storage solution providing object storage (sr, atoms, cas)**
