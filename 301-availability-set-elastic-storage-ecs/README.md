@@ -1,16 +1,16 @@
 # multinode dellemc ecs community edition in an azure availabilty set
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbottkars%2Fazure-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.local.azurestack.external/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbottkars%2Fazurestack-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
 <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.png"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fbottkars%2Fazure-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fbottkars%2Fazurestack-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
 <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.png"/>
 </a>
 
 To deploy this template using the scripts from the root of this repo: (change the folder name below to match the folder name for this sample)
 
 ```PowerShell
-.\Deploy-AzureResourceGroup.ps1 -ResourceGroupLocation 'eastus' -ArtifactsStagingDirectory '301-availability-set-elastic-storage-ecs'
+.\Deploy-AzureResourceGroup.ps1 -ResourceGroupLocation 'local' -ArtifactsStagingDirectory '301-availability-set-elastic-storage-ecs'
 ```
 ```bash
 azure-group-deploy.sh -a '301-availability-set-elastic-storage-ecs' -l eastus 
@@ -32,6 +32,12 @@ Storage ressources provided per vm
 
 + **vm storage account**: holds the os copy from image (CentOS) and up to 8 data disks per node
 + **diagnostic storage account**: storage for vm diagnostics
+
+#### Supported OSimage Publisher / SKU /Versions
+the following images are supported:
++ **CentOS** this is based on the RogueWave Centos Image using Publicher OpenLogic, SKU CentOS, Version 7.4
++ **CentOS-7** this is based on the original Centos CloudImage using Publisher CentOS, SKU Centos-7, Version Centos-7.4 
+The Centos-7 m,ust be loaded manually or using [Azurestack-Kickstart](https://github.com/bottkars/Azurestack-Kickstart)
 
 #### networkSecurityGroups
 
@@ -73,7 +79,7 @@ once open, click on the upload and load the azuredeploy.json
 
 fill in all parameters to you need and make sure the dns prefix is not used 
 ![new deploy](images/template_edit.png "new template from azure portal")  
-### quickstart emplate 
+### quickstart template 
 
 
 Also, you can use Visual Studio to deploy the template. If you have installed the ressourcegroup extensions creater a new deployment and select '301-availability-set-elastic-storage-ecs' from the quickstart templates
