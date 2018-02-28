@@ -37,7 +37,7 @@ Storage ressources provided per vm
 the following images are supported:
 + **CentOS** this is based on the RogueWave Centos Image using Publicher OpenLogic, SKU CentOS, Version 7.4
 + **CentOS-7** this is based on the original Centos CloudImage using Publisher CentOS, SKU Centos-7, Version Centos-7.4 
-The Centos-7 m,ust be loaded manually or using [Azurestack-Kickstart](https://github.com/bottkars/Azurestack-Kickstart)
+The Centos-7 must be loaded manually or using [Azurestack-Kickstart](https://github.com/bottkars/Azurestack-Kickstart)
 
 #### networkSecurityGroups
 
