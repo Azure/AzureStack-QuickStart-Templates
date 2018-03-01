@@ -642,6 +642,33 @@
         }
       }
     },
+
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2016-03-30",
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "mode": "Parallel",
+        "name": "vmLoopNode"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), parameters('numberOfInstances'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[concat(parameters('VMNamePrefix'), copyIndex(1), '/resetpassword')]",
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "VMAccessForLinux",
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true,
+        "settings": {},
+        "protectedSettings": {
+          "username": "[parameters('adminUsername')]",
+          "password": "[parameters('adminPassword')]",
+          "reset_ssh": true
+        }
+      }
+    },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2016-03-30",
@@ -651,7 +678,9 @@
         "name": "vmLoopNode"
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('VMNamePrefix'), copyIndex(2)))]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2))]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2),'/extensions/configurenode')]"
+
       ],
       "location": "[resourceGroup().location]",
       "name": "[concat(parameters('VMNamePrefix'), copyIndex(2), '/configurenode')]",
@@ -671,7 +700,9 @@
       "location": "[resourceGroup().location]",
       "name": "[concat(parameters('VMNamePrefix'), '1', '/installecs')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('VMNamePrefix'), '1'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), '1')]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'),'1','/extensions/configurenode')]"
+
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
