@@ -643,7 +643,7 @@
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2016-03-30",
       "copy": {
         "count": "[sub(parameters('numberOfInstances'),1)]",
@@ -664,8 +664,7 @@
         "type": "CustomScriptForLinux",
         "autoUpgradeMinorVersion": "true",
         "typeHandlerVersion": "1.4"
-      },
-      "type": "Microsoft.Compute/virtualMachines/extensions"
+      }
     },
     {
       "apiVersion": "2016-03-30",
