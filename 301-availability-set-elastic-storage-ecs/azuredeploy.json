@@ -687,7 +687,7 @@
         "publisher": "Microsoft.OSTCExtensions",
         "settings": {
           "commandToExecute": "./ecs_pre.sh",
-          "fileUris": [ "[concat(variables('gitUrl'),'/emcecs/ecs_pre.sh')]" ]
+          "fileUris": [ "[concat(variables('gitUrl'),'/scripts/ecs_pre.sh')]" ]
         },
         "type": "CustomScriptForLinux",
         "autoUpgradeMinorVersion": "true",
@@ -708,10 +708,10 @@
         "settings": {
           "commandToExecute": "[concat('bash ecs.sh --DISKNUM ',parameters('dataDiskCount'),' --NODENUM ',parameters('numberOfInstances'),' --NODEPREFIX ',parameters('VMNamePrefix'),' --ECSUSER ',parameters('adminUsername'),' --ECSPASSWORD ',parameters('adminPassword'))]",
           "fileUris": [
-            "[concat(variables('gitUrl'),'/emcecs/ecs_pre.sh')]",
-            "[concat(variables('gitUrl'),'/emcecs/deploy.yml')]",
-            "[concat(variables('gitUrl'),'/emcecs/ecs.sh')]",
-            "[concat(variables('gitUrl'),'/emcecs/ecs-installer.service')]"
+            "[concat(variables('gitUrl'),'/scripts/ecs_pre.sh')]",
+            "[concat(variables('gitUrl'),'/scripts/deploy.yml')]",
+            "[concat(variables('gitUrl'),'/scripts/ecs.sh')]",
+            "[concat(variables('gitUrl'),'/scripts/ecs-installer.service')]"
           ]
         },
         "type": "CustomScriptForLinux",

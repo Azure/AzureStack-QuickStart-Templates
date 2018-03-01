@@ -101,7 +101,7 @@ The ressource group deployment will take between 10 and 15 Minutes, depneding on
 ![rg](images/rg_done.png "parameters for resource group")
 
 once the resource group deployment has finished, the ecs installer will be started from
-[ecs.sh](emcecs/ecs.sh)
+[ecs.sh](scripts/ecs.sh)
 
 #### monitor installation
 ssh into the first node (use the external dns name ), port 2201
@@ -111,7 +111,7 @@ tail -f /root/install.log
 ```
 ![log](images/log.png "installation logs")
 the system will do a reboot after package installation.
-the reboot(s) will be controlled by a systemd service [ecs-installer.service](emcecs/ecs-installer.service)
+the reboot(s) will be controlled by a systemd service [ecs-installer.service](scripts/ecs-installer.service)
 
 after the reboot, the ECS ansible installer starts withn step1 and step2  
 the progress is also logged 
