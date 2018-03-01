@@ -679,7 +679,7 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2))]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2),'/extensions/configurenode')]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2),'/extensions/resetpassword')]"
 
       ],
       "location": "[resourceGroup().location]",
@@ -701,7 +701,7 @@
       "name": "[concat(parameters('VMNamePrefix'), '1', '/installecs')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), '1')]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'),'1','/extensions/configurenode')]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'),'1','/extensions/resetpassword')]"
 
       ],
       "properties": {
