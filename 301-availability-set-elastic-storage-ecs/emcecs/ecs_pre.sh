@@ -7,6 +7,7 @@ myreboot () {
 yum install firewalld libselinux-python docker ntp pigz python-docker-py -y
 # for openlogic
 sed -i -e 's/#GatewayPorts no/GatewayPorts yes/g' /etc/ssh/sshd_config 
+sed -i -e 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config 
 yum remove *nfs* -y 
 systemctl disable rpcbind 
 myreboot &  

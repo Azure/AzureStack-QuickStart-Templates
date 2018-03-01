@@ -45,6 +45,7 @@ before_reboot(){
 yum install git firewalld -y
 #for openlogic
 sed -i -e 's/#GatewayPorts no/GatewayPorts yes/g' /etc/ssh/sshd_config
+sed -i -e 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config 
 systemctl disable rpcbind    
 cp ecs.sh /root/ 
 chmod +X /root/ecs.sh 
