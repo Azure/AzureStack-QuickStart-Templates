@@ -161,7 +161,11 @@
       9024,
       9025
     ],
+<<<<<<< HEAD
     "gitUrl": "https://raw.githubusercontent.com/azure/AzureStack-QuickStart-Templates/master/301-availability-set-elastic-storage-ecs"
+=======
+    "gitUrl": "https://raw.githubusercontent.com/bottkars/AzureStack-QuickStart-Templates/kb-dev/301-availability-set-elastic-storage-ecs"
+>>>>>>> kb-dev
   },
   "resources": [
     {
@@ -643,7 +647,33 @@
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2016-03-30",
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "mode": "Parallel",
+        "name": "vmLoopNode"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), parameters('numberOfInstances'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[concat(parameters('VMNamePrefix'), copyIndex(1), '/resetpassword')]",
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "VMAccessForLinux",
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true,
+        "settings": {},
+        "protectedSettings": {
+          "username": "[parameters('adminUsername')]",
+          "password": "[parameters('adminPassword')]",
+          "reset_ssh": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2016-03-30",
       "copy": {
         "count": "[sub(parameters('numberOfInstances'),1)]",
@@ -651,7 +681,9 @@
         "name": "vmLoopNode"
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('VMNamePrefix'), copyIndex(2)))]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2))]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2),'/extensions/resetpassword')]"
+
       ],
       "location": "[resourceGroup().location]",
       "name": "[concat(parameters('VMNamePrefix'), copyIndex(2), '/configurenode')]",
@@ -664,15 +696,16 @@
         "type": "CustomScriptForLinux",
         "autoUpgradeMinorVersion": "true",
         "typeHandlerVersion": "1.4"
-      },
-      "type": "Microsoft.Compute/virtualMachines/extensions"
+      }
     },
     {
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "name": "[concat(parameters('VMNamePrefix'), '1', '/installecs')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('VMNamePrefix'), '1'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), '1')]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'),'1','/extensions/resetpassword')]"
+
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
