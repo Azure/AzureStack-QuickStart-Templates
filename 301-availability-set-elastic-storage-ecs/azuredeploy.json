@@ -642,7 +642,6 @@
         }
       }
     },
-
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2016-03-30",
