@@ -12,7 +12,10 @@
 
 ## Prerequisites
 The required VM Types need to have at least 4vCPU and 16GB memory.
-With the current AzureStrack VM Sizes, this would be 28GN Mem per machine, so make sure you ASDK has enough Memory...
+With the current AzureStrack VM Sizes, this would be 28G Memory per machine, so make sure you ASDK has enough Memory...
+
+To depoloy to an ASDK Admin Tenant, just click on "ASDK Admin Tenant"   
+To depoloy to an ASDK User Tenant, just click on "Deploy to ASDK"  
 
 To deploy this template using the scripts from the root of this repo: (change the folder name below to match the folder name for this sample)
 
