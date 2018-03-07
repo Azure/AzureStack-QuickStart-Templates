@@ -1,4 +1,4 @@
-# Multinode DELLEMC ECS Community Edition in an Azure Availabilty Set
+# Deploy Multinode DELLEMC ECS Elastic Storage S3 Community Edition in an AzureStack Availabilty Set
 
 <a href="https://portal.local.azurestack.external/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazurestack-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
 <img src="images/deploytoasdk.png"/>
