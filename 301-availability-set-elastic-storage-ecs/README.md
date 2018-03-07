@@ -1,11 +1,17 @@
-# multinode dellemc ecs community edition in an azure availabilty set
+# Multinode DELLEMC ECS Community Edition in an Azure Availabilty Set
 
-<a href="https://portal.local.azurestack.external/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbottkars%2Fazurestack-quickstart-templates%2Fkb-dev%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.local.azurestack.external/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazurestack-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
 <img src="images/deploytoasdk.png"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fbottkars%2Fazurestack-quickstart-templates%2Fkb-dev%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazurestack-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
 <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.png"/>
 </a>
+
+## Prerequisites
+The required VM Types need to have at least 4vCPU and 16GB memory.
+Depending on your Subscription, you may require to increase your arm quota vor cores.  
+also notice that some vm types are not available in some regions, specially the promo ones.  
+
 
 To deploy this template using the scripts from the root of this repo: (change the folder name below to match the folder name for this sample)
 
@@ -58,10 +64,6 @@ Password Change extension
 the Deployment utilizes the Password change extension for linux
 + **resetpassword** to overcome some issues where cloudinit does not accept password
 the default password is Subscription#**id**, example Subscription#8c21cadc-9e41-459e-bf4b-9b5aa2fad938
-## Prerequisites
-The required VM Types need to have at least 4vCPU and 16GB memory.
-Depending on your Subscription, you may require to increase your arm quota vor cores.  
-also notice that some vm types are not available in some regions, specially the promo ones.
 
 ## Deployment steps
 

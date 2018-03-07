@@ -122,6 +122,20 @@
       "metadata": {
         "description": "The Linux version for the VM. Use 7.4 for default Marketplace"
       }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+          "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+      },
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/301-availability-set-elastic-storage-ecs"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+          "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -139,35 +153,22 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
     "loadBalancerProbeName": "443Probe",
-    "loadBalancerBackendName": "LoadBalancerBackend",
     "publicLBName": "[tolower(concat('external-lb-', resourceGroup().name))]",
     "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
     "lbFE": "[tolower(concat('external-lb-fe-',resourceGroup().name))]",
     "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
-    "apiVersion": "2015-06-15",
     "publicIPAddressName": "[tolower(concat('public-ip',resourceGroup().name))]",
     "nsgName": "[tolower(concat('vmnsg',resourceGroup().name))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "vmContainerName": "vhds",
     "diagnosticsStorageAccountName": "[concat('diag', uniquestring(resourceGroup().id))]",
-    "diagnosticsStorageAccountType": "Standard_LRS",
-    "lbPorts": [
-      443,
-      2049,
-      9020,
-      9021,
-      9022,
-      9023,
-      9024,
-      9025
-    ],
-    "gitUrl": "https://raw.githubusercontent.com/bottkars/AzureStack-QuickStart-Templates/kb-dev/301-availability-set-elastic-storage-ecs"
+    "diagnosticsStorageAccountType": "Standard_LRS"
   },
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageName')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-04-17",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
@@ -179,7 +180,7 @@
     {
       "name": "[variables('diagnosticsStorageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-04-17",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('diagnosticsStorageAccountType')]"
@@ -188,7 +189,7 @@
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
@@ -211,7 +212,7 @@
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2016.03.30",
       "location": "[resourceGroup().location]",
       "properties": {
         "platformFaultDomainCount": 1,
@@ -221,7 +222,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015.06.15",
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
@@ -236,7 +237,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015.06.15",
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
@@ -261,7 +262,7 @@
       ]
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015.06.15",
       "name": "[variables('publiclbName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[resourceGroup().location]",
@@ -510,7 +511,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015.06.15",
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
       "name": "[concat(variables('publicLBName'), '/ssh-VM', copyIndex(1))]",
       "location": "[resourceGroup().location]",
@@ -534,7 +535,7 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('NICPrefix'), parameters('vmNamePrefix'), copyIndex(1))]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015.06.15",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "nicLoop",
@@ -573,7 +574,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('vmNamePrefix'), copyIndex(1))]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "virtualMachineLoop",
@@ -669,7 +670,6 @@
       }
     },
     {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2016-03-30",
       "copy": {
         "count": "[sub(parameters('numberOfInstances'),1)]",
@@ -678,7 +678,6 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'), copyIndex(2),'/extensions/resetpassword')]"
-
       ],
       "location": "[resourceGroup().location]",
       "name": "[concat(parameters('VMNamePrefix'), copyIndex(2), '/configurenode')]",
@@ -686,35 +685,37 @@
         "publisher": "Microsoft.OSTCExtensions",
         "settings": {
           "commandToExecute": "./ecs_pre.sh",
-          "fileUris": [ "[concat(variables('gitUrl'),'/scripts/ecs_pre.sh')]" ]
+          "fileUris": [ "[concat(parameters('_artifactsLocation'),'/scripts/ecs_pre.sh')]" ]
         },
         "type": "CustomScriptForLinux",
-        "autoUpgradeMinorVersion": "true",
-        "typeHandlerVersion": "1.4"
-      }
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true
+      },
+      "type": "Microsoft.Compute/virtualMachines/extensions"
     },
     {
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
-      "name": "[concat(parameters('VMNamePrefix'), '1', '/installecs')]",
+      "name": "[concat(parameters('VMNamePrefix'),'1','/installecs')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('VMNamePrefix'),'1','/extensions/resetpassword')]"
-
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
         "settings": {
-          "commandToExecute": "[concat('bash ecs.sh --DISKNUM ',parameters('dataDiskCount'),' --NODENUM ',parameters('numberOfInstances'),' --NODEPREFIX ',parameters('VMNamePrefix'),' --ECSUSER ',parameters('adminUsername'),' --ECSPASSWORD ',parameters('adminPassword'))]",
           "fileUris": [
-            "[concat(variables('gitUrl'),'/scripts/ecs_pre.sh')]",
-            "[concat(variables('gitUrl'),'/scripts/deploy.yml')]",
-            "[concat(variables('gitUrl'),'/scripts/ecs.sh')]",
-            "[concat(variables('gitUrl'),'/scripts/ecs-installer.service')]"
+            "[concat(parameters('_artifactsLocation'),'/scripts/ecs_pre.sh')]",
+            "[concat(parameters('_artifactsLocation'),'/scripts/deploy.yml')]",
+            "[concat(parameters('_artifactsLocation'),'/scripts/ecs.sh')]",
+            "[concat(parameters('_artifactsLocation'),'/scripts/ecs-installer.service')]"
           ]
         },
+        "protectedSettings": {
+          "commandToExecute": "[concat('bash ecs.sh --DISKNUM ',parameters('dataDiskCount'),' --NODENUM ',parameters('numberOfInstances'),' --NODEPREFIX ',parameters('VMNamePrefix'),' --ECSUSER ',parameters('adminUsername'),' --ECSPASSWORD ',parameters('adminPassword'))]"
+        },
         "type": "CustomScriptForLinux",
-        "autoUpgradeMinorVersion": "true",
-        "typeHandlerVersion": "1.4"
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true
       },
       "type": "Microsoft.Compute/virtualMachines/extensions"
     }
