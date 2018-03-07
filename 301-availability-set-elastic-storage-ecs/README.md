@@ -12,9 +12,7 @@
 
 ## Prerequisites
 The required VM Types need to have at least 4vCPU and 16GB memory.
-Depending on your Subscription, you may require to increase your arm quota vor cores.  
-also notice that some vm types are not available in some regions, specially the promo ones.  
-
+With the current AzureStrack VM Sizes, this would be 28GN Mem per machine, so make sure you ASDK has enough Memory...
 
 To deploy this template using the scripts from the root of this repo: (change the folder name below to match the folder name for this sample)
 
