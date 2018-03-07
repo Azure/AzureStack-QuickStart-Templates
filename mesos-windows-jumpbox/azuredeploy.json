@@ -541,9 +541,9 @@
                 "[concat('Microsoft.Compute/virtualMachines/', variables('masterVMNamePrefix'), copyIndex())]"
             ],
             "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.3",
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('mesosScriptName'))]", "[concat(parameters('configureScriptsRootLocation'), variables('nginxScriptName'))]" ],
@@ -708,9 +708,9 @@
                 "[concat('Microsoft.Compute/virtualMachines/', variables('agentVMNamePrefix'), copyIndex())]"
             ],
             "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.3",
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [ "[concat(parameters('configureScriptsRootLocation'), variables('mesosScriptName'))]", "[concat(parameters('configureScriptsRootLocation'), variables('nginxScriptName'))]" ],

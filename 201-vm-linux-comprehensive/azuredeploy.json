@@ -227,15 +227,13 @@
         "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
       ],
       "properties": {
-        "publisher": "Microsoft.OSTCExtensions",
-        "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.3",
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
         "autoUpgradeMinorVersion": "true",
         "settings": {
           "fileUris": ["[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"],
-          "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]",
-          "timestamp": "(Get-Date).Ticks",
-          "enableInternalDNSCheck": "false"
+          "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]"
         }
       }
     },
