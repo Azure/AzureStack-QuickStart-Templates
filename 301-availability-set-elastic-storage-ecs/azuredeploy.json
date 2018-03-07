@@ -212,7 +212,7 @@
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
-      "apiVersion": "2016.03.30",
+      "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
         "platformFaultDomainCount": 1,
@@ -222,7 +222,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
-      "apiVersion": "2015.06.15",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
@@ -237,7 +237,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
-      "apiVersion": "2015.06.15",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
@@ -262,7 +262,7 @@
       ]
     },
     {
-      "apiVersion": "2015.06.15",
+      "apiVersion": "2015-06-15",
       "name": "[variables('publiclbName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[resourceGroup().location]",
@@ -511,7 +511,7 @@
       }
     },
     {
-      "apiVersion": "2015.06.15",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
       "name": "[concat(variables('publicLBName'), '/ssh-VM', copyIndex(1))]",
       "location": "[resourceGroup().location]",
@@ -535,7 +535,7 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('NICPrefix'), parameters('vmNamePrefix'), copyIndex(1))]",
-      "apiVersion": "2015.06.15",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "nicLoop",
