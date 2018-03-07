@@ -168,7 +168,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageName')]",
-      "apiVersion": "2017-04-17",
+      "apiVersion": "2016-01-01",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
@@ -180,7 +180,7 @@
     {
       "name": "[variables('diagnosticsStorageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2017-04-17",
+      "apiVersion": "2016-01-01",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('diagnosticsStorageAccountType')]"
