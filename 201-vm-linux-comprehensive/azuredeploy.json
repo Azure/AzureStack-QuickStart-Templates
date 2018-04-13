@@ -241,31 +241,11 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),'/LinuxVMAccessExtension')]",
-      "apiVersion": "2016-03-30",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxCustomScriptExtension')]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.OSTCExtensions",
-        "type": "VMAccessForLinux",
-        "typeHandlerVersion": "1.3",
-        "autoUpgradeMinorVersion": "true",
-        "settings": { },
-        "protectedSettings": {
-          "username": "[parameters('adminUsername')]",
-          "password": "[parameters('adminPassword')]"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),'/installospatching')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxVMAccessExtension')]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxCustomScriptExtension')]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
