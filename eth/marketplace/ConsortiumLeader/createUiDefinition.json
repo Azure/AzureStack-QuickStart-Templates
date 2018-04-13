@@ -1,0 +1,611 @@
+{
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.0.1-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "namePrefix",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Resource prefix",
+        "toolTip": "String used as a base for naming resources (6 alphanumeric characters or less).  A unique hash is prepended to the string for some resources, while resource-specific information is appended.",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z][a-z0-9-]{1,5}$",
+          "validationMessage": "Resource prefix must be between 2 and 6 characters long, must begin with a lowercase letter, and can contain only numbers and lowercase letters."
+        }
+      },
+      {
+        "name": "adminUsername",
+        "type": "Microsoft.Compute.UserNameTextBox",
+        "label": "VM user name",
+        "defaultValue": "gethadmin",
+        "toolTip": "Admin username for all of the deployed virtual machines.",
+        "osPlatform": "Linux"
+      },
+      {
+        "name": "adminCredentials",
+        "type": "Microsoft.Compute.CredentialsCombo",
+        "label": {
+          "authenticationType": "Authentication type",
+          "password": "Password",
+          "confirmPassword": "Confirm password",
+          "sshPublicKey": "SSH public key"
+        },
+        "toolTip": {
+          "authenticationType": "",
+          "password": "VM password must be 12 characters and have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character.",
+          "sshPublicKey": ""
+        },
+        "constraints": {
+          "required": true
+        },
+        "options": {
+          "hideConfirmation": false
+        },
+        "osPlatform": "Linux"
+      }
+    ],
+    "steps": [
+      {
+        "name": "NetworkSize",
+        "label": "Network size and performance",
+        "subLabel": {
+          "preValidation": "Define the number and size and nodes in the network",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Network Size and Performance",
+        "elements": [
+          {
+            "name": "consortiumMemberIdValue",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Consortium Member Id",
+            "defaultValue": "0",
+            "toolTip": "The Id associated with each member participating in the consortium network.  Member Id should be unique across different members in the same network.",
+            "constraints": {
+              "required": true,
+              "regex": "^(?:25[0-5]|2[0-4]\\d|[01]\\d\\d|\\d?\\d)$",
+              "validationMessage": "Must be between 0 and 255"
+            },
+            "visible": "true"
+          },
+          {
+            "name": "mnSection",
+            "type": "Microsoft.Common.Section",
+            "label": "Mining Nodes",
+            "elements": [
+              {
+                "name": "numberOfMiningNodes",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Number of mining nodes per member",
+                "defaultValue": "2",
+                "toolTip": "Mining nodes record transactions within a blockchain network.  Choose the number of nodes that meet your availability and security requirements.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "2",
+                      "value": 2
+                    },
+                    {
+                      "label": "3",
+                      "value": 3
+                    },
+                    {
+                      "label": "4",
+                      "value": 4
+                    },
+                    {
+                      "label": "5",
+                      "value": 5
+                    },
+                    {
+                      "label": "6",
+                      "value": 6
+                    },
+                    {
+                      "label": "7",
+                      "value": 7
+                    },
+                    {
+                      "label": "8",
+                      "value": 8
+                    },
+                    {
+                      "label": "9",
+                      "value": 9
+                    },
+                    {
+                      "label": "10",
+                      "value": 10
+                    },
+                    {
+                      "label": "11",
+                      "value": 11
+                    },
+                    {
+                      "label": "12",
+                      "value": 12
+                    },
+                    {
+                      "label": "13",
+                      "value": 13
+                    },
+                    {
+                      "label": "14",
+                      "value": 14
+                    },
+                    {
+                      "label": "15",
+                      "value": 15
+                    }
+                  ]
+                },
+                "visible": true
+              },
+              {
+                "name": "mnStoragePerformance",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Mining node storage performance",
+                "defaultValue": "Standard",
+                "toolTip": "Standard storage is backed by magnetic drives and provides the lowest cost per GB. Premium storage accounts are backed by solid state drives and offer consistent, low-latency performance. They can only be used with Azure virtual machine disks, and are best for I/O-intensive applications. This setting can't be changed after the storage account is created. [Learn more](https://azure.microsoft.com/documentation/articles/storage-introduction/#introducing-the-azure-storage-services)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard",
+                      "value": "Standard"
+                    },
+                    {
+                      "label": "Premium",
+                      "value": "Premium"
+                    }
+                  ]
+                },
+                "visible": true
+              },
+              {
+                "name": "mnStorageReplication-Standard",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Mining node storage replication",
+                "defaultValue": "Locally-redundant storage (LRS)",
+                "toolTip": "Data Azure storage is always replicated to ensure durability and high availability. Choose a replication strategy that matches your durability requirements. Some settings can't be changed after the storage account is created.   [Learn more](https://azure.microsoft.com/documentation/articles/storage-redundancy/)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Locally-redundant storage (LRS)",
+                      "value": "LRS"
+                    },
+                    {
+                      "label": "Geo-redundant storage (GRS)",
+                      "value": "GRS"
+                    },
+                    {
+                      "label": "Read-access geo-redundant storage (RAGRS)",
+                      "value": "RAGRS"
+                    }
+                  ]
+                },
+                "visible": "[equals(steps('NetworkSize').mnSection.mnStoragePerformance, 'Standard')]"
+              },
+              {
+                "name": "mnStorageReplication-Premium",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Mining node storage replication",
+                "defaultValue": "Locally-redundant storage (LRS)",
+                "toolTip": "Data Azure storage is always replicated to ensure durability and high availability. Choose a replication strategy that matches your durability requirements. Some settings can't be changed after the storage account is created.   [Learn more](https://azure.microsoft.com/documentation/articles/storage-redundancy/)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Locally-redundant storage (LRS)",
+                      "value": "LRS"
+                    }
+                  ]
+                },
+                "visible": "[equals(steps('NetworkSize').mnSection.mnStoragePerformance, 'Premium')]"
+              },
+              {
+                "name": "mnNodeVMSizeHDD",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Mining node virtual machine size",
+                "toolTip": "",
+                "recommendedSizes": [
+                  "Standard_D1_v2",
+                  "Standard_D1",
+                  "Standard_A1"
+                ],
+                "constraints": {
+                  "allowedSizes": [
+                    "Standard_A1",
+                    "Standard_A2",
+                    "Standard_A3",
+                    "Standard_A4",
+                    "Standard_A5",
+                    "Standard_A6",
+                    "Standard_A7",
+                    "Standard_A8",
+                    "Standard_A9",
+                    "Standard_A10",
+                    "Standard_A11",
+                    "Standard_D1",
+                    "Standard_D2",
+                    "Standard_D3",
+                    "Standard_D4",
+                    "Standard_D11",
+                    "Standard_D12",
+                    "Standard_D13",
+                    "Standard_D14",
+                    "Standard_D1_v2",
+                    "Standard_D2_v2",
+                    "Standard_D3_v2",
+                    "Standard_D4_v2",
+                    "Standard_D5_v2",
+                    "Standard_D11_v2",
+                    "Standard_D12_v2",
+                    "Standard_D13_v2",
+                    "Standard_D14_v2",
+                    "Standard_D15_v2",
+                    "Standard_F1",
+                    "Standard_F2",
+                    "Standard_F4",
+                    "Standard_F8",
+                    "Standard_F16"
+                  ],
+                  "excludedSizes": []
+                },
+                "osPlatform": "Linux",
+                "count": "[steps('NetworkSize').mnSection.numberOfMiningNodes]",
+                "visible": "[equals(steps('NetworkSize').mnSection.mnStoragePerformance, 'Standard')]"
+              },
+              {
+                "name": "mnNodeVMSizeSSD",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Mining node virtual machine size",
+                "toolTip": "",
+                "recommendedSizes": [
+                  "Standard_DS1_v2",
+                  "Standard_DS1",
+                  "Standard_F1s"
+                ],
+                "constraints": {
+                  "allowedSizes": [
+                    "Standard_DS1",
+                    "Standard_DS2",
+                    "Standard_DS3",
+                    "Standard_DS4",
+                    "Standard_DS11",
+                    "Standard_DS12",
+                    "Standard_DS13",
+                    "Standard_DS14",
+                    "Standard_DS1_v2",
+                    "Standard_DS2_v2",
+                    "Standard_DS3_v2",
+                    "Standard_DS4_v2",
+                    "Standard_DS5_v2",
+                    "Standard_DS11_v2",
+                    "Standard_DS12_v2",
+                    "Standard_DS13_v2",
+                    "Standard_DS14_v2",
+                    "Standard_DS15_v2",
+                    "Standard_F1s",
+                    "Standard_F2s",
+                    "Standard_F4s",
+                    "Standard_F8s",
+                    "Standard_F16s"
+                  ],
+                  "excludedSizes": []
+                },
+                "osPlatform": "Linux",
+                "count": "[steps('NetworkSize').mnSection.numberOfMiningNodes]",
+                "visible": "[equals(steps('NetworkSize').mnSection.mnStoragePerformance, 'Premium')]"
+              }
+            ]
+          },
+          {
+            "name": "txSection",
+            "type": "Microsoft.Common.Section",
+            "label": "Transaction Nodes",
+            "elements": [
+              {
+                "name": "numTXNodes",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Number of load balanced transaction nodes",
+                "defaultValue": "1",
+                "toolTip": "An application or user interacts with a load balanced set of transaction nodes to submit transactions to the network.  Choose the number of nodes that meets your availability requirements.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "1",
+                      "value": 1
+                    },
+                    {
+                      "label": "2",
+                      "value": 2
+                    },
+                    {
+                      "label": "3",
+                      "value": 3
+                    },
+                    {
+                      "label": "4",
+                      "value": 4
+                    },
+                    {
+                      "label": "5",
+                      "value": 5
+                    }
+                  ]
+                },
+                "visible": true
+              },
+              {
+                "name": "txStoragePerformance",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Transaction node storage performance",
+                "defaultValue": "Standard",
+                "toolTip": "Standard storage is backed by magnetic drives and provides the lowest cost per GB. Premium storage accounts are backed by solid state drives and offer consistent, low-latency performance. They can only be used with Azure virtual machine disks, and are best for I/O-intensive applications. This setting can't be changed after the storage account is created. [Learn more](https://azure.microsoft.com/documentation/articles/storage-introduction/#introducing-the-azure-storage-services)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard",
+                      "value": "Standard"
+                    },
+                    {
+                      "label": "Premium",
+                      "value": "Premium"
+                    }
+                  ]
+                },
+                "visible": true
+              },
+              {
+                "name": "txStorageReplication-Standard",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Transaction node storage replication",
+                "defaultValue": "Locally-redundant storage (LRS)",
+                "toolTip": "Data Azure storage is always replicated to ensure durability and high availability. Choose a replication strategy that matches your durability requirements. Some settings can't be changed after the storage account is created.   [Learn more](https://azure.microsoft.com/documentation/articles/storage-redundancy/)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Locally-redundant storage (LRS)",
+                      "value": "LRS"
+                    },
+                    {
+                      "label": "Geo-redundant storage (GRS)",
+                      "value": "GRS"
+                    },
+                    {
+                      "label": "Read-access geo-redundant storage (RAGRS)",
+                      "value": "RAGRS"
+                    }
+                  ]
+                },
+                "visible": "[equals(steps('NetworkSize').txSection.txStoragePerformance, 'Standard')]"
+              },
+              {
+                "name": "txStorageReplication-Premium",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Transaction node storage replication",
+                "defaultValue": "Locally-redundant storage (LRS)",
+                "toolTip": "Data Azure storage is always replicated to ensure durability and high availability. Choose a replication strategy that matches your durability requirements. Some settings can't be changed after the storage account is created.   [Learn more](https://azure.microsoft.com/documentation/articles/storage-redundancy/)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Locally-redundant storage (LRS)",
+                      "value": "LRS"
+                    }
+                  ]
+                },
+                "visible": "[equals(steps('NetworkSize').txSection.txStoragePerformance, 'Premium')]"
+              },
+              {
+                "name": "txNodeVMSizeHDD",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Transaction node virtual machine size",
+                "toolTip": "",
+                "recommendedSizes": [
+                  "Standard_D1_v2",
+                  "Standard_D1",
+                  "Standard_A1"
+                ],
+                "constraints": {
+                  "allowedSizes": [
+                    "Standard_A1",
+                    "Standard_A2",
+                    "Standard_A3",
+                    "Standard_A4",
+                    "Standard_A5",
+                    "Standard_A6",
+                    "Standard_A7",
+                    "Standard_A8",
+                    "Standard_A9",
+                    "Standard_A10",
+                    "Standard_A11",
+                    "Standard_D1",
+                    "Standard_D2",
+                    "Standard_D3",
+                    "Standard_D4",
+                    "Standard_D11",
+                    "Standard_D12",
+                    "Standard_D13",
+                    "Standard_D14",
+                    "Standard_D1_v2",
+                    "Standard_D2_v2",
+                    "Standard_D3_v2",
+                    "Standard_D4_v2",
+                    "Standard_D5_v2",
+                    "Standard_D11_v2",
+                    "Standard_D12_v2",
+                    "Standard_D13_v2",
+                    "Standard_D14_v2",
+                    "Standard_D15_v2",
+                    "Standard_F1",
+                    "Standard_F2",
+                    "Standard_F4",
+                    "Standard_F8",
+                    "Standard_F16"
+                  ],
+                  "excludedSizes": []
+                },
+                "osPlatform": "Linux",
+                "count": "[steps('NetworkSize').txSection.numTXNodes]",
+                "visible": "[equals(steps('NetworkSize').txSection.txStoragePerformance, 'Standard')]"
+              },
+              {
+                "name": "txNodeVMSizeSSD",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Transaction node virtual machine size",
+                "toolTip": "",
+                "recommendedSizes": [
+                  "Standard_DS1_v2",
+                  "Standard_DS1",
+                  "Standard_F1s"
+                ],
+                "constraints": {
+                  "allowedSizes": [
+                    "Standard_DS1",
+                    "Standard_DS2",
+                    "Standard_DS3",
+                    "Standard_DS4",
+                    "Standard_DS11",
+                    "Standard_DS12",
+                    "Standard_DS13",
+                    "Standard_DS14",
+                    "Standard_DS1_v2",
+                    "Standard_DS2_v2",
+                    "Standard_DS3_v2",
+                    "Standard_DS4_v2",
+                    "Standard_DS5_v2",
+                    "Standard_DS11_v2",
+                    "Standard_DS12_v2",
+                    "Standard_DS13_v2",
+                    "Standard_DS14_v2",
+                    "Standard_DS15_v2",
+                    "Standard_F1s",
+                    "Standard_F2s",
+                    "Standard_F4s",
+                    "Standard_F8s",
+                    "Standard_F16s"
+                  ],
+                  "excludedSizes": []
+                },
+                "osPlatform": "Linux",
+                "count": "[steps('NetworkSize').txSection.numTXNodes]",
+                "visible": "[equals(steps('NetworkSize').txSection.txStoragePerformance, 'Premium')]"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "EthereumSettings",
+        "label": "Ethereum Settings",
+        "subLabel": {
+          "preValidation": "Configure the Ethereum nodes",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Ethereum Settings",
+        "elements": [
+          {
+            "name": "ethereumNetworkID",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Network ID",
+            "defaultValue": "10101010",
+            "toolTip": "ID used to name the private Ethereum network created.  Only nodes that share the same ID peer with each other.",
+            "constraints": {
+              "required": true,
+              "regex": "^[0-9]{1,9}$",
+              "validationMessage": "Only numeric values up to 9 characters long allowed."
+            },
+            "visible": "true"
+          },
+          {
+            "type": "Microsoft.Common.OptionsGroup",
+            "name": "genesisBlockCreation",
+            "label": "Custom Genesis Block",
+            "toolTip": "Option to either automatically generate a genesis block or provide a custom one.",
+            "defaultValue": "No",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "GENESIS"
+                },
+                {
+                  "label": "No",
+                  "value": "PASSWORD"
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "name": "genesisBlock",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Genesis Block",
+            "defaultValue": "",
+            "toolTip": "JSON string representing custom genesis block",
+            "constraints": {
+              "required": "[contains(steps('EthereumSettings').genesisBlockCreation, 'GENESIS')]"
+            },
+            "visible": "[contains(steps('EthereumSettings').genesisBlockCreation, 'GENESIS')]"
+          },
+          {
+            "name": "ethereumAccountPsswd",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Ethereum account password",
+              "confirmPassword": "Confirm password"
+            },
+            "defaultValue": "",
+            "toolTip": "Password used to secure the default Ethereum account that will be generated.",
+            "constraints": {
+              "required": "[contains(steps('EthereumSettings').genesisBlockCreation, 'PASSWORD')]",
+              "regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[^\"]{12,}$",
+              "validationMessage": "Password must be 12 characters or more with a minimum of 1 lower case, 1 upper case and one number. Double quotes are not allowed."
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[contains(steps('EthereumSettings').genesisBlockCreation, 'PASSWORD')]"
+          },
+          {
+            "name": "ethereumAccountPassphrase",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Ethereum private key passphrase",
+              "confirmPassword": "Confirm passphrase"
+            },
+            "defaultValue": "",
+            "toolTip": "Passphrase used to generate the private key associated with the default Ethereum account that is generated.  Consider a passphrase with sufficient randomness to ensure a strong private key.",
+            "constraints": {
+              "required": "[contains(steps('EthereumSettings').genesisBlockCreation, 'PASSWORD')]",
+              "regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[^\"]{12,}$",
+              "validationMessage": "Password must be 12 characters or more with a minimum of 1 lower case, 1 upper case and one number. Double quotes are not allowed."
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[contains(steps('EthereumSettings').genesisBlockCreation, 'PASSWORD')]"
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "namePrefix": "[basics('namePrefix')]",
+      "authType": "[basics('adminCredentials').authenticationType]",
+      "adminUsername": "[basics('adminUsername')]",
+      "adminPassword": "[basics('adminCredentials').password]",
+      "adminSSHKey": "[basics('adminCredentials').sshPublicKey]",
+      "ethereumNetworkID": "[int(steps('EthereumSettings').ethereumNetworkID)]",
+      "ethereumAccountPsswd": "[steps('EthereumSettings').ethereumAccountPsswd]",
+      "ethereumAccountPassphrase": "[steps('EthereumSettings').ethereumAccountPassphrase]",
+      "consortiumMemberId": "[int(steps('NetworkSize').consortiumMemberIdValue)]",
+      "numMiningNodes": "[steps('NetworkSize').mnSection.numberOfMiningNodes]",
+      "mnNodeVMSize": "[coalesce(steps('NetworkSize').mnSection.mnNodeVMSizeHDD, steps('NetworkSize').mnSection.mnNodeVMSizeSSD)]",
+      "mnStorageAccountType": "[concat(steps('NetworkSize').mnSection.mnStoragePerformance, '_', coalesce(steps('NetworkSize').mnSection.mnStorageReplication-Standard, steps('NetworkSize').mnSection.mnStorageReplication-Premium))]",
+      "numTXNodes": "[steps('NetworkSize').txSection.numTXNodes]",
+      "txNodeVMSize": "[coalesce(steps('NetworkSize').txSection.txNodeVMSizeHDD, steps('NetworkSize').txSection.txNodeVMSizeSSD)]",
+      "txStorageAccountType": "[concat(steps('NetworkSize').txSection.txStoragePerformance, '_', coalesce(steps('NetworkSize').txSection.txStorageReplication-Standard, steps('NetworkSize').txSection.txStorageReplication-Premium))]",
+      "location": "[location()]",
+      "genesisBlock": "[steps('EthereumSettings').genesisBlock]"
+    }
+  }
+}
