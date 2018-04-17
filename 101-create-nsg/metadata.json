@@ -1,5 +1,5 @@
 {
-  "itemDisplayName": "Create a Network Security Group2",
+  "itemDisplayName": "Create a Network Security Group",
   "description": "Creates a Network Security Group with a single variable (no parameters): networkSecurityGroupName",
   "summary": "This template creates a Network Security Group in the Azure Stack POC environment.",
   "githubUsername": "azurestack",
