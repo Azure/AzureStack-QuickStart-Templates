@@ -1,4 +1,4 @@
- # Deploy a Secure Service Fabric Cluster on Azure Stack
+# Deploy a Secure Service Fabric Cluster on Azure Stack
 This item will deploy a secured Service Fabric Cluster. For more information, see [Service Fabric Cluster Security](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security).
 # Prerequisites
 
@@ -40,7 +40,7 @@ Alternatively, you can also use the [helper script](scripts/Publish-SecretToVaul
 
 - In the Security Step, replace the values you obtained from creating the Azure KeyVault and Uploading the Secret in the previous step.
 
--  For the Admin Client Certificate Thumbprint, enter the thumbprint of the Admin Client certificate (See the [Prerequisites](#Prerequisites) section).
+-  For the Admin Client Certificate Thumbprint, enter the thumbprint of the Admin Client certificate (See the [Prerequisites](#prerequisites) section).
     ![Filling out the Security Step](images/filledupsecurity.png)
 
 Go through the rest of the wizard and click on Purchase to kick off the deployment.
