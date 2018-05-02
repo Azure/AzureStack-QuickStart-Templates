@@ -20,7 +20,7 @@ Note: Self-signed certs can also be used for testing purposes and don’t have t
 This template requires you to upload your Cluster certificate to a Key Vault and provide the location to it.
 
 ### Create a Key Vault and upload the Cluster certificate
-    NOTE: Do not upload the certificates to the Key Vault from the UI. Do this only through Powershell as prescribed below.
+**NOTE: Do not upload the certificates to the Key Vault from the UI. Do this only through Powershell as prescribed below.**
 
 You can create a vault and upload the certificate to it through Azure Powershell. For more information, see [Manage KeyVault on Azure Stack with PowerShell](https://docs.microsoft.com/en-us/azure/azure-stack/user/azure-stack-kv-manage-powershell). 
 Alternatively, you can also use the [helper script](scripts/Publish-SecretToVault.ps1) provided to do this.
