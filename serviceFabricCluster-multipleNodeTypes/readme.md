@@ -11,7 +11,7 @@ Note: Self-signed certs can also be used for testing purposes and don’t have t
 
 # Installation Steps:
 ## Azure Stack Operator
-- Download the **Service Fabric Cluster (Preview)** item from Marketplace management so thatit shows up in your Azure Stack Marketplace under Compute.
+- **Download the Service Fabric Cluster (Preview) item from Marketplace management** so that it shows up in your Azure Stack Marketplace under Compute.
 
 ![Marketplace](images/Marketplace.png)
 
