@@ -1,11 +1,11 @@
-
-# Accessing the SF Cluster
-You can access the SF cluster through either the SF Explorer or through SF PowerShell.
+# Accessing the Service Fabric Cluster
+You can access the SF cluster either through the Service Fabric Explorer or the Service Fabric PowerShell cmdlets.
 
 ## Access SF cluster through SF explorer
 1.	First, you need to make sure the Browser has access to your Admin client certificate to authenticate to your SF cluster. To do this, open Internet Explorer  and go to **Internet Options -> Content -> Certificates**
 
     ![](images/internetoptionscertificates.png)
+    
     Click on Import, go through the Certificate Installation wizard and select the **Admin Client certificate** you’d provided to the template 
 
     **Note: This is different from the Cluster certificate you uploaded to KV.** 
