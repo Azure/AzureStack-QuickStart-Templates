@@ -25,7 +25,7 @@ You can access the SF cluster either through the Service Fabric Explorer or the 
 
     ![](images/publicipaddress.png)
 
-3.	Go to https:// **FQDN>**:19080 (**Note the Https in front of the FQDN**). 
+3.	Go to https://<**FQDN>**:19080  (**Note the Https in front of the FQDN**). 
     If you’ve used a self signed certificate, you’ll get a warning that the connection is not secure. If you get it, click **More Information -> Go on to the webpage**
     ![](images/notsecuregoon.png)
 
