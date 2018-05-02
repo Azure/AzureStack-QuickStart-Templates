@@ -1,4 +1,4 @@
-# Deploy a Secure Service Fabric Cluster on Azure Stack
+ # Deploy a Secure Service Fabric Cluster on Azure Stack
 This item will deploy a secured Service Fabric Cluster. For more information, see [Service Fabric Cluster Security](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security).
 # Prerequisites
 
@@ -19,12 +19,11 @@ Note: Self-signed certs can also be used for testing purposes and don’t have t
 
 This template requires you to upload your Cluster certificate to a Key Vault and provide the location to it.
 
-### Create a Key Vault and upload a secret
+### Create a Key Vault and upload the Cluster certificate
     NOTE: Do not upload the certificates to the Key Vault from the UI. Do this only through Powershell as prescribed below.
 
-The template takes a KeyVault as input and retrieves the Cluster certificate from it during installation. 
-You can create and upload the certificate to keyvault through Azure Powershell. For more information, see [Manage KeyVault on Azure Stack with PowerShell](https://docs.microsoft.com/en-us/azure/azure-stack/user/azure-stack-kv-manage-powershell). 
-Alternatively, you can use the [helper script](scripts/Publish-SecretToVault.ps1) provided to do this.
+You can create a vault and upload the certificate to it through Azure Powershell. For more information, see [Manage KeyVault on Azure Stack with PowerShell](https://docs.microsoft.com/en-us/azure/azure-stack/user/azure-stack-kv-manage-powershell). 
+Alternatively, you can also use the [helper script](scripts/Publish-SecretToVault.ps1) provided to do this.
 
 - Modify the input parameters on this script to login, create the vault and upload the Cluster cert to it
 - This script will also output the values you need to provide the template
