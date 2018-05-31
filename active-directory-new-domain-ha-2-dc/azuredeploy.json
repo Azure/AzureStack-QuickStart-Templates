@@ -210,7 +210,7 @@
     {
       "name": "[variables('adPDCNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2016-10-01",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "Microsoft.Resources/deployments/VNet",
@@ -244,7 +244,7 @@
     {
       "name": "[variables('adBDCNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2016-10-01",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "Microsoft.Resources/deployments/VNet",
