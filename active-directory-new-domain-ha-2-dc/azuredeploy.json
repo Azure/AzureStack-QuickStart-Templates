@@ -158,7 +158,7 @@
     {
       "name": "[variables('adLBName')]",
       "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2016-10-01",
+      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
