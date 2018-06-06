@@ -28,6 +28,13 @@
         "description": "Number of VMs to create."
       }
     },
+    "batchSize": {
+      "type": "int",
+      "defaultValue": "[parameters('vmCount')]",
+      "metadata": {
+        "description": "Number of VMs to create in a batch."
+      }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_A2",
@@ -54,7 +61,7 @@
       ],
       "metadata": {
         "description": "VM size supported by Azure Stack."
-      }   
+      }
     }
   },
   "variables": {
@@ -82,7 +89,7 @@
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
-    "controllerVmSize": "Standard_A2"
+    "controllerVmSize": "Standard_A4"
   },
   "resources": [
     {
@@ -196,8 +203,7 @@
       "name": "[variables('vmName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'))]"
+        "vmLoop"
       ],
       "properties": {
         "hardwareProfile": {
@@ -246,7 +252,9 @@
       "location": "[variables('location')]",
       "copy": {
         "name": "vmLoop",
-        "count": "[parameters('vmCount')]"
+        "count": "[parameters('vmCount')]",
+        "mode": "Serial",
+        "batchSize": "[parameters('batchSize')]"
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",

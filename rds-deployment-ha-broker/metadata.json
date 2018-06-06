@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "RDS Broker High Availability deployment",
+    "description": "This template provides high availability to RD Connection Broker in an existing RDS deployment",
+    "summary": "Provide HA to RDCB servers in RDS deployment",
+    "githubUsername": "fberson",
+    "dateUpdated": "2017-07-21"
+}
