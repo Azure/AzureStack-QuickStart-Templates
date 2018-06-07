@@ -183,6 +183,11 @@
     "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
     "mnNICPrefix": "nic-mn",
     "vnaNICName": "nic-vna",
+    "vnaVMName": "[concat(variables('namingInfix'), '-vna')]",
+    "vnaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'vna')]",
+    "vnaStorageAccountType": "Standard_LRS",
+    "vnaNodeVMSize": "Standard_A1",
+    "vnaPublicIpName": "vnaPip",
     "txStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'tx')]",
     "txVMNamePrefix": "[concat(variables('namingInfix'), '-tx')]",
     "txSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'tx'))]",
@@ -532,6 +537,38 @@
     },
     {
       "apiVersion": "[variables('apiVersionDeployments')]",
+      "name": "nvaResources",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('vNet').name)]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('baseUrl'), '/nested/virtualNetworkAppliance.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apiVersionVirtualMachines": { "value": "[variables('apiVersionVirtualMachines')]" },
+          "apiVersionNetworkInterfaces": { "value": "[variables('apiVersionNetworkInterfaces')]" },
+          "apiVersionStorageAccounts": { "value": "[variables('apiVersionStorageAccounts')]" },
+          "vnaVMName": { "value": "[variables('vnaVMName')]" },
+          "vnaNICName": { "value": "[variables('vnaNICName')]" },
+          "vnaStorageAcctName": { "value": "[variables('vnaStorageAcctName')]" },
+          "vnaSubnetRef": { "value": "[variables('vnaSubnetRef')]" },
+          "storageAccountType": { "value": "[variables('vnaStorageAccountType')]" },
+          "vnaNodeVMSize": { "value": "[variables('vnaNodeVMSize')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "windowsImage": { "value": "[variables('windowsImage')]" },
+          "namingInfix": { "value": "[variables('namingInfix')]" },
+          "vnaPublicIpName": { "value": "[variables('vnaPublicIpName')]" },
+          "location": { "value": "[variables('location')]" }
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionDeployments')]",
       "name": "vmExtensionLinkedTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
@@ -589,10 +626,6 @@
     "Pair-Gateway-Azure-CLI-Script": {
       "type": "string",
       "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value, '/ConsortiumBridge.sh')]"
-    },
-    "Gateway-Id": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways',variables('vNet').gatewayName)]"
     }
   }
 }
