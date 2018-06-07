@@ -75,7 +75,7 @@
         "type": "Microsoft.Network/networkInterfaces",
         "name": "[parameters('vnaNICName')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Network/publicIPAddresses',variables('vnaPublicIpName'))]"
+            "[resourceId('Microsoft.Network/publicIPAddresses',parameters('vnaPublicIpName'))]"
         ],
         "location": "[parameters('location')]",
         "properties": {
@@ -88,7 +88,7 @@
                   "id": "[parameters('vnaSubnetRef')]"
                 },
                 "publicIPAddress": {
-                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('vnaPublicIpName'))]"
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('vnaPublicIpName'))]"
                 }
               }
             }
