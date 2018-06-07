@@ -64,6 +64,7 @@
         "apiVersion": "[parameters('apiVersionNetworkInterfaces')]",
         "type": "Microsoft.Network/publicIPAddresses",
         "name": "[parameters('vnaPublicIpName')]",
+        "location": "[parameters('location')]",
         "properties": {
             "publicIPAddressVersion": "IPv4",
             "publicIPAllocationMethod": "Static",
