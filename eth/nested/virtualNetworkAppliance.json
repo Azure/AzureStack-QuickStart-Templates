@@ -67,7 +67,7 @@
         "location": "[parameters('location')]",
         "properties": {
             "publicIPAddressVersion": "IPv4",
-            "publicIPAllocationMethod": "Static",
+            "publicIPAllocationMethod": "Dynamic",
             "idleTimeoutInMinutes": 4
         }
       },
@@ -84,7 +84,7 @@
             {
               "name": "ipconfig1",
               "properties": {
-                "privateIPAllocationMethod": "Static",
+                "privateIPAllocationMethod": "Dynamic",
                 "subnet": {
                   "id": "[parameters('vnaSubnetRef')]"
                 },
