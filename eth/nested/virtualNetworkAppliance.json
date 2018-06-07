@@ -18,7 +18,7 @@
         "type": "string"
       },
       "vnaStorageAcctName": {
-        "type": "array"
+        "type": "string"
       },
       "vnaSubnetRef": {
         "type": "string"
