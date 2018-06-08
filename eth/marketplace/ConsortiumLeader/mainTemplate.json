@@ -554,7 +554,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('baseUrl'), '/nested/virtualNetworkAppliance.json')]",
+          "uri": "[concat(parameters('baseUrl'), '/nested/networkVirtualAppliance.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
