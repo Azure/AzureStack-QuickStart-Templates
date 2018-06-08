@@ -169,7 +169,7 @@
     "genesisBlock": "[parameters('genesisBlock')]",
     "gethRPCPort": 8545,
     "gethIPCPort": 30303,
-    "routeTableName": "VNARouteTable",
+    "routeTableName": "NVARouteTable",
     "loadBalancerName": "[concat(variables('namingInfix'), '-LB')]",
     "loadBalancerBackendAddressPoolName": "LoadBalancerBackend1",
     "loadBalancerInboundNatRuleNamePrefix": "SSH-VM",
@@ -180,15 +180,15 @@
     "mnStorageAcctNames": [
       "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'mn0')]"
     ],
-    "vnaNICName": "nic-vna",
-    "vnaVMName": "[concat(variables('namingInfix'), '-vna')]",
-    "vnaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'vna')]",
-    "vnaStorageAccountType": "Standard_LRS",
-    "vnaNodeVMSize": "Standard_A1",
-    "vnaPublicIpName": "vnaPip",
-    "vnaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'vna'))]",
-    "vnaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
-    "vnaNetPrefix": "10.0.0.0/12",
+    "nvaNICName": "nic-nva",
+    "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
+    "nvaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'nva')]",
+    "nvaStorageAccountType": "Standard_LRS",
+    "nvaNodeVMSize": "Standard_A1",
+    "nvaPublicIpName": "nvaPip",
+    "nvaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'nva'))]",
+    "nvaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
+    "nvaNetPrefix": "10.0.0.0/12",
     "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
     "mnNICPrefix": "nic-mn",
     "txStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'tx')]",
@@ -227,7 +227,7 @@
         }
       },
       {
-        "name": "[variables('vnaSubnetName')]",
+        "name": "[variables('nvaSubnetName')]",
         "properties": {
           "addressPrefix": "[replace('10._.14.0/27','_',string(parameters('consortiumMemberId')))]"
         }
@@ -256,7 +256,7 @@
     "mnSubnetRefArray": [
       "[concat(variables('vnetID'),'/subnets/', variables('mnSubnetName'))]"
     ],
-    "vnaSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('vnaSubnetName'))]"
+    "nvaSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('nvaSubnetName'))]"
   },
   "resources": [
     {
@@ -310,14 +310,14 @@
       "properties": {
         "securityRules": [
           {
-            "name": "allow-vna-bootnodes",
+            "name": "allow-nva-bootnodes",
             "properties": {
-              "description": "Allows VNA Bootnodes access",
+              "description": "Allows NVA Bootnodes access",
               "protocol": "*",
               "sourcePortRange": "*",
               "destinationPortRange": "[variables('gethIPCPort')]",
               "sourceAddressPrefix": "[variables('vNet').addressSpacePrefix]",
-              "destinationAddressPrefix": "[variables('vnaNetPrefix')]",
+              "destinationAddressPrefix": "[variables('nvaNetPrefix')]",
               "access": "Allow",
               "priority": 100,
               "direction": "Outbound"
@@ -338,13 +338,13 @@
             }
           },
           {
-            "name": "allow-vna-inbound",
+            "name": "allow-nva-inbound",
             "properties": {
-              "description": "Allow VNA inbound access",
+              "description": "Allow NVA inbound access",
               "protocol": "*",
               "sourcePortRange": "*",
               "destinationPortRange": "*",
-              "sourceAddressPrefix": "[variables('vnaNetPrefix')]",
+              "sourceAddressPrefix": "[variables('nvaNetPrefix')]",
               "destinationAddressPrefix": "[variables('vNet').addressSpacePrefix]",
               "access": "Allow",
               "priority": 100,
@@ -407,13 +407,13 @@
             }
           },
           {
-            "name": "allow-vna-inbound",
+            "name": "allow-nva-inbound",
             "properties": {
-              "description": "Allow VNA inbound access",
+              "description": "Allow NVA inbound access",
               "protocol": "*",
               "sourcePortRange": "*",
               "destinationPortRange": "*",
-              "sourceAddressPrefix": "[variables('vnaNetPrefix')]",
+              "sourceAddressPrefix": "[variables('nvaNetPrefix')]",
               "destinationAddressPrefix": "[variables('vNet').addressSpacePrefix]",
               "access": "Allow",
               "priority": 103,
@@ -421,14 +421,14 @@
             }
           },
           {
-            "name": "allow-vna-bootnodes",
+            "name": "allow-nva-bootnodes",
             "properties": {
-              "description": "Allows VNA Bootnodes access",
+              "description": "Allows NVA Bootnodes access",
               "protocol": "*",
               "sourcePortRange": "*",
               "destinationPortRange": "[variables('gethIPCPort')]",
               "sourceAddressPrefix": "[variables('vNet').addressSpacePrefix]",
-              "destinationAddressPrefix": "[variables('vnaNetPrefix')]",
+              "destinationAddressPrefix": "[variables('nvaNetPrefix')]",
               "access": "Allow",
               "priority": 100,
               "direction": "Outbound"
@@ -561,17 +561,17 @@
           "apiVersionVirtualMachines": { "value": "[variables('apiVersionVirtualMachines')]" },
           "apiVersionNetworkInterfaces": { "value": "[variables('apiVersionNetworkInterfaces')]" },
           "apiVersionStorageAccounts": { "value": "[variables('apiVersionStorageAccounts')]" },
-          "vnaVMName": { "value": "[variables('vnaVMName')]" },
-          "vnaNICName": { "value": "[variables('vnaNICName')]" },
-          "vnaStorageAcctName": { "value": "[variables('vnaStorageAcctName')]" },
-          "vnaSubnetRef": { "value": "[variables('vnaSubnetRef')]" },
-          "storageAccountType": { "value": "[variables('vnaStorageAccountType')]" },
-          "vnaNodeVMSize": { "value": "[variables('vnaNodeVMSize')]" },
+          "nvaVMName": { "value": "[variables('nvaVMName')]" },
+          "nvaNICName": { "value": "[variables('nvaNICName')]" },
+          "nvaStorageAcctName": { "value": "[variables('nvaStorageAcctName')]" },
+          "nvaSubnetRef": { "value": "[variables('nvaSubnetRef')]" },
+          "storageAccountType": { "value": "[variables('nvaStorageAccountType')]" },
+          "nvaNodeVMSize": { "value": "[variables('nvaNodeVMSize')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "windowsImage": { "value": "[variables('windowsImage')]" },
           "namingInfix": { "value": "[variables('namingInfix')]" },
-          "vnaPublicIpName": { "value": "[variables('vnaPublicIpName')]" },
+          "nvaPublicIpName": { "value": "[variables('nvaPublicIpName')]" },
           "location": { "value": "[variables('location')]" }
         }
       }

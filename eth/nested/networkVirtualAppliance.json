@@ -11,22 +11,22 @@
       "apiVersionStorageAccounts": {
         "type": "string"
       },
-      "vnaVMName": {
+      "nvaVMName": {
         "type": "string"
       },
-      "vnaNICName": {
+      "nvaNICName": {
         "type": "string"
       },
-      "vnaStorageAcctName": {
+      "nvaStorageAcctName": {
         "type": "string"
       },
-      "vnaSubnetRef": {
+      "nvaSubnetRef": {
         "type": "string"
       },
       "storageAccountType": {
         "type": "string"
       },
-      "vnaNodeVMSize": {
+      "nvaNodeVMSize": {
         "type": "string"
       },
       "adminUsername": {
@@ -41,7 +41,7 @@
       "namingInfix": {
         "type": "string"
       },
-      "vnaPublicIpName": {
+      "nvaPublicIpName": {
           "type": "string"
       },
       "location": {
@@ -52,7 +52,7 @@
       {
         "apiVersion": "[parameters('apiVersionStorageAccounts')]",
         "type": "Microsoft.Storage/storageAccounts",
-        "name": "[parameters('vnaStorageAcctName')]",
+        "name": "[parameters('nvaStorageAcctName')]",
         "location": "[parameters('location')]",
         "sku": {
           "name": "[parameters('storageAccountType')]"
@@ -63,7 +63,7 @@
       {
         "apiVersion": "[parameters('apiVersionNetworkInterfaces')]",
         "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[parameters('vnaPublicIpName')]",
+        "name": "[parameters('nvaPublicIpName')]",
         "location": "[parameters('location')]",
         "properties": {
             "publicIPAddressVersion": "IPv4",
@@ -74,9 +74,9 @@
       {
         "apiVersion": "[parameters('apiVersionNetworkInterfaces')]",
         "type": "Microsoft.Network/networkInterfaces",
-        "name": "[parameters('vnaNICName')]",
+        "name": "[parameters('nvaNICName')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Network/publicIPAddresses',parameters('vnaPublicIpName'))]"
+            "[resourceId('Microsoft.Network/publicIPAddresses',parameters('nvaPublicIpName'))]"
         ],
         "location": "[parameters('location')]",
         "properties": {
@@ -86,10 +86,10 @@
               "properties": {
                 "privateIPAllocationMethod": "Dynamic",
                 "subnet": {
-                  "id": "[parameters('vnaSubnetRef')]"
+                  "id": "[parameters('nvaSubnetRef')]"
                 },
                 "publicIPAddress": {
-                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('vnaPublicIpName'))]"
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('nvaPublicIpName'))]"
                 }
               }
             }
@@ -99,18 +99,18 @@
       {
         "apiVersion": "[parameters('apiVersionVirtualMachines')]",
         "type": "Microsoft.Compute/virtualMachines",
-        "name": "[parameters('vnaVMName')]",
+        "name": "[parameters('nvaVMName')]",
         "location": "[parameters('location')]",
         "dependsOn": [
-          "[concat('Microsoft.Storage/storageAccounts/', parameters('vnaStorageAcctName'))]",
-          "[concat('Microsoft.Network/networkInterfaces/', parameters('vnaNICName'))]"
+          "[concat('Microsoft.Storage/storageAccounts/', parameters('nvaStorageAcctName'))]",
+          "[concat('Microsoft.Network/networkInterfaces/', parameters('nvaNICName'))]"
         ],
         "properties": {
           "hardwareProfile": {
-            "vmSize": "[parameters('vnaNodeVMSize')]"
+            "vmSize": "[parameters('nvaNodeVMSize')]"
           },
           "osProfile": {
-            "computerName": "[parameters('vnaVMName')]",
+            "computerName": "[parameters('nvaVMName')]",
             "adminUsername": "[parameters('adminUsername')]",
             "adminPassword": "[parameters('adminPassword')]"
           },
@@ -119,7 +119,7 @@
             "osDisk": {
               "name": "[concat(parameters('namingInfix'), '-osdisk')]",
               "vhd": {
-                "uri" :"[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('vnaStorageAcctName')), parameters('apiVersionStorageAccounts')).primaryEndpoints.blob, 'vhds/osdisk.vhd')]"
+                "uri" :"[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('nvaStorageAcctName')), parameters('apiVersionStorageAccounts')).primaryEndpoints.blob, 'vhds/osdisk.vhd')]"
               },
               "caching": "ReadWrite",
               "createOption": "FromImage"
@@ -128,7 +128,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('vnaNICName'))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nvaNICName'))]"
               }
             ]
           }
