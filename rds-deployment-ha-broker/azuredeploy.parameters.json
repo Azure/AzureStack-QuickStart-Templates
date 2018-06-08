@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "value": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/rds-deployment-ha-broker/"
+    },
+    "clientAccessName": {
+      "value": "HARDCB"
+    },
+    "dnsServer": {
+      "value": "addc-01"
+    },
+    "existingAdminPassword": {
+      "value": "{enter_existing_adminUsername_password_here}"
+    },
+    "existingAdminUsername": {
+      "value": "cloudadmin"
+    },
+    "existingBrokerAvailabilitySet": {
+      "value": "cb-availabilityset"
+    },
+    "existingBrokerHostname": {
+      "value": "rdcb-01"
+    },
+    "existingDomainName": {
+      "value": "contoso.com"
+    },
+    "existingSubnetName": {
+      "value": "subnet"
+    },
+    "existingVnetName": {
+      "value": "vnet"
+    },
+    "primaryDbConnectionString": {
+      "value": "DRIVER=SQL Server Native Client 11.0;Server={enter_sql_server_here},1433;Database={enter_sql_database_here};Uid={enter_sql_admin_here}@{enter_sql_server_here};Pwd={enter_sql_password_here};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+    },
+    "sqlServer": {
+      "value": "{enter_NON_Azure_sql_server_here_or_leave_blank_for_Azure_SQL}"
+    },
+    "windowsServerVersion": {
+      "value": "2016-Datacenter"
+    }
+  }
+}
