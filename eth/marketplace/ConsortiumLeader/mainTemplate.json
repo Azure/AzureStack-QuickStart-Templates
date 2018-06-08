@@ -206,6 +206,9 @@
         "name": "[variables('txSubnetName')]",
         "properties": {
           "addressPrefix": "[variables('txSubnetPrefix')]",
+          "routeTable": {
+            "id": "[resourceId ('Microsoft.Network/routeTables', variables('routeTableName'))]"
+          }, 
           "networkSecurityGroup": {
             "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('txNsgName'))]"
           }
@@ -215,6 +218,9 @@
         "name": "[variables('mnSubnetName')]",
         "properties": {
           "addressPrefix": "[variables('mnSubnetPrefix')]",
+          "routeTable": {
+            "id": "[resourceId ('Microsoft.Network/routeTables', variables('routeTableName'))]"
+          },
           "networkSecurityGroup": {
             "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('mnNsgName'))]"
           }
@@ -452,7 +458,8 @@
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', variables('txNsgName'))]",
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('mnNsgName'))]"
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('mnNsgName'))]",
+        "[concat('Microsoft.Network/routeTables/', variables('routeTableName'))]"
       ],
       "properties": {
         "addressSpace": {

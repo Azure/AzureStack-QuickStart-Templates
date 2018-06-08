@@ -209,6 +209,9 @@
         "name": "[variables('txSubnetName')]",
         "properties": {
           "addressPrefix": "[variables('txSubnetPrefix')]",
+          "routeTable": {
+            "id": "[resourceId ('Microsoft.Network/routeTables', variables('routeTableName'))]"
+          },
           "networkSecurityGroup": {
             "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('txNsgName'))]"
           }
@@ -218,6 +221,9 @@
         "name": "[variables('mnSubnetName')]",
         "properties": {
           "addressPrefix": "[variables('mnSubnetPrefix')]",
+          "routeTable": {
+            "id": "[resourceId ('Microsoft.Network/routeTables', variables('routeTableName'))]"
+          },
           "networkSecurityGroup": {
             "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('mnNsgName'))]"
           }
@@ -460,7 +466,8 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', variables('txNsgName'))]",
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('mnNsgName'))]"
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('mnNsgName'))]",
+        "[concat('Microsoft.Network/routeTables/', variables('routeTableName'))]"
       ],
       "comments": "This is my vNet",
       "properties": {
