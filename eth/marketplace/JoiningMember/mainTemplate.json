@@ -126,10 +126,16 @@
         "description": "The URL pointing to the consortium configuration data provided by another member's deployment"
       }
     },
-    "consortiumMemberGateway": {
+    "consortiumMemberVnet": {
       "type": "string",
       "metadata": {
-        "description": "The ResourceId of the Consortium Member VNet Gateawy to which to connect to"
+        "description": "The ResourceId of the Consortium Member VNet to connect to"
+      }
+    },
+    "consortiumMemberVnaPublicIP": {
+      "type": "string",
+      "metadata": {
+        "description": "The ResourceId of the Consortium Member VNA Public IP address to connect to"
       }
     },
     "connectionSharedKey": {
@@ -147,10 +153,11 @@
         "description": "The base URL for dependent assets",
         "artifactsBaseUrl": ""
       },
-      "defaultValue": "https://servicerunnerbuildstore.blob.core.windows.net/azstack/common"
+      "defaultValue": "https://raw.githubusercontent.com/seyadava/AzureStack-QuickStart-Templates-1/blockchain_nva/eth"
     }
   },
   "variables": {
+    "apiVersionRouteTables": "2015-06-15",
     "apiVersionDeployments": "2016-02-01",
     "apiVersionStorageAccounts": "2015-06-15",
     "apiVersionAvailabilitySets": "2016-03-30",
@@ -166,6 +173,7 @@
     "sshNATFrontEndStartingPort": 3000,
     "gethRPCPort": 8545,
     "gethIPCPort": 30303,
+    "routeTableName": "VNARouteTable",
     "loadBalancerName": "[concat(variables('namingInfix'), '-LB')]",
     "loadBalancerBackendAddressPoolName": "LoadBalancerBackend1",
     "loadBalancerInboundNatRuleNamePrefix": "SSH-VM",
@@ -176,6 +184,15 @@
     "mnStorageAcctNames": [
       "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'mn')]"
     ],
+    "vnaNICName": "nic-vna",
+    "vnaVMName": "[concat(variables('namingInfix'), '-vna')]",
+    "vnaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'vna')]",
+    "vnaStorageAccountType": "Standard_LRS",
+    "vnaNodeVMSize": "Standard_A1",
+    "vnaPublicIpName": "vnaPip",
+    "vnaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'vna'))]",
+    "vnaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
+    "vnaNetPrefix": "10.0.0.0/12",
     "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
     "mnNICPrefix": "nic-mn",
     "txStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'tx')]",
@@ -207,9 +224,9 @@
         }
       },
       {
-        "name": "GatewaySubnet",
+        "name": "[variables('vnaSubnetName')]",
         "properties": {
-          "addressPrefix": "[replace('10._.2.224/27','_',string(parameters('consortiumMemberId')))]"
+          "addressPrefix": "[replace('10._.14.0/27','_',string(parameters('consortiumMemberId')))]"
         }
       }
     ],
@@ -219,34 +236,42 @@
       "sku": "16.04-LTS",
       "version": "latest"
     },
-    "gatewayToConnectToArray": "[split(parameters('consortiumMemberGateway'),'/')]",
-    "nameOfGatewayToConnectTo": "[skip(variables('gatewayToConnectToArray'), add(-1,length(variables('gatewayToConnectToArray'))))]",
+    "windowsImage": {
+      "publisher": "MicrosoftWindowsServer",
+      "offer": "WindowsServer",
+      "sku": "2016-Datacenter",
+      "version": "latest"
+    },
+    
+    
     "vNet": {
       "name": "[concat('vNet',string(parameters('consortiumMemberId')),'-', resourceGroup().location)]",
       "addressSpacePrefix": "[replace('10._.0.0/20', '_',string(parameters('consortiumMemberId')))]",
       "subnetName": "[concat('subnet-', resourceGroup().location, variables('namingInfix'))]",
       "subnetPrefix": "[replace('10._.1.0/24','_', string(parameters('consortiumMemberId')))]",
-      "gatewayName": "[replace('vNet_-Gateway', '_',string(parameters('consortiumMemberId')))]",
-      "gatewaySubnetPrefix": "[replace('10._.2.224/27','_',string(parameters('consortiumMemberId')))]",
-      "gatewayPublicIPName": "[replace(concat('gw_pip', uniqueString(resourceGroup().id)),'_',string(parameters('consortiumMemberId')))]",
-      "connectionName": "[concat('Connect_To_',variables('nameOfGatewayToConnectTo')[0])]",
       "asn": "[add(parameters('consortiumMemberId'),65050)]"
     },
     "vnetRef": "[resourceId('Microsoft.Network/virtualNetworks',variables('vNet').name)]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vNet').name)]",
     "txSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('txSubnetName'))]",
     "memberVNetRef": "[resourceId('Microsoft.Network/virtualNetworks',variables('vNet').name)]",
-    "gateway1SubnetRef": "[concat(variables('memberVNetRef'),'/subnets/','GatewaySubnet')]",
-    "gatewaySku": "Standard",
     "mnSubnetRefArray": [
       "[concat(variables('vnetID'),'/subnets/', variables('mnSubnetName'))]"
-    ]
+    ],
+    "vnaSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('vnaSubnetName'))]"
   },
   "resources": [
     {
       "apiVersion": "[variables('apiVersionAvailabilitySets')]",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
+      "location": "[variables('location')]",
+      "properties": {}
+    },
+    {
+      "apiVersion": "[variables('apiVersionRouteTables')]",
+      "type": "Microsoft.Network/routeTables",
+      "name": "[variables('routeTableName')]",
       "location": "[variables('location')]",
       "properties": {}
     },
@@ -287,17 +312,45 @@
       "properties": {
         "securityRules": [
           {
-            "name": "block-bootnodes",
+            "name": "allow-vna-bootnodes",
+            "properties": {
+              "description": "Allows VNA Bootnodes access",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[variables('gethIPCPort')]",
+              "sourceAddressPrefix": "[variables('vNet').addressSpacePrefix]",
+              "destinationAddressPrefix": "[variables('vnaNetPrefix')]",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "block-internet-bootnodes",
             "properties": {
               "description": "Block Internet Bootnodes",
               "protocol": "*",
               "sourcePortRange": "*",
-              "destinationPortRange": "30303",
+              "destinationPortRange": "[variables('gethIPCPort')]",
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "Internet",
               "access": "Deny",
-              "priority": 100,
+              "priority": 101,
               "direction": "Outbound"
+            }
+          },
+          {
+            "name": "allow-vna-inbound",
+            "properties": {
+              "description": "Allow VNA inbound access",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[variables('vnaNetPrefix')]",
+              "destinationAddressPrefix": "[variables('vNet').addressSpacePrefix]",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
             }
           }
         ]
@@ -356,16 +409,44 @@
             }
           },
           {
+            "name": "allow-vna-inbound",
+            "properties": {
+              "description": "Allow VNA inbound access",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[variables('vnaNetPrefix')]",
+              "destinationAddressPrefix": "[variables('vNet').addressSpacePrefix]",
+              "access": "Allow",
+              "priority": 103,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "allow-vna-bootnodes",
+            "properties": {
+              "description": "Allows VNA Bootnodes access",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[variables('gethIPCPort')]",
+              "sourceAddressPrefix": "[variables('vNet').addressSpacePrefix]",
+              "destinationAddressPrefix": "[variables('vnaNetPrefix')]",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Outbound"
+            }
+          },
+          {
             "name": "block-bootnodes",
             "properties": {
               "description": "Block Internet Bootnodes",
               "protocol": "*",
               "sourcePortRange": "*",
-              "destinationPortRange": "30303",
+              "destinationPortRange": "[variables('gethIPCPort')]",
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "Internet",
               "access": "Deny",
-              "priority": 100,
+              "priority": 101,
               "direction": "Outbound"
             }
           }
@@ -392,58 +473,10 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('vNet').gatewayPublicIPName]",
-      "location": "[parameters('location')]",
-      "comments": "This is the public IP for vNet Gateway",
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/virtualNetworkGateways",
-      "name": "[variables('vNet').gatewayName]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('vNet').gatewayPublicIPName)]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('vNet').name)]"
-      ],
-      "comments": "This is the vNet Gateway for vNet",
-      "properties": {
-        "ipConfigurations": [
-          {
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[variables('gateway1SubnetRef')]"
-              },
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('vNet').gatewayPublicIPName)]"
-              }
-            },
-            "name": "memberVNetGatewayConfig"
-          }
-        ],
-        "gatewayType": "Vpn",
-        "sku": {
-          "name": "[variables('gatewaySku')]",
-          "tier": "[variables('gatewaySku')]"
-        },
-        "vpnType": "RouteBased",
-        "enableBgp": "true",
-        "bgpSettings": {
-          "asn": "[variables('vNet').asn]"
-        }
-      }
-    },
-    {
       "apiVersion": "[variables('apiVersionDeployments')]",
       "name": "txVMLinkedTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworkGateways/', variables('vNet').gatewayName)]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('vNet').name)]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
         "loadBalancerLinkedTemplate"
@@ -483,7 +516,6 @@
       "name": "mnVMLinkedTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworkGateways/', variables('vNet').gatewayName)]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('vNet').name)]"
       ],
       "properties": {
@@ -510,6 +542,38 @@
           "adminSSHKey": { "value": "[parameters('adminSSHKey')]" },
           "ubuntuImage": { "value": "[variables('ubuntuImage')]" },
           "namingInfix": { "value": "[variables('namingInfix')]" },
+          "location": { "value": "[variables('location')]" }
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionDeployments')]",
+      "name": "nvaResources",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('vNet').name)]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('baseUrl'), '/nested/virtualNetworkAppliance.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apiVersionVirtualMachines": { "value": "[variables('apiVersionVirtualMachines')]" },
+          "apiVersionNetworkInterfaces": { "value": "[variables('apiVersionNetworkInterfaces')]" },
+          "apiVersionStorageAccounts": { "value": "[variables('apiVersionStorageAccounts')]" },
+          "vnaVMName": { "value": "[variables('vnaVMName')]" },
+          "vnaNICName": { "value": "[variables('vnaNICName')]" },
+          "vnaStorageAcctName": { "value": "[variables('vnaStorageAcctName')]" },
+          "vnaSubnetRef": { "value": "[variables('vnaSubnetRef')]" },
+          "storageAccountType": { "value": "[variables('vnaStorageAccountType')]" },
+          "vnaNodeVMSize": { "value": "[variables('vnaNodeVMSize')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "windowsImage": { "value": "[variables('windowsImage')]" },
+          "namingInfix": { "value": "[variables('namingInfix')]" },
+          "vnaPublicIpName": { "value": "[variables('vnaPublicIpName')]" },
           "location": { "value": "[variables('location')]" }
         }
       }
@@ -571,10 +635,6 @@
     "Pair-Gateway-Azure-CLI-Script": {
       "type": "string",
       "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value, '/ConsortiumBridge.sh')]"
-    },
-    "Gateway-Id": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways',variables('vNet').gatewayName)]"
     }
   }
 }

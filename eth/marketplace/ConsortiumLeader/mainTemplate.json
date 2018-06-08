@@ -169,8 +169,8 @@
     "genesisBlock": "[parameters('genesisBlock')]",
     "gethRPCPort": 8545,
     "gethIPCPort": 30303,
-    "loadBalancerName": "[concat(variables('namingInfix'), '-LB')]",
     "routeTableName": "VNARouteTable",
+    "loadBalancerName": "[concat(variables('namingInfix'), '-LB')]",
     "loadBalancerBackendAddressPoolName": "LoadBalancerBackend1",
     "loadBalancerInboundNatRuleNamePrefix": "SSH-VM",
     "location": "[parameters('location')]",
@@ -180,21 +180,21 @@
     "mnStorageAcctNames": [
       "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'mn0')]"
     ],
-    "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
-    "mnNICPrefix": "nic-mn",
     "vnaNICName": "nic-vna",
     "vnaVMName": "[concat(variables('namingInfix'), '-vna')]",
     "vnaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'vna')]",
     "vnaStorageAccountType": "Standard_LRS",
     "vnaNodeVMSize": "Standard_A1",
     "vnaPublicIpName": "vnaPip",
+    "vnaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'vna'))]",
+    "vnaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
+    "vnaNetPrefix": "10.0.0.0/12",
+    "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
+    "mnNICPrefix": "nic-mn",
     "txStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'tx')]",
     "txVMNamePrefix": "[concat(variables('namingInfix'), '-tx')]",
     "txSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'tx'))]",
     "txSubnetPrefix": "[replace('10._.0.0/24','_', string(parameters('consortiumMemberId')))]",
-    "vnaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'vna'))]",
-    "vnaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
-    "vnaNetPrefix": "10.0.0.0/12",
     "txNIPrefix": "nic-tx",
     "txNsgName": "[concat(variables('namingInfix'), 'TXNsg')]",
     "mnNsgName": "[concat(variables('namingInfix'), 'MNNsg')]",
@@ -247,7 +247,9 @@
     "vnetRef": "[resourceId('Microsoft.Network/virtualNetworks',variables('vNet').name)]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vNet').name)]",
     "txSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('txSubnetName'))]",
-    "mnSubnetRefArray": ["[concat(variables('vnetID'),'/subnets/', variables('mnSubnetName'))]"],
+    "mnSubnetRefArray": [
+      "[concat(variables('vnetID'),'/subnets/', variables('mnSubnetName'))]"
+    ],
     "vnaSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('vnaSubnetName'))]"
   },
   "resources": [
