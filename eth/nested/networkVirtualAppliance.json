@@ -138,7 +138,7 @@
     "outputs": {
       "nvaNicResourceId": {
         "type": "string",
-        "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('nvaNICName'))).Id]"
+        "value": "[resourceId(concat('Microsoft.Network/networkInterfaces/', parameters('nvaNICName')))]"
       }
     }
   }
