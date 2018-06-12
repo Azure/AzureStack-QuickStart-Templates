@@ -134,5 +134,11 @@
           }
         }
       }
-    ]
+    ],
+    "outputs": {
+      "nvaPrivateIp": {
+        "type": "string",
+        "value": "[reference(parameters('nvaNICName')).IpConfigurations[0].PrivateIpAddress]"
+      }
+    }
   }
