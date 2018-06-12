@@ -136,9 +136,9 @@
       }
     ],
     "outputs": {
-      "nvaPrivateIp": {
+      "nvaNicResourceId": {
         "type": "string",
-        "value": "[reference(parameters('nvaNICName')).IpConfigurations[0].PrivateIpAddress]"
+        "value": "[reference(concat('Microsoft.Network/networkInterfaces/', variables('nvaNICName'))).Id]"
       }
     }
   }

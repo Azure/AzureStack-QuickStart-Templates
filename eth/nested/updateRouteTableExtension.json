@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "nvaPrivateIpAddress": {
+        "nvaNicResourceId": {
           "type": "string"
         },
         "routeTableName": {
@@ -35,7 +35,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\UpdateRouteTable.ps1 -RouteTableName \"',parameters('routeTableName'),'\" -PrivateIpAddress \"',parameters('nvaPrivateIpAddress'),'\" -RemoteAddressSpace \"',parameters('remoteAddressSpace'),'\"')]"
+                    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\UpdateRouteTable.ps1 -RouteTableName \"',parameters('routeTableName'),'\" -NicResourceId \"',parameters('nvaNicResourceId'),'\" -RemoteAddressSpace \"',parameters('remoteAddressSpace'),'\"')]"
                 }
             }
         }

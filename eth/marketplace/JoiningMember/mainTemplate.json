@@ -623,7 +623,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "nvaPrivateIpAddress": {"value": "[reference('nvaResources').outputs.nvaPrivateIp.value]" },
+          "nvaNicResourceId": {"value": "[reference('nvaResources').outputs.nvaNicResourceId.value]" },
           "routeTableName": {"value": "[variables('routeTableName')]" },
           "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
           "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }

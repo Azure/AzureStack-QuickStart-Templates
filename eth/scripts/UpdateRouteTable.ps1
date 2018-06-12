@@ -3,13 +3,18 @@ Param
     [Parameter(Mandatory = $true)]
     $RouteTableName,
     [Parameter(Mandatory = $true)]
-    $PrivateIpAddress,
+    $NicResourceId,
     [Parameter(Mandatory = $true)]
     $RemoteAddressSpace
 )
 
 Import-Module AzureRM.Network
 
-$routeTable = Get-AzureRmRouteTable -Name $RouteTableName 
-Add-AzureRmRouteConfig -Name "WinNVARoute" -AddressPrefix $RemoteAddressSpace -NextHopType VirtualAppliance -NextHopIpAddress $PrivateIpAddress -RouteTable $routeTable
+$splited = $NicResourceId.Split('/')
+$resourceGroup = $splited[4]
+$nicName = $splited[8]
+$routeTable = Get-AzureRmRouteTable -Name $RouteTableName -ResourceGroupName $resourceGroup
+$nic = Get-AzureRmNetworkInterface -Name $nicname -ResourceGroupName $resourceGroup
+$privateIpAddress = $nic.IpConfigurations[0].PrivateIpAddress
+Add-AzureRmRouteConfig -Name "WinNVARoute" -AddressPrefix $RemoteAddressSpace -NextHopType VirtualAppliance -NextHopIpAddress $privateIpAddress -RouteTable $routeTable
 Set-AzureRmRouteTable -RouteTable $routeTable
