@@ -22,7 +22,7 @@
         {
             "apiVersion": "[variables('apiVersionVirtualMachinesExtensions')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('nvaVMName'), '/newuserscript')]",
+            "name": "['routetable/newuserscript']",
             "location": "[parameters('location')]",
             "properties": {
                 "publisher": "Microsoft.Compute",
