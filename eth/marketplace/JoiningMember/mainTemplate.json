@@ -192,6 +192,7 @@
     "nvaPublicIpName": "nvaPip",
     "nvaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'nva'))]",
     "nvaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
+    "nvaPrivateIp": "[replace('10._.14.4','_', string(parameters('consortiumMemberId')))]",
     "nvaNetPrefix": "10.0.0.0/12",
     "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
     "mnNICPrefix": "nic-mn",
@@ -279,7 +280,18 @@
       "type": "Microsoft.Network/routeTables",
       "name": "[variables('routeTableName')]",
       "location": "[variables('location')]",
-      "properties": {}
+      "properties": {
+        "routes": [
+          {
+            "name": "NVARoute",
+            "properties": {
+              "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('nvaPrivateIp')]"
+            }
+          }
+        ]
+      }
     },
     {
       "apiVersion": "[variables('apiVersionDeployments')]",
@@ -581,6 +593,7 @@
           "windowsImage": { "value": "[variables('windowsImage')]" },
           "namingInfix": { "value": "[variables('namingInfix')]" },
           "nvaPublicIpName": { "value": "[variables('nvaPublicIpName')]" },
+          "nvaPrivateIpAddress": { "value": "[variables('nvaPrivateIp')]" },
           "location": { "value": "[variables('location')]" }
         }
       }
@@ -604,28 +617,6 @@
           "remoteIpAddress": { "value": "[parameters('consortiumMemberNVAPublicIP')]" },
           "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
           "sharedKey": { "value": "[parameters('connectionSharedKey')]" },
-          "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }
-        }
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersionDeployments')]",
-      "name": "nvaRouteExtension",
-      "type": "Microsoft.Resources/deployments",
-      "dependsOn": [
-        "nvaResources",
-        "[concat('Microsoft.Network/routeTables/', variables('routeTableName'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(parameters('baseUrl'), '/nested/updateRouteTableExtension.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "nvaNicResourceId": {"value": "[reference('nvaResources').outputs.nvaNicResourceId.value]" },
-          "routeTableName": {"value": "[variables('routeTableName')]" },
-          "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
           "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }
         }
       }

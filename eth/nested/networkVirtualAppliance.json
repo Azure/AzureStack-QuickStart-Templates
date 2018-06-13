@@ -44,6 +44,9 @@
       "nvaPublicIpName": {
           "type": "string"
       },
+      "nvaPrivateIpAddress": {
+        "type": "string"
+      },
       "location": {
         "type": "string"
       }
@@ -67,7 +70,7 @@
         "location": "[parameters('location')]",
         "properties": {
             "publicIPAddressVersion": "IPv4",
-            "publicIPAllocationMethod": "Dynamic",
+            "publicIPAllocationMethod": "Static",
             "idleTimeoutInMinutes": 4
         }
       },
@@ -84,7 +87,8 @@
             {
               "name": "ipconfig1",
               "properties": {
-                "privateIPAllocationMethod": "Dynamic",
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[parameters('nvaPrivateIpAddress')]",
                 "subnet": {
                   "id": "[parameters('nvaSubnetRef')]"
                 },
@@ -134,11 +138,5 @@
           }
         }
       }
-    ],
-    "outputs": {
-      "nvaNicResourceId": {
-        "type": "string",
-        "value": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nvaNICName'))]"
-      }
-    }
+    ]
   }
