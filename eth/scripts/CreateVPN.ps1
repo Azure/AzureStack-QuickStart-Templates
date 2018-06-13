@@ -8,6 +8,7 @@ Param
     $SharedKey
 )
 
+$AddressSpace = '10.0.0.0/14'
 Install-WindowsFeature -Name Routing
 Install-WindowsFeature -Name 'RSAT-RemoteAccess-PowerShell'
 Install-RemoteAccess -VpnType VpnS2S
