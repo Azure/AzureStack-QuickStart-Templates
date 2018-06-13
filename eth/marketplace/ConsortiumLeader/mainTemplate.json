@@ -188,6 +188,7 @@
     "nvaPublicIpName": "nvaPip",
     "nvaSubnetName": "[concat(uniqueString(concat(resourceGroup().id, concat(variables('namingInfix'), 'subnet')), 'nva'))]",
     "nvaSubnetPrefix": "[replace('10._.14.0/27','_', string(parameters('consortiumMemberId')))]",
+    "nvaPrivateIp": "[replace('10._.14.4','_', string(parameters('consortiumMemberId')))]",
     "nvaNetPrefix": "10.0.0.0/12",
     "mnVMNamePrefix": "[concat(variables('namingInfix'), '-mn')]",
     "mnNICPrefix": "nic-mn",
@@ -572,6 +573,7 @@
           "windowsImage": { "value": "[variables('windowsImage')]" },
           "namingInfix": { "value": "[variables('namingInfix')]" },
           "nvaPublicIpName": { "value": "[variables('nvaPublicIpName')]" },
+          "nvaPrivateIpAddress": { "value": "[variables('nvaPrivateIp')]" },
           "location": { "value": "[variables('location')]" }
         }
       }
