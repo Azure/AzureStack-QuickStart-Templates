@@ -171,6 +171,7 @@
     "gethIPCPort": 30303,
     "routeTableName": "NVARouteTable",
     "loadBalancerName": "[concat(variables('namingInfix'), '-LB')]",
+    "loadBalancerPublicIpName": "[concat(variables('namingInfix'), '-publicip')]",
     "loadBalancerBackendAddressPoolName": "LoadBalancerBackend1",
     "loadBalancerInboundNatRuleNamePrefix": "SSH-VM",
     "location": "[parameters('location')]",
@@ -630,15 +631,15 @@
     },
     "consortium-data-ipaddress": {
       "type": "string",
-      "value": "[concat('http://', string(reference('loadBalancerLinkedTemplate').outputs.ipAddress.value))]"
+      "value": "[concat('http://', string(reference('loadBalancerPublicIpName').IpAddress))]"
     },
     "member-nva-ipaddress": {
       "type": "string",
-      "value": "[reference('nvaResources).outputs.nvaPrivateIpAddress.value]"
+      "value": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value]"
     },
     "member-vnet-address-space": {
       "type": "string",
-      "value": "[string(reference('variables('vNet').name).AddressSpace.AddressPrefixes[0])]"
+      "value": "[string(reference(variables('vNet').name).AddressSpace.AddressPrefixes[0])]"
     },
     "member-prefix": {
       "type": "string",

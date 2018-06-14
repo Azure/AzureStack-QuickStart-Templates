@@ -43,6 +43,10 @@
         "location": {
             "type": "string"
         },
+        "nvaPrivateIp":
+        {
+            "type": "string"
+        },
         "baseUrl": {
             "type": "string",
             "metadata": {
@@ -56,9 +60,9 @@
       "apiVersionDeployments": "2016-02-01",
       "apiVersionRouteTables": "2015-06-15",
       "namingInfix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 9))]",
-      "nvaPrivateIp": "[replace('10._.14.4','_', string(parameters('consortiumMemberId')))]",
       "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
-      "vpnName": "[concat(variables('namingInfix'), '-vpn')]"
+      "vpnName": "[concat(variables('namingInfix'), '-vpn')]",
+      "NvaRouteName": "[concat('r', uniqueString(resourceGroup().id), '-Route')]"
     },
     "resources": [
         {
@@ -81,11 +85,11 @@
                             "properties": {
                                 "routes": [
                                     {
-                                      "name": "NVARoute",
+                                      "name": "variables('NvaRouteName')",
                                       "properties": {
                                         "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
                                         "nextHopType": "VirtualAppliance",
-                                        "nextHopIpAddress": "[variables('nvaPrivateIp')]"
+                                        "nextHopIpAddress": "[parameters('nvaPrivateIp')]"
                                         }
                                     }
                                 ]
