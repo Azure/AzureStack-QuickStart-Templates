@@ -2,33 +2,25 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "namePrefix": {
+        "MemberNamePrefix": {
             "type": "string",
             "metadata": {
             "description": "String used as a base for naming resources (6 alphanumeric characters or less).  A unique hash is prepended to the string for some resources, while resource-specific information is appended."
             }
         },
-        "routeTableName": {
+        "MemberRouteTableName": {
             "type": "string",
             "metadata": {
             "description": "RouteTableName"
             }
         },
-        "consortiumMemberVnetAddressSpace": {
+        "RemoteMemberVnetAddressSpace": {
             "type": "string",
             "metadata": {
             "description": "The Address Space of the Consortium Member VNet to connect to"
             }
         },
-        "consortiumMemberId": {
-            "type": "int",
-            "metadata": {
-            "description": "Unique Identifier for the current member of this consortium"
-            },
-            "minValue": 0,
-            "maxValue": 255
-        },
-        "consortiumMemberNVAPublicIP": {
+        "RemoteMemberNvaPublicIP": {
             "type": "string",
             "metadata": {
             "description": "The Public IP address of the Consortium Member NVA to connect to"
@@ -43,7 +35,7 @@
         "location": {
             "type": "string"
         },
-        "nvaPrivateIp":
+        "MemberNvaPrivateIp":
         {
             "type": "string"
         },
@@ -59,44 +51,21 @@
     "variables": {
       "apiVersionDeployments": "2016-02-01",
       "apiVersionRouteTables": "2015-06-15",
-      "namingInfix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 9))]",
+      "namingInfix": "[toLower(substring(concat(parameters('MemberNamePrefix'), uniqueString(resourceGroup().id)), 0, 9))]",
       "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
-      "vpnName": "[concat(variables('namingInfix'), '-vpn')]",
+      "vpnName": "[concat('v', uniqueString(resourceGroup().id), '-vpn')]",
       "NvaRouteName": "[concat('r', uniqueString(resourceGroup().id), '-Route')]"
     },
     "resources": [
         {
-            "apiVersion": "[variables('apiVersionDeployments')]",
-            "type": "Microsoft.Resources/deployments",
-            "name": "updateRouteTable",
+            "apiVersion": "[variables('apiVersionRouteTables')]",
+            "type": "Microsoft.Network/routeTables/routes",
+            "name": "[concat(parameters('MemberRouteTableName'), '/', variables('NvaRouteName'))]",
+            "location": "[parameters('location')]",
             "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {},
-                    "variables": {},  
-                    "resources": [
-                        {
-                            "apiVersion": "[variables('apiVersionRouteTables')]",
-                            "name": "[parameters('routeTableName')]",
-                            "location": "[parameters('location')]",
-                            "type": "Microsoft.Network/routeTables",
-                            "properties": {
-                                "routes": [
-                                    {
-                                      "name": "[variables('NvaRouteName')]",
-                                      "properties": {
-                                        "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
-                                        "nextHopType": "VirtualAppliance",
-                                        "nextHopIpAddress": "[parameters('nvaPrivateIp')]"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
+                "addressPrefix": "[parameters('RemoteMemberVnetAddressSpace')]",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "[parameters('MemberNvaPrivateIp')]"
             }
         },
         {
@@ -112,8 +81,8 @@
                 "parameters": {
                     "nvaVMName": {"value": "[variables('nvaVMName')]" },
                     "location": {"value": "[parameters('location')]" },
-                    "remoteIpAddress": { "value": "[parameters('consortiumMemberNVAPublicIP')]" },
-                    "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
+                    "remoteIpAddress": { "value": "[parameters('RemoteMemberNvaPublicIP')]" },
+                    "remoteAddressSpace": { "value": "[parameters('RemoteMemberVnetAddressSpace')]" },
                     "sharedKey": { "value": "[parameters('connectionSharedKey')]" },
                     "vpnName": { "value": "[variables('vpnName')]" },
                     "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }

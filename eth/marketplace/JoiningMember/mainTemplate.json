@@ -187,7 +187,7 @@
     ],
     "nvaNICName": "nic-nva",
     "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
-    "vpnName": "[concat(variables('namingInfix'), '-vpn')]",
+    "vpnName": "[concat('v', uniqueString(resourceGroup().id), '-vpn')]",
     "nvaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'nva')]",
     "nvaStorageAccountType": "Standard_LRS",
     "nvaNodeVMSize": "Standard_A1",
@@ -611,7 +611,7 @@
                       "properties": {
                           "routes": [
                               {
-                                "name": "variables('NvaRouteName')",
+                                "name": "[variables('NvaRouteName')]",
                                 "properties": {
                                   "addressPrefix": "[parameters('RemoteMemberVnetAddressSpace')]",
                                   "nextHopType": "VirtualAppliance",
