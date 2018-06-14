@@ -139,7 +139,7 @@
       {
         "nvaPrivateIpAddress": {
             "type": "string",
-            "value": "[string(reference(variables('nvaNICName')).IpConfigurations[0].Properties.privateIPAddress)]"
+            "value": "[string(reference(parameters('nvaNICName')).IpConfigurations[0].Properties.privateIPAddress)]"
         }
       }
   }
