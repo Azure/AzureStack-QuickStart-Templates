@@ -614,7 +614,7 @@
                                 "properties": {
                                   "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
                                   "nextHopType": "VirtualAppliance",
-                                  "nextHopIpAddress": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value)]"
+                                  "nextHopIpAddress": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value]"
                                   }
                               }
                           ]
