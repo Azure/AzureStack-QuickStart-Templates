@@ -186,6 +186,7 @@
     ],
     "nvaNICName": "nic-nva",
     "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
+    "vpnName": "[concat(variables('namingInfix'), '-vpn')]",
     "nvaStorageAcctName": "[concat(uniqueString(resourceGroup().id, variables('namingInfix')), 'nva')]",
     "nvaStorageAccountType": "Standard_LRS",
     "nvaNodeVMSize": "Standard_A1",
@@ -617,6 +618,7 @@
           "remoteIpAddress": { "value": "[parameters('consortiumMemberNVAPublicIP')]" },
           "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
           "sharedKey": { "value": "[parameters('connectionSharedKey')]" },
+          "vpnName": { "value": "[variables('vpnName')]" },
           "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }
         }
       }

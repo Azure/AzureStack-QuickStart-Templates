@@ -1,6 +1,8 @@
 Param
 (
     [Parameter(Mandatory = $true)]
+    $VPNName,
+    [Parameter(Mandatory = $true)]
     $RemoteIPAddress,
     [Parameter(Mandatory = $true)]
     $AddressSpace,
@@ -8,14 +10,13 @@ Param
     $SharedKey
 )
 
-$AddressSpace = '10.0.0.0/14'
 Install-WindowsFeature -Name Routing
 Install-WindowsFeature -Name 'RSAT-RemoteAccess-PowerShell'
 Install-RemoteAccess -VpnType VpnS2S
 Start-Sleep -Seconds 10
 Get-Service -Name RemoteAccess
 $params = @{
-    Name                             = 'ToCloud'
+    Name                             = $VPNName
     Protocol                         = 'IKEv2'
     Destination                      = $RemoteIPAddress
     AuthenticationMethod             = 'PSKOnly'

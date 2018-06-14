@@ -17,6 +17,9 @@
         "sharedKey": {
             "type": "string"
         },
+        "vpnName": {
+            "type": "string"
+        },
         "artifactsLocationURL": {
             "type": "string"
         }
@@ -41,7 +44,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\CreateVPN.ps1 -RemoteIPAddress \"',parameters('remoteIpAddress'),'\" -AddressSpace \"',parameters('remoteAddressSpace'),'\" -SharedKey \"',parameters('sharedKey'),'\"')]"
+                    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\CreateVPN.ps1  -VPNName \"',parameters('vpnName'),'\" -RemoteIPAddress \"',parameters('remoteIpAddress'),'\" -AddressSpace \"',parameters('remoteAddressSpace'),'\" -SharedKey \"',parameters('sharedKey'),'\"')]"
                 }
             }
         }
