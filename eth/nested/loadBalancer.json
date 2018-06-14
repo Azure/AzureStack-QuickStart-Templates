@@ -176,6 +176,10 @@
     "fqdn": {
       "type": "string",
       "value": "[reference(variables('lbPublicIPAddressName')).dnsSettings.fqdn]"
+    },
+    "ipAddress": {
+      "type": "string",
+      "value": "[reference(variables('lbPublicIPAddressName')).IpConfiguration[0].Properties.PublicIpAddress]"
     }
   }
 }

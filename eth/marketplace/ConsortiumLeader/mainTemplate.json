@@ -630,13 +630,25 @@
       "type": "string",
       "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value)]"
     },
-    "Pair-Gateway-PS-Module": {
+    "consortium-data-ipaddress": {
       "type": "string",
-      "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value, '/ConsortiumBridge.psm1')]"
+      "value": "[concat('http://', string(reference('loadBalancerLinkedTemplate').outputs.ipAddress.value))]"
     },
-    "Pair-Gateway-Azure-CLI-Script": {
+    "member-nva-ipaddress": {
       "type": "string",
-      "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value, '/ConsortiumBridge.sh')]"
+      "value": "[reference('nvaResources).outputs.nvaPrivateIpAddress.value]"
+    },
+    "member-vnet-address-space": {
+      "type": "string",
+      "value": "[string(reference('variables('vNet').name).AddressSpace.AddressPrefixes[0])]"
+    },
+    "member-prefix": {
+      "type": "string",
+      "value": "[variables('namingInfix')]"
+    },
+    "member-routetable-name": {
+      "type": "string",
+      "value": "[variables('routeTableName')]"
     }
   }
 }
