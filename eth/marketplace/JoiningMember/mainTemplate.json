@@ -281,18 +281,7 @@
       "type": "Microsoft.Network/routeTables",
       "name": "[variables('routeTableName')]",
       "location": "[variables('location')]",
-      "properties": {
-        "routes": [
-          {
-            "name": "NVARoute",
-            "properties": {
-              "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('nvaPrivateIp')]"
-            }
-          }
-        ]
-      }
+      "properties": {}
     },
     {
       "apiVersion": "[variables('apiVersionDeployments')]",
@@ -594,11 +583,47 @@
           "windowsImage": { "value": "[variables('windowsImage')]" },
           "namingInfix": { "value": "[variables('namingInfix')]" },
           "nvaPublicIpName": { "value": "[variables('nvaPublicIpName')]" },
-          "nvaPrivateIpAddress": { "value": "[variables('nvaPrivateIp')]" },
           "location": { "value": "[variables('location')]" }
         }
       }
     },
+    {
+      "apiVersion": "[variables('apiVersionDeployments')]",
+      "type": "Microsoft.Resources/deployments",
+      "name": "updateRouteTable",
+      "dependsOn": [
+        "nvaResources"
+      ],
+      "properties": {
+          "mode": "Incremental",
+          "template": {
+              "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {},
+              "variables": {},  
+              "resources": [
+                  {
+                      "apiVersion": "[variables('apiVersionRouteTables')]",
+                      "name": "[parameters('routeTableName')]",
+                      "location": "[parameters('location')]",
+                      "type": "Microsoft.Network/routeTables",
+                      "properties": {
+                          "routes": [
+                              {
+                                "name": "NVARoute",
+                                "properties": {
+                                  "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
+                                  "nextHopType": "VirtualAppliance",
+                                  "nextHopIpAddress": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value)]"
+                                  }
+                              }
+                          ]
+                      }
+                  }
+              ]
+          }
+      }
+  },
     {
       "apiVersion": "[variables('apiVersionDeployments')]",
       "name": "nvaExtension",
