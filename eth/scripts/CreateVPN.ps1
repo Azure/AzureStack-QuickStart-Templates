@@ -32,3 +32,4 @@ $params = @{
     NumberOfTries                    = 0  
 }
 Add-VpnS2SInterface @params -Persistent -CustomPolicy
+Connect-VpnS2SInterface -Name $VPNName

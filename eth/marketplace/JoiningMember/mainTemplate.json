@@ -286,7 +286,7 @@
           {
             "name": "NVARoute",
             "properties": {
-              "addressPrefix": "10.0.0.0/14",
+              "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[variables('nvaPrivateIp')]"
             }

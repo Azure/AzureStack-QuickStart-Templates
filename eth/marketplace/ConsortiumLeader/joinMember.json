@@ -1,0 +1,121 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "metadata": {
+            "description": "String used as a base for naming resources (6 alphanumeric characters or less).  A unique hash is prepended to the string for some resources, while resource-specific information is appended."
+            }
+        },
+        "routeTableName": {
+            "type": "string",
+            "metadata": {
+            "description": "RouteTableName"
+            }
+        },
+        "consortiumMemberVnetAddressSpace": {
+            "type": "string",
+            "metadata": {
+            "description": "The Address Space of the Consortium Member VNet to connect to"
+            }
+        },
+        "consortiumMemberId": {
+            "type": "int",
+            "metadata": {
+            "description": "Unique Identifier for the current member of this consortium"
+            },
+            "minValue": 0,
+            "maxValue": 255
+        },
+        "consortiumMemberNVAPublicIP": {
+            "type": "string",
+            "metadata": {
+            "description": "The Public IP address of the Consortium Member NVA to connect to"
+            }
+        },
+        "connectionSharedKey": {
+            "type": "string",
+            "metadata": {
+            "description": "Shared Key for the Gateway Connection"
+            }
+        },
+        "location": {
+            "type": "string"
+        },
+        "baseUrl": {
+            "type": "string",
+            "metadata": {
+            "description": "The base URL for dependent assets",
+            "artifactsBaseUrl": ""
+            },
+            "defaultValue": "https://raw.githubusercontent.com/seyadava/AzureStack-QuickStart-Templates-1/blockchain_nva/eth"
+        }
+    },
+    "variables": {
+      "apiVersionDeployments": "2016-02-01",
+      "apiVersionRouteTables": "2015-06-15",
+      "namingInfix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 9))]",
+      "nvaPrivateIp": "[replace('10._.14.4','_', string(parameters('consortiumMemberId')))]",
+      "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
+      "vpnName": "[concat(variables('namingInfix'), '-vpn')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('apiVersionDeployments')]",
+            "type": "Microsoft.Resources/deployments",
+            "name": "updateRouteTable",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},  
+                    "resources": [
+                        {
+                            "apiVersion": "[variables('apiVersionRouteTables')]",
+                            "name": "[parameters('routeTableName')]",
+                            "location": "[parameters('location')]",
+                            "type": "Microsoft.Network/routeTables",
+                            "properties": {
+                                "routes": [
+                                    {
+                                      "name": "NVARoute",
+                                      "properties": {
+                                        "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
+                                        "nextHopType": "VirtualAppliance",
+                                        "nextHopIpAddress": "[variables('nvaPrivateIp')]"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersionDeployments')]",
+            "name": "nvaExtension",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                "uri": "[concat(parameters('baseUrl'), '/nested/joiningNVAExtension.json')]",
+                "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "nvaVMName": {"value": "[variables('nvaVMName')]" },
+                    "location": {"value": "[parameters('location')]" },
+                    "remoteIpAddress": { "value": "[parameters('consortiumMemberNVAPublicIP')]" },
+                    "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
+                    "sharedKey": { "value": "[parameters('connectionSharedKey')]" },
+                    "vpnName": { "value": "[variables('vpnName')]" },
+                    "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+  }
