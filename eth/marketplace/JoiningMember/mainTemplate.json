@@ -126,13 +126,13 @@
         "description": "The URL pointing to the consortium configuration data provided by another member's deployment"
       }
     },
-    "consortiumMemberVnetAddressSpace": {
+    "RemoteMemberVnetAddressSpace": {
       "type": "string",
       "metadata": {
         "description": "The Address Space of the Consortium Member VNet to connect to"
       }
     },
-    "consortiumMemberNVAPublicIP": {
+    "RemoteMemberNVAPublicIP": {
       "type": "string",
       "metadata": {
         "description": "The Public IP address of the Consortium Member NVA to connect to"
@@ -613,7 +613,7 @@
                               {
                                 "name": "variables('NvaRouteName')",
                                 "properties": {
-                                  "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
+                                  "addressPrefix": "[parameters('RemoteMemberVnetAddressSpace')]",
                                   "nextHopType": "VirtualAppliance",
                                   "nextHopIpAddress": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value]"
                                   }
@@ -641,8 +641,8 @@
         "parameters": {
           "nvaVMName": {"value": "[variables('nvaVMName')]" },
           "location": {"value": "[parameters('location')]" },
-          "remoteIpAddress": { "value": "[parameters('consortiumMemberNVAPublicIP')]" },
-          "remoteAddressSpace": { "value": "[parameters('consortiumMemberVnetAddressSpace')]" },
+          "remoteIpAddress": { "value": "[parameters('RemoteMemberNVAPublicIP')]" },
+          "remoteAddressSpace": { "value": "[parameters('RemoteMemberVnetAddressSpace')]" },
           "sharedKey": { "value": "[parameters('connectionSharedKey')]" },
           "vpnName": { "value": "[variables('vpnName')]" },
           "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }
@@ -699,13 +699,21 @@
       "type": "string",
       "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value)]"
     },
-    "Pair-Gateway-PS-Module": {
+    "member-nva-ipaddress": {
       "type": "string",
-      "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value, '/ConsortiumBridge.psm1')]"
+      "value": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value]"
     },
-    "Pair-Gateway-Azure-CLI-Script": {
+    "member-vnet-address-space": {
       "type": "string",
-      "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value, '/ConsortiumBridge.sh')]"
+      "value": "[string(reference(variables('vNet').name).AddressSpace.AddressPrefixes[0])]"
+    },
+    "member-prefix": {
+      "type": "string",
+      "value": "[variables('namingInfix')]"
+    },
+    "member-routetable-name": {
+      "type": "string",
+      "value": "[variables('routeTableName')]"
     }
   }
 }

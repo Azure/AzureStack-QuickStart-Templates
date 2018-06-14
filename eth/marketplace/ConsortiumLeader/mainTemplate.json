@@ -629,10 +629,6 @@
       "type": "string",
       "value": "[concat('http://', reference('loadBalancerLinkedTemplate').outputs.fqdn.value)]"
     },
-    "consortium-data-ipaddress": {
-      "type": "string",
-      "value": "[concat('http://', string(reference('loadBalancerPublicIpName').IpAddress))]"
-    },
     "member-nva-ipaddress": {
       "type": "string",
       "value": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value]"

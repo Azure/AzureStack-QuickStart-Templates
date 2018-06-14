@@ -85,7 +85,7 @@
                             "properties": {
                                 "routes": [
                                     {
-                                      "name": "variables('NvaRouteName')",
+                                      "name": "[variables('NvaRouteName')]",
                                       "properties": {
                                         "addressPrefix": "[parameters('consortiumMemberVnetAddressSpace')]",
                                         "nextHopType": "VirtualAppliance",
