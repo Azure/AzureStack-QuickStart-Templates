@@ -38,11 +38,11 @@ Configuration ConfigureVMBootAll
     # Log file
     $logFileName = "VMBootDSC.log"
     $logFilePath = "$localPath\$logFileName"
-    
+
     $AzureAccountUsername = $AzureAccountCreds.UserName
     $AzureAccountPasswordBSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AzureAccountCreds.Password)
     $AzureAccountPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($AzureAccountPasswordBSTR)
-    
+
     $VMAdminUserName = $VMAdminCreds.UserName
     $VMAdminPasswordBSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($VMAdminCreds.Password)
     $VMAdminPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($VMAdminPasswordBSTR)
@@ -95,18 +95,29 @@ Configuration ConfigureVMBootAll
                     $storageEndpoint = $storageEndpoint.Substring(0, $storageEndpoint.LastIndexOf(":"))
                 }
             }
-            
+
             "Storage endpoint given: $using:AzureStorageEndpoint Storage endpoint passed to script: $storageEndpoint" | Tee-Object -FilePath $logFilePath -Append
-            
+
+            # Disable windows update
+            sc.exe config wuauserv start=disabled
+            sc.exe stop wuauserv
+
+            # Enable task scheduler event logs
+            $taskSchedulerlogName = 'Microsoft-Windows-TaskScheduler/Operational'
+            $taskLog = New-Object System.Diagnostics.Eventing.Reader.EventLogConfiguration $taskSchedulerlogName
+            $taskLog.IsEnabled=$true
+            $taskLog.SaveChanges()
+
             $psPath = $using:PSPath
             $psScriptDir = Split-Path -Parent -Path $psPath
             $psScriptName = "VMBootAllScript.ps1"
             $psScriptPath = "$psScriptDir\$psScriptName"
             $action = New-ScheduledTaskAction -Execute 'Powershell.exe' -Argument "& $psScriptPath -azureUserName $azureUsername -azurePassword $azurePassword -tenant $tenant -location $location -vmName $vmName -vmCount $vmCount -azureStorageAccount $storageAccount -azureStorageAccessKey $storageKey -azureStorageEndpoint $storageEndpoint -AzureSubscription $subscription -Verbose" -ErrorAction Ignore
-            $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) -RepetitionInterval (New-TimeSpan -Minutes 10) -RepetitionDuration (New-TimeSpan -Minutes 30) -ErrorAction Ignore
+            $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) -ErrorAction Ignore
             $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -RunOnlyIfNetworkAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 2) -ErrorAction Ignore
             Unregister-ScheduledTask -TaskName "VMBootAll" -Confirm:0 -ErrorAction Ignore
             Register-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -TaskName "VMBootAll" -Description "VMBootstorm" -User $vmAdminUserName -Password $vmAdminPassword -RunLevel Highest -ErrorAction Ignore
+
 
             ######################
             ### AZURE RM SETUP ###
@@ -114,7 +125,7 @@ Configuration ConfigureVMBootAll
             $logFilePath = $using:logFilePath
             $azureStackSdkPath = $using:azureStackSdkPath
             $azureStackInstallerPath = $using:azureStackInstallerPath
-                        
+
             if((IsAzureStack -Location $location) -eq $true) {
                 # Ignore server certificate errors to avoid https://api.azurestack.local/ certificate error
                 add-type @"
@@ -183,11 +194,11 @@ Configuration ConfigureVMBootAll
                     }
                 }
             }
-            Disable-AzureRmDataCollection 
+            Disable-AzureRmDataCollection
 
             # Test status file
             $statusFilePath = "$localPath\VMBootStatus.log"
-            
+
             # Wait for VM bootstorm test to finish if vm count is small and DSC can finish within 90 minutes
             $waitCount = 75
             while(((Test-Path $statusFilePath) -eq $false) -and ($waitCount -gt 0)) {
@@ -195,7 +206,7 @@ Configuration ConfigureVMBootAll
                 Start-Sleep -Seconds 60
                 $waitCount--
             }
-            
+
             if((Test-Path $statusFilePath) -eq $false) {
                 "Bootstorm test finished successfully." | Tee-Object -FilePath $logFilePath -Append
             }
@@ -203,6 +214,6 @@ Configuration ConfigureVMBootAll
                 "Bootstorm test not finished successfully." | Tee-Object -FilePath $logFilePath -Append
             }
         }
-    }    
+    }
 }
 
