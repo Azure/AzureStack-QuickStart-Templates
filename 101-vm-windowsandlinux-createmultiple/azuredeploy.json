@@ -107,7 +107,7 @@
         "linuxImageOffer": "UbuntuServer",
         "linuxOSDiskName": "linuxOSDisk",
         "linuxVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'virtualnetwork')]",
-        "LinuxVMSubnetRef": "[concat(variables('linuxVnetID'), '/subnets/', variables('virtualnetworkSubnet1Name'))]",
+        "LinuxVMSubnetRef": "[concat(variables('linuxVnetID'), '/subnets/', variables('virtualnetworkSubnet2Name'))]",
         "linuxVMStorageAccountContainerName": "lvhds",
         "linuxNicName": "[concat(parameters('linuxVMName'), 'NetworkInterface')]"
     },
