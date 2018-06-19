@@ -703,6 +703,10 @@
       "type": "string",
       "value": "[reference('nvaResources').outputs.nvaPrivateIpAddress.value]"
     },
+    "member-nva-public-ipaddress": {
+      "type": "string",
+      "value": "[reference('nvaResources').outputs.nvaPublicIpAddress.value]"
+    },
     "member-vnet-address-space": {
       "type": "string",
       "value": "[string(reference(variables('vNet').name).AddressSpace.AddressPrefixes[0])]"
