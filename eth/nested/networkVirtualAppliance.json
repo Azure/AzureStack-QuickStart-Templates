@@ -67,7 +67,7 @@
         "location": "[parameters('location')]",
         "properties": {
             "publicIPAddressVersion": "IPv4",
-            "publicIPAllocationMethod": "Dynamic",
+            "publicIPAllocationMethod": "Static",
             "idleTimeoutInMinutes": 4
         }
       },
