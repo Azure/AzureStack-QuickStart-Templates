@@ -141,9 +141,9 @@
             "type": "string",
             "value": "[string(reference(parameters('nvaNICName')).IpConfigurations[0].Properties.privateIPAddress)]"
         },
-        "nvaPublicIpAddressId": {
+        "nvaPublicIpAddress": {
           "type": "string",
-          "value": "[string(reference(parameters('nvaNICName')).IpConfigurations[0].Properties.PublicIpAddress.Id)]"
-      }
+          "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('nvaPublicIpName'))).IpAddress]"
+        }
       }
   }
