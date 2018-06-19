@@ -140,6 +140,10 @@
         "nvaPrivateIpAddress": {
             "type": "string",
             "value": "[string(reference(parameters('nvaNICName')).IpConfigurations[0].Properties.privateIPAddress)]"
-        }
+        },
+        "nvaPublicIpAddressId": {
+          "type": "string",
+          "value": "[string(reference(parameters('nvaNICName')).IpConfigurations[0].Properties.PublicIpAddress.Id)]"
+      }
       }
   }
