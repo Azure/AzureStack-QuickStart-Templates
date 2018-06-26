@@ -144,9 +144,6 @@
         "description": "Shared Key for the Gateway Connection"
       }
     },
-    "location": {
-      "type": "string"
-    },
     "baseUrl": {
       "type": "string",
       "metadata": {
@@ -178,7 +175,7 @@
     "loadBalancerName": "[concat(variables('namingInfix'), '-LB')]",
     "loadBalancerBackendAddressPoolName": "LoadBalancerBackend1",
     "loadBalancerInboundNatRuleNamePrefix": "SSH-VM",
-    "location": "[parameters('location')]",
+    "location": "[resourceGroup().location]",
     "numMNNodes": "[parameters('numMiningNodes')]",
     "maxVMsPerStorageAcct": 20,
     "mnStorageAcctCount": "[add(div(variables('numMNNodes'), variables('maxVMsPerStorageAcct')), 1)]",
@@ -466,7 +463,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vNet').name]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', variables('txNsgName'))]",
         "[concat('Microsoft.Network/networkSecurityGroups/', variables('mnNsgName'))]",
@@ -606,7 +603,7 @@
                   {
                       "apiVersion": "[variables('apiVersionRouteTables')]",
                       "name": "[variables('routeTableName')]",
-                      "location": "[parameters('location')]",
+                      "location": "[variables('location')]",
                       "type": "Microsoft.Network/routeTables",
                       "properties": {
                           "routes": [
@@ -640,7 +637,7 @@
         },
         "parameters": {
           "nvaVMName": {"value": "[variables('nvaVMName')]" },
-          "location": {"value": "[parameters('location')]" },
+          "location": {"value": "[variables('location')]" },
           "remoteIpAddress": { "value": "[parameters('RemoteMemberNVAPublicIP')]" },
           "remoteAddressSpace": { "value": "[parameters('RemoteMemberVnetAddressSpace')]" },
           "sharedKey": { "value": "[parameters('connectionSharedKey')]" },

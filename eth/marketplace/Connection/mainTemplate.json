@@ -32,9 +32,6 @@
           "description": "Shared Key for the Gateway Connection"
           }
       },
-      "location": {
-          "type": "string"
-      },
       "MemberNvaPrivateIp":
       {
           "type": "string"
@@ -53,15 +50,16 @@
     "apiVersionRouteTables": "2015-06-15",
     "namingInfix": "[toLower(substring(concat(parameters('MemberNamePrefix'), uniqueString(resourceGroup().id)), 0, 9))]",
     "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
-    "vpnName": "[concat('v', uniqueString(resourceGroup().id), '-vpn')]",
-    "NvaRouteName": "[concat('r', uniqueString(resourceGroup().id), '-Route')]"
+    "vpnName": "[concat('v', uniqueString(variables('namingInfix'), parameters('RemoteMemberVnetAddressSpace')), '-vpn')]",
+    "NvaRouteName": "[concat('r', uniqueString(variables('namingInfix'), parameters('RemoteMemberVnetAddressSpace')), '-Route')]",
+    "location": "[resourceGroup().location]"
   },
   "resources": [
       {
           "apiVersion": "[variables('apiVersionRouteTables')]",
           "type": "Microsoft.Network/routeTables/routes",
           "name": "[concat(parameters('MemberRouteTableName'), '/', variables('NvaRouteName'))]",
-          "location": "[parameters('location')]",
+          "location": "[variables('location')]",
           "properties": {
               "addressPrefix": "[parameters('RemoteMemberVnetAddressSpace')]",
               "nextHopType": "VirtualAppliance",
@@ -80,7 +78,7 @@
               },
               "parameters": {
                   "nvaVMName": {"value": "[variables('nvaVMName')]" },
-                  "location": {"value": "[parameters('location')]" },
+                  "location": {"value": "[variables('location')]" },
                   "remoteIpAddress": { "value": "[parameters('RemoteMemberNvaPublicIP')]" },
                   "remoteAddressSpace": { "value": "[parameters('RemoteMemberVnetAddressSpace')]" },
                   "sharedKey": { "value": "[parameters('connectionSharedKey')]" },

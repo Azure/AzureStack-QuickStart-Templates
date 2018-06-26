@@ -138,9 +138,6 @@
         "description": "Type of storage accounts to create"
       }
     },
-    "location": {
-      "type": "string"
-    },
     "baseUrl": {
       "type": "string",
       "metadata": {
@@ -174,7 +171,7 @@
     "loadBalancerPublicIpName": "[concat(variables('namingInfix'), '-publicip')]",
     "loadBalancerBackendAddressPoolName": "LoadBalancerBackend1",
     "loadBalancerInboundNatRuleNamePrefix": "SSH-VM",
-    "location": "[parameters('location')]",
+    "location": "[resourceGroup().location]",
     "numMNNodes": "[parameters('numMiningNodes')]",
     "maxVMsPerStorageAcct": 20,
     "mnStorageAcctCount": "[add(div(variables('numMNNodes'), variables('maxVMsPerStorageAcct')), 1)]",
