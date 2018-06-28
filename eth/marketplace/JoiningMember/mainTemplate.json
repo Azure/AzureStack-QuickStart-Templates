@@ -150,7 +150,7 @@
         "description": "The base URL for dependent assets",
         "artifactsBaseUrl": ""
       },
-      "defaultValue": "https://raw.githubusercontent.com/seyadava/AzureStack-QuickStart-Templates-1/blockchain_nva/eth"
+      "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/eth"
     }
   },
   "variables": {
