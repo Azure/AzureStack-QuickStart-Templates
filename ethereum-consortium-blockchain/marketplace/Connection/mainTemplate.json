@@ -42,7 +42,7 @@
           "description": "The base URL for dependent assets",
           "artifactsBaseUrl": ""
           },
-          "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/eth"
+          "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain"
       }
   },
   "variables": {
