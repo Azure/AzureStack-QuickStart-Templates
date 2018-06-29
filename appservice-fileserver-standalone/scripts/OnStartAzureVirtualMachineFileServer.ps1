@@ -100,7 +100,7 @@ try
 
             if (Test-Path $zipFile) 
             {
-                Expand-ZIPFile –File $zipFile –Destination "$pwd"                
+                Expand-ZIPFile -file $zipFile -destination "$pwd"           
                 Move-Item -Path $zipFile -Destination "$zipFile.expanded" -Force
             }
         }   
