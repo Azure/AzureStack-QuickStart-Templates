@@ -1,0 +1,149 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "apiVersionVirtualMachines": {
+        "type": "string"
+      },
+      "apiVersionNetworkInterfaces": {
+        "type": "string"
+      },
+      "apiVersionStorageAccounts": {
+        "type": "string"
+      },
+      "nvaVMName": {
+        "type": "string"
+      },
+      "nvaNICName": {
+        "type": "string"
+      },
+      "nvaStorageAcctName": {
+        "type": "string"
+      },
+      "nvaSubnetRef": {
+        "type": "string"
+      },
+      "storageAccountType": {
+        "type": "string"
+      },
+      "nvaNodeVMSize": {
+        "type": "string"
+      },
+      "adminUsername": {
+        "type": "string"
+      },
+      "adminPassword": {
+        "type": "securestring"
+      },
+      "windowsImage": {
+        "type": "object"
+      },
+      "namingInfix": {
+        "type": "string"
+      },
+      "nvaPublicIpName": {
+          "type": "string"
+      },
+      "location": {
+        "type": "string"
+      }
+    },
+    "resources": [
+      {
+        "apiVersion": "[parameters('apiVersionStorageAccounts')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "[parameters('nvaStorageAcctName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "[parameters('storageAccountType')]"
+        },
+        "kind": "Storage",
+        "properties": {}
+      },
+      {
+        "apiVersion": "[parameters('apiVersionNetworkInterfaces')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[parameters('nvaPublicIpName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+            "publicIPAddressVersion": "IPv4",
+            "publicIPAllocationMethod": "Static",
+            "idleTimeoutInMinutes": 4
+        }
+      },
+      {
+        "apiVersion": "[parameters('apiVersionNetworkInterfaces')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[parameters('nvaNICName')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses',parameters('nvaPublicIpName'))]"
+        ],
+        "location": "[parameters('location')]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[parameters('nvaSubnetRef')]"
+                },
+                "publicIPAddress": {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('nvaPublicIpName'))]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "[parameters('apiVersionVirtualMachines')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('nvaVMName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Storage/storageAccounts/', parameters('nvaStorageAcctName'))]",
+          "[concat('Microsoft.Network/networkInterfaces/', parameters('nvaNICName'))]"
+        ],
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[parameters('nvaNodeVMSize')]"
+          },
+          "osProfile": {
+            "computerName": "[parameters('nvaVMName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": "[parameters('windowsImage')]",
+            "osDisk": {
+              "name": "[concat(parameters('namingInfix'), '-osdisk')]",
+              "vhd": {
+                "uri" :"[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('nvaStorageAcctName')), parameters('apiVersionStorageAccounts')).primaryEndpoints.blob, 'vhds/osdisk.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nvaNICName'))]"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "outputs": 
+      {
+        "nvaPrivateIpAddress": {
+            "type": "string",
+            "value": "[string(reference(parameters('nvaNICName')).IpConfigurations[0].Properties.privateIPAddress)]"
+        },
+        "nvaPublicIpAddress": {
+          "type": "string",
+          "value": "[reference(concat('Microsoft.Network/publicIPAddresses/',parameters('nvaPublicIpName'))).ipAddress]"
+        }
+      }
+  }

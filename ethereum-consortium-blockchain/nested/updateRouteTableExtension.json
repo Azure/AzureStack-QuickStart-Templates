@@ -1,0 +1,44 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nvaNicResourceId": {
+          "type": "string"
+        },
+        "routeTableName": {
+            "type": "string"
+          },
+        "remoteAddressSpace": {
+            "type": "string"
+        },
+        "artifactsLocationURL": {
+            "type": "string"
+        }
+    },
+    "variables": {
+      "apiVersionVirtualMachinesExtensions": "2016-03-30"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('apiVersionVirtualMachinesExtensions')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "['routetable/newuserscript']",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[concat(parameters('artifactsLocationURL'), '/scripts/UpdateRouteTable.ps1')]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\UpdateRouteTable.ps1 -RouteTableName \"',parameters('routeTableName'),'\" -NicResourceId \"',parameters('nvaNicResourceId'),'\" -RemoteAddressSpace \"',parameters('remoteAddressSpace'),'\"')]"
+                }
+            }
+        }
+    ]
+  }
+  
