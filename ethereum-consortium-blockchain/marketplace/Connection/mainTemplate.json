@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "MemberNamePrefix": {
+          "type": "string",
+          "metadata": {
+          "description": "String used as a base for naming resources (6 alphanumeric characters or less).  A unique hash is prepended to the string for some resources, while resource-specific information is appended."
+          }
+      },
+      "MemberRouteTableName": {
+          "type": "string",
+          "metadata": {
+          "description": "RouteTableName"
+          }
+      },
+      "RemoteMemberVnetAddressSpace": {
+          "type": "string",
+          "metadata": {
+          "description": "The Address Space of the Consortium Member VNet to connect to"
+          }
+      },
+      "RemoteMemberNvaPublicIP": {
+          "type": "string",
+          "metadata": {
+          "description": "The Public IP address of the Consortium Member NVA to connect to"
+          }
+      },
+      "connectionSharedKey": {
+          "type": "string",
+          "metadata": {
+          "description": "Shared Key for the Gateway Connection"
+          }
+      },
+      "MemberNvaPrivateIp":
+      {
+          "type": "string"
+      },
+      "baseUrl": {
+          "type": "string",
+          "metadata": {
+          "description": "The base URL for dependent assets",
+          "artifactsBaseUrl": ""
+          },
+          "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain"
+      }
+  },
+  "variables": {
+    "apiVersionDeployments": "2016-02-01",
+    "apiVersionRouteTables": "2015-06-15",
+    "namingInfix": "[toLower(substring(concat(parameters('MemberNamePrefix'), uniqueString(resourceGroup().id)), 0, 9))]",
+    "nvaVMName": "[concat(variables('namingInfix'), '-nva')]",
+    "vpnName": "[concat('v', uniqueString(variables('namingInfix'), parameters('RemoteMemberVnetAddressSpace')), '-vpn')]",
+    "NvaRouteName": "[concat('r', uniqueString(variables('namingInfix'), parameters('RemoteMemberVnetAddressSpace')), '-Route')]",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+      {
+          "apiVersion": "[variables('apiVersionRouteTables')]",
+          "type": "Microsoft.Network/routeTables/routes",
+          "name": "[concat(parameters('MemberRouteTableName'), '/', variables('NvaRouteName'))]",
+          "location": "[variables('location')]",
+          "properties": {
+              "addressPrefix": "[parameters('RemoteMemberVnetAddressSpace')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('MemberNvaPrivateIp')]"
+          }
+      },
+      {
+          "apiVersion": "[variables('apiVersionDeployments')]",
+          "name": "nvaExtension",
+          "type": "Microsoft.Resources/deployments",
+          "properties": {
+              "mode": "Incremental",
+              "templateLink": {
+              "uri": "[concat(parameters('baseUrl'), '/nested/joiningNVAExtension.json')]",
+              "contentVersion": "1.0.0.0"
+              },
+              "parameters": {
+                  "nvaVMName": {"value": "[variables('nvaVMName')]" },
+                  "location": {"value": "[variables('location')]" },
+                  "remoteIpAddress": { "value": "[parameters('RemoteMemberNvaPublicIP')]" },
+                  "remoteAddressSpace": { "value": "[parameters('RemoteMemberVnetAddressSpace')]" },
+                  "sharedKey": { "value": "[parameters('connectionSharedKey')]" },
+                  "vpnName": { "value": "[variables('vpnName')]" },
+                  "artifactsLocationURL": { "value": "[parameters('baseUrl')]" }
+              }
+          }
+      }
+  ],
+  "outputs": {}
+}
