@@ -1,0 +1,62 @@
+<div class="container">
+  <table class="u-full-width">
+    <tbody>
+      <tr>
+        <td><h2>Ethereum Node Status</h2></td>
+        <td>
+          <form action="" method="GET">
+            <input class="button-primary" type="submit" value="Reload">
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <b>Consortium Member ID: {{this.consortiumid}}<b>
+  <p>My Account Address: {{this.myAddress}}<br>
+  Ether Balance: {{this.myBalance}}</p>
+  {{#if hasNodeRows}}
+    <table class="u-full-width">
+      <thead>
+        <tr>
+          <th>Node Hostname</th>
+          <th>Peer Count</th>
+          <th>Latest Block Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each nodeRows}}
+          <tr>
+            <td>{{this.hostname}}</td>
+            <td>{{this.peercount}}</td>
+            <td>{{this.blocknumber}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <i>As of {{this.timestamp}}   (Refresh interval: ~{{this.refreshinterval}} seconds)</i>
+    <hr />
+  {{else}}
+    <h4>Waiting on all Ethereum nodes to boot up...</h4>
+  {{/if}}
+  <h3>Bootstrap New Address with Ether</h3>
+  {{#if minedABlock}}
+    <p>Use this function to send Ether from the predefined account to a new address</p>
+    <form action="" method="POST">
+      <label for="etherAddress">Address of Recipient</label>
+      <input class="u-full-width" type="text" placeholder="Ex: 0x17Bf5e7b3CE6779DBaeDEB907010601A8c1e3118"
+        name="etherAddress">
+      <label for="amount">Amount</label>
+      <input class="u-full-width" type="number" name="amount" value="1000" min="0">
+      <input class="button-primary" type="submit" value="Submit">
+    </form>
+    {{#if error}}
+      <h4>Error sending ether</h4>
+      <p>{{error}}</p>
+    {{/if}}
+    {{#if isSent}}
+      <h4>Ether sent!</h4>
+    {{/if}}
+  {{else}}
+    <h4>Waiting for first block to be mined...</h4>
+  {{/if}}
+</div>
