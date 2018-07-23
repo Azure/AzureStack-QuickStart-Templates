@@ -253,7 +253,8 @@
             "type": "string",
             "allowedValues": [
                 "SQL2016SP1-WS2016-ENT",
-                "SQL2016SP1-WS2016-DEV"
+                "SQL2016SP1-WS2016-DEV",
+                "SQL2016SP1-WS2016-STD"
             ],
             "metadata": {
                 "description": "The Sql Server Version"
@@ -332,6 +333,7 @@
         },
         "SQL2016SP1-WS2016-ENT": "Enterprise",
         "SQL2016SP1-WS2016-DEV": "Developer",
+        "SQL2016SP1-WS2016-STD": "Standard",
         "Monday": true,
         "Tuesday": true,
         "Wednesday": true,
