@@ -76,8 +76,8 @@
         "apiVersion": "2016-03-30",
         "location": "[parameters('location')]",
         "properties": {
-            "platformFaultDomainCount": "1",
-            "platformUpdateDomainCount": "1"
+            "platformFaultDomainCount": "3",
+            "platformUpdateDomainCount": "5"
         }
     },
     {
