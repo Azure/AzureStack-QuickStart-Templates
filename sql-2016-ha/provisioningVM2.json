@@ -59,6 +59,12 @@
         },
         "sqlwNicName": {
             "type": "string"
+        },
+        "platformFaultDomainCount": {
+            "type": "int"
+        },
+        "platformUpdateDomainCount": {
+            "type": "int"
         }
     },
     "variables": {
@@ -76,8 +82,8 @@
         "apiVersion": "2016-03-30",
         "location": "[parameters('location')]",
         "properties": {
-            "platformFaultDomainCount": "3",
-            "platformUpdateDomainCount": "5"
+            "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]",
+            "platformUpdateDomainCount": "[parameters('platformUpdateDomainCount')]"
         }
     },
     {
