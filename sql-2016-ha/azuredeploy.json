@@ -121,6 +121,20 @@
             },
             "defaultValue": "Standard_LRS"
         },
+        "platformFaultDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Fault Domain Count Integer"
+            },
+            "defaultValue": "1"
+        },
+        "platformUpdateDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Update Domain Count Integer"
+            },
+            "defaultValue": "1"
+        },
         "virtualNetworkAddressRange": {
             "type": "string",
             "metadata": {
@@ -788,6 +802,12 @@
                     },
                     "sqlwNicName": {
                         "value": "[variables('sqlwNicName')]"
+                    },
+                    "platformFaultDomainCount": {
+                        "value": "[parameters('platformFaultDomainCount')]"
+                    },
+                    "platformUpdateDomainCount": {
+                        "value": "[parameters('platformUpdateDomainCount')]"
                     }
                 }
             }
