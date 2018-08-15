@@ -103,7 +103,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2018-02-01",
       "location": "[variables('location')]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
@@ -112,7 +112,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetName')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2018-04-01",
       "location": "[variables('location')]",
       "properties": {
         "addressSpace": {
@@ -133,7 +133,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-06-01",
       "location": "[variables('location')]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
@@ -145,7 +145,7 @@
     {
       "type": "Microsoft.Network/loadBalancers",
       "name": "[variables('loadBalancerName')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-10-01",
       "location": "[variables('location')]",
       "properties": {
         "frontendIPConfigurations": [
@@ -222,7 +222,7 @@
         "capacity": "[parameters('instanceCount')]"
       },
       "name": "[parameters('vmssName')]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-04-01",
       "location": "[variables('location')]",
       "properties": {
         "upgradePolicy": {
@@ -284,6 +284,7 @@
             "extensions": [
               {
                 "name": "customScript",
+                "type": "CustomScriptExtension"
                 "properties": {
                   "publisher": "Microsoft.Compute",
                   "settings": {
@@ -295,8 +296,7 @@
                   "autoUpgradeMinorVersion": true,
                   "protectedSettings": {
                     "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File helloWorld.ps1"
-                  },
-                  "type": "CustomScriptExtension"
+                  }
                 }
               }
             ]

@@ -1,6 +1,29 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {	
+   "parameters": {
+    "vmSku": {
+      "value": "Standard_D1"
+    },
+    "vmssName": {
+      "value" : "GEN-UNIQUE-vmssname"
+    },
+    "instanceCount": {
+      "value": 2
+    },
+    "adminUsername": {
+     "value": "GEN-UNIQUE-admin"
+    },
+    "adminPassword": {
+       "value": "GEN-UNIQUE-admin@2018"
+    },
+    "osImagePublisher": {
+      "defaultValue": "Canonical"
+    },
+    "osImageOffer": {
+      "value": "UbuntuServer"
+    },
+    "osImageSku": {
+      "value": "16.04-LTS"
     }
 }

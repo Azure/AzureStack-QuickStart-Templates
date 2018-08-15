@@ -85,10 +85,12 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "nsgName": "[concat('ng', resourceGroup().name)]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",	
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
+    "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
+    "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]",
     "controllerVmSize": "Standard_A4"
   },
   "resources": [
@@ -150,12 +152,28 @@
       }
     },
     {
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIPAddressName')]",
+        "apiVersion": "2015-05-01-preview",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "publicIPAllocationMethod": "Dynamic",
+            "dnsSettings": {
+                "domainNameLabel": "[variables('dnsPrefix')]"
+            }
+        },
+        "dependsOn": [
+            "[variables('vnetID')]"
+        ]
+    },    
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('vmNicName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -165,7 +183,10 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetRef')]"
-              }
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              }               
             }
           }
         ]
@@ -191,7 +212,7 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetRef')]"
-              }
+              }             
             }
           }
         ]

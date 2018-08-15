@@ -121,6 +121,20 @@
             },
             "defaultValue": "Standard_LRS"
         },
+        "platformFaultDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Fault Domain Count Integer"
+            },
+            "defaultValue": "1"
+        },
+        "platformUpdateDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Update Domain Count Integer"
+            },
+            "defaultValue": "1"
+        },
         "virtualNetworkAddressRange": {
             "type": "string",
             "metadata": {
@@ -253,7 +267,8 @@
             "type": "string",
             "allowedValues": [
                 "SQL2016SP1-WS2016-ENT",
-                "SQL2016SP1-WS2016-DEV"
+                "SQL2016SP1-WS2016-DEV",
+                "SQL2016SP1-WS2016-STD"
             ],
             "metadata": {
                 "description": "The Sql Server Version"
@@ -332,6 +347,7 @@
         },
         "SQL2016SP1-WS2016-ENT": "Enterprise",
         "SQL2016SP1-WS2016-DEV": "Developer",
+        "SQL2016SP1-WS2016-STD": "Standard",
         "Monday": true,
         "Tuesday": true,
         "Wednesday": true,
@@ -786,6 +802,12 @@
                     },
                     "sqlwNicName": {
                         "value": "[variables('sqlwNicName')]"
+                    },
+                    "platformFaultDomainCount": {
+                        "value": "[parameters('platformFaultDomainCount')]"
+                    },
+                    "platformUpdateDomainCount": {
+                        "value": "[parameters('platformUpdateDomainCount')]"
                     }
                 }
             }

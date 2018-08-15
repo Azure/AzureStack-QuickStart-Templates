@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 Param
 (
     [string] $fileServerAdminUserName,
@@ -100,10 +100,33 @@ try
 
             if (Test-Path $zipFile) 
             {
-                Expand-ZIPFile –File $zipFile –Destination "$pwd"                
+                Expand-ZIPFile -file $zipFile -destination "$pwd"           
                 Move-Item -Path $zipFile -Destination "$zipFile.expanded" -Force
             }
         }   
+    }
+
+    Log "Configure admin user"
+    # Disable built-in admin if it is not our admin
+    $adminGroup = Get-LocalGroup -SID 'S-1-5-32-544'
+    $buildinAdmin = Get-LocalGroupMember $adminGroup | where {$_.SID.Value.EndsWith("-500")}
+
+    if ($buildinAdmin.Name -ne "${env:COMPUTERNAME}\$fileServerAdminUserName") 
+    {
+        Disable-LocalUser -SID $buildinAdmin.SID
+    }
+
+    # Create or update the actual admin
+    $securePassword = ConvertTo-SecureString $fileServerAdminPassword -Force -AsPlainText
+    if (Get-LocalUser -Name $fileServerAdminUserName -ErrorAction SilentlyContinue) 
+    {
+        Set-LocalUser -Name $fileServerAdminUserName -Password $securePassword -AccountNeverExpires -PasswordNeverExpires $true
+        Enable-LocalUser -Name $fileServerAdminUserName
+    }
+    else
+    {
+        New-LocalUser -Name $fileServerAdminUserName -Password $securePassword -AccountNeverExpires -PasswordNeverExpires
+        Add-LocalGroupMember -Group $adminGroup -Member $fileServerAdminUserName
     }
 
     Log "Start App Service file server configuration."
@@ -115,6 +138,9 @@ try
         "-fileShareOwnerPassword '$fileShareOwnerPassword' " +
         "-fileShareUserUserName '$fileShareUserUserName' " +
         "-fileShareUserPassword '$fileShareUserPassword' "
+
+    # Escape double quote else it will be trimmed by ArgumentList
+    $cmd = $cmd.Replace('"','\"')
 
     $process = Start-Process -FilePath Powershell.exe -ArgumentList $cmd -Wait -NoNewWindow -PassThru
     if ($process.ExitCode -ne 0)

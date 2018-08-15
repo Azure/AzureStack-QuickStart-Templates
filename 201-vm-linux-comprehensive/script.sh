@@ -19,7 +19,7 @@ echo "Install Python 3.5"
 sudo apt-get install python3.5 -y
 
 echo "Install Python PIP."
-sudo apt install python-pip -y
+sudo apt-get install python-pip -y
 
 echo "Upgrading Python PIP."
 pip install --upgrade pip

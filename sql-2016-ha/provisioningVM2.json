@@ -59,6 +59,12 @@
         },
         "sqlwNicName": {
             "type": "string"
+        },
+        "platformFaultDomainCount": {
+            "type": "int"
+        },
+        "platformUpdateDomainCount": {
+            "type": "int"
         }
     },
     "variables": {
@@ -66,7 +72,8 @@
         "fwstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
         "diagstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
         "SQL2016SP1-WS2016-ENT": "SQL2016SP1-WS2016",
-        "SQL2016SP1-WS2016-DEV": "SQL2016SP1-WS2016"
+        "SQL2016SP1-WS2016-DEV": "SQL2016SP1-WS2016",
+        "SQL2016SP1-WS2016-STD": "SQL2016SP1-WS2016"
     },
   "resources": [
     {
@@ -75,8 +82,8 @@
         "apiVersion": "2016-03-30",
         "location": "[parameters('location')]",
         "properties": {
-            "platformFaultDomainCount": "1",
-            "platformUpdateDomainCount": "1"
+            "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]",
+            "platformUpdateDomainCount": "[parameters('platformUpdateDomainCount')]"
         }
     },
     {
