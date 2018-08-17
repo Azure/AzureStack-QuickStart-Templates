@@ -1,8 +1,12 @@
-# Hadoop Template and Extensions
+# Hadoop Cluster
 
 ## ARM Templates
 
-### hadoop_template.json
+### Dependencies
+
+This template requires Ubuntu 16.04LTS and Custom Script 2.0 for Linux to function.
+
+### hadoop_cluster.json
 
 This ARM template will setup your Hadoop cluster along with a jump box used to transfer data.
 
@@ -20,7 +24,7 @@ This ARM template will deploy the Hadoop worker nodes.
 
 ## Virtual Machine Extensions
 
-### Hadoop Node Setup
+### Hadoop Cluster Setup
 
 This script will download and install hadoop on each machine.  This includes
 

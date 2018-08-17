@@ -22,20 +22,6 @@
                 "description": "Password for the deployed virtual machines."
             }
         },
-        "storageAccountType": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS",
-                "Standard_GRS",
-                "Standard_RAGRS",
-                "Standard_ZRS",
-                "Premium_LRS"
-            ],
-            "metadata": {
-                "description": "Storage account type."
-            }
-        },
         "masterNodeVMSize": {
             "type": "string",
             "defaultValue": "Standard_DS3_v2",
@@ -116,7 +102,7 @@
         },
         "baseUri": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop",
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/hadoop/hadoop",
             "metadata": {
                 "description": "Base URI for scripts and files."
             }
@@ -143,7 +129,7 @@
             "apiVersion": "2016-01-01",
             "location": "[variables('location')]",
             "properties": {
-                "accountType": "[parameters('storageAccountType')]"
+                "accountType": "Standard_LRS"
             }
         },
         {

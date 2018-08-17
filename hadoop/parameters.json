@@ -11,9 +11,6 @@
         "adminPassword": {
             "value": ""
         },
-        "storageAccountType": {
-            "value": "Standard_LRS"
-        },
         "masterNodeVMSize": {
             "value": "Standard_DS3_v2"
         },
