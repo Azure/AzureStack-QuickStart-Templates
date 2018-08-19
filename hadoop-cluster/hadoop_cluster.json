@@ -22,6 +22,17 @@
                 "description": "Password for the deployed virtual machines."
             }
         },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage account type."
+            }
+        },
         "masterNodeVMSize": {
             "type": "string",
             "defaultValue": "Standard_DS3_v2",
@@ -100,9 +111,9 @@
                 "description": "How many resources to attempt to deploy at once."
             }
         },
-        "baseUri": {
+        "_artifactsLocation": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/hadoop/hadoop",
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/hadoop-cluster",
             "metadata": {
                 "description": "Base URI for scripts and files."
             }
@@ -129,7 +140,7 @@
             "apiVersion": "2016-01-01",
             "location": "[variables('location')]",
             "properties": {
-                "accountType": "Standard_LRS"
+                "accountType": "[parameters('storageAccountType')]"
             }
         },
         {
@@ -327,7 +338,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('baseURI'),'/worker_node.json')]",
+                    "uri": "[concat(parameters('_artifactsLocation'),'/worker_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -361,8 +372,8 @@
                     "networkSecurityGroupName": {
                         "value": "[variables('networkSecurityGroupName')]"
                     },
-                    "baseURI": {
-                        "value": "[parameters('baseURI')]"
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
                     },
                     "batchSize": {
                         "value": "[parameters('batchSize')]"
@@ -381,7 +392,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('baseURI'),'/master_node.json')]",
+                    "uri": "[concat(parameters('_artifactsLocation'),'/master_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -415,8 +426,8 @@
                     "numberWorkerNodes": {
                         "value": "[parameters('numberWorkerNodes')]"
                     },
-                    "baseURI": {
-                        "value": "[parameters('baseURI')]"
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
                     }
                 }
             }
@@ -432,7 +443,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('baseURI'),'/jumpbox_node.json')]",
+                    "uri": "[concat(parameters('_artifactsLocation'),'/jumpbox_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -466,8 +477,8 @@
                     "loadBalancerName": {
                         "value": "[variables('loadBalancerName')]"
                     },
-                    "baseURI": {
-                        "value": "[parameters('baseURI')]"
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
                     }
                 }
             }

@@ -15,26 +15,31 @@
         "vmSize": {
             "type": "string"
         },
+        "numberWorkerNodes": {
+            "type": "int"
+        },
+        "dataDiskSize": {
+            "type": "int"
+        },
         "storageAccountName": {
-            "type": "string"
-        },
-        "networkSecurityGroupName": {
-            "type": "string"
-        },
-        "virtualNetworkName": {
             "type": "string"
         },
         "subnetName": {
             "type": "string"
         },
-        "loadBalancerName": {
+        "virtualNetworkName": {
             "type": "string"
         },
-        "numberWorkerNodes": {
-            "type": "int"
-        },
-        "baseURI": {
+        "networkSecurityGroupName": {
             "type": "string"
+        },
+        "_artifactsLocation": {
+            "type": "string"
+        },
+        "batchSize": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 40
         }
     },
     "variables": {
@@ -44,28 +49,21 @@
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
         "nicName": "[concat(variables('defaultName'),'nic')]",
-        "vmName": "[variables('defaultName')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
-        "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
-        "masters": [
-            "NameNode",
-            "ResourceManager",
-            "JobHistory"
-        ],
-        "numberMasters": "[length(variables('masters'))]"
+        "sizeOfBatch": "[max(1,min(parameters('batchSize'),parameters('numberWorkerNodes')))]"
     },
     "resources": [
         {
-            "comments": "Network interfaces for each master node. This has a public and private IP address.",
+            "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('nicName'),variables('masters')[copyIndex()])]",
+            "name": "[concat(variables('nicName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
             "copy": {
-                "name": "masterNics",
-                "count": "[variables('numberMasters')]"
+                "name": "nicLoop",
+                "count": "[parameters('numberWorkerNodes')]"
             },
             "properties": {
                 "networkSecurityGroup": {
@@ -73,39 +71,31 @@
                 },
                 "ipConfigurations": [
                     {
-                        "name": "[concat('ipConfig',variables('masters')[copyIndex()])]",
+                        "name": "workerIpConfig",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
-                            },
-                            "loadBalancerBackendAddressPools": [
-                                {
-                                    "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/LoadBalancerBackend')]"
-                                }
-                            ],
-                            "loadBalancerInboundNatRules": [
-                                {
-                                    "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
-                                }
-                            ]
+                            }
                         }
                     }
                 ]
             }
         },
         {
-            "comments": "These are the master nodes.",
+            "comments": "Worker nodes.",
             "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(variables('vmName'),variables('masters')[copyIndex()])]",
+            "name": "[concat(variables('defaultName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
             "copy": {
-                "name": "masterNodes",
-                "count": "[variables('numberMasters')]"
+                "name": "workerNodes",
+                "mode": "Serial",
+                "count": "[parameters('numberWorkerNodes')]",
+                "batchSize": "[variables('sizeOfBatch')]"
             },
             "dependsOn": [
-                "masterNics"
+                "nicLoop"
             ],
             "properties": {
                 "availabilitySet": {
@@ -115,7 +105,7 @@
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
+                    "computerName": "[concat(parameters('clusterName'),'Worker',copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
@@ -130,9 +120,9 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
+                        "name": "[concat('osworkerdisk',copyIndex())]",
                         "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'os.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'os.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -140,9 +130,9 @@
                     "dataDisks": [
                         {
                             "name": "[concat('workerdatadisk',copyIndex())]",
-                            "diskSizeGB": "128",
+                            "diskSizeGB": "[parameters('dataDiskSize')]",
                             "vhd": {
-                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'dd.vhd')]"
+                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'data.vhd')]"
                             },
                             "lun": 0,
                             "caching": "ReadWrite",
@@ -153,30 +143,30 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),variables('masters')[copyIndex()]))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),'Worker',copyIndex()))]"
                         }
                     ]
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }
             }
         },
         {
-            "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/masterCustomScript')]",
+            "name": "[concat(variables('defaultName'),'Worker',copyIndex(),'/workerCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "masterNodes"
+                "workerNodes"
             ],
             "copy": {
-                "name": "masterHadoopSetup",
-                "count": "[variables('numberMasters')]"
+                "name": "workerHadoopSetup",
+                "count": "[parameters('numberWorkerNodes')]"
             },
+            "apiVersion": "2016-03-30",
             "tags": {
                 "displayName": "hadoopSetup"
             },
@@ -187,13 +177,13 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/scripts/hadoopSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/scripts/template.service')]",
-                        "[concat(parameters('baseURI'),'/config/sources.txt')]",
-                        "[concat(parameters('baseURI'),'/config/core-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
+                        "[concat(parameters('_artifactsLocation'),'/scripts/hadoopSetup.sh')]",
+                        "[concat(parameters('_artifactsLocation'),'/scripts/template.service')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/sources.txt')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/core-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/hdfs-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
                     ],
                     "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
                 }

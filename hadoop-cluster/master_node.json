@@ -15,25 +15,25 @@
         "vmSize": {
             "type": "string"
         },
-        "numberWorkerNodes": {
-            "type": "int"
-        },
         "storageAccountName": {
-            "type": "string"
-        },
-        "subnetName": {
-            "type": "string"
-        },
-        "virtualNetworkName": {
             "type": "string"
         },
         "networkSecurityGroupName": {
             "type": "string"
         },
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        },
         "loadBalancerName": {
             "type": "string"
         },
-        "baseURI": {
+        "numberWorkerNodes": {
+            "type": "int"
+        },
+        "_artifactsLocation": {
             "type": "string"
         }
     },
@@ -43,27 +43,37 @@
         "imageOffer": "UbuntuServer",
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
-        "nicName": "[concat(variables('defaultName'),'nicjumpbox')]",
-        "vmName": "[concat(variables('defaultName'),'Jumpbox')]",
-        "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
+        "nicName": "[concat(variables('defaultName'),'nic')]",
+        "vmName": "[variables('defaultName')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+        "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
+        "masters": [
+            "NameNode",
+            "ResourceManager",
+            "JobHistory"
+        ],
+        "numberMasters": "[length(variables('masters'))]"
     },
     "resources": [
         {
-            "comments": "Network interfaces for jumpbox.",
+            "comments": "Network interfaces for each master node. This has a public and private IP address.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[variables('nicName')]",
+            "name": "[concat(variables('nicName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
+            "copy": {
+                "name": "masterNics",
+                "count": "[variables('numberMasters')]"
+            },
             "properties": {
                 "networkSecurityGroup": {
                     "id": "[variables('nsgID')]"
                 },
                 "ipConfigurations": [
                     {
-                        "name": "privateIpConfiguration",
+                        "name": "[concat('ipConfig',variables('masters')[copyIndex()])]",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
@@ -76,7 +86,7 @@
                             ],
                             "loadBalancerInboundNatRules": [
                                 {
-                                    "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/','JumpNode')]"
+                                    "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
                                 }
                             ]
                         }
@@ -85,13 +95,17 @@
             }
         },
         {
-            "comments": "Jump box node.",
+            "comments": "These are the master nodes.",
             "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[variables('vmName')]",
+            "name": "[concat(variables('vmName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
+            "copy": {
+                "name": "masterNodes",
+                "count": "[variables('numberMasters')]"
+            },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+                "masterNics"
             ],
             "properties": {
                 "availabilitySet": {
@@ -101,7 +115,7 @@
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[variables('vmName')]",
+                    "computerName": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
@@ -116,18 +130,30 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[variables('defaultName')]",
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage",
+                        "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
                         "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'jumpbox/'),'os.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'os.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "name": "[concat('workerdatadisk',copyIndex())]",
+                            "diskSizeGB": "128",
+                            "vhd": {
+                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'dd.vhd')]"
+                            },
+                            "lun": 0,
+                            "caching": "ReadWrite",
+                            "createOption": "Empty"
                         }
-                    }
+                    ]
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName')))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),variables('masters')[copyIndex()]))]"
                         }
                     ]
                 },
@@ -140,15 +166,19 @@
             }
         },
         {
-            "name": "[concat(variables('vmName'),'/jumpboxCustomScript')]",
+            "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/masterCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId(resourceGroup().name, 'Microsoft.Compute/virtualMachines',variables('vmName'))]"
+                "masterNodes"
             ],
+            "copy": {
+                "name": "masterHadoopSetup",
+                "count": "[variables('numberMasters')]"
+            },
             "tags": {
-                "displayName": "jumpboxSetup"
+                "displayName": "hadoopSetup"
             },
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -157,14 +187,15 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/scripts/jumpboxSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/config/sources.txt')]",
-                        "[concat(parameters('baseURI'),'/config/core-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
+                        "[concat(parameters('_artifactsLocation'),'/scripts/hadoopSetup.sh')]",
+                        "[concat(parameters('_artifactsLocation'),'/scripts/template.service')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/sources.txt')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/core-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/hdfs-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('numberWorkerNodes'),' ',parameters('adminPassword'))]"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
                 }
             }
         }

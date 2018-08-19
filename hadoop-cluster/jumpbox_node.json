@@ -18,9 +18,6 @@
         "numberWorkerNodes": {
             "type": "int"
         },
-        "dataDiskSize": {
-            "type": "int"
-        },
         "storageAccountName": {
             "type": "string"
         },
@@ -33,13 +30,11 @@
         "networkSecurityGroupName": {
             "type": "string"
         },
-        "baseURI": {
+        "loadBalancerName": {
             "type": "string"
         },
-        "batchSize": {
-            "type": "int",
-            "minValue": 1,
-            "maxValue": 40
+        "_artifactsLocation": {
+            "type": "string"
         }
     },
     "variables": {
@@ -48,54 +43,55 @@
         "imageOffer": "UbuntuServer",
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
-        "nicName": "[concat(variables('defaultName'),'nic')]",
+        "nicName": "[concat(variables('defaultName'),'nicjumpbox')]",
+        "vmName": "[concat(variables('defaultName'),'Jumpbox')]",
+        "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
-        "sizeOfBatch": "[max(1,min(parameters('batchSize'),parameters('numberWorkerNodes')))]"
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
     "resources": [
         {
-            "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
+            "comments": "Network interfaces for jumpbox.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('nicName'),'Worker',copyIndex())]",
+            "name": "[variables('nicName')]",
             "location": "[variables('location')]",
-            "copy": {
-                "name": "nicLoop",
-                "count": "[parameters('numberWorkerNodes')]"
-            },
             "properties": {
                 "networkSecurityGroup": {
                     "id": "[variables('nsgID')]"
                 },
                 "ipConfigurations": [
                     {
-                        "name": "workerIpConfig",
+                        "name": "privateIpConfiguration",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
-                            }
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/LoadBalancerBackend')]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/','JumpNode')]"
+                                }
+                            ]
                         }
                     }
                 ]
             }
         },
         {
-            "comments": "Worker nodes.",
+            "comments": "Jump box node.",
             "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(variables('defaultName'),'Worker',copyIndex())]",
+            "name": "[variables('vmName')]",
             "location": "[variables('location')]",
-            "copy": {
-                "name": "workerNodes",
-                "mode": "Serial",
-                "count": "[parameters('numberWorkerNodes')]",
-                "batchSize": "[variables('sizeOfBatch')]"
-            },
             "dependsOn": [
-                "nicLoop"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
             "properties": {
                 "availabilitySet": {
@@ -105,7 +101,7 @@
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[concat(parameters('clusterName'),'Worker',copyIndex())]",
+                    "computerName": "[variables('vmName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
@@ -120,55 +116,39 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[concat('osworkerdisk',copyIndex())]",
-                        "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'os.vhd')]"
-                        },
+                        "name": "[variables('defaultName')]",
                         "caching": "ReadWrite",
-                        "createOption": "FromImage"
-                    },
-                    "dataDisks": [
-                        {
-                            "name": "[concat('workerdatadisk',copyIndex())]",
-                            "diskSizeGB": "[parameters('dataDiskSize')]",
-                            "vhd": {
-                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'data.vhd')]"
-                            },
-                            "lun": 0,
-                            "caching": "ReadWrite",
-                            "createOption": "Empty"
+                        "createOption": "FromImage",
+                        "vhd": {
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'jumpbox/'),'os.vhd')]"
                         }
-                    ]
+                    }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),'Worker',copyIndex()))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName')))]"
                         }
                     ]
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                        "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
                     }
                 }
             }
         },
         {
-            "name": "[concat(variables('defaultName'),'Worker',copyIndex(),'/workerCustomScript')]",
+            "name": "[concat(variables('vmName'),'/jumpboxCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "workerNodes"
+                "[resourceId(resourceGroup().name, 'Microsoft.Compute/virtualMachines',variables('vmName'))]"
             ],
-            "copy": {
-                "name": "workerHadoopSetup",
-                "count": "[parameters('numberWorkerNodes')]"
-            },
-            "apiVersion": "2016-03-30",
             "tags": {
-                "displayName": "hadoopSetup"
+                "displayName": "jumpboxSetup"
             },
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -177,15 +157,14 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/scripts/hadoopSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/scripts/template.service')]",
-                        "[concat(parameters('baseURI'),'/config/sources.txt')]",
-                        "[concat(parameters('baseURI'),'/config/core-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
+                        "[concat(parameters('_artifactsLocation'),'/scripts/jumpboxSetup.sh')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/sources.txt')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/core-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/hdfs-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
+                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('numberWorkerNodes'),' ',parameters('adminPassword'))]"
                 }
             }
         }
