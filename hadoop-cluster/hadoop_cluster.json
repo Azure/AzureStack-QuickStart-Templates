@@ -96,7 +96,7 @@
         "dataDiskSize": {
             "type": "int",
             "defaultValue": 512,
-            "minValue": 128,
+            "minValue": 1,
             "maxValue": 1024,
             "metadata": {
                 "description": "Size of the attached data disks in GB."
