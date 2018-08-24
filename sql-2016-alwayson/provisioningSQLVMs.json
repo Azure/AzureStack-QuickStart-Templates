@@ -41,6 +41,9 @@
         "sqlImageSKU": {
             "type": "string"
         },
+        "numberOfDisks": {
+            "type": "int"
+        },
         "vmDiskSize": {
             "type": "string"
         },
@@ -55,9 +58,10 @@
         }
     },
     "variables": {
-        "sqlstorageName": "[parameters('sqlStorageAccountName')]",
         "fwstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
         "diagstorageName": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
+        "updateDomainCount": "5",
+        "faultDomainCount": "3"
     },
   "resources": [
     {
@@ -66,14 +70,14 @@
         "apiVersion": "2016-03-30",
         "location": "[parameters('location')]",
         "properties": {
-            "platformFaultDomainCount": "3",
-            "platformUpdateDomainCount": "5"
+            "platformFaultDomainCount": "[variables('faultDomainCount')]",
+            "platformUpdateDomainCount": "[variables('updateDomainCount')]"
         }
     },
     {
         "apiVersion": "2016-03-30",
         "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat(parameters('sqlVMName'), copyindex())]",
+        "name": "[concat(parameters('sqlVMName'), copyIndex())]",
         "location": "[parameters('location')]",
         "dependsOn": [
             "[concat('Microsoft.Compute/availabilitySets/',parameters('sqlAvailabilitySetName'))]"
@@ -90,7 +94,7 @@
                 "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('sqlAvailabilitySetName'))]"
             },
             "osProfile": {
-                "computername": "[concat(parameters('sqlVMName'), copyindex())]",
+                "computerName": "[concat(parameters('sqlVMName'), copyIndex('sqlvirtualMachineLoop'))]",
                 "adminUsername": "[parameters('adminUsername')]",
                 "adminPassword": "[parameters('adminPassword')]"
             },
@@ -104,44 +108,38 @@
                 "osDisk": {
                     "name": "osdisk",
                     "vhd": {
-                        "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-osdisk.vhd')]"
+                        "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('sqlStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyIndex('sqlvirtualMachineLoop'),'-osdisk.vhd')]"
                     },
                     "caching": "ReadWrite",
                     "createOption": "FromImage"
                 },
-                "dataDisks": [
-                    {
-                        "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-1.vhd')]"
-                        },
-                        "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk1')]",
-                        "caching": "ReadOnly",
-                        "createOption": "empty",
-                        "diskSizeGB": "[parameters('vmDiskSize')]",
-                        "lun": 0
-                    },
-                    {
-                        "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('sqlstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(),'-Data-2.vhd')]"
-                        },
-                        "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk2')]",
-                        "caching": "ReadOnly",
-                        "createOption": "empty",
-                        "diskSizeGB": "[parameters('vmDiskSize')]",
-                        "lun": 1
+                "copy": [
+                  {
+                    "name": "dataDisks",
+                    "count": "[parameters('numberOfDisks')]",
+                    "input": {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('sqlStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, parameters('vmContainerName'),'/', parameters('sqlVMName'), copyIndex('sqlvirtualMachineLoop'),'-Data-', copyIndex('dataDisks'),'.vhd')]"
+                            },
+                            "name": "[concat(parameters('sqlVMName'), copyIndex('sqlvirtualMachineLoop'),'-data-disk', copyIndex('dataDisks'))]",
+                            "caching": "ReadOnly",
+                            "createOption": "empty",
+                            "diskSizeGB": "[parameters('vmDiskSize')]",
+                            "lun": "[copyIndex('dataDisks')]"
+                        }
                     }
                 ]
             },
             "networkProfile": {
                 "networkInterfaces": [
                     {
-                        "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',concat(parameters('sqlVMName'), copyindex(),'-nic'))]"
+                        "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',concat(parameters('sqlVMName'), copyIndex(),'-nic'))]"
                     }
                 ]
             },
             "diagnosticsProfile": {
                 "bootDiagnostics": {
-                    "enabled": "true",
+                    "enabled": true,
                     "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('diagstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob)]"
                 }
             }
@@ -163,7 +161,7 @@
                 "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('sqlAvailabilitySetName'))]"
             },
             "osProfile": {
-                "computername": "[parameters('sqlwVMName')]",
+                "computerName": "[parameters('sqlwVMName')]",
                 "adminUsername": "[parameters('adminUsername')]",
                 "adminPassword": "[parameters('adminPassword')]"
             },
@@ -189,8 +187,8 @@
                         },
                         "name": "[concat(parameters('sqlwVMName'),'-data-disk1')]",
                         "caching": "None",
-                        "createOption": "empty",
-                        "diskSizeGB": "2",
+                        "createOption": "Empty",
+                        "diskSizeGB": 2,
                         "lun": 0
                     }
                 ]
@@ -204,7 +202,7 @@
             },
             "diagnosticsProfile": {
                 "bootDiagnostics": {
-                    "enabled": "true",
+                    "enabled": true,
                     "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('diagstorageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob)]"
                 }
             }

@@ -14,9 +14,6 @@
         "SqlStorageAccountType": {
             "type": "string"
         },
-        "DcStorageAccountType": {
-            "type": "string"
-        },
         "virtualNetworkName": {
             "type": "string"
         },
@@ -92,7 +89,7 @@
             "name": "[parameters('primaryDCIPAddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
-                "publicIPAllocationMethod": "dynamic"
+                "publicIPAllocationMethod": "Dynamic"
             }
         },
         {
@@ -101,7 +98,7 @@
             "name": "[parameters('sql1AddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
-                "publicIPAllocationMethod": "dynamic",
+                "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
                     "domainNameLabel": "[concat(parameters('sqlVMName'), '1')]",
                     "reverseFqdn": "[concat(parameters('sqlVMName'), '1.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"
@@ -114,7 +111,7 @@
             "name": "[parameters('sql0AddressNameWithSuffix')]",
             "location": "[parameters('location')]",
             "properties": {
-                "publicIPAllocationMethod": "dynamic",
+                "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
                     "domainNameLabel": "[concat(parameters('sqlVMName'), '0')]",
                     "reverseFqdn": "[concat(parameters('sqlVMName'), '0.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"

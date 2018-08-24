@@ -59,11 +59,14 @@
       "sqlwVMName":{  
          "type":"string"
       },
-      "numberOfDisks":{  
-         "type":"string"
+      "numberOfDataDisks":{  
+         "type":"int"
       },
       "workloadType":{  
          "type":"string"
+      },
+      "databaseName":{
+          "type": "string"
       }
    },
    "resources":[  
@@ -92,7 +95,7 @@
                   "sqlAlwaysOnAvailabilityGroupName":"[parameters('sqlAOAGName')]",
                   "sqlAlwaysOnAvailabilityGroupListenerName":"[parameters('sqlAOListenerName')]",
                   "SqlAlwaysOnAvailabilityGroupListenerPort":"[parameters('sqlAOListenerPort')]",
-                  "databaseNames":"AutoHa-sample",
+                  "databaseNames":"[parameters('databaseName')]",
                   "lbName":"[parameters('sqlLBName')]",
                   "lbAddress":"[parameters('sqlLBIPAddress')]",
                   "primaryReplica":"[concat(parameters('sqlVMName'),'1')]",
@@ -110,7 +113,7 @@
                      "userName":"sqlsa",
                      "password":"privateSettingsRef:sqlAuthPassword"
                   },
-                  "NumberOfDisks":"[parameters('numberOfDisks')]",
+                  "NumberOfDisks":"[parameters('numberOfDataDisks')]",
                   "WorkloadType":"[parameters('workloadType')]"
                }
             },

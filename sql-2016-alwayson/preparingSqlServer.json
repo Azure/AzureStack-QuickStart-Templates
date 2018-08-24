@@ -63,7 +63,7 @@
             "type": "string"
         },
         "numberOfDisks": {
-            "type": "string"
+            "type": "int"
         },
         "workloadType": {
             "type": "string"
