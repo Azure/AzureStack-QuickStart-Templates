@@ -1,4 +1,4 @@
-{
+    {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
         "parameters": {
@@ -29,7 +29,7 @@
                     "Standard_D2_v2"
                 ],
                 "metadata": {
-                    "description": "The size of the AD VM Created"
+                    "description": "The size of the AD VMs Created"
                 },
                 "defaultValue": "Standard_D2_v2"
             },
@@ -47,16 +47,16 @@
             "domainName": {
                 "type": "string",
                 "metadata": {
-                    "description": "The FQDN of the AD Domain created"
+                    "description": "The FQDN of the AD Domain created "
                 },
                 "defaultValue": "fabrikam.local"
             },
             "dnsSuffix": {
                 "type": "string",
                 "metadata": {
-                    "description": "The DNS Suffix for reverse lookup of public IPAddresses. Must be lowercase. It should match with the following regular expression: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$ or it will raise an error."
+                    "description": "The DNS Suffix for reverse lookup of public IPAddresses"
                 }
-             },
+            },
             "virtualNetworkAddressRange": {
                 "type": "string",
                 "metadata": {
