@@ -1,7 +1,0 @@
-{
-    "itemDisplayName": "Deploys Two SQL Server 2016 SP1 VMs in always-on mode with Windows Authentication.",
-    "description": "This template creates four new 2016-Datacenter Windows server VMs and an internal load balancer and VNet. It configures one VM to be the AD DC in its own availability group, and creates a Windows Cluster with the other three VMs where two VMs in the cluster are running SQL Server 2016 SP1 Enterprise edition and are configured with an availability group and an availability group listener, the other VM is a File Share Witness for the cluster",
-    "summary": "This template creates 4 AzureStack VMs with Active Directory and SQL Server Always On",
-    "githubUsername": "azurestack",
-    "dateUpdated": "2017-07-1"
-}
