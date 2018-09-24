@@ -1,6 +1,6 @@
 # GDPR Commpliant Simple Web Application template
 
-![Simple Web Application architecture](images/basicwebapp.png)
+![Simple Web Application architecture](/images/basicwebapp.png)
 
 This template deploys the following infrastructure components to deploy and host a simple Web Application:
 * SQL Server database 
