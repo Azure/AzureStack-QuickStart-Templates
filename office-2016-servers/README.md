@@ -1,7 +1,7 @@
 # Office 2016 Workloads
 
 Office workloads (Exchange 2016, SharePoint 2016 and Skype for Business 2015) designed & validated to run on Azure Stack for up to 250 users.
-Additional required Workloads: Active Directory, Certificate Authority, FileServer using S2D, SQL Server 2017 
+Additional required workloads: Active Directory, Certificate Authority, FileServer using S2D, SQL Server 2017 
 
 The preview templates are designed,validated and supported to work with Azure Stack beeing conneted or disconnected. Any changes to the templates will break supportability. 
 
@@ -35,8 +35,8 @@ Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter
 
 ## Deployment
 
-### Deploy Manually via Portal
-1. Download artifacts and content
+### Deploy manually via Portal
+1. Download artifacts and templates
 2. Download additional files like ISO as called out for the individual products
 3. Create Storage Account, Blob Container with access set to blob
 4. Upload the content from the artifacts folder
