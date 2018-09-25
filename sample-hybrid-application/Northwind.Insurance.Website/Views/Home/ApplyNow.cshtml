@@ -1,0 +1,127 @@
+@model Northwind.Insurance.Website.Models.Subscriber
+
+@{ 
+    Random rand = new Random();
+    int income = rand.Next(60000, 100000);
+
+    int day = rand.Next(1, 30);
+    int months = rand.Next(1, 12);
+    int year = rand.Next(1973, 1994);
+
+    string dob = months.ToString() + "/" + day.ToString() + "/" + year.ToString();
+}
+
+<section id="intro" class="intro">
+    <div class="intro-content intro-nobg paddingbot-0" style="background:#0d8ebd;padding:140px">
+        <div class="form-wrapper container" style="background:#FFFFFF;padding:50px;">
+            <div class="row paddingtop-25 paddingbot-0">
+                <div class="col-lg-12">
+                    <h2 class="h-bold">Step 1</h2><h3 class="h-medium">Subscriber and Dependent Information</h3>
+                </div>
+            </div>
+            <form class="contactForm lead" id="demographicForm" name="demographicForm" asp-action="CreateApplication" autocomplete="off">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p class="light">Let's get some information about you and your dependents. Then see if you qualify for any Affordable Care Act subsidies.</p>
+                    </div>
+                </div>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="well h4" style="border-radius:0px">
+                            Where do you live?
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="ZipCode">
+                                Zip Code*
+                            </label>
+                            <input asp-for="ZipCode" class="form-control input-md" value="98004">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="well h4" style="border-radius:0px">
+                            Enter your household information below. Be sure to enter all dependents.
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-md-12 column ">
+                        <table class="table table-bordered table-hover" id="tab_logic">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Relationship
+                                    </th>
+                                    <th class="text-center">
+                                        Date of Birth
+                                    </th>
+                                    <th class="text-center">
+                                        Gender
+                                    </th>
+                                    <th class="text-center">
+                                        Tobacco Use
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='person0'>
+                                    <td>
+                                        <select id="relation0" name="HouseholdMembers[0].Relationship" class="form-control" ><option value="0">Applicant</option></select>
+                                    </td>
+                                    <td>
+                                        <input id="dob0" type="text" name="HouseholdMembers[0].DateOfBirth" class="form-control" value="@dob" />
+                                    </td>
+                                    <td>
+                                        <select id="gender0" name="HouseholdMembers[0].Gender" class="form-control" ><option value="2"></option><option value="0">Male</option><option value="1" selected="selected">Female</option></select>
+                                    </td>
+                                    <td>
+                                        <select id="tobacco0" name="HouseholdMembers[0].TobaccoUse" class="form-control" ><option value=""></option><option value="0" selected="selected">Never</option><option value="1">6 months or less</option><option value="2">7 months or more</option></select>
+                                    </td>
+                                </tr>
+                                <tr id='person1'></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <a id="add_row" class="btn btn-skin btn-lg pull-left">Add Row</a><a id='delete_row' class="pull-right btn btn-skin btn-lg">Delete Row</a>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="well h4" style="border-radius:0px">
+                            What is your annual household income?
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="EmploymentIncome">
+                                Annual Employment Income*
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-addon">$</div>
+                                <input asp-for="EmploymentIncome" class="form-control input-md" value="@income" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <button id='showplans' type="submit" class="pull-right btn btn-skin btn-lg">Show Plans <i class="fa fa-angle-right"></i></button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
