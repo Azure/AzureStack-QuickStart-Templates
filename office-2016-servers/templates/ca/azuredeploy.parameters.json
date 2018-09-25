@@ -9,7 +9,7 @@
             "value": "thoroetadm"
         },
         "adminPassword": {
-            "value": "mysecurepw"
+            "value": "mysecurepassword"
         },
         "workloadsLocation": {
             "value": "https://colabval.blob.redmond.azurestack.corp.microsoft.com/workload"

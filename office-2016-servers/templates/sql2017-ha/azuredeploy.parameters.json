@@ -25,10 +25,10 @@
   "value": '\\\\fs01\\data'
 },
 "sqlAuthPassword": {
-  "value": "p@ssw0rd"
+  "value": "mysecurepassword"
 },
 "sqlServerServiceAccountPassword": {
-  "value": "p@ssw0rd"
+  "value": "mysecurepassword"
 }
   }
 }
