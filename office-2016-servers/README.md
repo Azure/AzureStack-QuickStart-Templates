@@ -1,9 +1,9 @@
-# Office 2016 Servers
+# Office 2016 Workloads
 
-Office workloads (Exchange 2016, SharePoint 2016 and Skype fpr Business 2015) designed & validated to run on Azure Stack for up to 250 users.
-Additional reqquired Workloads: Active Directory, Certificate Authority, FileServer using S2D, SQL Server 2017 
+Office workloads (Exchange 2016, SharePoint 2016 and Skype for Business 2015) designed & validated to run on Azure Stack for up to 250 users.
+Additional required Workloads: Active Directory, Certificate Authority, FileServer using S2D, SQL Server 2017 
 
-The Tempplates are designed,validated and supported to work with Azure Stack beeing conneted or disconnected. Changes to the Templates will break the supportability. 
+The preview templates are designed,validated and supported to work with Azure Stack beeing conneted or disconnected. Any changes to the templates will break supportability. 
 
 
 ## Requirements
@@ -12,7 +12,7 @@ The Tempplates are designed,validated and supported to work with Azure Stack bee
 
 THe following Marketplace Items must be installed on Azure Stack:
 
-- Windows Server 2016 Image
+- Windows Server 2016 Full Image
 - SQL Server 2017 Enterprise Windows Image
 - DSC Extension
 - Antimalware Extension
@@ -51,7 +51,7 @@ Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter
 ### Connect
 
 The Virtual Machines do not have public IPs assigned, as a result you can not RDP to the machines. Deploy an additional VM with a public IP as a "Jumpbox" for troubleshooting or create
-a site to site VPN to access via the internal network.
+a site to site VPN to access via the internal network. Publishing is done via Windows Application Proxy.
 
 ### Content
 
