@@ -1,0 +1,238 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AdCsAvailabilitySetName": {
+            "defaultValue": "AdCrtSet",
+            "type": "string",
+            "metadata": {
+                "description": "The name of availability set for AD CS"
+            }
+        },
+        "domainName": {
+            "defaultValue": "contoso.com",
+            "type": "string",
+            "metadata": {
+                "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
+            }
+        },
+        "workloadsLocation": {
+            "defaultValue": "https://templates.blob.redmond.azurestack.corp.microsoft.com/workload",
+            "type": "string",
+            "metadata": {
+                "description": "Location of workloads"
+            }
+        },
+		"vmPrefix": {
+            "defaultValue": "srv",
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Naming prefix for each new resource created. 3-char min, 8-char max, lowercase alphanumeric"
+            }
+        },
+        "adminUsername": {
+            "defaultValue": "lcladmin",
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        }
+    },
+    "variables": {
+        "crtPrefix": "[concat(parameters('vmPrefix'),'-adcs')]",
+        "vmNicName": "[tolower(concat(variables('crtPrefix'),'-nic'))]",
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "storageAccountType": "Standard_LRS",
+        "uniqueStorageAccountName": "[tolower(concat('sa-',variables('crtPrefix'),'-', resourceGroup().name))]",
+        "uniqueStorageAccountContainerName": "[tolower(concat('sc-',variables('crtPrefix'), resourceGroup().name))]",
+        "location": "[resourceGroup().location]",
+        "vmOsSku": "2016-Datacenter",
+        "vmOsDiskName": "[concat('od-',variables('crtPrefix'), resourceGroup().name)]",
+        "vmSize": "Standard_D1",
+        "nsgName": "[concat('ADNsg',resourceGroup().name)]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+        "staticSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
+        "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+        "ModulesURL": "[concat(parameters('workloadsLocation'),'/CreateADCertAuth.ps1.zip')]",
+        "ConfigurationFunction": "CreateADCertAuth.ps1\\CreateADCertAuth"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('AdCsAvailabilitySetName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[tolower(variables('uniqueStorageAccountName'))]",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmNicName'))]",
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ],
+            "location": "[variables('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('staticSubnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('crtPrefix'))]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('AdCsAvailabilitySetName'))]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('crtPrefix'))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('vmOsSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName')))]"
+                        }
+                    ]
+                }
+            }
+        },
+        
+        {
+            "name": "[concat(variables('crtPrefix'),'/dscExtension')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+             "dependsOn": [ 
+                "[concat('Microsoft.Compute/virtualMachines/',variables('crtPrefix'))]"
+            ], 
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.76",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "modulesUrl": "[variables('ModulesURL')]",
+                    "configurationFunction": "[variables('ConfigurationFunction')]",
+                    "properties": {
+                        "domainName": "[parameters('domainName')]",
+                        "adminCreds": {
+                            "userName": "[parameters('adminUserName')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        }
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions", 
+            "name": "[concat(variables('crtPrefix'),'/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [ 
+                        "[concat('Microsoft.Compute/virtualMachines/',variables('crtPrefix'),'/extensions/','dscExtension')]"
+                    ], 
+                    "properties": { 
+                        "publisher": "Microsoft.Azure.Security", 
+                        "type": "IaaSAntimalware", 
+                        "typeHandlerVersion": "1.4", 
+                        "autoUpgradeMinorVersion": true, 
+                        "settings": { 
+                            "AntimalwareEnabled": true, 
+                            "RealtimeProtectionEnabled": "true", 
+                            "ScheduledScanSettings": { 
+                                "isEnabled": "true", 
+                                "scanType": "Quick", 
+                                "day": "7", 
+                                "time": "120" 
+                             } 
+                        } 
+                    }      
+        }
+
+    ]
+}

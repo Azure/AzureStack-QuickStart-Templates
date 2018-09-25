@@ -1,0 +1,629 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ExchangeAvailabilitySetName": {
+            "defaultValue": "ExAvSet",
+            "type": "String",
+            "metadata": {
+                "description": "The name of availability set for Exchange"
+            }
+        },
+        "domainName": {
+            "defaultValue": "contoso.com",
+            "type": "String",
+            "metadata": {
+                "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
+            }
+        },
+        "workloadsLocation": {
+            "defaultValue": "https://templates.blob.orlando.azurestack.corp.microsoft.com/workloads",
+            "type": "String",
+            "metadata": {
+                "description": "Location of workloads"
+            }
+        },
+        "exchangeIsoUrl": {
+            "defaultValue": "https://colabval.blob.redmond.azurestack.corp.microsoft.com/workload/ExchangeServer2016-x64-cu10.iso",
+            "type": "String",
+            "metadata": {
+                "description": "Location of Exchange ISO"
+            }
+        },
+        "licensekey" : {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "License for Enterprise features ( required )"
+            }
+        },
+		"vmPrefix": {
+            "defaultValue": "srvex",
+            "type": "String",
+            "minLength": 3,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Naming prefix for each new resource created. 3-char min, 8-char max, lowercase alphanumeric"
+            }
+        },
+        "adminUsername": {
+            "defaultValue": "lcladmin",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "WitnessName": {
+            "type": "String",
+            "metadata": {
+                "description": "The name of witness"
+            }
+        },
+        "DagName": {
+            "defaultValue": "DAG1",
+            "type": "String",
+            "metadata": {
+                "description": "the name of DAG"
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+        "lbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The ip address of load balancer for Exchange web"
+            },
+            "defaultValue": "10.0.0.186"
+        },
+        "primaryAD": {
+            "type": "string",
+            "metadata": {
+                "description": "the primary AD of the forest"
+            }
+        }
+    },
+    "variables": {
+        "vmCount": 4,
+        "exchangeNoDisks": 10,
+        "exchangeStorageSizeInGB": 460,
+        "exchangePrefix": "[concat(parameters('vmPrefix'),'-ex-')]",
+        "vmNicName": "[tolower(concat(variables('exchangePrefix'),'nic-'))]",
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "storageAccountType": "Standard_LRS",
+        "publicIPAddressName": "[tolower(concat('ip-',variables('exchangePrefix'), resourceGroup().name))]",
+        "publicIPAddressType": "Dynamic",
+        "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+        "uniqueStorageAccountName": "[tolower(concat('sa-',variables('exchangePrefix'), resourceGroup().name))]",
+        "uniqueStorageAccountContainerName": "[tolower(concat('sc-',variables('exchangePrefix'), resourceGroup().name))]",
+        "location": "[resourceGroup().location]",
+        "vmOsSku": "2016-Datacenter",
+        "vmOsDiskName": "[concat('od-',variables('exchangePrefix'), resourceGroup().name)]",
+        "vmDataDiskName": "[concat('dd-',variables('exchangePrefix'), resourceGroup().name)]",
+        "vmSize": "Standard_DS13_v2",
+        "vmDataDiskSize": "[variables('exchangeStorageSizeInGB')]",
+        "modulesPath": "[concat(parameters('workloadsLocation'),'/')]",
+        "modulesExchange": "ExchangeWorkload.ps1.zip",
+        "modulesAddExchange": "ExchangeWorkloadAdditional.ps1.zip",
+        "modulesAddLastExchange": "ExchangeWorkloadLast.ps1.zip",
+        "modulesUrlExchange": "[concat(variables('modulesPath'),variables('modulesExchange'))]",
+        "modulesUrlAddExchange": "[concat(variables('modulesPath'),variables('modulesAddExchange'))]",
+        "modulesUrlAddLastExchange": "[concat(variables('modulesPath'),variables('modulesAddLastExchange'))]",
+        "configurationFunctionExchange": "ExchangeWorkload.ps1\\InstallAndConfigureExchange",
+        "configurationFunctionAddExchange": "ExchangeWorkloadAdditional.ps1\\InstallAndConfigureExchange",
+        "configurationFunctionAddLastExchange": "ExchangeWorkloadLast.ps1\\InstallAndConfigureExchange",
+        "exchangeInstallerPath": "InstallerExchange",
+        "modulesExchangeISODownload": "CSDownloadISO.ps1",
+        "modulesUrlExchangeISODownload": "[concat(variables('modulesPath'),variables('modulesExchangeISODownload'))]",
+        "staticSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
+        "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+        "AzCopyURL": "[concat(variables('modulesPath'),'MicrosoftAzureStorageTools.msi')]",
+        "UCMA4URL": "[concat(variables('modulesPath'),'UcmaRuntimeSetup.exe')]",
+        "vcredistURL": "[concat(variables('modulesPath'),'vcredist_x64.exe')]",
+        "ndp471URL": "[concat(variables('modulesPath'),'NDP471-KB4033342-x86-x64-AllOS-ENU.exe')]",
+        "lbName": "[concat('lb-int-exc-',parameters('vmPrefix'))]",
+        "lbName2": "[concat('lb-ext-exc-',parameters('vmPrefix'))]",
+        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+        "lbID2": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName2'))]",
+        "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEndInt')]",
+        "frontEndIPConfigID2": "[concat(variables('lbID2'),'/frontendIPConfigurations/LoadBalancerFrontEndExt')]",
+        "lbPoolIDInt": "[concat(variables('lbID'),'/backendAddressPools/BackendPoolInt')]",
+        "lbPoolIDExt": "[concat(variables('lbID2'),'/backendAddressPools/BackendPoolExt')]",
+        "lbProbeID2": "[concat(variables('lbID2'),'/probes/SmtpProbe')]",
+        "lbProbeID": "[concat(variables('lbID'),'/probes/HttpsProbe')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('ExchangeAvailabilitySetName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[tolower(variables('uniqueStorageAccountName'))]",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+              "dnsSettings": {
+                "domainNameLabel": "[concat(parameters('vmPrefix'),'-dns-ex')]"
+              }
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "name": "[variables('lbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "properties": {
+                            "subnet": {
+                              "id": "[variables('staticSubnetId')]"
+                            },
+                            "privateIPAddress": "[parameters('lbIpAddress')]",
+                            "privateIPAllocationMethod": "Static"
+                          },
+                          "name": "LoadBalancerFrontendInt"
+                    }
+                  ],
+              "backendAddressPools": [
+                {
+                  "name": "BackendPoolInt"
+                }
+              ],
+              "loadBalancingRules": [
+                {
+                    "name": "LBRuleHttps",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[variables('frontEndIPConfigID')]"
+                      },
+                      "backendAddressPool": {
+                        "id": "[variables('lbPoolIDInt')]"
+                      },
+                      "protocol": "tcp",
+                      "frontendPort": 443,
+                      "backendPort": 443,
+                      "enableFloatingIP": false,
+                      "idleTimeoutInMinutes": 5,
+                      "probe": {
+                        "id": "[variables('lbProbeID')]"
+                      }
+                    }
+                  }
+              ],
+              "probes": [
+                {
+                    "name": "HttpsProbe",
+                    "properties": {
+                      "protocol": "tcp",
+                      "port": 443,
+                      "intervalInSeconds": 60,
+                      "numberOfProbes": 2
+                    }
+                  }
+              ]
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "name": "[variables('lbName2')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('publicIPAddressID')]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "properties": {
+                            "publicIPAddress": {
+                              "id": "[variables('publicIPAddressID')]"
+                            }
+                          },
+                          "name": "LoadBalancerFrontendExt"
+                    }
+                  ],
+              "backendAddressPools": [
+                {
+                  "name": "BackendPoolExt"
+                }
+              ],
+              "loadBalancingRules": [
+                {
+                  "name": "LBRuleSmtp",
+                  "properties": {
+                    "frontendIPConfiguration": {
+                      "id": "[variables('frontEndIPConfigID2')]"
+                    },
+                    "backendAddressPool": {
+                      "id": "[variables('lbPoolIDExt')]"
+                    },
+                    "protocol": "tcp",
+                    "frontendPort": 25,
+                    "backendPort": 25,
+                    "enableFloatingIP": false,
+                    "idleTimeoutInMinutes": 5,
+                    "probe": {
+                        "id": "[variables('lbProbeID2')]"
+                      }
+                  }
+                }
+              ],
+              "probes": [
+                {
+                  "name": "SmtpProbe",
+                  "properties": {
+                    "protocol": "tcp",
+                    "port": 25,
+                    "intervalInSeconds": 60,
+                    "numberOfProbes": 2
+                  }
+                }
+              ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "sngex",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmNicName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[variables('vmCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]",
+                "[concat('Microsoft.Network/loadBalancers/', variables('lbName2'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('staticSubnetId')]"
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                  "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPoolInt')]"
+                                },
+                                {
+                                    "id": "[concat(variables('lbID2'), '/backendAddressPools/BackendPoolExt')]"
+                                  }
+                              ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('exchangePrefix'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "vmLoop",
+                "count": "[variables('vmCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('ExchangeAvailabilitySetName'))]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('exchangePrefix'),copyIndex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('vmOsSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "copy": [
+                        {
+                          "name": "dataDisks",
+                          "count": "[variables('exchangeNoDisks')]",
+                          "input": {
+                            "caching": "None",
+                            "diskSizeGB": "[variables('vmDataDiskSize')]",
+                            "lun": "[copyIndex('dataDisks')]",
+                            "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-', copyIndex('dataDisks'))]",
+                            "vhd": {
+                              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-',copyIndex('DataDisks'),'.vhd')]"
+                            },
+                            "createOption": "Empty"
+                          }
+                        }
+                      ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+		{
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('exchangePrefix'),copyIndex(),'/CustomScriptExtension')]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "customExtensionLoop",
+                "count": "[variables('vmCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[variables('modulesUrlExchangeISODownload')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('modulesExchangeISODownload'),' -uri ',parameters('exchangeIsoUrl'),' -destination ',variables('exchangeInstallerPath'),' -urlMSFTAST ',variables('AzCopyURL'),' -urlUCMA4 ',variables('UCMA4URL'),' -urlVcredist ',variables('vcredistURL'),' -urlNDP471 ',variables('ndp471URL'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('exchangePrefix'),'0','/dscExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'0')]",
+				"[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'0','/extensions/','CustomScriptExtension')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesUrl": "[variables('modulesUrlExchange')]",
+                    "configurationFunction": "[variables('configurationFunctionExchange')]",
+                    "properties": {
+                        "DomainName": "[parameters('DomainName')]",
+                        "StorageSize": "[variables('exchangeStorageSizeInGB')]",
+                        "VMAdminCreds": {
+                            "userName": "[parameters('adminUsername')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        },
+                        "Location": "[variables('location')]",
+                        "WitnessName": "[parameters('WitnessName')]",
+                        "DagName": "[parameters('DagName')]",
+                        "InstallerFolder": "[variables('modulesPath')]",
+                        "NoOfDisks":"[variables('exchangeNoDisks')]",
+                        "License":"[parameters('licensekey')]",
+                        "primaryAD":"[parameters('primaryAD')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('exchangePrefix'),'1/dscExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'1')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'1/extensions/','CustomScriptExtension')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'0','/extensions/','dscExtension')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesUrl": "[variables('modulesUrlAddExchange')]",
+                    "configurationFunction": "[variables('configurationFunctionAddExchange')]",
+                    "properties": {
+                        "DomainName": "[parameters('DomainName')]",
+                        "StorageSize": "[variables('exchangeStorageSizeInGB')]",
+                        "VMAdminCreds": {
+                            "userName": "[parameters('adminUsername')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        },
+                        "Location": "[variables('location')]",
+                        "WitnessName": "[parameters('WitnessName')]",
+                        "DagName": "[parameters('DagName')]",
+                        "InstallerFolder": "[variables('modulesPath')]",
+                        "NoOfDisks":"[variables('exchangeNoDisks')]",
+                        "License":"[parameters('licensekey')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+            
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('exchangePrefix'),'2/dscExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'2')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'2/extensions/','CustomScriptExtension')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'1','/extensions/','dscExtension')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesUrl": "[variables('modulesUrlAddExchange')]",
+                    "configurationFunction": "[variables('configurationFunctionAddExchange')]",
+                    "properties": {
+                        "DomainName": "[parameters('DomainName')]",
+                        "StorageSize": "[variables('exchangeStorageSizeInGB')]",
+                        "VMAdminCreds": {
+                            "userName": "[parameters('adminUsername')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        },
+                        "Location": "[variables('location')]",
+                        "WitnessName": "[parameters('WitnessName')]",
+                        "DagName": "[parameters('DagName')]",
+                        "InstallerFolder": "[variables('modulesPath')]",
+                        "NoOfDisks":"[variables('exchangeNoDisks')]",
+                        "License":"[parameters('licensekey')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+            
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('exchangePrefix'),'3/dscExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'3')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'3/extensions/','CustomScriptExtension')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),'2','/extensions/','dscExtension')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesUrl": "[variables('modulesUrlAddLastExchange')]",
+                    "configurationFunction": "[variables('configurationFunctionAddLastExchange')]",
+                    "properties": {
+                        "DomainName": "[parameters('DomainName')]",
+                        "StorageSize": "[variables('exchangeStorageSizeInGB')]",
+                        "VMAdminCreds": {
+                            "userName": "[parameters('adminUsername')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        },
+                        "Location": "[variables('location')]",
+                        "WitnessName": "[parameters('WitnessName')]",
+                        "DagName": "[parameters('DagName')]",
+                        "InstallerFolder": "[variables('modulesPath')]",
+                        "NoOfDisks":"[variables('exchangeNoDisks')]",
+                        "License":"[parameters('licensekey')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+            
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions", 
+            "name": "[concat(variables('exchangePrefix'),copyIndex(),'/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "copy": {
+               "name": "vmLoop",
+               "count": "[variables('vmCount')]"
+            },
+            "dependsOn": [ 
+                        "[concat('Microsoft.Compute/virtualMachines/',variables('exchangePrefix'),copyIndex(),'/extensions/','dscExtension')]"
+                    ], 
+                    "properties": { 
+                        "publisher": "Microsoft.Azure.Security", 
+                        "type": "IaaSAntimalware", 
+                        "typeHandlerVersion": "1.4", 
+                        "autoUpgradeMinorVersion": true, 
+                        "settings": { 
+                            "AntimalwareEnabled": true, 
+                            "RealtimeProtectionEnabled": "true", 
+                            "ScheduledScanSettings": { 
+                                "isEnabled": "true", 
+                                "scanType": "Quick", 
+                                "day": "7", 
+                                "time": "120" 
+                             } 
+                        } 
+                    }      
+        }
+
+    ]
+}

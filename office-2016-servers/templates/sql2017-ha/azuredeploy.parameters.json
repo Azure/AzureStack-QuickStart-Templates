@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmPrefix": {
+      "value": "war"
+    },
+    
+    "adminUsername": {
+      "value": "thoroetadm"
+    },
+    "adminPassword": {
+      "value": "mysecurepassword"
+    },
+    "workloadsLocation": {
+      "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload"  
+  },
+"SqlAvailabilitySetName": {
+  "value": "SqlAvSet"
+},
+"domainName": {
+  "value": "contoso.com"
+},
+"WitnessUnc": {
+  "value": '\\\\fs01\\data'
+},
+"sqlAuthPassword": {
+  "value": "p@ssw0rd"
+},
+"sqlServerServiceAccountPassword": {
+  "value": "p@ssw0rd"
+}
+  }
+}
