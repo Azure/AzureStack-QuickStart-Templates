@@ -1,0 +1,255 @@
+﻿@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+@using Microsoft.AspNetCore.Http
+
+@{
+    var cloudName = Context.Session.GetString("CloudName");
+    var barColor = "#0d8ebd";
+    if (cloudName == "AZURE")
+    {
+        barColor = "#65b037";
+        //barColor = "#e23c3c";
+    }
+    else if (cloudName == "AZURESTACK")
+    {
+        barColor = "#ff0000";
+    }
+    else
+    {
+        ;
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <environment names="Development">
+        <link href="~/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="~/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="~/plugins/cubeportfolio/css/cubeportfolio.min.css">
+        <link href="~/css/nivo-lightbox.css" rel="stylesheet" />
+        <link href="~/css/nivo-lightbox-theme/default/default.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/owl.carousel.css" rel="stylesheet" media="screen" />
+        <link href="~/css/owl.theme.css" rel="stylesheet" media="screen" />
+        <link href="~/css/animate.css" rel="stylesheet" />
+        <link href="~/css/style.css" rel="stylesheet">
+        <!-- boxed bg -->
+        <link id="bodybg" href="~/bodybg/bg1.css" rel="stylesheet" type="text/css" />
+        <!-- template skin -->
+        <link id="t-colors" href="~/color/blue.css" rel="stylesheet">
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link href="~/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="~/plugins/cubeportfolio/css/cubeportfolio.min.css">
+        <link href="~/css/nivo-lightbox.css" rel="stylesheet" />
+        <link href="~/css/nivo-lightbox-theme/default/default.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/owl.carousel.css" rel="stylesheet" media="screen" />
+        <link href="~/css/owl.theme.css" rel="stylesheet" media="screen" />
+        <link href="~/css/animate.css" rel="stylesheet" />
+        <link href="~/css/style.css" rel="stylesheet">
+        <!-- boxed bg -->
+        <link id="bodybg" href="~/bodybg/bg1.css" rel="stylesheet" type="text/css" />
+        <!-- template skin -->
+        <link id="t-colors" href="~/color/blue.css" rel="stylesheet">
+    </environment>
+
+    @Html.Raw(JavaScriptSnippet.FullScript)
+</head>
+<body id="page-top" data-spy="scroll" data-target=".navbar-custom">
+
+    <div id="wrapper" >
+
+        <nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
+            <div class="top-area" style="background:@(barColor);">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6">
+                            <p class="bold text-left">THIS PAGE LOADED FROM @(cloudName)</p>
+                        </div>
+                        <div class="col-sm-6 col-md-6">
+                            <p class="bold text-right">Call us now 1-800-555-5555</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container navigation">
+
+                <div class="navbar-header page-scroll">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <a class="nav navbar-nav navbar-brand" asp-controller="Home" asp-action="Index">
+                        <h1 class="h-ultra">Northwind Health</h1>
+                    </a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+                    <ul class="nav navbar-nav">
+                        <li @(ViewData["activePage"].ToString() == "home" ? "class=active" : "") ><a id="home" asp-action="Index">Home</a></li>
+                        <li><a href="#">Doctors</a></li>
+                        <li><a href="#">Facilities</a></li>
+                        <li @(ViewData["activePage"].ToString() == "applynow" ? "class=active" : "")><a asp-route="applynow">Apply Now</a></li>
+                        <li @(ViewData["activePage"].ToString() == "createaccount" ? "class=active" : "")><a href="#">Create an Account</a></li>
+                        <li @(ViewData["activePage"].ToString() == "login" ? "class=active" : "")><a href="#">Log In</a></li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container -->
+        </nav>
+            @RenderBody()
+            <footer>
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4">
+                            <div class="wow fadeInDown" data-wow-delay="0.1s">
+                                <div class="widget">
+                                    <h5>Non-Discrimination</h5>
+                                    <p>
+                                        Northwind Insurance complies with applicable federal civil rights laws and does not discriminate on the basis of race, color, national origin, age, disability, or sex.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="wow fadeInDown" data-wow-delay="0.1s">
+                                <div class="widget">
+                                    <h5>Languages</h5>
+                                    <ul>
+                                        <li><a href="#">English</a></li>
+                                        <li><a href="#">Español</a></li>
+                                        <li><a href="#">Français</a></li>
+                                        <li><a href="#"> 中文</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="wow fadeInDown" data-wow-delay="0.1s">
+                                <div class="widget">
+                                    <h5>Northwind Insurance</h5>
+                                    <p>
+                                        Northwind Insurance is an independent licensee of the WellHealth network.
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <span class="fa-stack fa-lg">
+                                                <i class="fa fa-circle fa-stack-2x"></i>
+                                                <i class="fa fa-phone fa-stack-1x fa-inverse"></i>
+                                            </span> 1800-555-5555
+                                        </li>
+                                        <li>
+                                            <span class="fa-stack fa-lg">
+                                                <i class="fa fa-circle fa-stack-2x"></i>
+                                                <i class="fa fa-envelope-o fa-stack-1x fa-inverse"></i>
+                                            </span> medinfo@northwindinsurance.com
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="wow fadeInDown" data-wow-delay="0.1s">
+                                <div class="widget">
+                                    <h5>Our location</h5>
+                                    <p>1 Northwind Plaza</p>
+                                    <p>Redmond, WA 98052</p>
+
+                                </div>
+                            </div>
+                            <div class="wow fadeInDown" data-wow-delay="0.1s">
+                                <div class="widget">
+                                    <h5>Follow us</h5>
+                                    <ul class="company-social">
+                                        <li class="social-facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                                        <li class="social-twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                                        <li class="social-google"><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                                        <li class="social-vimeo"><a href="#"><i class="fa fa-vimeo-square"></i></a></li>
+                                        <li class="social-dribble"><a href="#"><i class="fa fa-dribbble"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sub-footer">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="wow fadeInLeft" data-wow-delay="0.1s">
+                                    <div class="text-left">
+                                        <p>&copy;Copyright - Northwind Insurance. All rights reserved.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="wow fadeInRight" data-wow-delay="0.1s">
+                                    <div class="text-right">
+                                        <div class="credits">
+                                            <!--
+                                            All the links in the footer should remain intact.
+                                            You can delete the links only if you purchased the pro version.
+                                            Licensing information: https://bootstrapmade.com/license/
+                                            Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=Medicio
+                                        -->
+                                            <a href="https://bootstrapmade.com/free-business-bootstrap-themes-website-templates/">Business Bootstrap Themes</a> by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+
+        <environment names="Development">
+            <script src="~/js/jquery.min.js"></script>
+            <script src="~/js/bootstrap.min.js"></script>
+            <script src="~/js/jquery.easing.min.js"></script>
+            <script src="~/js/wow.min.js"></script>
+            <script src="~/js/jquery.scrollTo.js"></script>
+            <script src="~/js/jquery.appear.js"></script>
+            <script src="~/js/stellar.js"></script>
+            <script src="~/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js"></script>
+            <script src="~/js/owl.carousel.min.js"></script>
+            <script src="~/js/nivo-lightbox.min.js"></script>
+            <script src="~/js/custom.js"></script>
+        </environment>
+        <environment names="Staging,Production">
+            <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+                    asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                    asp-fallback-test="window.jQuery"
+                    crossorigin="anonymous"
+                    integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+            </script>
+            <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
+                    asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                    asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                    crossorigin="anonymous"
+                    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+            </script>
+            <script src="~/js/site.min.js" asp-append-version="true"></script>
+            <script src="~/js/jquery.easing.min.js"></script>
+            <script src="~/js/wow.min.js"></script>
+            <script src="~/js/jquery.scrollTo.js"></script>
+            <script src="~/js/jquery.appear.js"></script>
+            <script src="~/js/stellar.js"></script>
+            <script src="~/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js"></script>
+            <script src="~/js/owl.carousel.min.js"></script>
+            <script src="~/js/nivo-lightbox.min.js"></script>
+            <script src="~/js/custom.js"></script>
+        </environment>
+
+        @RenderSection("Scripts", required: false)
+</body>
+</html>

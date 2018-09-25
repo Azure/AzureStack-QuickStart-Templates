@@ -1,0 +1,44 @@
+@model IEnumerable<Northwind.Insurance.Website.Models.InsurancePlan>
+
+<section id="intro" class="intro">
+    <div class="intro-content intro-nobg paddingbot-0" style="background:#0d8ebd;padding:140px">
+        <div class="form-wrapper container" style="background:#FFFFFF;padding:50px;">
+            <div class="row paddingtop-25 paddingbot-0">
+                <div class="col-lg-12">
+                    <h2 class="h-bold">Step 2</h2><h3 class="h-medium">Select a Plan</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p class="light">Here are the plans for which you qualify. Take note of the deductible, coinsurance, and out-of-pocket maximums.</p>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var item in Model){
+                <div class="col-lg-3">
+                    <div class="pricing-box-alt @(item.IsSpecial ? "special" : item.IsSpecial.ToString())">
+                        <div class="pricing-heading">
+                            <h3><strong>@Html.DisplayFor(modelItem => item.PlanName)</strong></h3>
+                        </div>
+                        <div class="pricing-terms">
+                            <h4 class="h-bold" style="color:#FFFFFF">$@Html.DisplayFor(modelItem => item.Premium) / Month</h4>
+                        </div>
+                        <div class="pricing-content">
+                            <ul>
+                                <li><strong>Deductible: </strong> $@Html.DisplayFor(modelItem => item.IndividualDeductible) Individual / $@Html.DisplayFor(modelItem => item.FamilyDeductible) Family</li>
+                                <li><strong>Out of Pocket Max: </strong> $@Html.DisplayFor(modelItem => item.IndividualOutOfPocketMax) Individual / $@Html.DisplayFor(modelItem => item.FamilyOutOfPocketMax) Family</li>
+                                <li><strong>Emergency Room: </strong> $@Html.DisplayFor(modelItem => item.ERVisitAfterDeductible) after deductible</li>
+                                <li><strong>Primary Care: </strong> @Html.DisplayFor(modelItem => item.FreePrimaryCareVisits) inlucded visits / $@Html.DisplayFor(modelItem => item.PrimaryCareVisitCostAfterDeductible) after deductible</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-action">
+                            <a asp-controller="Plans" asp-action ="PurchasePlan" asp-route-id ="@item.InsurancePlanId" class="btn btn-lg btn-primary">Buy now</a>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</section>
