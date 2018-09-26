@@ -1,0 +1,192 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmAvailabilitySetName": {
+            "type": "string"
+        },
+        "windowsImagePublisher": {
+            "type": "string",
+            "metadata": {
+                "description": "The Publisher of Windows Image"
+            },
+            "defaultValue": "MicrosoftWindowsServer"
+        },
+        "windowsImageOffer": {
+            "type": "string",
+            "metadata": {
+                "description": "The offer of Windows Image"
+            },
+            "defaultValue": "WindowsServer"
+        },
+        "windowsImageSKU": {
+            "type": "string",
+            "metadata": {
+                "description": "The SKU Name of Windows Image"
+            },
+            "defaultValue": "2016-Datacenter"
+        },
+        "windowsImageVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "The Version of Windows Image"
+            },
+            "defaultValue": "latest"
+        },
+        "dataDiskSize": {
+            "type": "int",
+            "metadata": {
+                "description": "Size of the VM data disk in GB"
+            },
+            "defaultValue": 2
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The VM Name"
+            }
+        },
+        "storageAccount": {
+            "type": "string",
+            "metadata": {
+                "description": "The Storage Account Name"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The size of the AD VMs Created"
+            }
+        },
+        "subnetResourceID": {
+            "type": "string",
+            "metadata": {
+                "description": "the resource id of the subnet"
+            }
+        },
+        "adRDPNATRuleID": {
+            "type": "string",
+            "metadata": {
+                "description": "the resource id of the RDP NAT rule"
+            }
+        },
+        "adDNicName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Nic attached to the ad VM"
+            }
+        },
+        "primaryAdIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "PrimaryIPAddress if AD VM"
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": {
+            "storage": {
+                "storageAccounts": "2015-06-15"
+            },
+            "compute": {
+                "virtualMachines": "2015-06-15"
+            },
+            "network": {
+                "virtualNetworks": "2015-05-01-preview"
+            }
+        },
+        "vmvhdContainerName": "vhds"
+    },
+    "resources": [
+        {
+            "name": "[parameters('adDNicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('primaryAdIpAddress')]",
+                            "subnet": {
+                                "id": "[parameters('subnetResourceID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('vmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('apiVersion').compute.virtualMachines]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces',parameters('adDNicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('vmAvailabilitySetName'))]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('windowsImagePublisher')]",
+                        "offer": "[parameters('windowsImageOffer')]",
+                        "sku": "[parameters('windowsImageSKU')]",
+                        "version": "[parameters('windowsImageVersion')]"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmvhdContainerName'),'/', parameters('vmName'), '0','-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob ,variables('vmvhdContainerName'),'/', parameters('vmName'), '0','data-1.vhd')]"
+                            },
+                            "name": "[concat(parameters('vmName'), '0','-data-disk1')]",
+                            "createOption": "empty",
+                            "caching": "None",
+                            "diskSizeGB": "[parameters('dataDiskSize')]",
+                            "lun": 0
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',parameters('adDNicName'))]"
+                        }
+                    ]
+                }
+            }
+        }            
+    ],
+    "outputs": { }
+}

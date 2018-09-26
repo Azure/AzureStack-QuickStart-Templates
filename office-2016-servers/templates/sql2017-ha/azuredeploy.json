@@ -1,0 +1,494 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SqlAvailabilitySetName": {
+            "defaultValue": "SqlAvSet",
+            "type": "String",
+            "metadata": {
+                "description": "The name of availability set for Sql Server AO"
+            }
+        },
+        "domainName": {
+            "defaultValue": "contoso.com",
+            "type": "String",
+            "metadata": {
+                "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
+            }
+        },
+        "workloadsLocation": {
+            "defaultValue": "https://mafon.blob.local.azurestack.external/workload",
+            "type": "String",
+            "metadata": {
+                "description": "Location of workloads"
+            }
+        },
+		"vmPrefix": {
+            "defaultValue": "server",
+            "type": "String",
+            "minLength": 3,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Naming prefix for each new resource created. 3-char min, 8-char max, lowercase alphanumeric"
+            }
+        },
+        "adminUsername": {
+            "defaultValue": "lcladmin",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "WitnessUnc": {
+            "type": "String",
+            "metadata": {
+                "description": "The UNC path of witness"
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+        "sqlAuthUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "The SQL Server Auth Account name"
+            },
+            "defaultValue": "sqlsa"
+        },
+        "sqlAuthPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The SQL Server Auth Account password"
+            }
+        },
+        "sqlServerServiceAccountUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "The SQL Server Service Account name"
+            },
+            "defaultValue": "sqlservice"
+        },
+        "sqlServerServiceAccountPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The SQL Server Service Account password"
+            }
+        },
+        "sqlAOAGName": {
+            "type": "string",
+            "metadata": {
+                "description": "The Sql AlwaysOn Group Name"
+            },
+            "defaultValue": "alwayson-ag"
+        },
+        "sqlAOListenerPort": {
+            "type": "string",
+            "metadata": {
+                "description": "The Sql AG Listener port"
+            },
+            "defaultValue": "1433"
+        },
+        "sqlAOListenerName": {
+            "type": "string",
+            "metadata": {
+                "description": "The Sql AG Listener Name"
+            },
+            "defaultValue": "[tolower(concat('aon-listener-' , resourceGroup().name))]"
+        },
+        "lbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The ip address of load balancer for AO"
+            },
+            "defaultValue": "10.0.0.180"
+        }
+    },
+    "variables": {
+        "sqlPrefix": "[concat(parameters('vmPrefix'),'-sql-')]",
+        "storageAccountType": "Standard_LRS",
+        "uniqueStorageAccountName": "[tolower(concat('sa-',variables('sqlPrefix'), resourceGroup().name))]",
+        "lbName": "[tolower(concat('lb-',variables('sqlPrefix'), resourceGroup().name))]",
+        "uniqueStorageAccountContainerName": "[tolower(concat('sc-',variables('sqlPrefix'), resourceGroup().name))]",
+        "location": "[resourceGroup().location]",
+        "vmOsDiskName": "[concat('od-',variables('sqlPrefix'))]",
+        "vmDataDiskName": "[concat('dd-',variables('sqlPrefix'))]",
+        "vmSize": "Standard_DS4",
+        "clusterName": "[concat(parameters('vmPrefix'),'-sql-fc')]",
+        "modulesPath": "[concat(parameters('workloadsLocation'),'/')]",
+        "vmNicName": "[tolower(concat(variables('sqlPrefix'),'nic-'))]",
+        "staticSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
+        "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+        "sqlAOPrepareModulesURL": "[concat(parameters('workloadsLocation'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
+        "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
+        "createClusterModulesURL": "[concat(parameters('workloadsLocation'),'/CreateFailoverCluster.ps1.zip')]",
+        "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster",
+        "sqlAOEPName": "[concat(parameters('vmPrefix'),'-hadr')]",
+        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+        "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
+        "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('SqlAvailabilitySetName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[tolower(variables('uniqueStorageAccountName'))]",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "sngsql",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmNicName'),copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": 2
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",                    
+                            "subnet": {
+                                "id": "[variables('staticSubnetId')]"
+                            },                   
+                    "loadBalancerBackendAddressPools": [
+                      {
+                        "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                      }
+                    ]           
+                        }
+                    }
+                ]
+            }
+        },
+          {
+            "apiVersion": "2015-05-01-preview",
+            "name": "[variables('lbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                      "properties": {
+                        "subnet": {
+                          "id": "[variables('staticSubnetId')]"
+                        },
+                        "privateIPAddress": "[parameters('lbIpAddress')]",
+                        "privateIPAllocationMethod": "Static"
+                      },
+                      "name": "LoadBalancerFrontend"
+                    }
+                  ],
+              "backendAddressPools": [
+                {
+                  "name": "BackendPool1"
+                }
+              ],
+              "loadBalancingRules": [
+                {
+                  "name": "LBRule",
+                  "properties": {
+                    "frontendIPConfiguration": {
+                      "id": "[variables('frontEndIPConfigID')]"
+                    },
+                    "backendAddressPool": {
+                    "id":  "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                    },
+                    "protocol": "Tcp",
+                    "frontendPort": 1433,
+                    "backendPort": 1433,
+                    "enableFloatingIP": false,
+                    "idleTimeoutInMinutes": 5,
+                    "probe": {
+                      "id": "[variables('lbProbeID')]"
+                    }
+                  }
+                }
+              ],
+              "probes": [
+                {
+                  "name": "tcpProbe",
+                  "properties": {
+                    "protocol": "Tcp",
+                    "port": 59999,
+                    "intervalInSeconds": 5,
+                    "numberOfProbes": 2
+                  }
+                }
+              ]
+            }
+          },
+        {
+            "name": "[concat(variables('SqlPrefix'),copyIndex())]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "vmLoop",
+                "count": 2
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[concat(variables('SqlPrefix'),copyIndex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('SqlAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftSQLServer",
+                        "offer": "SQL2017-WS2016",
+                        "sku": "Enterprise",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "createOption": "empty",
+                            "lun": 0,
+                            "diskSizeGB": "1023",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-1')]",
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-1','.vhd')]"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 1,
+                            "diskSizeGB": "1023",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-2')]",
+                            "vhd": {
+                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-2','.vhd')]"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('SqlPrefix'),copyIndex(), '/SqlIaasExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [ 
+                "[concat('Microsoft.Compute/virtualMachines/', variables('SqlPrefix'),copyIndex())]" 
+            ],
+            "copy": {
+                "name": "vmLoop",
+                "count": 2
+             },
+            "properties": {
+                "type": "SqlIaaSAgent",
+                "publisher": "Microsoft.SqlServer.Management",
+                "typeHandlerVersion": "1.2",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "AutoTelemetrySettings": {
+                        "Region": "[variables('location')]"
+                    },
+                    "AutoPatchingSettings": {
+                        "PatchCategory": "WindowsMandatoryUpdates",
+                        "Enable": false,
+                        "DayOfWeek": "Sunday",
+                        "MaintenanceWindowStartingHour": "2",
+                        "MaintenanceWindowDuration": "60"
+                    },
+                    "KeyVaultCredentialSettings": {
+                        "Enable": false,
+                        "CredentialName": ""
+                    },
+                    "ServerConfigurationsManagementSettings": {
+                        "SQLConnectivityUpdateSettings": {
+                            "ConnectivityType": "Private",
+                            "Port": 1433
+                        },
+                        "SQLWorkloadTypeUpdateSettings": {
+                            "SQLWorkloadType": "OLTP"
+                        },
+                        "SQLStorageUpdateSettings": {
+                            "DiskCount": 2,
+                            "NumberOfColumns": 2,
+                            "StartingDeviceID": 2,
+                            "DiskConfigurationType": "NEW"
+                        },
+                        "AdditionalFeaturesServerConfigurations": {
+                            "IsRServicesEnabled": "false"
+                        }
+                    }
+                },
+                "protectedSettings": {
+                    "SQLAuthUpdateUserName": "[parameters('SqlAuthUserName')]",
+                    "SQLAuthUpdatePassword": "[parameters('SqlAuthPassword')]"
+                }
+            }
+        },
+        {  
+            "type":"Microsoft.Compute/virtualMachines/extensions",
+            "name":"[concat(variables('SqlPrefix'),'0/sqlAOPrepare')]",
+            "apiVersion":"2015-06-15",
+            "location":"[variables('location')]",
+            "dependsOn":[  
+                "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),'0','/extensions/','SqlIaasExtension')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),'1','/extensions/','SqlIaasExtension')]"
+            ],
+            "properties":{  
+               "publisher":"Microsoft.Powershell",
+               "type":"DSC",
+               "typeHandlerVersion":"2.76",
+               "autoUpgradeMinorVersion":true,
+               "settings":{  
+                  "modulesURL":"[variables('sqlAOPrepareModulesURL')]",
+                  "configurationFunction":"[variables('sqlAOPrepareConfigurationFunction')]",
+                  "properties":{  
+                     "domainName":"[parameters('domainName')]",
+                     "sqlAlwaysOnEndpointName":"[variables('sqlAOEPName')]",
+                     "adminCreds":{  
+                        "userName":"[parameters('adminUserName')]",
+                        "password":"privateSettingsRef:AdminPassword"
+                     },
+                     "sqlServiceCreds":{  
+                        "userName":"[parameters('sqlServerServiceAccountUserName')]",
+                        "password":"privateSettingsRef:SqlServerServiceAccountPassword"
+                     },
+                     "NumberOfDisks":2,
+                     "WorkloadType":"OLTP",
+					 "BaseUrl":"[variables('modulesPath')]"
+                  }
+               },
+               "protectedSettings":{  
+                  "items":{  
+                     "adminPassword":"[parameters('adminPassword')]",
+                     "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]"
+                  }
+               }
+            }
+         },
+         {  
+            "type":"Microsoft.Compute/virtualMachines/extensions",
+            "name":"[concat(variables('sqlPrefix'),'1/configuringAlwaysOn')]",
+            "apiVersion":"2015-06-15",
+            "location":"[variables('location')]",
+            "dependsOn":[  
+                "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),'0','/extensions/','sqlAOPrepare')]"
+             ],
+            "properties":{  
+               "publisher":"Microsoft.Powershell",
+               "type":"DSC",
+               "typeHandlerVersion":"2.76",
+               "autoUpgradeMinorVersion":true,
+               "settings":{  
+                  "modulesURL":"[variables('createClusterModulesURL')]",
+                  "configurationFunction":"[variables('createClusterConfigurationFunction')]",
+                  "properties":{  
+                     "domainName":"[parameters('domainName')]",
+                     "clusterName":"[variables('clusterName')]",
+                     "sharePath":"[parameters('WitnessUnc')]",
+                     "nodes":[  
+                        "[concat(variables('sqlPrefix'),'0')]",
+                        "[concat(variables('sqlPrefix'),'1')]"
+                     ],
+                     "sqlAlwaysOnEndpointName":"[variables('sqlAOEPName')]",
+                     "sqlAlwaysOnAvailabilityGroupName":"[parameters('sqlAOAGName')]",
+                     "sqlAlwaysOnAvailabilityGroupListenerName":"[parameters('sqlAOListenerName')]",
+                     "SqlAlwaysOnAvailabilityGroupListenerPort":"[parameters('sqlAOListenerPort')]",
+                     "databaseNames":"testHA",
+                     "lbName":"[variables('lbName')]",
+                     "lbAddress":"[parameters('lbIpAddress')]",
+                     "primaryReplica":"[concat(variables('sqlPrefix'),'1')]",
+                     "secondaryReplica":"[concat(variables('sqlPrefix'),'0')]",
+                     "dnsServerName":"",
+                     "adminCreds":{  
+                        "userName":"[parameters('adminUserName')]",
+                        "password":"privateSettingsRef:adminPassword"
+                     },
+                     "sqlServiceCreds":{  
+                        "userName":"[parameters('sqlServerServiceAccountUserName')]",
+                        "password":"privateSettingsRef:sqlServerServiceAccountPassword"
+                     },
+                     "SQLAuthCreds":{  
+                        "userName":"sqlsa",
+                        "password":"privateSettingsRef:sqlAuthPassword"
+                     },
+                     "NumberOfDisks":2,
+                     "WorkloadType":"OLTP",
+					 "BaseUrl":"[variables('modulesPath')]"
+                  }
+               },
+               "protectedSettings":{  
+                  "items":{  
+                     "adminPassword":"[parameters('adminPassword')]",
+                     "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]",
+                     "sqlAuthPassword":"[parameters('sqlServerServiceAccountPassword')]"
+                  }
+               }
+            }
+         }
+    ]
+}
