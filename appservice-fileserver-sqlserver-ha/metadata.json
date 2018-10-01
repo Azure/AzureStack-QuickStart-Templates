@@ -1,0 +1,11 @@
+{
+    "$schema": "https://aka.ms/azure-quickstart-templates-metadata-schema#",
+    "type": "QuickStart",
+    "itemDisplayName": "Create infrastructure for HA AppService deployment",
+    "description": "This template creates a SQL always-on cluster and Storage Spaces Direct Cluster with 2 domain controllers. It also creates a VNET with subnets required by AppService",
+    "summary": "Creates VNET, 2 node SQL cluster, 2 node FileServer cluster and 2 domain controllers",
+    "githubUsername": "pappleby64",
+    "dateUpdated": "2018-09-21"
+  }
+  
+  
