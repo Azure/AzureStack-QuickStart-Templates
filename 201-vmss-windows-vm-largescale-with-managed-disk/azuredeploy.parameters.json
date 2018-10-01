@@ -5,9 +5,6 @@
     "vmSku": {
       "value": "Standard_D1"
     },
-    "vmssName": {
-      "value": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]"
-    },
     "instanceCount": {
       "value": 2
     },
