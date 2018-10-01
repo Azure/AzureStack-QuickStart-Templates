@@ -1,6 +1,33 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {	
+      "parameters": {
+    "vmSku": {
+      "value": "Standard_D1"
+    },
+    "vmssName": {
+      "value": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]"
+    },
+    "instanceCount": {
+      "value": 2
+    },
+    "adminUsername": {
+      "value": "azureuser"
+    },
+    "adminPassword": {
+      "value": "[concat('Subscription#', subscription().subscriptionId)]"
+    },
+    "osImagePublisher": {
+      "value": "MicrosoftWindowsServer"
+    },
+    "osImageOffer": {
+      "value": "WindowsServer"
+    },
+    "osImageSku": {
+      "value": "2016-Datacenter"
+    },
+    "dataDiskSizeGB": {
+      "value": 1
     }
+  }
 }
