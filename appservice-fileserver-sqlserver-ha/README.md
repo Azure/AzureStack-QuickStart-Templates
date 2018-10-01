@@ -5,16 +5,17 @@ This template will deploy all the infrastructure required for Azure Stack AppSer
  It creates the following resources:
 
 * A virtual network with required subnets 
-* network security groups for file server, SQL server and AD subnets
+* Network security groups for file server, SQL server and AD subnets
 * Storage accounts for VM disks and cluster cloud witness
 * One internal load balancer for SQL VMs with private IP bound to the SQL Always On listener
 * Two VM (WS2016Core) configured as Domain Controllers for a new forest with a single domain
 * Two VM (WS2016Core) configured as Storage Spaces Direct File share cluster 
-* 3 Availability Sets, for AD, Fileserver cluster and SQL cluster 
+* Three Availability Sets, for AD, Fileserver cluster and SQL cluster 
 
 # Deploying the AppService Resource Provider
 
 As stated the goal of this template is to deploy the infrastructure needed to support the App Service Resource Provider so this should be deployed before running the AppService installer.
+
 * Check the template meets any requirements you may have on VNET address space and storage sizing
 * Deploy this template using the Default Provider Subscription
 * Create a new Resource Group 
