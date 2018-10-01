@@ -1,0 +1,36 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "GEN-USER"
+    },
+    "adminPassword": {
+      "value": "GEN-PASSWORD"
+    },
+    "fileShareOwnerUserName": {
+      "value": "GEN-USER"
+    },
+    "fileShareOwnerPassword": {
+      "value": "GEN-PASSWORD"
+    },
+    "fileShareUserUserName": {
+      "value": "GEN-USER"
+    },
+    "fileShareUserPassword": {
+      "value": "GEN-PASSWORD"
+    },
+    "sqlServerServiceAccountUserName": {
+      "value": "GEN-USER"
+    },
+    "sqlServerServiceAccountPassword": {
+      "value": "GEN-PASSWORD"
+    },
+    "sqlLogin": {
+      "value": "GEN-USER"
+    },
+    "sqlLoginPassword": {
+      "value": "GEN-PASSWORD"
+    }
+  }
+}
