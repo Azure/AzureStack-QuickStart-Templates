@@ -1,0 +1,585 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Administrator of the existing Active Directory Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Administrator account of the existing Active Directory Domain"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
+            },
+            "defaultValue": "Premium_LRS"
+        },
+        "feStaticSubnetID": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource ID of the subnet for the SfB front-end servers."
+            }
+        },
+        "namePrefix": {
+            "defaultValue": "sfb-edge",
+            "type": "String",
+            "metadata": {
+                "description": "Virtual machine name prefix"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "Size of the Skype for Business Edge VMs to be created"
+            },
+            "defaultValue": "Standard_DS5_v2"
+        },
+        "edgeNodes": {
+            "type": "array",
+            "metadata": {
+                "description": "A list of edge nodes to deploy. This template expects 2."
+            },
+            "defaultValue": [
+            ]
+        },
+        "sfbIsoURL": {
+            "type": "string",
+            "metadata": {
+                "description": "The URL of the Skype for Business ISO"
+            },
+            "defaultValue": ""
+        },
+        "sfbPrereqModulesURL": {
+            "type": "string",
+            "metadata": {
+                "description": "URL to the prerequisites installation DSC modules"
+            },
+            "defaultValue": ""
+        },
+        "sfbISOSHA256": {
+            "type": "string",
+            "metadata": {
+                "description": "The SHA256 checksum of the Skype for Business ISO"
+            },
+            "defaultValue": ""
+        },
+        "sfbCMUURL": {
+            "type": "string",
+            "metadata": {
+                "description": "The URL of the Skype for Business cumulative update installer"
+            },
+            "defaultValue": ""
+        },
+        "sfbCMUSHA256": {
+            "type": "string",
+            "metadata": {
+                "description": "The SHA256 checksum of the Skype for Business cumulative update installer"
+            },
+            "defaultValue": ""
+        },
+        "domainName": {
+            "defaultValue": "contoso.com",
+            "type": "String",
+            "metadata": {
+                "description": "The domain to which we will join these machines"
+            }
+        },
+        "edgeNetworkSubnet": {
+            "defaultValue": "10.1.0.0/24",
+            "type": "String",
+            "metadata": {
+                "description": "The subnet for the VM network"
+            }
+        },
+        "edgeNetworkAddressRange": {
+            "defaultValue": "10.1.0.0/16",
+            "type": "String",
+            "metadata": {
+                "description": "Addresses range for VM network"
+            }
+        },
+        "primaryEdgeIpAddress": {
+            "defaultValue": "10.1.0.11",
+            "type": "String",
+            "metadata": {
+                "description": "Address of first edge server"
+            }
+        },
+        "additionalEdgeIpAddress": {
+            "defaultValue": "10.1.0.12",
+            "type": "String",
+            "metadata": {
+                "description": "Address of second edge server"
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": {
+            "storage": {
+                "storageAccounts": "2015-06-15"
+            },
+            "compute": {
+                "virtualMachines": "2015-06-15"
+            },
+            "resources": {
+                "deployments": "2015-01-01"
+            },
+            "network": {
+                "virtualNetworks": "2015-05-01-preview",
+                "loadBalancers": "2015-05-01-preview",
+                "publicIPAddresses": "2015-05-01-preview",
+                "networkSecurityGroups": "2015-05-01-preview"
+            }
+        },
+        "storageAccountName": "[concat(parameters('namePrefix'), '-edge-sa-', resourceGroup().name)]",
+        "nicPrefix": "[concat(parameters('namePrefix'), '-edge-internal-nic-')]",
+        "nicPrefixExternal": "[concat(parameters('namePrefix'), '-edge-external-nic-')]",
+        "vmOsDiskName": "[concat('od-edge-',parameters('namePrefix'))]",
+        "EdgeAvailabilitySetName": "[concat(parameters('namePrefix'), '-edge-availability-set')]",
+        "nsgname": "[concat(parameters('namePrefix'), '-edge-sng')]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgname'))]",
+        "externalEdgeNetworkName": "[concat(parameters('namePrefix'), '-edge-network-',resourceGroup().name)]",
+        "externalStaticSubnetName": "[concat(parameters('namePrefix'), '-edge-subnet-', resourceGroup().name)]",
+        "dnsPrefix1": "[concat('sfbEdge',resourceGroup().name, '01')]",
+        "dnsPrefix2": "[concat('sfbEdge',resourceGroup().name, '02')]",
+        "subnets": [
+            {
+                "name": "[variables('externalStaticSubnetName')]",
+                "properties": {
+                    "addressPrefix": "[parameters('edgeNetworkSubnet')]",
+                    "networkSecurityGroup": {
+                        "id": "[variables('nsgID')]"
+                    }
+                }
+            }
+        ],
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('externalEdgeNetworkName'))]",
+        "edgeSubnetID": "[concat(variables('vnetID'),'/subnets/', variables('externalStaticSubnetName'))]",
+        "firstEdgePublicIPName": "[concat(parameters('namePrefix'), '-edge-publicIP-01')]",
+        "secondEdgePublicIPName": "[concat(parameters('namePrefix'), '-edge-publicIP-02')]",
+        "createClusterConfigurationFunction": "InstallSfBFePrereq.ps1\\Deploy_SkypeForBusinessFeServers"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[variables('EdgeAvailabilitySetName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2016-01-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "kind": "Storage"
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgname')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": { 
+                            "protocol": "*",
+                            "sourcePortRange": "*", 
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*", 
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('externalEdgeNetworkName')]",
+            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('edgeNetworkAddressRange')]"
+                    ],
+                    "networkSecurityGroup": {
+                        "id": "[variables('nsgID')]"
+                    }
+                },
+                "subnets": "[variables('subnets')]"
+            },
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ]
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicPrefix'), '01')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigFeBackendNetwork",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('feStaticSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicPrefix'), '02')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigFeBackendNetwork",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('feStaticSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('firstEdgePublicIPName')]",
+            "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(variables('dnsPrefix1'))]"
+                },
+                "idleTimeoutInMinutes": 30
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('secondEdgePublicIPName')]",
+            "apiVersion": "[variables('apiVersion').network.publicIPAddresses]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(variables('dnsPrefix2'))]"
+                },
+                "idleTimeoutInMinutes": 30
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicPrefixExternal'), '01')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('externalEdgeNetworkName'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('firstEdgePublicIPName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('firstEdgePublicIPName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('edgeSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicPrefixExternal'), '02')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('externalEdgeNetworkName'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('secondEdgePublicIPName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId ('Microsoft.Network/publicIPAddresses/', variables('secondEdgePublicIPName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('edgeSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('edgeNodes')[0]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefix'), '01')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefixExternal'), '01')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('edgeNodes')[0]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('EdgeAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('storageAccountName'),'/',variables('vmOsDiskName'), '0','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefix'), '01'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefixExternal'), '01'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "[parameters('edgeNodes')[1]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefix'), '02')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefixExternal'), '02')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('edgeNodes')[1]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('EdgeAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('storageAccountName'),'/',variables('vmOsDiskName'), '1','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefix'), '01'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefixExternal'), '01'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[0], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('edgeNodes')[0])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[1], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('edgeNodes')[1])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        {  
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[0], '/installPrerequisites')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[0],'IaaSAntimalware')]"
+             ],
+            "properties":{  
+               "publisher":"Microsoft.Powershell",
+               "type":"DSC",
+               "typeHandlerVersion":"2.80",
+               "autoUpgradeMinorVersion":true,
+               "settings":{  
+                  "modulesURL": "[parameters('sfbPrereqModulesURL')]",
+                  "configurationFunction": "[variables('createClusterConfigurationFunction')]",
+                  "properties": {  
+                     "DomainName": "[parameters('domainName')]",
+                     "isoURL": "[parameters('sfbIsoURL')]",
+                     "sfbISOSHA256": "[parameters('sfbISOSHA256')]",
+                     "cmuURL": "[parameters('sfbCMUURL')]",
+                     "sfbCMUSHA256": "[parameters('sfbCMUSHA256')]",
+                     "AdminCreds":{  
+                        "userName":"[parameters('adminUsername')]",
+                        "password":"privateSettingsRef:adminPassword"
+                     }
+                  }
+               },
+               "protectedSettings":{  
+                  "items":{  
+                     "adminPassword":"[parameters('adminPassword')]"
+                  }
+               }
+            }
+        },
+        {  
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[1], '/installPrerequisites')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[1],'IaaSAntimalware')]"
+             ],
+            "properties":{  
+               "publisher":"Microsoft.Powershell",
+               "type":"DSC",
+               "typeHandlerVersion":"2.80",
+               "autoUpgradeMinorVersion":true,
+               "settings":{  
+                  "modulesURL": "[parameters('sfbPrereqModulesURL')]",
+                  "configurationFunction": "[variables('createClusterConfigurationFunction')]",
+                  "properties": {  
+                     "DomainName": "[parameters('domainName')]",
+                     "isoURL": "[parameters('sfbIsoURL')]",
+                     "sfbISOSHA256": "[parameters('sfbISOSHA256')]",
+                     "cmuURL": "[parameters('sfbCMUURL')]",
+                     "sfbCMUSHA256": "[parameters('sfbCMUSHA256')]",
+                     "AdminCreds":{  
+                        "userName":"[parameters('adminUsername')]",
+                        "password":"privateSettingsRef:adminPassword"
+                     }
+                  }
+               },
+               "protectedSettings":{  
+                  "items":{  
+                     "adminPassword":"[parameters('adminPassword')]"
+                  }
+               }
+            }
+        }
+    ]
+}
