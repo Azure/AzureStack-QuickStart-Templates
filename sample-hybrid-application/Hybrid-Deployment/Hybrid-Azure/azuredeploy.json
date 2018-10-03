@@ -1,0 +1,599 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "AddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual Network Address Space for Azure. Please be sure not to overlap with your Azure Stack Vitual Network Address Space"
+      }
+    },
+    "Subnet": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet Address Space for your Azure Network"
+      }
+    },
+    "GatewaySubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway Subnet Address Space for your Azure Network "
+      }
+    },
+    "LocalGatewayIPAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "This should be the external facing IP Address for your Azure Stack Environment"
+      }
+    },
+    "LocalGatewayAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "This Should be the Address Space for the Local Network you want routed on the Azure Stack Side"
+      }
+    },
+    "siteName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the web app that you wish to create."
+      }
+    },
+    "hostingPlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the App Service plan to use for hosting the web app."
+      }
+    },
+    "EnvironmentName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the App Service plan to use for hosting the web app."
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "allowedValues": [
+        "S1",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "defaultValue": "S1",
+      "metadata": {
+        "description": "The pricing tier for the hosting plan."
+      }
+    },
+    "skuCapacity": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
+      "defaultValue": "0",
+      "metadata": {
+        "description": "The instance size of the hosting plan (small, medium, or large)."
+      }
+    },
+    "repoURL": {
+      "type": "string",
+      "defaultValue": "https://github.com/terawe/azurestacktemplates.git",
+      "metadata": {
+        "description": "The URL for the GitHub repository that contains the project to deploy."
+      }
+    },
+    "branch": {
+      "type": "string",
+      "defaultValue": "master",
+      "metadata": {
+        "description": "The branch of the GitHub repository to use."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "subnetName": "mySubnet",
+    "virtualNetworkName": "myVnet",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "GatewayName": "Gateway",
+    "GatewayNamePublicIP": "Gateway-PIP",
+    "LocalGatewayName": "LocalGateway",
+    "NSGName": "[concat(variables('virtualNetworkName'),'-NSG')]",
+    "subnetNSGName": "IsolatedServer-NSG",
+    "sku": "Standard",
+    "appInsightsName": "[concat(parameters('siteName'),'-AppInsights')]",
+    "uniqueDnsName":  "[concat(uniqueString(resourceGroup().id),'traffic')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "Vnet"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('NSGName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('AddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('Subnet')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSGName'))]"
+              }
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('GatewaySubnet')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2018-02-01",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('NSGName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NSG"
+      },
+      "dependsOn": [],
+      "properties": {
+        "securityRules": [
+          {
+            "name": "rdp_rule",
+            "properties": {
+              "description": "Allow RDP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "web_rule",
+            "properties": {
+              "description": "Allow WEB",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "https_rule",
+            "properties": {
+              "description": "Allow https",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 102,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbound-management",
+            "properties": {
+              "description": "Used to manage ASE from public VIP",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "454-455",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 105,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "ASE-internal-inbound",
+            "properties": {
+              "description": "ASE-internal-inbound",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "192.168.250.0/24",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbound-HTTP",
+            "properties": {
+              "description": "Allow HTTP",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbount-HTTPS",
+            "properties": {
+              "description": "Allow HTTPS",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 130,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbound-FTP",
+            "properties": {
+              "description": "Allow FTP over port 21",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "21",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 140,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbound-FTPS",
+            "properties": {
+              "description": "Allow FTPS",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "990",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 150,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbound-FTP-Data",
+            "properties": {
+              "description": "RDP",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "10001-10020",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 160,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Inbound-Remote-Debugging",
+            "properties": {
+              "description": "Visual Studio remote debugging",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "4016-4022",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 170,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Outbound-443",
+            "properties": {
+              "description": "Azure Storage blob",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "Outbound-SMB",
+            "properties": {
+              "description": "Azure Storage queue",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "445",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "Outbound-DB",
+            "properties": {
+              "description": "Database",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "1433",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "Outbound-DB2",
+            "properties": {
+              "description": "Database 2",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "11000-11999",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 130,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "Outbound-DB3",
+            "properties": {
+              "description": "Database 3",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "14000-14999",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 140,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "Outbound-DNS",
+            "properties": {
+              "description": "DNS",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "53",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 150,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "ASE-internal-outbound",
+            "properties": {
+              "description": "Azure Storage queue",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "192.168.250.0/24",
+              "access": "Allow",
+              "priority": 160,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "Outbound-80",
+            "properties": {
+              "description": "Outbound 80",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 170,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "ASE-to-VNET",
+            "properties": {
+              "description": "ASE to VNET",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "192.168.250.0/23",
+              "access": "Allow",
+              "priority": 180,
+              "direction": "Outbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('GatewayNamePublicIP')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "Gateway-PiP"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/localNetworkGateways",
+      "name": "[variables('localGatewayName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "Local Network Gateway"
+      },
+      "properties": {
+        "localNetworkAddressSpace": {
+          "addressPrefixes": [
+            "[parameters('localGatewayAddressPrefix')]"
+          ]
+        },
+        "gatewayIpAddress": "[parameters('localGatewayIpAddress')]"
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[variables('gatewayName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "Virtual Gateway"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('GatewayNamePublicIP'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('GatewayNamePublicIP'))]"
+              }
+            },
+            "name": "vnetGatewayConfig"
+          }
+        ],
+        "gatewayType": "Vpn",
+        "vpnType": "RouteBased",
+        "enableBgp": false
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('hostingPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "HostingPlan"
+      },
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('skuCapacity')]"
+      },
+      "properties": {
+        "name": "[parameters('hostingPlanName')]"
+      }
+    },
+    {
+      "apiVersion": "2016-03-01",
+      "name": "[parameters('siteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+        "displayName": "Website"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+        "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]"
+      ],
+      "properties": {
+        "name": "[parameters('siteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('repoURL')]",
+            "branch": "[parameters('branch')]",
+            "IsManualIntegration": true
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+          ],
+          "properties": {
+            "WEBSITE_NODE_DEFAULT_VERSION": "8.9.0"
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[variables('appInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('siteName'))]": "Resource",
+        "displayName": "AppInsightsComponent"
+      },
+      "properties": {
+        "applicationId": "[variables('appInsightsName')]"
+      }
+    },
+    {
+      "apiVersion": "2015-11-01",
+      "type": "Microsoft.Network/trafficManagerProfiles",
+      "name": "TrafficManager",
+      "location": "global",
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+        "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+      ],
+      "properties": {
+        "profileStatus": "Enabled",
+        "trafficRoutingMethod": "Weighted",
+        "dnsConfig": {
+          "relativeName": "[variables('uniqueDnsName')]",
+          "ttl": 30
+        },
+        "monitorConfig": {
+          "protocol": "HTTP",
+          "port": 80,
+          "path": "/"
+        }
+      }
+    }
+  ]
+}

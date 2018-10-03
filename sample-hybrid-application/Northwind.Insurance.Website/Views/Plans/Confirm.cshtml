@@ -1,0 +1,47 @@
+@model Northwind.Insurance.Website.Models.Enrollment
+
+<section id="intro" class="intro">
+    <div class="intro-content intro-nobg paddingbot-0" style="background:#0d8ebd;padding:140px">
+        <div class="form-wrapper container" style="background:#FFFFFF;padding:50px;">
+            <div class="row paddingtop-25 paddingbot-0">
+                <div class="col-lg-12">
+                    <h2 class="h-bold">Step 4</h2><h3 class="h-medium">Confirmation</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="callaction bg-gray">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="wow fadeInUp" data-wow-delay="0.1s">
+                                    <div class="text-center">
+                                        <h3><i class="fa fa-2x fa-check btn-success circled text-center"></i></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="wow fadeInUp" data-wow-delay="0.1s">
+                                    <div class="cta-text">
+                                        <h3>All Done!</h3>
+                                        <p>Confirmation Code: <strong>@TempData["confirmation"]</strong></p>
+                                        <p>You're all set! Our staff will reach out to you in the next week to set up an orientation.</p>
+                                        <p>Please save this code for your records. Thank you for choosing Northwind Insurance.</p>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-5">
+                                <div class="">
+                                    <a asp-controller="Home" asp-action="Index" class="btn btn-skin btn-lg">Return to home page</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

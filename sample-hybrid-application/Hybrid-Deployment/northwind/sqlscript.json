@@ -1,0 +1,40 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineName": {
+      "type": "string"
+    },
+	"adminUsername": {
+      "type": "string"
+    },
+	"adminPassword": {
+      "type": "securestring"
+    },
+    "fileUris": {
+      "type": "string"
+    }
+  },
+  "variables": {
+	"sqladminUserName": "[parameters('adminUsername')]",
+	"adminLoginPassword": "[parameters('adminPassword')]"
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('virtualMachineName'),'/CustomScriptExtension')]",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.7",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": "[split(parameters('fileUris'), ' ')]",
+        "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File sqldbcreate.ps1 -dbname ', parameters('virtualMachineName'), ' -adminname ',  variables('sqladminUserName'), ' -adminpwd ',  variables('adminLoginPassword'))]"
+		}
+      }
+    }
+  ]
+}
