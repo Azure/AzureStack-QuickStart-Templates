@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a Windows VM Scale Set",
+  "description": "This template allows you to deploy a VM Scale Set of Windows VMs using the lastest patched version of various Windows Versions. The VM Scale Set can be scaled upto 100 VMs. VMs are set with 2 managed disks; the OS disk and a data disk of 1 GB. VMs are behind a load balancer with NAT rules for rdp connections.",
+  "summary": "This template deploys a Windows VM Scale Set with custom script extension behind a load balancer with NAT rules for rdp connections.",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-09-29"
+}
