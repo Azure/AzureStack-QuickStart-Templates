@@ -43,3 +43,6 @@ New-AzureRmResourceGroupDeployment -Name MSX -ResourceGroupName $ResourceGroup -
 
 #Deploy SQL
 New-AzureRmResourceGroupDeployment -Name SQL -ResourceGroupName $ResourceGroup -TemplateFile .\templates\sql2017-ha\azuredeploy.json -TemplateParameterFile .\templates\sql2017-ha\azuredeploy.parameters.json
+
+#Deploy SFB
+New-AzureRmResourceGroupDeployment -Name SFB -ResourceGroupName $ResourceGroup -TemplateFile .\templates\sfb2015\azuredeploy.json -TemplateParameterFile .\templates\sfb2015\azuredeploy.parameters.json

@@ -22,6 +22,9 @@ THe following Marketplace Items must be installed on Azure Stack:
 
 ### Exchange 2016
 
+Does install a 4 Node DAG with 9 Databases. Each Node has 10 data drives attached, each 460 GB in size.
+
+#### Requirements not provided with the download
 Latest Exchange CU 8 or 9 ISO file stored in .\artifacts\exchange2016-ha folder
 
 UcmaRuntimeSetup.exe file stored in .\artifacts\exchange2016-ha folder
@@ -30,7 +33,12 @@ UcmaRuntimeSetup.exe file stored in .\artifacts\exchange2016-ha folder
 
 Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter. CU 10 is not supported for initial deployment and must be applied manually post deployment
 
+### Skype for Business 2015
 
+Does install 3 Skype for Business - Front End Servers. Edge Sevrers required for publishing will come with an update.
+
+#### Requirements not provided with the download
+Skype for Business 2015 ISO file stored in .\artifacts\SFB folder
 
 
 ## Deployment

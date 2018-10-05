@@ -1,0 +1,722 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Naming prefix for each new resource created. 3-char min, 8-char max, lowercase alphanumeric"
+            }
+        },
+        "feStaticSubnetID": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource ID of the subnet for the SfB front-end servers"
+            }
+        },
+        "SqlServerFQDN": {
+            "type": "string",
+            "metadata": {
+                "description": "The FQDN of one of the SQL servers in the AlwaysOn Cluster"
+            },
+            "defaultValue": "sql-sql-0.contoso.com"
+        },
+        "SqlAG": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the SQL always-on availability group"
+            },
+            "defaultValue": "alwayson-ag"
+        },
+        "DNSserver": {
+            "type": "string",
+            "metadata": {
+                "description": "The IP or fqdn of the DNS server you want to update. Typically, this is one of your AD servers."
+            },
+            "defaultValue": "10.0.0.11"
+        },
+        "CA": {
+            "type": "string",
+            "metadata": {
+                "description": "The certificate authority path. Should be in the form of: 'srvdc-dc-1.contoso.com\\contoso-srvdc-dc-1-CA'"
+            },
+            "defaultValue": "srvdc-dc-1.contoso.com\\contoso-srvdc-dc-1-CA"
+        },
+        "storageAccountType": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
+            },
+            "defaultValue": "Premium_LRS"
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "Size of the Skype for Business front-end VMs to be created"
+            },
+            "defaultValue": "Standard_DS5_v2"
+        },
+        "domainName": {
+            "type": "string",
+            "metadata": {
+                "description": "DNS domain name for existing Active Directory domain"
+            }
+        },
+        "domainNetbiosName": {
+            "type": "string",
+            "metadata": {
+                "description": "Netbios name for existing Active Directory domain"
+            },
+            "defaultValue": "contoso"
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Administrator of the existing Active Directory Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Administrator account of the existing Active Directory Domain"
+            }
+        },
+        "sfbIsoURL": {
+            "type": "string",
+            "metadata": {
+                "description": "The URL of the Skype for Business ISO"
+            },
+            "defaultValue": ""
+        },
+        "modRewriteURL": {
+            "type": "string",
+            "metadata": {
+                "description": "The URL of the mod rewrite MSI"
+            },
+            "defaultValue": ""
+        },
+        "sfbPrereqModulesURL": {
+            "type": "string",
+            "metadata": {
+                "description": "URL to the prerequisites installation DSC modules"
+            },
+            "defaultValue": ""
+        },
+        "installScriptURL": {
+            "type": "string",
+            "metadata": {
+                "description": "URL to install script"
+            },
+            "defaultValue": ""
+        },
+        "sfbCMUURL": {
+            "type": "string",
+            "metadata": {
+                "description": "The URL of the Skype for Business cumulative update installer"
+            },
+            "defaultValue": ""
+        },
+        "workloadsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The URL of the Skype for Business files container"
+            },
+            "defaultValue": ""
+        },
+        "shareServerFQDN": {
+            "type": "String",
+            "metadata": {
+                "description": "The share server FQDN"
+            },
+            "defaultValue": "fs01.contoso.com"
+        },
+        "shareName": {
+            "type": "String",
+            "metadata": {
+                "description": "The share name"
+            },
+            "defaultValue": "data"
+        },
+        "feLbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The ip address of load balancer for SfB front-end"
+            },
+            "defaultValue": ""
+        },
+        "feNodes": {
+            "type": "array",
+            "defaultValue": [
+            ]
+        },
+        "lbRules": {
+            "type": "array",
+            "defaultValue": [
+                {
+                    "name": "httpPort",
+                    "frontendPort": "80",
+                    "backendPort": "80",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "webComponentExtAccess",
+                    "frontendPort": "8080",
+                    "backendPort": "8888",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "httpsPort",
+                    "frontendPort": "443",
+                    "backendPort": "443",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "internalClientConnections",
+                    "frontendPort": "5061",
+                    "backendPort": "5061",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "focusPort",
+                    "frontendPort": "444",
+                    "backendPort": "444",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "dcomPort",
+                    "frontendPort": "135",
+                    "backendPort": "135",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "reverseProxyHttps",
+                    "frontendPort": "4443",
+                    "backendPort": "4443",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "incommingSIP",
+                    "frontendPort": "5072",
+                    "backendPort": "5072",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "sipAnnouncementServicePort",
+                    "frontendPort": "5073",
+                    "backendPort": "5073",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "sipCallPack",
+                    "frontendPort": "5075",
+                    "backendPort": "5075",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "audioTest",
+                    "frontendPort": "5076",
+                    "backendPort": "5076",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "sipResponseGroup",
+                    "frontendPort": "5071",
+                    "backendPort": "5071",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "edgeAV",
+                    "frontendPort": "5080",
+                    "backendPort": "5080",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "callAdmissionControl",
+                    "frontendPort": "448",
+                    "backendPort": "448",
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "mediationServer",
+                    "frontendPort": "5070",
+                    "backendPort": "5070",
+                    "protocol": "tcp"
+                }
+            ]
+        }
+    },
+    "variables": {
+        "storageAccountName": "[tolower(concat(parameters('namePrefix'), '-sa-', resourceGroup().name))]",
+        "lbName": "[tolower(concat(parameters('namePrefix'), '-lb-', resourceGroup().name))]",
+        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+        "nicPrefix": "[tolower(concat(parameters('namePrefix'), '-nic-'))]",
+        "vmOsDiskName": "[concat('od-',parameters('namePrefix'))]",
+        "nsgname": "[concat(parameters('namePrefix'), '-sng')]",
+        "FEAvailabilitySetName": "[tolower(concat(parameters('namePrefix'), '-availability-set'))]",
+        "deploySfBTopology": "deploySfBTopology.ps1\\Deploy_SkypeForBusinessTopology",
+        "createClusterConfigurationFunction": "InstallSfBFePrereq.ps1\\Deploy_SkypeForBusinessFeServers",
+        "deployAllSfbComponents": "DeployAll.ps1\\Deploy_AllSkypeForBusinessComponents",
+        "installPrereqAndComponents": "deployPrereqAndComponents.ps1\\Deploy_SkypeForBusinessPrereqAndComponents",
+        "installScriptName": "installSkypeForBusiness.ps1",
+        "azCopyUri": "[concat(parameters('workloadsLocation'), '/MicrosoftAzureStorageTools.msi')]",
+        "sqlServerModuleURL": "[concat(parameters('workloadsLocation'), '/SqlServer.zip')]",
+        "silverlightURL": "[concat(parameters('workloadsLocation'), '/Silverlight.exe')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[variables('FEAvailabilitySetName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2016-01-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "kind": "Storage"
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgname')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": { 
+                            "protocol": "*",
+                            "sourcePortRange": "*", 
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*", 
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "name": "[variables('lbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "properties": {
+                            "subnet": {
+                                "id": "[parameters('feStaticSubnetID')]"
+                            },
+                            "privateIPAddress": "[parameters('feLbIpAddress')]",
+                            "privateIPAllocationMethod": "Static"
+                        },
+                        "name": "LoadBalancerFrontend"
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "BackendPool1"
+                    }
+                ],
+                "copy": [
+                    {
+                        "name": "probes",
+                        "count": "[length(parameters('lbRules'))]",
+                        "input": {
+                            "name": "[concat(parameters('lbRules')[copyIndex('probes')].name,'Probe')]",
+                            "properties": {
+                                "intervalInSeconds": 5,
+                                "numberOfProbes": 2,
+                                "port": "[parameters('lbRules')[copyIndex('probes')].backendPort]",
+                                "protocol": "[parameters('lbRules')[copyIndex('probes')].protocol]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "loadBalancingRules",
+                        "count": "[length(parameters('lbRules'))]",
+                        "input": {
+                            "name": "[parameters('lbRules')[copyIndex('loadBalancingRules')].name]",
+                            "properties": {
+                                "frontendIPConfiguration": {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers/', variables('lbName')),'/frontendIPConfigurations/LoadBalancerFrontend')]"
+                                },
+                                "frontendport": "[parameters('lbRules')[copyIndex('loadBalancingRules')].frontendport]",
+                                "backendport": "[parameters('lbRules')[copyIndex('loadBalancingRules')].backendport]",
+                                "enableFloatingIP": false,
+                                "idleTimeoutInMinutes": "5",
+                                "protocol": "[parameters('lbRules')[copyIndex('loadBalancingRules')].protocol]",
+                                "backendAddressPool": {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/BackendPool1')]"
+                                },
+                                "probe": {
+                                    "id": "[concat(variables('lbID'),'/probes/', parameters('lbRules')[copyIndex('loadBalancingRules')].name, 'Probe')]"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicPrefix'), copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[length(parameters('feNodes'))]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('feStaticSubnetID')]"
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('feNodes')[0]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefix'), '0')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('feNodes')[0]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('FEAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('storageAccountName'),'/',variables('vmOsDiskName'), '0','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nicPrefix'), '0'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "[parameters('feNodes')[1]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefix'), '1')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('feNodes')[1]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('FEAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('storageAccountName'),'/',variables('vmOsDiskName'), '1','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nicPrefix'), '1'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "[parameters('feNodes')[2]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicPrefix'), '2')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('feNodes')[2]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('FEAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('storageAccountName'),'/',variables('vmOsDiskName'), '2','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefix'), '2'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[0], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('feNodes')[0])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[1], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('feNodes')[1])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        { 
+            "apiVersion": "2015-06-15", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[2], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('feNodes')[2])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[0], '/joindomain')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[0],'IaaSAntimalware')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('DomainName')]",
+                    "User": "[concat(parameters('domainNetbiosName'), '\\', parameters('adminUsername'))]",
+                    "Restart": "true",
+                    "Options": "3"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[1], '/joindomain')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[1],'IaaSAntimalware')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('DomainName')]",
+                    "User": "[concat(parameters('domainNetbiosName'), '\\', parameters('adminUsername'))]",
+                    "Restart": "true",
+                    "Options": "3"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[2], '/joindomain')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[2],'IaaSAntimalware')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('DomainName')]",
+                    "User": "[concat(parameters('domainNetbiosName'), '\\', parameters('adminUsername'))]",
+                    "Restart": "true",
+                    "Options": "3"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {  
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('feNodes')[0], '/installAll')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[0],'joindomain')]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[1],'joindomain')]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[2],'joindomain')]"
+            ],
+            "properties":{  
+                "publisher":"Microsoft.Compute",
+                "type":"CustomScriptExtension",
+                "typeHandlerVersion":"1.4",
+                "autoUpgradeMinorVersion":true,
+                "settings": {
+                    "fileUris": [
+                        "[parameters('installScriptURL')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ', variables('installScriptName'), ' -AdminUser ', parameters('adminUsername'), ' -adminPassword ', parameters('adminPassword'), ' -AzCopyURI ', variables('azCopyUri'),' -DomainName ', parameters('DomainName'), ' -silverlightURL ', variables('silverlightURL') ,' -SqlServerPSUri ', variables('sqlServerModuleURL') ,' -isoURL ', parameters('sfbIsoURL'), ' -modRewriteURL ', parameters('modRewriteURL'), ' -SqlServerFQDN ', parameters('SqlServerFQDN'), ' -SqlAG ' , parameters('SqlAG'), ' -LBIPAddress ', parameters('feLBIPAddress'), ' -DNSserver ', parameters('DNSserver'), ' -ShareFqdn ', parameters('shareServerFQDN'), ' -shareName ', parameters('shareName'), ' -CA ', parameters('CA'), ' -cmuURL ', parameters('sfbCMUURL'), ' -WorkloadsURL ', parameters('sfbPrereqModulesURL'), ' -FirstFE ', parameters('feNodes')[0], ' -SecondFE ', parameters('feNodes')[1], ' -ThirdFE ', parameters('feNodes')[2])]"
+                },
+                "protectedSettings":{  
+                    "items":{  
+                        "adminPassword":"[parameters('adminPassword')]"
+                    }
+                }
+            }
+        }
+    ]
+}

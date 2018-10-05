@@ -1,0 +1,394 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "subscriptionId": {
+          "type": "string",
+          "defaultValue": "[subscription().subscriptionId]"
+      },
+      "keyVaultName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of the Vault"
+          }
+        },
+        "keyVaultTenantId": {
+          "type": "string",
+          "defaultValue": "[subscription().tenantId]",
+          "metadata": {
+            "description": "Tenant Id of the subscription. Get using Get-AzureRmSubscription cmdlet or Get Subscription API"
+          }
+        },
+        "keyVaultObjectId": {
+          "type": "string",
+          "metadata": {
+            "description": "Object Id of the AD user. Get using Get-AzureRmADUser or Get-AzureRmADServicePrincipal cmdlets"
+          }
+        },
+        "keyVaultKeysPermissions": {
+          "type": "array",
+          "defaultValue": [
+            "all"
+          ],
+          "metadata": {
+            "description": "Permissions to keys in the vault. Valid values are: all, create, import, update, get, list, delete, backup, restore, encrypt, decrypt, wrapkey, unwrapkey, sign, and verify."
+          }
+        },
+        "keyVaultSecretsPermissions": {
+          "type": "array",
+          "defaultValue": [
+            "all"
+          ],
+          "metadata": {
+            "description": "Permissions to secrets in the vault. Valid values are: all, get, set, list, and delete."
+          }
+        },
+        "keyVaultSkuName": {
+          "type": "string",
+          "defaultValue": "Standard",
+          "allowedValues": [
+            "Standard",
+            "Premium"
+          ],
+          "metadata": {
+            "description": "SKU for the vault"
+          }
+        },
+        "keyVaultEnableVaultForDeployment": {
+          "type": "bool",
+          "defaultValue": false,
+          "allowedValues": [
+            true,
+            false
+          ],
+          "metadata": {
+            "description": "Specifies if the vault is enabled for a VM deployment"
+          }
+        },
+        "keyVaultEnableVaultForDiskEncryption": {
+          "type": "bool",
+          "defaultValue": false,
+          "allowedValues": [
+            true,
+            false
+          ],
+          "metadata": {
+            "description": "Specifies if the azure platform has access to the vault for enabling disk encryption scenarios."
+          }
+        },
+        "keyVaultEnabledForTemplateDeployment": {
+          "type": "bool",
+          "defaultValue": true,
+          "allowedValues": [
+            true,
+            false
+          ],
+          "metadata": {
+            "description": "Specifies whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
+          }
+        },
+        "location": {
+          "type": "string",
+          "defaultValue": "[resourceGroup().location]",
+          "metadata": {
+            "description": "Location for all resources."
+          }
+        },
+        "SQLdatabaseName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of the SQL database to be created."
+          }
+      },
+      "SQLdatabaseLoginName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of the SQL login to be created for connecting to the new database."
+          }
+      },
+      "SQLdatabaseLoginPassword": {
+          "type": "securestring",
+          "metadata": {
+            "description": "Password of the SQL login to be created for connecting to the new database."
+          }
+      },
+      "SQLcollation": {
+          "type": "string",
+          "metadata": {
+            "description": "Collation of the new SQL database."
+          },
+          "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+      },
+      "SQLdatabaseSizeMB": {
+          "type": "int",
+          "metadata": {
+            "description": "Size in MB of the SQL database to be created."
+          }
+      },
+      "SQLskuName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of the requested database SKU."
+          }   
+      },
+      "APIappName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of API App."
+          }   
+      },
+      "APIappHostingPlanName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of the AppService Plan for API App."
+          }   
+      },
+      "APIappSku": {
+          "type": "string",
+          "metadata": {
+            "description": "API AppService Plan SKU"
+          }   
+      },
+      "APIappSkuCode": {
+          "type": "string",
+          "metadata": {
+            "description": "API AppService Plan SKU Code"
+          }   
+      },
+      "APIappWorkerSize": {
+          "type": "string",
+          "metadata": {
+            "description": "Amount of API AppService Plan workers"
+          }  
+      },
+      "APIappServerFarmResourceGroup": {
+          "type": "string",
+          "defaultValue": "[resourceGroup().id]",
+          "metadata": {
+            "description": "Resource Group for API App"
+          }  
+      },
+      "WEBappName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of WEB App."
+          }   
+      },
+      "WEBappHostingPlanName": {
+          "type": "string",
+          "metadata": {
+            "description": "Name of the AppService Plan for API App."
+          }   
+      },
+      "WEBappSku": {
+          "type": "string",
+          "metadata": {
+            "description": "WEB AppService Plan SKU"
+          }   
+      },
+      "WEBappSkuCode": {
+          "type": "string",
+          "metadata": {
+            "description": "WEB AppService Plan SKU"
+          }  
+      },
+      "WEBappWorkerSize": {
+          "type": "string",
+          "metadata": {
+            "description": "Amount of WEB AppService Plan workers"
+          }  
+      },
+      "WEBappServerFarmResourceGroup": {
+          "type": "string",
+          "defaultValue": "[resourceGroup().id]",
+          "metadata": {
+            "description": "Resource Group for WEB App"
+          }  
+      },
+      "vnetName": {
+        "type": "string",
+          "metadata": {
+            "description": "VNET Name for application"
+          }  
+    },
+    "addressPrefix": {
+      "type": "string",
+          "metadata": {
+            "description": "VNET Address prefix"
+          }  
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "VNET Subnet name"
+      }  
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "VNET Subnet prefix"
+      }  
+  },
+  "storageAccountType": {
+    "type": "string",
+    "allowedValues": [
+      "Standard_LRS"
+    ],
+    "defaultValue": "Standard_LRS",
+    "metadata": {
+      "description": "Type of redundancy for your storage account."
+    }
+  },
+  "storageAccountName": {
+    "type":"string",
+    "metadata": {
+      "description": "Name of storage account."
+    }
+  }
+},
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.KeyVault/vaults",
+          "name": "[parameters('keyVaultName')]",
+          "apiVersion": "2016-10-01",
+          "location": "[parameters('location')]",
+          "properties": {
+            "enabledForDeployment": "[parameters('keyVaultEnableVaultForDeployment')]",
+            "enabledForDiskEncryption": "[parameters('keyVaultEnableVaultForDiskEncryption')]",
+            "enabledForTemplateDeployment": "[parameters('keyVaultEnabledForTemplateDeployment')]",
+            "tenantId": "[parameters('keyVaultTenantId')]",
+            "accessPolicies": [
+              {
+                "tenantId": "[parameters('keyVaultTenantId')]",
+                "objectId": "[parameters('keyVaultObjectId')]",
+                "permissions": {
+                  "keys": "[parameters('keyVaultKeysPermissions')]",
+                  "secrets": "[parameters('keyVaultSecretsPermissions')]"
+                }
+              }
+            ],
+            "sku": {
+              "name": "[parameters('keyVaultSkuName')]",
+              "family": "A"
+            }
+          }
+        },
+        {
+          "apiVersion": "2017-08-28",
+          "type": "Microsoft.SQLAdapter/logins",
+          "location": "[resourceGroup().location]",
+          "name": "[parameters('SQLdatabaseLoginName')]",
+          "properties": {
+            "userName": "[parameters('SQLdatabaseLoginName')]",
+            "password": "[parameters('SQLdatabaseLoginPassword')]",
+            "skuName": "[parameters('SQLskuName')]"
+          }
+        }, 
+        {
+            "apiVersion": "2017-08-28",
+            "type": "Microsoft.SQLAdapter/databases",
+            "dependsOn": [
+              "[concat('Microsoft.SQLAdapter/logins/', parameters('SQLdatabaseLoginName'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('SQLdatabaseName')]",
+            "properties": {
+              "databaseName": "[parameters('SQLdatabaseName')]",
+              "loginUserName": "[parameters('SQLdatabaseLoginName')]",
+              "collation": "[parameters('SQLcollation')]",            
+              "maxSizeMb": "[parameters('SQLdatabaseSizeMB')]"
+            },
+          "sku": {
+                "name": "[parameters('SQLskuName')]"
+              }
+          },
+          {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('vnetName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "addressSpace": {
+                "addressPrefixes": [
+                  "[parameters('addressPrefix')]"
+                ]
+              },
+              "subnets": [
+                {
+                  "name": "[parameters('subnetName')]",
+                  "properties": {
+                    "addressPrefix": "[parameters('subnetPrefix')]"
+                  }
+                }
+              ]
+            }
+          },
+          {
+              "type": "Microsoft.Web/sites",
+              "name": "[parameters('APIappName')]",
+              "apiVersion": "2016-03-01",
+              "location": "[parameters('location')]",
+              "properties": {
+                  "name": "[parameters('APIappName')]",
+                  "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('APIappServerFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('APIapphostingPlanName'))]"
+              },
+              "dependsOn": [
+                  "[concat('Microsoft.Web/serverfarms/', parameters('APIappHostingPlanName'))]"
+              ]
+          },
+          {
+              "type": "Microsoft.Web/serverfarms",
+              "sku": {
+                  "Tier": "[parameters('APIappSku')]",
+                  "Name": "[parameters('APIappSkuCode')]"
+              },
+              "name": "[parameters('APIappHostingPlanName')]",
+              "apiVersion": "2016-09-01",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                  "name": "[parameters('APIappHostingPlanName')]",
+                  "workerSizeId": "[parameters('APIappWorkerSize')]",
+                  "numberOfWorkers": "1"
+              }
+          },
+          {
+              "type": "Microsoft.Web/sites",
+              "name": "[parameters('WEBappName')]",
+              "apiVersion": "2016-03-01",
+              "location": "[parameters('location')]",
+              "properties": {
+                  "name": "[parameters('WEBappName')]",
+                  "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('WEBappServerFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('WEBappHostingPlanName'))]"
+              },
+              "dependsOn": [
+                  "[concat('Microsoft.Web/serverfarms/', parameters('WEBappHostingPlanName'))]"
+              ]
+          },
+          {
+              "type": "Microsoft.Web/serverfarms",
+              "sku": {
+                  "Tier": "[parameters('WEBappSku')]",
+                  "Name": "[parameters('WEBappSkuCode')]"
+              },
+              "name": "[parameters('WEBappHostingPlanName')]",
+              "apiVersion": "2016-09-01",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                  "name": "[parameters('WEBappHostingPlanName')]",
+                  "workerSizeId": "[parameters('WEBappWorkerSize')]",
+                  "numberOfWorkers": "1"
+              }
+          },
+          {
+            "name": "[parameters('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "accountType": "[parameters('storageAccountType')]"
+            }
+          }
+  ],
+  "outputs": {}
+} 
