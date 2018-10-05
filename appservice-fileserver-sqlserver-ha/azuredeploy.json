@@ -532,7 +532,7 @@
   "outputs": {
     "FileSharePath": {
       "type": "string",
-      "value": "[concat('\\\\',reference('deployS2DCluster').outputs.sofsName.value,'\\',reference('deployS2DCluster').outputs.shareName.value)]"
+      "value": "[concat('\\\\',reference('deployS2DCluster').outputs.sofsName.value,'.',parameters('domainName'),'\\',reference('deployS2DCluster').outputs.shareName.value)]"
     },
     "FileShareOwner":{
       "type": "string",
