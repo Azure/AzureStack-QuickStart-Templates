@@ -32,7 +32,7 @@ This template uses Azure Stack Marketplace images. These need to be available on
 * Windows Server 2016 Datacenter Core Image (for AD and File Server VMs)
 * SQL Server 2016 SP2 on Windows Server 2016 (Enterprise)
 * Latest SQL IaaS Extension 1.2.x (currently 1.2.30)
- Latest PowerShell Desired State Configuration Extension (currently 2.76.0)
+* Latest PowerShell Desired State Configuration Extension (currently 2.76.0)
 
 ## Parameters
 
