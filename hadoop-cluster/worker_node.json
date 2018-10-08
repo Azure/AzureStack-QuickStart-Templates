@@ -40,6 +40,9 @@
             "type": "int",
             "minValue": 1,
             "maxValue": 40
+        },
+        "replication" : {
+            "type" : "int"
         }
     },
     "variables": {
@@ -185,7 +188,7 @@
                         "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
                         "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'),' ',parameters('replication'))]"
                 }
             }
         }

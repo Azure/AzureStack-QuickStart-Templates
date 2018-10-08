@@ -72,7 +72,7 @@
             default is used if replication is not specified in create time.
         </description>
         <name>dfs.replication</name>
-        <value>1</value>
+        <value>REPLICATION</value>
         <final>true</final>
     </property>
     <property>
@@ -80,7 +80,7 @@
             Minimal block replication.
         </description>
         <name>dfs.replication.min</name>
-        <value>1</value>
+        <value>REPLICATION</value>
         <final>true</final>
     </property>
     <property>
@@ -88,7 +88,7 @@
             Maximal block replication.
         </description>
         <name>dfs.replication.max</name>
-        <value>1</value>
+        <value>REPLICATION</value>
         <final>true</final>
     </property>
     <property>
