@@ -12,6 +12,12 @@
 
         "imageSku": {
             "value": "16.04-LTS"
+        },
+        "adminUsername": {
+            "value": "localadmin"
+        },
+        "adminPassword": {
+            "value": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
         }
     }
 }
