@@ -1,60 +1,44 @@
-# A template that deploys the Microsoft Monitoring Agent extension to an existing Windows VM and adds it to an existing OMS workspace.
+# A template that deploys the Microsoft Monitoring Agent extension to an existing Windows VM and adds it to an existing Azure LogAnalytics workspace.
 
 ## Prerequisites
-This template requires an existing Windows VM.
-This template requires an existing OMS workspace on Azure. See on the link below how to set up a workspace:
-https://azure.microsoft.com/en-us/documentation/articles/log-analytics-get-started/?cdn=disable#sign-up-quickly-using-microsoft-azure
+This template requires:
+- an existing Azure Stack Windows VM
+- the latest version of the "Azure Update and Configuration Management” extension downloaded in the Azure Stack Marketplace
+- an LogAnalytics workspace created in Azure (more info see [this link](https://docs.microsoft.com/en-us/azure/log-analytics/log-analytics-quick-create-workspace))
+
+
+To enable the [Update Management](https://docs.microsoft.com/en-us/azure/automation/automation-update-management), [Change Tracking](https://docs.microsoft.com/en-us/azure/automation/automation-change-tracking), and [Inventory](https://docs.microsoft.com/en-us/azure/automation/automation-vm-inventory) solutions in Azure, you will also need an Automation Account and to enable those solutions.
+For more information on the enabling the solution please see https://aka.ms/azstackupdatemgmt
+
 
 ## Parameters
 - vmName: Name of an existing Windows VM to update. 
-- workspaceId: Target Azure OMS workspace ID. 
-- password: Target Azure OMS workspace key.
+- workspaceId: Target Azure LogAnalytics workspace ID. 
+- password: Target Azure LogAnalytics workspace key.
 
-## Deployment steps
-1. Deploy to azure stack portal using custom deployment.
+## Deployment options
+1. Add the extension from the Azure Stack VM extension blade - more information [here](https://aka.ms/azstackupdatemgmt)
+1. Deploy to Azure Stack portal using custom deployment - use the azuredeploy.json content directly to deploy via the Template Deployment 
 2. Deploy through Visual Studio using azuredeploy.json and azuredeploy.parameters.json
 2. Deploy the solution from PowerShell with the following PowerShell script 
 
 ``` PowerShell
 ## Specify your AzureAD Tenant in a variable. 
-# If you know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 1)
-# If you do not know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 2)
+## make sure you have configured the right Azure Stack PowerShell environment
+# the ASDK environment will use these settings 
 
-# Option 1) If you know the prefix of your <prefix>.onmicrosoft.com AzureAD namespace.
-# You need to set that in the $AadTenantId varibale (e.g. contoso.onmicrosoft.com).
-    $AadTenantId = "contoso"
-
-# Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
-# Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Development Kit.
-    $AadTenant = Login-AzureRmAccount
-    $AadTenantId = $AadTenant.Context.Tenant.TenantId
-
-## Configure the environment with the Add-AzureRmEnvironment cmdlt
-    Add-AzureRmEnvironment -Name 'Azure Stack' `
-        -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
-        -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/"`
-        -ResourceManagerEndpoint ("https://api.azurestack.local/") `
-        -GalleryEndpoint ("https://gallery.azurestack.local/") `
-        -GraphEndpoint "https://graph.windows.net/"
-
-## Authenticate a user to the environment (you will be prompted during authentication)
-    $privateEnv = Get-AzureRmEnvironment 'Azure Stack'
-    $privateAzure = Add-AzureRmAccount -Environment $privateEnv -Verbose
-    Select-AzureRmProfile -Profile $privateAzure
+    $ArmEndpoint = "https://management.local.azurestack.external"
+    Add-AzureRMEnvironment -Name "AzureStackAdmin" -ArmEndpoint $ArmEndpoint
+    Add-AzureRmAccount -EnvironmentName "AzureStackAdmin"
 
 ## Select an existing subscription where the deployment will take place
     Get-AzureRmSubscription -SubscriptionName "SUBSCRIPTION_NAME"  | Select-AzureRmSubscription
 
 # Set Deployment Variables
-$myNum = "001" #Modify this per deployment
-$RGName = "myRG$myNum"
-$myLocation = "local"
-
+# Make sure the parameters file includes the right LogAnalytics WorkspaceID, Key, and VM name
+$RGName = "the_RG_of_the_VM"
 $templateFile= "azuredeploy.json"
 $templateParameterFile= "azuredeploy.parameters.json"
-
-# Create Resource Group for Template Deployment
-New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 
 # Deploy Template 
 New-AzureRmResourceGroupDeployment `
