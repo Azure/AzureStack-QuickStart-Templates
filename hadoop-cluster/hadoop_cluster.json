@@ -490,6 +490,9 @@
                     "loadBalancerName": {
                         "value": "[variables('loadBalancerName')]"
                     },
+                    "replication": {
+                        "value": "[parameters('replication')]"
+                    },
                     "_artifactsLocation": {
                         "value": "[parameters('_artifactsLocation')]"
                     }
