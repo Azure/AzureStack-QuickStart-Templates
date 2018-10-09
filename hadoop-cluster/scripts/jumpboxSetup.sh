@@ -69,7 +69,7 @@ NUMBER_NODES="$1"
 # How many worker nodes
 ADMIN_PASSWORD="$2"
 
-ADMIN_PASSWORD="$3"
+REPLICATION="$3"
 
 # Check to see if ADMIN_USER has been passed in
 if [ $# -eq 5 ]; then
