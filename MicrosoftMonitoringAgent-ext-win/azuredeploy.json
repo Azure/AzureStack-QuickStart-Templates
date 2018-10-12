@@ -5,15 +5,16 @@
         "vmName": {
             "type": "string",
             "metadata": {
-                "description": "Name of an existing Windows VM to update"
+                "description": "Name of an existing Windows VM to install the MMA agent and link to an existing OMS workspace"
             },
-            "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
+            "defaultValue": "AzureStackVMname"
         },
         "workspaceId": {
             "type": "string",
             "metadata": {
-                "description": "Target Azure OMS workspace ID e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX "
-            }
+                "description": "Target an existing Azure OMS workspace ID e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX "
+            },
+            "defaultValue": "Existing-Azure-OMS-workspace-ID"
         },
         "workspaceKey": {
             "type": "string",
