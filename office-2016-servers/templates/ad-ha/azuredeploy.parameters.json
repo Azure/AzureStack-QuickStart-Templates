@@ -8,9 +8,6 @@
         "adminUsername": {
             "value": "thoroetadm"
         },
-        "adminPassword": {
-            "value": "mysecurepassword"
-        },
         "workloadsLocation": {
             "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload"
         },

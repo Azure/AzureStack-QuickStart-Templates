@@ -1,10 +1,13 @@
 #Environment Details. PLEASE ADJUST
 $FQDN = "azurestack.corp.microsoft.com"
 $RegionName = "orlando"
+$TenantId = "246b1785-9030-40d8-a0f0-d94b15dc002c"
+
+#Deployment Parameters. PLEASE ADJUST
 $StorageAccountName = "trval"
 $ResourceGroup = "valirg"
 $StorageContainerName = "workload"
-$TenantId = "246b1785-9030-40d8-a0f0-d94b15dc002c"
+$AdminPassword = Read-Host -AsSecureString
 
 
 #Add and Login to Environment
@@ -30,19 +33,19 @@ ls -file .\artifacts\sql2017-ha -Recurse|Set-AzureStorageBlobContent -Container 
 
 
 #Deploy AD
-New-AzureRmResourceGroupDeployment -Name AD -ResourceGroupName $ResourceGroup -TemplateFile .\templates\ad-ha\azuredeploy.json -TemplateParameterFile .\templates\ad-ha\azuredeploy.parameters.json
+New-AzureRmResourceGroupDeployment -Name AD -ResourceGroupName $ResourceGroup -TemplateFile .\templates\ad-ha\azuredeploy.json -TemplateParameterFile .\templates\ad-ha\azuredeploy.parameters.json -adminPassword $AdminPassword
 
 #Deploy CA
-New-AzureRmResourceGroupDeployment -Name CA -ResourceGroupName $ResourceGroup -TemplateFile .\templates\ca\azuredeploy.json -TemplateParameterFile .\templates\ca\azuredeploy.parameters.json
+New-AzureRmResourceGroupDeployment -Name CA -ResourceGroupName $ResourceGroup -TemplateFile .\templates\ca\azuredeploy.json -TemplateParameterFile .\templates\ca\azuredeploy.parameters.json -adminPassword $AdminPassword
 
 #Deploy S2D
-New-AzureRmResourceGroupDeployment -Name S2D -ResourceGroupName $ResourceGroup -TemplateFile .\templates\s2d\azuredeploy.json -TemplateParameterFile .\templates\s2d\azuredeploy.parameters.json
+New-AzureRmResourceGroupDeployment -Name S2D -ResourceGroupName $ResourceGroup -TemplateFile .\templates\s2d\azuredeploy.json -TemplateParameterFile .\templates\s2d\azuredeploy.parameters.json -adminPassword $AdminPassword
 
 #Deploy Exchange
-New-AzureRmResourceGroupDeployment -Name MSX -ResourceGroupName $ResourceGroup -TemplateFile .\templates\exchange2016-ha\azuredeploy.json -TemplateParameterFile .\templates\exchange2016-ha\azuredeploy.parameters.json
+New-AzureRmResourceGroupDeployment -Name MSX -ResourceGroupName $ResourceGroup -TemplateFile .\templates\exchange2016-ha\azuredeploy.json -TemplateParameterFile .\templates\exchange2016-ha\azuredeploy.parameters.json -adminPassword $AdminPassword
 
 #Deploy SQL
-New-AzureRmResourceGroupDeployment -Name SQL -ResourceGroupName $ResourceGroup -TemplateFile .\templates\sql2017-ha\azuredeploy.json -TemplateParameterFile .\templates\sql2017-ha\azuredeploy.parameters.json
+New-AzureRmResourceGroupDeployment -Name SQL -ResourceGroupName $ResourceGroup -TemplateFile .\templates\sql2017-ha\azuredeploy.json -TemplateParameterFile .\templates\sql2017-ha\azuredeploy.parameters.json -adminPassword $AdminPassword
 
 #Deploy SFB
-New-AzureRmResourceGroupDeployment -Name SFB -ResourceGroupName $ResourceGroup -TemplateFile .\templates\sfb2015\azuredeploy.json -TemplateParameterFile .\templates\sfb2015\azuredeploy.parameters.json
+New-AzureRmResourceGroupDeployment -Name SFB -ResourceGroupName $ResourceGroup -TemplateFile .\templates\sfb2015\azuredeploy.json -TemplateParameterFile .\templates\sfb2015\azuredeploy.parameters.json -adminPassword $AdminPassword

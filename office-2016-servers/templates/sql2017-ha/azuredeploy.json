@@ -96,7 +96,8 @@
             "metadata": {
                 "description": "The Sql AG Listener Name"
             },
-            "defaultValue": "[tolower(concat('aon-listener-' , resourceGroup().name))]"
+            "defaultValue": "aon-listener",
+            "maxLength": 15
         },
         "lbIpAddress": {
             "type": "string",

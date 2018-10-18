@@ -11,9 +11,6 @@
     "adminUsername": {
       "value": "thoroetadm"
     },
-    "adminPassword": {
-      "value": "mysecurepassword"
-    },
     "existingVirtualNetworkName": {
       "value": "ADVNETvalirg"
     },  

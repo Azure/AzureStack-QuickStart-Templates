@@ -11,9 +11,6 @@
     "VMPrefix": {
       "value": "war"
     },
-    "adminPassword": {
-      "value": "mysecurepassword"
-    },
     "workloadsLocation": {
       "value": "https://colabval.blob.redmond.azurestack.corp.microsoft.com/workload"  
   },
