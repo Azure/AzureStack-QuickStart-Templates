@@ -1,51 +1,51 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "vmName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of an existing Windows VM to install the MMA agent and link to an existing OMS workspace"
-            },
-            "defaultValue": "AzureStackVMname"
-        },
-        "workspaceId": {
-            "type": "string",
-            "metadata": {
-                "description": "Target an existing Azure OMS workspace ID e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX "
-            },
-            "defaultValue": "Existing-Azure-OMS-workspace-ID"
-        },
-        "workspaceKey": {
-            "type": "string",
-            "metadata": {
-                "description": "Target Azure OMS workspace key"
-            }
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of an existing Windows VM to install the MMA agent and link to an existing OMS workspace"
+      },
+      "defaultValue": "AzureStackVMname"
     },
-    "variables": {
-        "vmExtensionName": "MicrosoftMonitoringAgent"
+    "workspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Target an existing Azure OMS workspace ID e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX "
+      },
+      "defaultValue": "Existing-Azure-OMS-workspace-ID"
     },
-    "resources": [
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('vmName'),'/', variables('vmExtensionName'))]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-            ],
-            "properties": {
-                "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-                "type": "MicrosoftMonitoringAgent",
-                "typeHandlerVersion": "1.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "workspaceId": "[parameters('workspaceId')]"
-                },
-                "protectedSettings": { 
-                    "workspaceKey" : "[parameters('workspaceKey')]"
-                }
-            }
+    "workspaceKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Target Azure OMS workspace key"
+      }
+    }
+  },
+  "variables": {
+    "vmExtensionName": "MicrosoftMonitoringAgent"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/', variables('vmExtensionName'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+      ],
+      "properties": {
+        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+        "type": "MicrosoftMonitoringAgent",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": "true",
+        "settings": {
+          "workspaceId": "[parameters('workspaceId')]"
+        },
+        "protectedSettings": {
+          "workspaceKey": "[parameters('workspaceKey')]"
         }
-    ]
+      }
+    }
+  ]
 }
