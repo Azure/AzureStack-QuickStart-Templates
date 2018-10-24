@@ -4,19 +4,21 @@
 
   "contentVersion": "1.0.0.0",
 
+  "apiProfile": "2018-03-01-hybrid",
+
   "parameters": {
 
     "vmName": {
 
-        "type": "string",
+      "type": "string",
 
-        "metadata": {
+      "metadata": {
 
-            "description": "Name of the existing VM to apply the custom script to"
+        "description": "Name of the existing VM to apply the custom script to"
 
-        },
+      },
 
-        "defaultvalue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
+      "defaultvalue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
 
     }
 
@@ -33,8 +35,6 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
 
       "name": "[concat(parameters('vmName'),'/CustomScriptExtension')]",
-
-      "apiVersion": "2017-03-30",
 
       "location": "[resourceGroup().location]",
 
