@@ -149,7 +149,24 @@
         {
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[tolower(variables('uniqueStorageAccountName'))]",
+            "name": "[concat(tolower(variables('uniqueStorageAccountName')),'-0-',copyIndex())]",
+            "copy": {
+                "name": "saLoop",
+                "count": "[variables('vmCount')]"
+            },
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(tolower(variables('uniqueStorageAccountName')),'-1-',copyIndex())]",
+            "copy": {
+                "name": "saLoop1",
+                "count": "[variables('vmCount')]"
+            },
             "location": "[variables('location')]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
@@ -351,7 +368,8 @@
                 "count": "[variables('vmCount')]"
             },
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'),'-0-',copyIndex())]",
+                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'),'-1-',copyIndex())]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
             ],
             "properties": {
@@ -376,7 +394,7 @@
                     "osDisk": {
                         "name": "osdisk",
                         "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName'),'-0-',copyIndex()),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -391,7 +409,7 @@
                             "lun": "[copyIndex('dataDisks')]",
                             "name": "[concat(variables('vmDataDiskName'),copyIndex(),'-', copyIndex('dataDisks'))]",
                             "vhd": {
-                              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-',copyIndex('DataDisks'),'.vhd')]"
+                              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName'),'-1-',copyIndex()),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),copyIndex(),'-',copyIndex('DataDisks'),'.vhd')]"
                             },
                             "createOption": "Empty"
                           }
