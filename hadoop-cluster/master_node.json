@@ -33,6 +33,9 @@
         "numberWorkerNodes": {
             "type": "int"
         },
+        "replication" : {
+            "type" : "int"
+        },
         "_artifactsLocation": {
             "type": "string"
         }
@@ -195,7 +198,7 @@
                         "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
                         "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'),' ',parameters('replication'))]"
                 }
             }
         }

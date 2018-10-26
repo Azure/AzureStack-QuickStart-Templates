@@ -69,9 +69,11 @@ NUMBER_NODES="$1"
 # How many worker nodes
 ADMIN_PASSWORD="$2"
 
+REPLICATION="$3"
+
 # Check to see if ADMIN_USER has been passed in
-if [ $# -eq 4 ]; then
-    ADMIN_USER="$3"
+if [ $# -eq 5 ]; then
+    ADMIN_USER="$4"
 fi
 
 ############################################################
@@ -233,11 +235,13 @@ install_hadoop () {
     sed -i -e "s+MOUNT_LOCATION+$MOUNT+g" $HADOOP_HOME/etc/hadoop/core-site.xml
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    sed -i -e "s+REPLICATION+$REPLICATION+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
 
     sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
+sed -i -e "s+REPLICATION+$REPLICATION+g" $HADOOP_HOME/etc/hadoop/mapred-site.xml
     #
     # Global profile environment variables
     #
