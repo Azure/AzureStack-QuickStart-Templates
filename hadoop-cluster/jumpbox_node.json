@@ -167,7 +167,7 @@
                         "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
                         "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('numberWorkerNodes'),' ',parameters('replication'),' ',parameters('adminPassword'))]"
+                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('numberWorkerNodes'),' ',parameters('adminPassword'),' ',parameters('replication'))]"
                 }
             }
         }
