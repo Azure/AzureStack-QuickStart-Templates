@@ -1,6 +1,7 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
   "parameters": {
     "agentpublicCount": {
       "allowedValues": [
@@ -488,7 +489,6 @@
     "agentpublicVMSize": "[parameters('agentpublicVMSize')]",
     "agentpublicVMSizeTier": "[split(parameters('agentpublicVMSize'),'_')[0]]",
     "agentpublicVnetSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('agentpublicSubnetName'))]",
-    "apiVersionDefault": "2015-06-15",
     "apiVersionStorage": "2015-06-15",
     "clusterInstallParameters": "[concat(variables('orchestratorVersion'), ' ',variables('dockerComposeVersion'), ' ',variables('masterCount'), ' ',variables('masterVMNamePrefix'), ' ',variables('masterFirstAddrOctet4'), ' ',variables('adminUsername'),' ',variables('postInstallScriptURI'),' ',variables('masterFirstAddrPrefix'),' ', parameters('dockerEngineDownloadRepo'), ' ', parameters('dockerComposeDownloadURL'))]",
     "configureClusterScriptFile": "configure-swarm-cluster.sh",
@@ -905,7 +905,6 @@
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersionStorage')]",
       "copy": {
         "count": "[variables('agentpublicStorageAccountsCount')]",
         "name": "vmLoopNode"
@@ -921,7 +920,6 @@
       "type": "Microsoft.Storage/storageAccounts"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[variables('location')]",
       "name": "[variables('agentpublicIPAddressName')]",
       "properties": {
@@ -933,7 +931,6 @@
       "type": "Microsoft.Network/publicIPAddresses"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('agentpublicIPAddressName'))]"
       ],
@@ -1051,7 +1048,6 @@
       "type": "Microsoft.Network/loadBalancers"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountPrefixes')[mod(add(0,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(0,variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
@@ -1143,7 +1139,6 @@
       "type": "Microsoft.Compute/virtualMachineScaleSets"
     },
     {
-      "apiVersion": "[variables('apiVersionStorage')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]"
       ],
@@ -1155,7 +1150,6 @@
       "type": "Microsoft.Storage/storageAccounts"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[variables('location')]",
       "name": "[variables('virtualNetworkName')]",
       "properties": {
@@ -1183,14 +1177,12 @@
       "type": "Microsoft.Network/virtualNetworks"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[variables('location')]",
       "name": "[variables('masterAvailabilitySet')]",
-      "properties": { },
+      "properties": {},
       "type": "Microsoft.Compute/availabilitySets"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[variables('location')]",
       "name": "[variables('masterPublicIPAddressName')]",
       "properties": {
@@ -1202,7 +1194,6 @@
       "type": "Microsoft.Network/publicIPAddresses"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]"
       ],
@@ -1228,7 +1219,7 @@
       "type": "Microsoft.Network/loadBalancers"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2017-10-01",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "masterLbLoopNode"
@@ -1250,7 +1241,7 @@
       "type": "Microsoft.Network/loadBalancers/inboundNatRules"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2017-10-01",
       "dependsOn": [
         "[variables('masterLbID')]"
       ],
@@ -1268,7 +1259,6 @@
       "type": "Microsoft.Network/loadBalancers/inboundNatRules"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "nicLoopNode"
@@ -1304,7 +1294,6 @@
       "type": "Microsoft.Network/networkInterfaces"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "vmLoopNode"
@@ -1369,7 +1358,6 @@
       "type": "Microsoft.Compute/virtualMachines"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "vmLoopNode"
@@ -1384,7 +1372,7 @@
         "publisher": "Microsoft.OSTCExtensions",
         "settings": {
           "commandToExecute": "[variables('masterCustomScript')]",
-          "fileUris": [ ]
+          "fileUris": []
         },
         "type": "CustomScriptForLinux",
         "typeHandlerVersion": "1.4"
