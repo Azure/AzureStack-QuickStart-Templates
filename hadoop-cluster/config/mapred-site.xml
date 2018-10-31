@@ -128,7 +128,7 @@
             The replication level for submitted job files. This should be around the square root of the number of nodes.
         </description>
         <name>mapreduce.client.submit.file.replication</name>
-        <value>1</value>
+        <value>REPLICATION</value>
         <final>true</final>
     </property>
 </configuration>

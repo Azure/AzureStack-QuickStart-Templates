@@ -25,6 +25,9 @@
         },
         "batchSize": {
             "value": 10
+        },
+        "replication": {
+            "value": 1
         }
     }
 }

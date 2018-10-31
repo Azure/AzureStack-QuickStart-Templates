@@ -47,6 +47,7 @@ function check_error() {
 #
 #
 WORKERS=$1
+REPLICATION=$2
 
 ############################################################
 #
@@ -290,10 +291,13 @@ install_hadoop () {
     sed -i -e "s+MOUNT_LOCATION+$MOUNT+g" $HADOOP_HOME/etc/hadoop/core-site.xml
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    sed -i -e "s+REPLICATION+$REPLICATION+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
 
     sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+
+    sed -i -e "s+REPLICATION+$REPLICATION+g" $HADOOP_HOME/etc/hadoop/mapred-site.xml
 
     #
     # Global profile environment variables
