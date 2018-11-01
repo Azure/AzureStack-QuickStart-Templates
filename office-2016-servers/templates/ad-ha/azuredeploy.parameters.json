@@ -9,7 +9,7 @@
             "value": "thoroetadm"
         },
         "workloadsLocation": {
-            "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload"
+            "value": "https://office.blob.local.azurestack.external/workload"
         },
         "ADAvailabilitySetName": {
             "value": "adhaavset"
@@ -21,7 +21,7 @@
             "value": "10.0.0.0/16"
         },
         "vmPrefix": {
-            "value": "war"
+            "value": "srv"
         },
         "primaryAdIpAddress": {
             "value": "10.0.0.11"

@@ -35,7 +35,7 @@ Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter
 
 ### Skype for Business 2015
 
-Does install 3 Skype for Business - Front End Servers. Edge Sevrers required for publishing will come with an update.
+Does install 3 Skype for Business - Front End Servers and 2 Edge Servers
 
 #### Requirements not provided with the download
 Skype for Business 2015 ISO file stored in .\artifacts\SFB folder
@@ -53,8 +53,7 @@ Skype for Business 2015 ISO file stored in .\artifacts\SFB folder
 ### Deploy automated via PowerShell
 1. Download artifacts and content
 2. Download additional files like ISO as called out for the individual products
-3. Adjust the parameter in PrepareAndDeploy.ps1
-4. Run the PrepareaAndDeploy.ps1 PowerShell script
+3. Run the PrepareaAndDeploy.ps1 PowerShell script
 
 ### Connect
 
