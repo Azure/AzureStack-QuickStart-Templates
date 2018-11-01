@@ -1,67 +1,67 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-     "apiProfile": "2017-03-09-profile",
-    "parameters": {
-        "newStorageAccountName": {
-            "type": "string",
-            "metadata": {
-                "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
-            },
-            "defaultValue": "[substring(concat('vm',uniquestring(replace(resourceGroup().Id,'-',''))),0,8)]"
-        },
-        "vmName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the VM."
-            },
-            "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
-        },
-        "adminUsername": {
-            "type": "string",
-            "metadata": {
-                "description": "Username for the Virtual Machine."
-            },
-            "defaultValue": "vmadmin1"
-        },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
-            },
-            "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
-        },
-        "windowsOSVersion": {
-            "type": "string",
-            "defaultValue": "2016-Datacenter",
-            "allowedValues": [
-                "2008-R2-SP1",
-                "2012-Datacenter",
-                "2012-R2-Datacenter",
-                "2016-Datacenter"
-            ],
-            "metadata": {
-                "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
-            }
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "newStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
+      },
+      "defaultValue": "[substring(concat('vm',uniquestring(replace(resourceGroup().Id,'-',''))),0,8)]"
     },
-    "variables": {
-        "location": "[resourceGroup().location]",
-        "imagePublisher": "MicrosoftWindowsServer",
-        "imageOffer": "WindowsServer",
-        "OSDiskName": "osdisk",
-        "nicName": "[replace(replace(tolower(concat('nic',resourceGroup().name)), '-', ''), '.','')]",
-        "addressPrefix": "10.0.0.0/24",
-        "subnetName": "[replace(replace(tolower(concat('subnet',resourceGroup().name)), '-', ''), '.','')]",
-        "subnetPrefix": "10.0.0.0/24",
-        "storageAccountType": "Standard_LRS",
-        "vmStorageAccountContainerName": "vhds",
-        "vmSize": "Standard_A1",
-        "virtualNetworkName": "[replace(replace(tolower(concat('vnet',resourceGroup().name)), '-', ''), '.','')]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[replace(replace(tolower(concat('nsg',resourceGroup().name)), '-', ''), '.','')]"
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VM."
+      },
+      "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
     },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      },
+      "defaultValue": "vmadmin1"
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+      },
+      "defaultValue": "[concat('Subscription#',substring(resourcegroup().id,15,36))]"
+    },
+    "windowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "OSDiskName": "osdisk",
+    "nicName": "[replace(replace(tolower(concat('nic',resourceGroup().name)), '-', ''), '.','')]",
+    "addressPrefix": "10.0.0.0/24",
+    "subnetName": "[replace(replace(tolower(concat('subnet',resourceGroup().name)), '-', ''), '.','')]",
+    "subnetPrefix": "10.0.0.0/24",
+    "storageAccountType": "Standard_LRS",
+    "vmStorageAccountContainerName": "vhds",
+    "vmSize": "Standard_A1",
+    "virtualNetworkName": "[replace(replace(tolower(concat('vnet',resourceGroup().name)), '-', ''), '.','')]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "networkSecurityGroupName": "[replace(replace(tolower(concat('nsg',resourceGroup().name)), '-', ''), '.','')]"
+  },
   "resources": [
     {
       "type": "Microsoft.Network/networkSecurityGroups",

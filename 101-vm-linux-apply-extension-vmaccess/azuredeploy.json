@@ -1,13 +1,14 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
   "parameters": {
     "vmName": {
-        "type": "string",
-        "metadata": {
-            "description": "Name of the existing Linux VM to modify"
-        },
-        "defaultValue": "[substring(concat('simplelinuxvm',resourceGroup().Name),0,14)]"
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing Linux VM to modify"
+      },
+      "defaultValue": "[substring(concat('simplelinuxvm',resourceGroup().Name),0,14)]"
     },
     "username": {
       "type": "string",
@@ -29,14 +30,13 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmName'),'/LinuxVMAccessExtension')]",
-      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
         "type": "VMAccessForLinux",
         "typeHandlerVersion": "1.4",
         "autoUpgradeMinorVersion": "true",
-        "settings": { },
+        "settings": {},
         "protectedSettings": {
           "username": "[parameters('username')]",
           "password": "[parameters('password')]"
@@ -44,5 +44,5 @@
       }
     }
   ],
-  "outputs": { }
+  "outputs": {}
 }

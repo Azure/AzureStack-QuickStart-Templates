@@ -1,6 +1,7 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.16.08.15",
+  "apiProfile": "2018-03-01-hybrid",
   "parameters": {
     "azureAccountUsername": {
       "type": "string",
@@ -85,7 +86,7 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "nsgName": "[concat('ng', resourceGroup().name)]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",	
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
@@ -95,7 +96,6 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[tolower(variables('uniqueStorageAccountName'))]",
       "location": "[variables('location')]",
@@ -104,7 +104,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
       "location": "[variables('location')]",
@@ -127,7 +126,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[variables('location')]",
@@ -152,22 +150,20 @@
       }
     },
     {
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[variables('publicIPAddressName')]",
-        "apiVersion": "2015-05-01-preview",
-        "location": "[resourceGroup().location]",
-        "properties": {
-            "publicIPAllocationMethod": "Dynamic",
-            "dnsSettings": {
-                "domainNameLabel": "[variables('dnsPrefix')]"
-            }
-        },
-        "dependsOn": [
-            "[variables('vnetID')]"
-        ]
-    },    
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsPrefix')]"
+        }
+      },
+      "dependsOn": [
+        "[variables('vnetID')]"
+      ]
+    },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('vmNicName')]",
       "location": "[variables('location')]",
@@ -186,14 +182,13 @@
               },
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-              }               
+              }
             }
           }
         ]
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('vmNicName'),copyIndex())]",
       "location": "[variables('location')]",
@@ -212,14 +207,13 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetRef')]"
-              }             
+              }
             }
           }
         ]
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[variables('location')]",
@@ -267,7 +261,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(variables('vmName'),copyIndex())]",
       "location": "[variables('location')]",
@@ -322,7 +315,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),'/dscExtension')]",
       "location": "[variables('location')]",

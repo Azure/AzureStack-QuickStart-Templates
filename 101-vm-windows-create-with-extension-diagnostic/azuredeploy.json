@@ -1,6 +1,7 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
   "parameters": {
     "vmsuffix": {
       "type": "string",
@@ -42,7 +43,7 @@
   },
   "variables": {
     "storage": {
-    "storageAccounts": {
+      "storageAccounts": {
         "name": "[concat('sa', uniquestring(resourceGroup().id))]",
         "type": "Standard_LRS"
       }
@@ -73,7 +74,6 @@
   },
   "resources": [
     {
-      "apiVersion":"2015-05-01-preview",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('networkSecurityGroupName')]",
       "location": "[resourceGroup().location]",
@@ -101,14 +101,12 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storage').storageAccounts.name]",
-      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storage').storageAccounts.type]"
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[resourceGroup().location]",
@@ -138,7 +136,6 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
       "location": "[resourceGroup().location]",
@@ -160,7 +157,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
@@ -212,7 +208,6 @@
           "name": "IaasDiagnosticsExtesnion",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
           ],
@@ -238,5 +233,5 @@
       ]
     }
   ],
-  "outputs": { }
+  "outputs": {}
 }

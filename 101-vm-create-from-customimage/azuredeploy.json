@@ -1,6 +1,7 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
   "parameters": {
     "vmName": {
       "type": "string",
@@ -79,7 +80,6 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('networkSecurityGroupName')]",
       "location": "[resourceGroup().location]",
@@ -105,7 +105,6 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[resourceGroup().location]",
@@ -128,11 +127,10 @@
               }
             }
           }
-        ]        
+        ]
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
       "location": "[resourceGroup().location]",
@@ -154,7 +152,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
@@ -208,5 +205,5 @@
       }
     }
   ],
-  "outputs": { }
+  "outputs": {}
 }

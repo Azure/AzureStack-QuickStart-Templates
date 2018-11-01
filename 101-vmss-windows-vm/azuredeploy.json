@@ -1,6 +1,7 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
     "parameters": {
         "vmSku": { 
             "defaultValue": "Standard_A1",
@@ -87,7 +88,6 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageAccountName')]",
-            "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
@@ -96,7 +96,6 @@
         {
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('vnetName')]",
-            "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
                 "addressSpace": {
@@ -117,7 +116,6 @@
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('publicIPAddressName')]",
-            "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -129,7 +127,6 @@
         {
             "type": "Microsoft.Network/loadBalancers",
             "name": "[variables('loadBalancerName')]",
-            "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
                 "frontendIPConfigurations": [
@@ -206,7 +203,6 @@
                 "capacity": "[parameters('instanceCount')]"
             },
             "name": "[parameters('vmssName')]",
-            "apiVersion": "2016-03-30",
             "location": "[variables('location')]",
             "properties": {
                 "upgradePolicy": {

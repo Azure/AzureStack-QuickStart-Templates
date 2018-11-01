@@ -1,52 +1,52 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "vmName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of an existing Windows VM to update"
-            },
-            "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
-        },
-        "userName": {
-            "type": "string",
-            "metadata": {
-                "description": "Username of a new or existing user"
-            },
-            "defaultValue": "localvmuser"
-        },
-        "password": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the new or existing user"
-            },
-            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of an existing Windows VM to update"
+      },
+      "defaultValue": "[substring(concat('simplewinvm',resourceGroup().Name),0,12)]"
     },
-    "variables": {
-        "vmExtensionName": "WindowsVMAccessAgent"
+    "userName": {
+      "type": "string",
+      "metadata": {
+        "description": "Username of a new or existing user"
+      },
+      "defaultValue": "localvmuser"
     },
-    "resources": [
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('vmName'),'/', variables('vmExtensionName'))]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "VMAccessAgent",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "UserName": "[parameters('userName')]"
-                },
-                "protectedSettings": { 
-                    "Password" : "[parameters('password')]"
-                }
-            }
+    "password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the new or existing user"
+      },
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+    }
+  },
+  "variables": {
+    "vmExtensionName": "WindowsVMAccessAgent"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/', variables('vmExtensionName'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "VMAccessAgent",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": "true",
+        "settings": {
+          "UserName": "[parameters('userName')]"
+        },
+        "protectedSettings": {
+          "Password": "[parameters('password')]"
         }
-    ]
+      }
+    }
+  ]
 }

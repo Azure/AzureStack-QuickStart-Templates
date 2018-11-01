@@ -1,43 +1,43 @@
 {
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-    "parameters": {
-        "newZoneName": {
-            "type": "string",
-            "defaultValue": "[concat(uniqueString(resourceGroup().id), '.azurestackquickstart.org')]",
-            "metadata": {
-                "description": "The name of the DNS zone to be created.  Must have at least 2 segements, e.g. hostname.org"
-            }
-        },
-        "newRecordName": {
-            "type": "string",
-            "defaultValue": "www",
-            "metadata": {
-                "description": "The name of the DNS record to be created.  The name is relative to the zone, not the FQDN."
-            }
-        },
-        "firstRecordIPAddress": {
-            "type": "string",
-            "defaultValue": "1.2.3.4",
-            "metadata": {
-                "description": "The ipv4Address for the first record."
-            }
-        },
-        "secondRecordIPAddress": {
-            "type": "string",
-            "defaultValue": "1.2.3.5",
-            "metadata": {
-                "description": "The ipv4Address for the second record."
-            }
-        }
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "newZoneName": {
+      "type": "string",
+      "defaultValue": "[concat(uniqueString(resourceGroup().id), '.azurestackquickstart.org')]",
+      "metadata": {
+        "description": "The name of the DNS zone to be created.  Must have at least 2 segements, e.g. hostname.org"
+      }
     },
+    "newRecordName": {
+      "type": "string",
+      "defaultValue": "www",
+      "metadata": {
+        "description": "The name of the DNS record to be created.  The name is relative to the zone, not the FQDN."
+      }
+    },
+    "firstRecordIPAddress": {
+      "type": "string",
+      "defaultValue": "1.2.3.4",
+      "metadata": {
+        "description": "The ipv4Address for the first record."
+      }
+    },
+    "secondRecordIPAddress": {
+      "type": "string",
+      "defaultValue": "1.2.3.5",
+      "metadata": {
+        "description": "The ipv4Address for the second record."
+      }
+    }
+  },
   "resources": [
     {
       "type": "Microsoft.Network/dnszones",
       "name": "[parameters('newZoneName')]",
-      "apiVersion": "2016-04-01",
       "location": "global",
-      "properties": { }
+      "properties": {}
     },
     {
       "type": "Microsoft.Network/dnszones/a",
@@ -50,12 +50,12 @@
       "properties": {
         "TTL": 3600,
         "ARecords": [
-            {
-                "ipv4Address": "[parameters('firstRecordIPAddress')]"
-            },
-            {
-                "ipv4Address": "[parameters('secondRecordIPAddress')]"
-            }
+          {
+            "ipv4Address": "[parameters('firstRecordIPAddress')]"
+          },
+          {
+            "ipv4Address": "[parameters('secondRecordIPAddress')]"
+          }
         ]
       }
     }
