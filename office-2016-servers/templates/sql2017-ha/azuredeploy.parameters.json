@@ -3,14 +3,14 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmPrefix": {
-      "value": "war"
+      "value": "srv"
     },
     
     "adminUsername": {
       "value": "thoroetadm"
     },
     "workloadsLocation": {
-      "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload"  
+      "value": "https://office.blob.local.azurestack.external/workload"  
   },
 "SqlAvailabilitySetName": {
   "value": "SqlAvSet"

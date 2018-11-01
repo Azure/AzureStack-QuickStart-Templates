@@ -6,7 +6,8 @@
             "type": "string",
             "metadata": {
                 "description": "Name of the Administrator of the existing Active Directory Domain"
-            }
+            },
+            "defaultValue": "lcladmin"
         },
         "adminPassword": {
             "type": "securestring",
@@ -27,14 +28,22 @@
             },
             "defaultValue": "Premium_LRS"
         },
-        "feStaticSubnetID": {
+        "feStaticNetworkName": {
             "type": "string",
             "metadata": {
                 "description": "The resource ID of the subnet for the SfB front-end servers."
-            }
+            },
+            "defaultValue": "ADVNETsfb-deploy"
+        },
+        "feStaticSubnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource ID of the subnet for the SfB front-end servers."
+            },
+            "defaultValue": "ADStaticSubnetsfb-deploy"
         },
         "namePrefix": {
-            "defaultValue": "sfb-edge",
+            "defaultValue": "edg",
             "type": "String",
             "metadata": {
                 "description": "Virtual machine name prefix"
@@ -53,6 +62,8 @@
                 "description": "A list of edge nodes to deploy. This template expects 2."
             },
             "defaultValue": [
+                "sfb30-edg-01",
+                "sfb30-edg-02"
             ]
         },
         "sfbIsoURL": {
@@ -98,28 +109,42 @@
             }
         },
         "edgeNetworkSubnet": {
-            "defaultValue": "10.1.0.0/24",
+            "defaultValue": "10.0.1.0/24",
             "type": "String",
             "metadata": {
                 "description": "The subnet for the VM network"
             }
         },
         "edgeNetworkAddressRange": {
-            "defaultValue": "10.1.0.0/16",
+            "defaultValue": "10.0.1.0/16",
             "type": "String",
             "metadata": {
                 "description": "Addresses range for VM network"
             }
         },
-        "primaryEdgeIpAddress": {
-            "defaultValue": "10.1.0.11",
+        "primaryEdgeExternalIpAddress": {
+            "defaultValue": "10.0.1.11",
             "type": "String",
             "metadata": {
                 "description": "Address of first edge server"
             }
         },
-        "additionalEdgeIpAddress": {
-            "defaultValue": "10.1.0.12",
+        "additionalEdgeExternalIpAddress": {
+            "defaultValue": "10.0.1.12",
+            "type": "String",
+            "metadata": {
+                "description": "Address of second edge server"
+            }
+        },
+        "primaryEdgeInternalIpAddress": {
+            "defaultValue": "10.0.0.100",
+            "type": "String",
+            "metadata": {
+                "description": "Address of first edge server"
+            }
+        },
+        "additionalEdgeInternalIpAddress": {
+            "defaultValue": "10.0.0.101",
             "type": "String",
             "metadata": {
                 "description": "Address of second edge server"
@@ -132,41 +157,31 @@
                 "storageAccounts": "2015-06-15"
             },
             "compute": {
-                "virtualMachines": "2015-06-15"
+                "virtualMachines": "2017-03-30"
             },
             "resources": {
                 "deployments": "2015-01-01"
             },
             "network": {
-                "virtualNetworks": "2015-05-01-preview",
-                "loadBalancers": "2015-05-01-preview",
-                "publicIPAddresses": "2015-05-01-preview",
-                "networkSecurityGroups": "2015-05-01-preview"
+                "virtualNetworks": "2017-10-01",
+                "loadBalancers": "2017-10-01",
+                "publicIPAddresses": "2017-10-01",
+                "networkSecurityGroups": "2017-10-01"
             }
         },
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('feStaticNetworkName'))]",
         "storageAccountName": "[concat(parameters('namePrefix'), '-edge-sa-', resourceGroup().name)]",
         "nicPrefix": "[concat(parameters('namePrefix'), '-edge-internal-nic-')]",
         "nicPrefixExternal": "[concat(parameters('namePrefix'), '-edge-external-nic-')]",
         "vmOsDiskName": "[concat('od-edge-',parameters('namePrefix'))]",
+        "feStaticSubnetID": "[concat(variables('vnetID'),'/subnets/', parameters('feStaticSubnetName'))]",
         "EdgeAvailabilitySetName": "[concat(parameters('namePrefix'), '-edge-availability-set')]",
         "nsgname": "[concat(parameters('namePrefix'), '-edge-sng')]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgname'))]",
-        "externalEdgeNetworkName": "[concat(parameters('namePrefix'), '-edge-network-',resourceGroup().name)]",
         "externalStaticSubnetName": "[concat(parameters('namePrefix'), '-edge-subnet-', resourceGroup().name)]",
         "dnsPrefix1": "[concat('sfbEdge',resourceGroup().name, '01')]",
         "dnsPrefix2": "[concat('sfbEdge',resourceGroup().name, '02')]",
-        "subnets": [
-            {
-                "name": "[variables('externalStaticSubnetName')]",
-                "properties": {
-                    "addressPrefix": "[parameters('edgeNetworkSubnet')]",
-                    "networkSecurityGroup": {
-                        "id": "[variables('nsgID')]"
-                    }
-                }
-            }
-        ],
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('externalEdgeNetworkName'))]",
+
         "edgeSubnetID": "[concat(variables('vnetID'),'/subnets/', variables('externalStaticSubnetName'))]",
         "firstEdgePublicIPName": "[concat(parameters('namePrefix'), '-edge-publicIP-01')]",
         "secondEdgePublicIPName": "[concat(parameters('namePrefix'), '-edge-publicIP-02')]",
@@ -176,7 +191,7 @@
         {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "[variables('EdgeAvailabilitySetName')]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-03-30",
             "location": "[resourceGroup().location]",
             "properties": {}
         },
@@ -191,7 +206,7 @@
             "kind": "Storage"
         },
         {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('nsgname')]",
             "location": "[resourceGroup().location]",
@@ -214,27 +229,22 @@
             }
         },
         {
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[variables('externalEdgeNetworkName')]",
-            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "name": "[concat(parameters('feStaticNetworkName'), '/', variables('externalStaticSubnetName'))]",
             "location": "[resourceGroup().location]",
             "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('edgeNetworkAddressRange')]"
-                    ],
-                    "networkSecurityGroup": {
-                        "id": "[variables('nsgID')]"
-                    }
-                },
-                "subnets": "[variables('subnets')]"
+                "addressPrefix": "[parameters('edgeNetworkSubnet')]",
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgID')]"
+                }
             },
             "dependsOn": [
                 "[variables('nsgID')]"
             ]
         },
         {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicPrefix'), '01')]",
             "location": "[resourceGroup().location]",
@@ -243,9 +253,10 @@
                     {
                         "name": "ipconfigFeBackendNetwork",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('primaryEdgeInternalIpAddress')]",
                             "subnet": {
-                                "id": "[parameters('feStaticSubnetID')]"
+                                "id": "[variables('feStaticSubnetID')]"
                             }
                         }
                     }
@@ -253,7 +264,7 @@
             }
         },
         {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicPrefix'), '02')]",
             "location": "[resourceGroup().location]",
@@ -262,9 +273,10 @@
                     {
                         "name": "ipconfigFeBackendNetwork",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('additionalEdgeInternalIpAddress')]",
                             "subnet": {
-                                "id": "[parameters('feStaticSubnetID')]"
+                                "id": "[variables('feStaticSubnetID')]"
                             }
                         }
                     }
@@ -298,12 +310,12 @@
             }
         },
         {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicPrefixExternal'), '01')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', variables('externalEdgeNetworkName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/',parameters('feStaticNetworkName'), '/subnets/', variables('externalStaticSubnetName'))]",
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('firstEdgePublicIPName'))]"
             ],
             "properties": {
@@ -324,12 +336,12 @@
             }
         },
         {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicPrefixExternal'), '02')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', variables('externalEdgeNetworkName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/',parameters('feStaticNetworkName'), '/subnets/', variables('externalStaticSubnetName'))]",
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('secondEdgePublicIPName'))]"
             ],
             "properties": {
@@ -352,7 +364,7 @@
         {
             "name": "[parameters('edgeNodes')[0]]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
@@ -392,13 +404,13 @@
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefix'), '01'))]",
                             "properties": {
-                                "primary": true
+                                "primary": false
                             }
                         },
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefixExternal'), '01'))]",
                             "properties": {
-                                "primary": false
+                                "primary": true
                             }
                         }
                     ]
@@ -408,7 +420,7 @@
         {
             "name": "[parameters('edgeNodes')[1]]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
@@ -446,15 +458,15 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefix'), '01'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefix'), '02'))]",
                             "properties": {
-                                "primary": true
+                                "primary": false
                             }
                         },
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefixExternal'), '01'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicPrefixExternal'), '02'))]",
                             "properties": {
-                                "primary": false
+                                "primary": true
                             }
                         }
                     ]
@@ -462,7 +474,7 @@
             }
         },
         { 
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "2017-03-30", 
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('edgeNodes')[0], '/', 'IaaSAntimalware')]", 
             "location": "[resourceGroup().location]", 
@@ -487,7 +499,7 @@
             }
         },
         { 
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "2017-03-30", 
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('edgeNodes')[1], '/', 'IaaSAntimalware')]", 
             "location": "[resourceGroup().location]", 
@@ -509,76 +521,6 @@
                         "time": "120" 
                      } 
                 } 
-            }
-        },
-        {  
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('edgeNodes')[0], '/installPrerequisites')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn":[
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[0],'IaaSAntimalware')]"
-             ],
-            "properties":{  
-               "publisher":"Microsoft.Powershell",
-               "type":"DSC",
-               "typeHandlerVersion":"2.80",
-               "autoUpgradeMinorVersion":true,
-               "settings":{  
-                  "modulesURL": "[parameters('sfbPrereqModulesURL')]",
-                  "configurationFunction": "[variables('createClusterConfigurationFunction')]",
-                  "properties": {  
-                     "DomainName": "[parameters('domainName')]",
-                     "isoURL": "[parameters('sfbIsoURL')]",
-                     "sfbISOSHA256": "[parameters('sfbISOSHA256')]",
-                     "cmuURL": "[parameters('sfbCMUURL')]",
-                     "sfbCMUSHA256": "[parameters('sfbCMUSHA256')]",
-                     "AdminCreds":{  
-                        "userName":"[parameters('adminUsername')]",
-                        "password":"privateSettingsRef:adminPassword"
-                     }
-                  }
-               },
-               "protectedSettings":{  
-                  "items":{  
-                     "adminPassword":"[parameters('adminPassword')]"
-                  }
-               }
-            }
-        },
-        {  
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('edgeNodes')[1], '/installPrerequisites')]",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn":[
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[1],'IaaSAntimalware')]"
-             ],
-            "properties":{  
-               "publisher":"Microsoft.Powershell",
-               "type":"DSC",
-               "typeHandlerVersion":"2.80",
-               "autoUpgradeMinorVersion":true,
-               "settings":{  
-                  "modulesURL": "[parameters('sfbPrereqModulesURL')]",
-                  "configurationFunction": "[variables('createClusterConfigurationFunction')]",
-                  "properties": {  
-                     "DomainName": "[parameters('domainName')]",
-                     "isoURL": "[parameters('sfbIsoURL')]",
-                     "sfbISOSHA256": "[parameters('sfbISOSHA256')]",
-                     "cmuURL": "[parameters('sfbCMUURL')]",
-                     "sfbCMUSHA256": "[parameters('sfbCMUSHA256')]",
-                     "AdminCreds":{  
-                        "userName":"[parameters('adminUsername')]",
-                        "password":"privateSettingsRef:adminPassword"
-                     }
-                  }
-               },
-               "protectedSettings":{  
-                  "items":{  
-                     "adminPassword":"[parameters('adminPassword')]"
-                  }
-               }
             }
         }
     ]

@@ -3,20 +3,20 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmPrefix": {
-      "value": "war"
+      "value": "srv"
     },
     
     "adminUsername": {
       "value": "thoroetadm"
     },
     "workloadsLocation": {
-      "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload"  
+      "value": "https://office.blob.local.azurestack.external/workload"  
   },
   "WitnessName": {
     "value": "FS01"
 },
 "exchangeIsoUrl": {
-  "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload/ExchangeServer2016-x64-cu9.iso"
+  "value": "https://office.blob.local.azurestack.external/workload/ExchangeServer2016-x64-cu9.iso"
 },
 "DagName": {
   "value": "DAG1"
