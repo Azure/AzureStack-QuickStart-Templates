@@ -38,7 +38,7 @@ Function GetJson {
 
 #region Installs Profile for Azure Stack
 Install-Module -Name AzureRm.BootStrapper -Force
-Use-AzureRmProfile -Profile 2017-03-09-profile -Force
+Use-AzureRmProfile -Profile 2018-03-01-hybrid -Force
 #endregion
 
 #region Adds Environment and Logs into Tenant Subscription
