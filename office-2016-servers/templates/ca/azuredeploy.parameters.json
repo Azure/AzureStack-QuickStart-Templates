@@ -8,11 +8,8 @@
         "adminUsername": {
             "value": "thoroetadm"
         },
-        "adminPassword": {
-            "value": "mysecurepassword"
-        },
         "workloadsLocation": {
-            "value": "https://colabval.blob.redmond.azurestack.corp.microsoft.com/workload"
+            "value": "https://office.blob.local.azurestack.external/workload"
         },
         "vmPrefix": {
             "value": "srv"

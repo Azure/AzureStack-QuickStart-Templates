@@ -1,10 +1,12 @@
-#Environment Details.PLEASE ADJUST 
-$FQDN = "azurestack.corp.microsoft.com"
-$RegionName = "orlando"
-$StorageAccountName = "trval"
-$ResourceGroup = "valirg"
-$StorageContainerName = "workload"
-$TenantId = "246b1785-9030-40d8-a0f0-d94b15dc002c"
+#Environment Details
+$FQDN = Read-Host "Enter External FQDN"
+$RegionName = Read-Host "Enter Azure Stack Region Name"
+$TenantId = Read-Host "Enter Tenant ID"
+
+#Deployment Parameters
+$StorageAccountName = Read-Host "Enter Name for New Storage Account"
+$ResourceGroup = Read-Host "Enter Name for New Resource Group"
+$StorageContainerName = Read-Host "Enter Name for Storage Container"
 
 
 #Add and Login to Environment
@@ -16,8 +18,8 @@ New-AzureRmResourceGroup -Name $ResourceGroup -Location $RegionName
 
 #Create Storage Account
 New-AzureRmStorageAccount -Name $StorageAccountName -ResourceGroupName $ResourceGroup -Type Standard_LRS -Location $RegionName
-$StorageKeys = Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroup -Name $StorageAccountName
-$StorageContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $StorageKeys.Key1 -Endpoint "$RegionName.$FQDN"
+$StorageKeys = (Get-AzureRmStorageAccountKey -ResourceGroupName $resourceGroup -Name $storageaccountName)[0].Value
+$StorageContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey "$StorageKeys" -Endpoint "$RegionName.$FQDN"
 New-AzureStorageContainer -Name $StorageContainerName -Context $StorageContext -Permission Blob
 
 #Upload Artifacts

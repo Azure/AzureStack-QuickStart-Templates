@@ -16,6 +16,12 @@
                 "description": "The resource ID of the subnet for the SfB front-end servers"
             }
         },
+        "feStaticNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "The network name"
+            }
+        },
         "SqlServerFQDN": {
             "type": "string",
             "metadata": {
@@ -89,24 +95,24 @@
                 "description": "Password for the Administrator account of the existing Active Directory Domain"
             }
         },
-        "sfbIsoURL": {
+        "sfbIsoFileName": {
             "type": "string",
             "metadata": {
-                "description": "The URL of the Skype for Business ISO"
+                "description": "The filename of the Skype for Business ISO"
             },
             "defaultValue": ""
         },
-        "modRewriteURL": {
+        "modRewriteMSIName": {
             "type": "string",
             "metadata": {
-                "description": "The URL of the mod rewrite MSI"
+                "description": "The name of the mod rewrite MSI"
             },
             "defaultValue": ""
         },
-        "sfbPrereqModulesURL": {
+        "sfbPrereqModulesFileName": {
             "type": "string",
             "metadata": {
-                "description": "URL to the prerequisites installation DSC modules"
+                "description": "Name of the prerequisites installation DSC modules zip file"
             },
             "defaultValue": ""
         },
@@ -117,10 +123,17 @@
             },
             "defaultValue": ""
         },
-        "sfbCMUURL": {
+        "edgeNodePrepScriptURL": {
             "type": "string",
             "metadata": {
-                "description": "The URL of the Skype for Business cumulative update installer"
+                "description": "URL to edge node prep script"
+            },
+            "defaultValue": ""
+        },
+        "sfbCMUPackageName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Skype for Business cumulative update installer"
             },
             "defaultValue": ""
         },
@@ -152,7 +165,19 @@
             },
             "defaultValue": ""
         },
+        "edgeNetworkSubnet": {
+            "defaultValue": "10.0.1.0/24",
+            "type": "String",
+            "metadata": {
+                "description": "The subnet for the Edge VM network"
+            }
+        },
         "feNodes": {
+            "type": "array",
+            "defaultValue": [
+            ]
+        },
+        "edgeNodes": {
             "type": "array",
             "defaultValue": [
             ]
@@ -255,26 +280,49 @@
     },
     "variables": {
         "storageAccountName": "[tolower(concat(parameters('namePrefix'), '-sa-', resourceGroup().name))]",
+        "edgeStorageAccountName": "[tolower(concat(parameters('namePrefix'), '-edge-sa-', resourceGroup().name))]",
         "lbName": "[tolower(concat(parameters('namePrefix'), '-lb-', resourceGroup().name))]",
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
         "nicPrefix": "[tolower(concat(parameters('namePrefix'), '-nic-'))]",
         "vmOsDiskName": "[concat('od-',parameters('namePrefix'))]",
-        "nsgname": "[concat(parameters('namePrefix'), '-sng')]",
+        "edgeVmOsDiskName": "[concat('od-edge-',parameters('namePrefix'))]",
+        "nsgname": "[concat(parameters('namePrefix'), '-nsg')]",
+        "edgensgname": "[concat(parameters('namePrefix'), '-edge-nsg')]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('edgensgname'))]",
         "FEAvailabilitySetName": "[tolower(concat(parameters('namePrefix'), '-availability-set'))]",
         "deploySfBTopology": "deploySfBTopology.ps1\\Deploy_SkypeForBusinessTopology",
         "createClusterConfigurationFunction": "InstallSfBFePrereq.ps1\\Deploy_SkypeForBusinessFeServers",
         "deployAllSfbComponents": "DeployAll.ps1\\Deploy_AllSkypeForBusinessComponents",
         "installPrereqAndComponents": "deployPrereqAndComponents.ps1\\Deploy_SkypeForBusinessPrereqAndComponents",
         "installScriptName": "installSkypeForBusiness.ps1",
+        "edgeNodePrepScriptName": "ConfigureEdgeServerPrereq.ps1",
         "azCopyUri": "[concat(parameters('workloadsLocation'), '/MicrosoftAzureStorageTools.msi')]",
         "sqlServerModuleURL": "[concat(parameters('workloadsLocation'), '/SqlServer.zip')]",
-        "silverlightURL": "[concat(parameters('workloadsLocation'), '/Silverlight.exe')]"
+        "silverlightURL": "[concat(parameters('workloadsLocation'), '/Silverlight.exe')]",
+        "edgeNicPrefix": "[concat(parameters('namePrefix'), '-edge-internal-nic-')]",
+        "edgeNicPrefixExternal": "[concat(parameters('namePrefix'), '-edge-external-nic-')]",
+        "externalStaticSubnetName": "[concat(parameters('namePrefix'), '-edge-subnet-', resourceGroup().name)]",
+        "dnsPrefix1": "[concat('sfbEdge',resourceGroup().name, '01')]",
+        "dnsPrefix2": "[concat('sfbEdge',resourceGroup().name, '02')]",
+        "firstEdgePublicIPName": "[concat(parameters('namePrefix'), '-edge-publicIP-01')]",
+        "secondEdgePublicIPName": "[concat(parameters('namePrefix'), '-edge-publicIP-02')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('feStaticNetworkName'))]",
+        "edgeSubnetID": "[concat(variables('vnetID'),'/subnets/', variables('externalStaticSubnetName'))]",
+        "EdgeAvailabilitySetName": "[concat(parameters('namePrefix'), '-edge-availability-set')]",
+        "EdgePoolFQDN": "[concat('edge.', parameters('DomainName'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "[variables('FEAvailabilitySetName')]",
             "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[variables('EdgeAvailabilitySetName')]",
+            "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "properties": {}
         },
@@ -287,6 +335,39 @@
                 "name": "[parameters('storageAccountType')]"
             },
             "kind": "Storage"
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('edgeStorageAccountName')]",
+            "apiVersion": "2016-01-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "kind": "Storage"
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('edgensgname')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": { 
+                            "protocol": "*",
+                            "sourcePortRange": "*", 
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*", 
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
         },
         {
             "apiVersion": "2015-06-15",
@@ -310,6 +391,21 @@
                     }
                 ]
             }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "name": "[concat(parameters('feStaticNetworkName'), '/', variables('externalStaticSubnetName'))]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressPrefix": "[parameters('edgeNetworkSubnet')]",
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgID')]"
+                }
+            },
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ]
         },
         {
             "apiVersion": "2015-05-01-preview",
@@ -374,8 +470,125 @@
                 ]
             }
         },
+
         {
-            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('firstEdgePublicIPName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(variables('dnsPrefix1'))]"
+                },
+                "idleTimeoutInMinutes": 30
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('secondEdgePublicIPName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(variables('dnsPrefix2'))]"
+                },
+                "idleTimeoutInMinutes": 30
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('edgeNicPrefixExternal'), '01')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/',parameters('feStaticNetworkName'), '/subnets/', variables('externalStaticSubnetName'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('firstEdgePublicIPName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('firstEdgePublicIPName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('edgeSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('edgeNicPrefixExternal'), '02')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/',parameters('feStaticNetworkName'), '/subnets/', variables('externalStaticSubnetName'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('secondEdgePublicIPName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId ('Microsoft.Network/publicIPAddresses/', variables('secondEdgePublicIPName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('edgeSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('edgeNicPrefix'), '01')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigFeBackendNetwork",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('feStaticSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('edgeNicPrefix'), '02')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigFeBackendNetwork",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('feStaticSubnetID')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicPrefix'), copyIndex())]",
             "location": "[resourceGroup().location]",
@@ -690,6 +903,220 @@
                 }
             }
         },
+        {
+            "name": "[parameters('edgeNodes')[0]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('edgeStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('edgeNicPrefix'), '01')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('edgeNicPrefixExternal'), '01')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('edgeNodes')[0]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('EdgeAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('edgeStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('edgeStorageAccountName'),'/',variables('edgeVmOsDiskName'), '0','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefix'), '01'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefixExternal'), '01'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        { 
+            "apiVersion": "2016-03-30", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[0], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('edgeNodes')[0])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        {
+            "name": "[parameters('edgeNodes')[1]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('edgeStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('edgeNicPrefix'), '02')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('edgeNicPrefixExternal'), '02')]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('edgeNodes')[1]]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', variables('EdgeAvailabilitySetName'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('edgeStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('edgeStorageAccountName'),'/',variables('edgeVmOsDiskName'), '1','.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefix'), '02'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefixExternal'), '02'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        { 
+            "apiVersion": "2016-03-30", 
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[1], '/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('edgeNodes')[1])]"
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        {  
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[0], '/prepEdgeNode')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[0], 'IaaSAntimalware')]"
+            ],
+            "properties":{  
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[parameters('edgeNodePrepScriptURL')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ', variables('edgeNodePrepScriptName'), ' -Hostname ', parameters('edgeNodes')[0])]"
+                },
+                "protectedSettings":{  
+                    "items": {  
+                        "adminPassword":"[parameters('adminPassword')]"
+                    }
+                }
+            }
+        },
+        {  
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('edgeNodes')[1], '/prepEdgeNode')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[1], 'IaaSAntimalware')]"
+            ],
+            "properties":{  
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[parameters('edgeNodePrepScriptURL')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ', variables('edgeNodePrepScriptName'), ' -Hostname ', parameters('edgeNodes')[1])]"
+                },
+                "protectedSettings":{  
+                    "items": {  
+                        "adminPassword":"[parameters('adminPassword')]"
+                    }
+                }
+            }
+        },
         {  
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('feNodes')[0], '/installAll')]",
@@ -698,21 +1125,23 @@
             "dependsOn":[
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[0],'joindomain')]",
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[1],'joindomain')]",
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[2],'joindomain')]"
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('feNodes')[2],'joindomain')]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[0],'prepEdgeNode')]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('edgeNodes')[1],'prepEdgeNode')]"
             ],
             "properties":{  
-                "publisher":"Microsoft.Compute",
-                "type":"CustomScriptExtension",
-                "typeHandlerVersion":"1.4",
-                "autoUpgradeMinorVersion":true,
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
                         "[parameters('installScriptURL')]"
                     ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ', variables('installScriptName'), ' -AdminUser ', parameters('adminUsername'), ' -adminPassword ', parameters('adminPassword'), ' -AzCopyURI ', variables('azCopyUri'),' -DomainName ', parameters('DomainName'), ' -silverlightURL ', variables('silverlightURL') ,' -SqlServerPSUri ', variables('sqlServerModuleURL') ,' -isoURL ', parameters('sfbIsoURL'), ' -modRewriteURL ', parameters('modRewriteURL'), ' -SqlServerFQDN ', parameters('SqlServerFQDN'), ' -SqlAG ' , parameters('SqlAG'), ' -LBIPAddress ', parameters('feLBIPAddress'), ' -DNSserver ', parameters('DNSserver'), ' -ShareFqdn ', parameters('shareServerFQDN'), ' -shareName ', parameters('shareName'), ' -CA ', parameters('CA'), ' -cmuURL ', parameters('sfbCMUURL'), ' -WorkloadsURL ', parameters('sfbPrereqModulesURL'), ' -FirstFE ', parameters('feNodes')[0], ' -SecondFE ', parameters('feNodes')[1], ' -ThirdFE ', parameters('feNodes')[2])]"
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ', variables('installScriptName'), ' -AdminUser ', parameters('adminUsername'), ' -adminPassword ', parameters('adminPassword'),' -DomainName ', parameters('DomainName'), ' -BaseResourceURI ', parameters('workloadsLocation'), ' -isoName ', parameters('sfbIsoFileName') , ' -AzCopyPackageName MicrosoftAzureStorageTools.msi ', ' -SilverlightPackageName Silverlight.exe ', ' -SqlServerPSName SqlServer.zip ', ' -modRewritePackageName ', parameters('modRewriteMSIName'), ' -SqlServerFQDN ', parameters('SqlServerFQDN'), ' -SqlAG ' , parameters('SqlAG'), ' -LBIPAddress ', parameters('feLBIPAddress'), ' -DNSserver ', parameters('DNSserver'), ' -ShareFqdn ', parameters('shareServerFQDN'), ' -shareName ', parameters('shareName'), ' -CA ', parameters('CA'), ' -cmuPackageName ', parameters('sfbCMUPackageName'), ' -WorkloadsZipName ', parameters('sfbPrereqModulesFileName'), ' -FirstFE ', parameters('feNodes')[0], ' -SecondFE ', parameters('feNodes')[1], ' -ThirdFE ', parameters('feNodes')[2], ' -FirstEdge ', parameters('edgeNodes')[0], ' -SecondEdge ', parameters('edgeNodes')[1], ' -FirstEdgeInternal ', reference(resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefix'), '01'))).ipConfigurations[0].properties.privateIPAddress, ' -FirstEdgeExternal ', reference(resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefixExternal'), '01'))).ipConfigurations[0].properties.privateIPAddress, ' -SecondEdgeInternal ', reference(resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefix'), '02'))).ipConfigurations[0].properties.privateIPAddress, ' -SecondEdgeExternal ', reference(resourceId('Microsoft.Network/networkInterfaces',concat(variables('edgeNicPrefixExternal'), '02'))).ipConfigurations[0].properties.privateIPAddress, ' -EdgePoolFQDN ', variables('EdgePoolFQDN'), ' -FirstEdgePoolIP ', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('firstEdgePublicIPName'))).IpAddress, ' -SecondEdgePoolIP ', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('secondEdgePublicIPName'))).IpAddress, ' -Verbose')]"
                 },
                 "protectedSettings":{  
-                    "items":{  
+                    "items": {  
                         "adminPassword":"[parameters('adminPassword')]"
                     }
                 }

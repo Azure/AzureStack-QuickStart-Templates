@@ -3,16 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
-      "value": "war"
+      "value": "srv"
     },
     "existingDomainName": {
       "value": "contoso.com"
     },
     "adminUsername": {
       "value": "thoroetadm"
-    },
-    "adminPassword": {
-      "value": "mysecurepassword"
     },
     "existingVirtualNetworkName": {
       "value": "ADVNETvalirg"
@@ -21,7 +18,7 @@
       "value": "ADStaticSubnetvalirg"
     },
     "workloadsLocation": {
-      "value": "https://trval.blob.orlando.azurestack.corp.microsoft.com/workload"
+      "value": "https://office.blob.local.azurestack.external/workload"
   }
   }
 }
