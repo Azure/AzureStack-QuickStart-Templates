@@ -3,5 +3,5 @@
   "description": "This template allows you to deploy multiple Windows VMs.",
   "summary": "Deploy multiple Windows VMs based on the VM count, OS version, and VM size provided by parameters.",
   "githubUsername": "martab-msft",
-  "dateUpdated": "2017-06-28"
+  "dateUpdated": "2018-11-06"
 }

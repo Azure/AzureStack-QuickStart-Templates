@@ -3,5 +3,5 @@
   "description": "This template allows you to deploy a VM Scale Set of Linux VMs. It creates 5 storage accounts so the VM Scale set and can be conviniently scaled to 100 VMs. These VMs are behind a load balancer with NAT rules for rdp connections.",
   "summary": "This template deploys a Linux VM Scale Set with custom script extension behind a load balancer with NAT rules for rdp connections. This template was taken from Azure GitHub repo and modified for Azure Stack.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2017-04-12"
+  "dateUpdated": "2018-11-06"
 }

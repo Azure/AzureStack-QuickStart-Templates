@@ -3,5 +3,5 @@
   "description": "This template deploys a VM Scale Set into an existing vnet.",
   "summary": "This template deploys a VM Scale Set into an exsisting vnet. This template was taken from Azure GitHub repo and modified for Azure Stack.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2017-04-10"
+  "dateUpdated": "2018-11-06"
 }

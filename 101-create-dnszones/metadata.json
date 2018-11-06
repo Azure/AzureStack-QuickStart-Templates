@@ -3,5 +3,5 @@
   "description": "This template shows how to create a DNS zone within Azure Stack DNS and how to add some record sets to it.",
   "summary": "This template creates a DNS zone within the Azure Stack DNS resource provider.  It then creates a RecordSet containing two DNS A records within that zone. This template was originally taken from Azure Github repo and modified for Azure Stack.",
   "githubUsername": "GarethBradshawMSFT",
-  "dateUpdated": "2017-03-22"
+  "dateUpdated": "2018-11-06"
 }
