@@ -3,5 +3,5 @@
   "description": "Deploys a simple Windows VM.",
   "summary": "This template deploys a simple Windows VM and also deploys a Virtual Network (with DNS), Network Security Group, and a Network Interface.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

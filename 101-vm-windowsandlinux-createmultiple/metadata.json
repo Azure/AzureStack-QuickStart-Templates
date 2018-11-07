@@ -3,5 +3,5 @@
   "description": "This template allows you to deploy multiple Windows and Linux VMs.",
   "summary": "Deploy multiple Windows and Linux VMs based on the VM count, OS version, and VM size provided by parameters. Notice that neither the Windows VM count nor the Linux VM count can be zero.",
   "githubUsername": "martab-msft",
-  "dateUpdated": "2017-06-28"
+  "dateUpdated": "2018-11-06"
 }

@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a Windows VM and VM extensions to Azure Stack",
+  "description": "This template deploys a Windows VM and also uses customscript, BGInfo and DSC extensions. The VM is set with 2 managed disks; the OS disk and a data disk of 1 GB.",
+  "summary": "This template deploys a Windows VM and also uses customscript, BGInfo and DSC extensions .",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

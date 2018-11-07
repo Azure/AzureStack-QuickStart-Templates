@@ -3,5 +3,5 @@
   "description": "Deploys the Custom Script VM Extension with three paremeters: vmName, scriptFile, and scriptName.",
   "summary": "This template deploys the Custom Script VM Extension to existing Windows VM in the Azure Stack environment. It takes parameters for vmName, scriptFile, and scriptName.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

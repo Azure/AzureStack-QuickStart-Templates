@@ -3,5 +3,5 @@
   "description": "Deploys the Custom Script VM Extension with one paremeter: vmName and hard coded PowerShell command.",
   "summary": "This template deploys the Custom Script VM Extension to an existing Windows VM in an Azure Stack environment. It takes a parameter for vmName, and allows for the execution of a PowerShell command (as seen in the commandToExecute Extension setting).",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

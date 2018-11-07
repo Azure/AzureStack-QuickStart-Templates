@@ -3,5 +3,5 @@
   "description": "Deploys a simple Windows VM with user images. This template also deploys a Virtual Network (with the appropriate DNS setting for the Azure Stack POC environment), Public IP address, Network Security Group, and a Network Interface.",
   "summary": "Upload existing VHDs to a Storage Account, Deploy a VM with this custom VHDs.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }
