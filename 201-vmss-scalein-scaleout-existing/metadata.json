@@ -3,5 +3,5 @@
   "description": "This template allows you to manually change the number of VMs in a Scale Set.",
   "summary": "This template allows you to manually change the number of VMs in a Scale Set. This template was taken from Azure GitHub repo and modified for Azure Stack.",
   "githubUsername": "gatneil",
-  "dateUpdated": "2017-03-29"
+  "dateUpdated": "2018-11-06"
 }

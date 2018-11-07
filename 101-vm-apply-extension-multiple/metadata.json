@@ -3,5 +3,5 @@
   "description": "Deploys the Custom Script and BGInfo VM Extensions with one paremeter: vmName and hard coded command.",
   "summary": "This template deploys both the Custom Script and BGInfo VM Extensions to existing Windows VM in the Azure Stack POC environment. It takes a parameter for vmName, and allows for the execution of a command (as seen in the commandToExecute Extension setting).",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

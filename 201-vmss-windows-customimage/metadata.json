@@ -3,5 +3,5 @@
   "description": "This template allows you to deploy a simple VM Scale Set usng a custom Windows image. These VMs are behind a load balancer with NAT rules for rdp connections.",
   "summary": "This template deploys a Custom Windows Image behind a load balancer with NAT rules for rdp connections. This template was taken from Azure GitHub repo and modified for Azure Stack.",
   "githubUsername": "simongdavies",
-  "dateUpdated": "2017-03-23"
+  "dateUpdated": "2018-11-06"
 }

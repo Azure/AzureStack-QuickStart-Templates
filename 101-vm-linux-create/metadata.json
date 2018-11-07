@@ -3,5 +3,5 @@
   "description": "Deploys a simple Linux VM. This template also deploys a Virtual Network, Network Security Group, and a Network Interface.",
   "summary": "This template has default values for all the parameters and deploys a Ubuntu 16.04-LTS VM. For other supported Linux distros please use the provided variations of azuredeploy.parameters.json.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

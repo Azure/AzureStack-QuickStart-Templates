@@ -3,5 +3,5 @@
   "description": "This template deploys a set of VMs (defaut 3) as part of the same availability group. This template template also deploys an availability group, a virtual Network (with DNS), a load balancer with a front end Public IP address, and a Network Security Group.",
   "summary": "This template takes a minimum amount of parameters and deploys 3 Windows VMs, with the appropriate DNS setting for the Azure Stack POC environment.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2017-05-17"
+  "dateUpdated": "2018-11-06"
 }

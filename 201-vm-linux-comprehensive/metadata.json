@@ -3,5 +3,5 @@
   "description": "Deploys a Linux Ubuntu VM and VM extensions",
   "summary": "This template has default values for all the parameters and deploys a Linux Ubuntu VM and its VM extensions (CustomScript, VMAccess, Docker, OSPatching)",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

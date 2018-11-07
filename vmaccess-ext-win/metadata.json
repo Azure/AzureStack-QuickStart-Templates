@@ -3,6 +3,6 @@
     "description": "Configures the given windows VM with VM Access Extension",
     "summary": "This template has default values for all the parameters which works with simple windows VM template of Azure stack github",
     "githubUsername": "azurestack",
-    "dateUpdated": "2016-09-22"
+    "dateUpdated": "2018-11-06"
 }
 
