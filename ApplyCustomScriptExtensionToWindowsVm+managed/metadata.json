@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a custom script extenstion to an existing Windows VM",
+  "description": "his template deploys a custom script extenstion to an existing Windows VM. The VM name needs to be passed in as input",
+  "summary": "Deploy a custom script extenstion to an existing Windows VM",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}
