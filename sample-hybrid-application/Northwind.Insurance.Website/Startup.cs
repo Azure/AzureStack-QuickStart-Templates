@@ -33,7 +33,7 @@ namespace Northwind.Insurance.Website
             // Add framework services.
             services.AddMvc();
 
-            //var connection = "Data Source=10.0.1.101;Initial Catalog=northwindinsurance;Integrated Security=False;User ID=insuranceadmin;Password=User@1234567;Connect Timeout=15;Encrypt=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            //var connection = "Data Source=10.0.1.101;Initial Catalog=northwindinsurance;Integrated Security=False;User ID=insuranceadmin;Password=<PASSWORD>;Connect Timeout=15;Encrypt=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
             services.AddDbContext<InsuranceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -57,7 +57,7 @@ namespace Northwind.Insurance.Website
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<InsuranceContext>();
-                context.Database.Migrate(); 
+                context.Database.Migrate();
                 context.EnsureSeedData();
             }
 
@@ -91,7 +91,7 @@ namespace Northwind.Insurance.Website
 
             });
 
-            
+
         }
     }
 }

@@ -1,0 +1,33 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "value": "hadoopCluster"
+        },
+        "adminUsername": {
+            "value": "localadmin"
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "masterNodeVMSize": {
+            "value": "Standard_DS3_v2"
+        },
+        "workerNodeVMSize": {
+            "value": "Standard_DS4_v2"
+        },
+        "numberWorkerNodes": {
+            "value": 4
+        },
+        "dataDiskSize": {
+            "value": 512
+        },
+        "batchSize": {
+            "value": 10
+        },
+        "replication": {
+            "value": 1
+        }
+    }
+}
