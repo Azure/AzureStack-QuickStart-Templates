@@ -1,0 +1,13 @@
+http://ftp.wayne.edu/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+ftp://ftp.wayne.edu/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://mirrors.gigenet.com/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://apache.mirrors.pair.com/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://mirrors.sonic.net/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://apache.claz.org/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://mirrors.ibiblio.org/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+ftp://ftp.osuosl.org/pub/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+ftp://apache.mirrors.tds.net/pub/apache.org/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://www.trieuvan.com/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://mirror.cc.columbia.edu/pub/software/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://mirrors.ocf.berkeley.edu/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz
+http://www.gtlib.gatech.edu/pub/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz

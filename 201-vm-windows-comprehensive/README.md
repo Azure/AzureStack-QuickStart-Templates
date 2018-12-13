@@ -24,7 +24,7 @@ This template deploys a [solution name]. The [solution name] is a [description]
 You can either click the "deploy to Azure" button at the beginning of this document or deploy the solution from PowerShell with the following PowerShell script.
 
 ``` PowerShell
-## Specify your AzureAD Tenant in a variable. 
+## Specify your AzureAD Tenant in a variable.
 # If you know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 1)
 # If you do not know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 2)
 
@@ -32,7 +32,7 @@ You can either click the "deploy to Azure" button at the beginning of this docum
 # You need to set that in the $AadTenantId varibale (e.g. contoso.onmicrosoft.com).
     $AadTenantId = "contoso"
 
-# Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
+# Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets.
 # Validate with the Azure AD credentials you also use to sign in as a tenant to Microsoft Azure Stack Development Kit.
     $AadTenant = Login-AzureRmAccount
     $AadTenantId = $AadTenant.Context.Tenant.TenantId
@@ -62,7 +62,7 @@ $myBlobStorageEndpoint = "blob.azurestack.local"
 # Create Resource Group for Template Deployment
 New-AzureRmResourceGroup -Name $RGName -Location $myLocation
 
-# Deploy Template 
+# Deploy Template
 New-AzureRmResourceGroupDeployment `
     -Name "myDeployment$myNum" `
     -ResourceGroupName $RGName `
@@ -71,9 +71,9 @@ New-AzureRmResourceGroupDeployment `
     -newStorageAccountName "mystorage$myNum" `
     -dnsNameForPublicIP "mydns$myNum" `
     -adminUsername "admin" `
-    -adminPassword ("User@123" | ConvertTo-SecureString -AsPlainText -Force) `
+    -adminPassword ("<PASSWORD>" | ConvertTo-SecureString -AsPlainText -Force) `
     -vmName "myVM$myNum" `
-    -windowsOSVersion "2012-R2-Datacenter" 
+    -windowsOSVersion "2012-R2-Datacenter"
 ```
 
 ## Usage

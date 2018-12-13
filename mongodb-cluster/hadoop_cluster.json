@@ -1,0 +1,504 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2017-03-09-profile",
+    "parameters": {
+        "clusterName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the hadoop cluster.  This must be a unique value."
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "localadmin",
+            "metadata": {
+                "description": "Username for the deployed virtual machines."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the deployed virtual machines."
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage account type."
+            }
+        },
+        "masterNodeVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS3_v2",
+            "allowedValues": [
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_D12",
+                "Standard_D13",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2"
+            ],
+            "metadata": {
+                "description": "The size of the virtual machine master nodes."
+            }
+        },
+        "workerNodeVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS4_v2",
+            "allowedValues": [
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_F8s_v2",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_F16s",
+                "Standard_F8s",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2"
+            ],
+            "metadata": {
+                "description": "The size of the Virtual Machine worker nodes."
+            }
+        },
+        "numberWorkerNodes": {
+            "type": "int",
+            "defaultValue": 4,
+            "minValue": 1,
+            "metadata": {
+                "description": "The number of worker nodes in the cluster."
+            }
+        },
+        "dataDiskSize": {
+            "type": "int",
+            "defaultValue": 512,
+            "minValue": 1,
+            "maxValue": 1024,
+            "metadata": {
+                "description": "Size of the attached data disks in GB."
+            }
+        },
+        "batchSize": {
+            "type": "int",
+            "defaultValue": 10,
+            "minValue": 1,
+            "maxValue": 40,
+            "metadata": {
+                "description": "How many resources to attempt to deploy at once."
+            }
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/hadoop-cluster",
+            "metadata": {
+                "description": "Base URI for scripts and files."
+            }
+        },
+        "replication" : {
+            "type":"int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The number of copies of the underlying data in Hadoop.  Please note that increasing this will require at least double the storage."
+            }
+        }
+    },
+    "variables": {
+        "defaultName": "[parameters('clusterName')]",
+        "location": "[resourceGroup().location]",
+        "dnsNameForPublicIP": "[parameters('clusterName')]",
+        "publicIPAddressName": "[concat(variables('defaultName'),'pubip')]",
+        "publicIPAddressType": "Dynamic",
+        "addressPrefix": "10.0.0.0/16",
+        "storageAccountName": "[tolower(concat(variables('defaultName'),'sa'))]",
+        "networkSecurityGroupName": "[tolower(concat(variables('defaultName'),'nsg'))]",
+        "subnetName": "[concat(variables('defaultName'),'sub')]",
+        "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
+        "loadBalancerName": "[concat(variables('defaultName'),'lb')]"
+    },
+    "resources": [
+        {
+            "comments": "Storage account which holds all containers and logs.",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[toLower(variables('storageAccountName'))]",
+            "apiVersion": "2016-01-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[parameters('storageAccountType')]"
+            }
+        },
+        {
+            "comments": "Virtual network in which the nodes will reside.",
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('addressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "The public IP addresses for NAT.",
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[tolower(variables('dnsNameForPublicIP'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "hadoop",
+            "apiVersion": "2016-03-30",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "platformFaultDomainCount": 1,
+                "platformUpdateDomainCount": 1
+            }
+        },
+        {
+            "comments": "Network security group for the network.",
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "SSH",
+                        "properties": {
+                            "priority": 1003,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "destinationPortRange": "22",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "HDFSUI",
+                        "properties": {
+                            "priority": 1002,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "destinationPortRange": "50070",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "MRJHUI",
+                        "properties": {
+                            "priority": 1001,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "destinationPortRange": "19888",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "RMUI",
+                        "properties": {
+                            "priority": 1000,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "destinationPortRange": "8088",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('loadBalancerName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "loadBalancerFrontEnd",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "LoadBalancerBackend"
+                    }
+                ],
+                "inboundNatRules": [
+                    {
+                        "name": "JumpNode",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'loadBalancerFrontEnd')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
+                        }
+                    },
+                    {
+                        "name": "NameNode",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'loadBalancerFrontEnd')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 50070,
+                            "backendPort": 50070,
+                            "enableFloatingIP": false
+                        }
+                    },
+                    {
+                        "name": "ResourceManager",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'loadBalancerFrontEnd')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 8088,
+                            "backendPort": 8088,
+                            "enableFloatingIP": false
+                        }
+                    },
+                    {
+                        "name": "JobHistory",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'loadBalancerFrontEnd')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 19888,
+                            "backendPort": 19888,
+                            "enableFloatingIP": false
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2016-02-01",
+            "name": "workerNodeTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('storageAccountName')]",
+                "[variables('loadBalancerName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'),'/worker_node.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('clusterName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('workerNodeVMSize')]"
+                    },
+                    "numberWorkerNodes": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    },
+                    "dataDiskSize": {
+                        "value": "[parameters('dataDiskSize')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "batchSize": {
+                        "value": "[parameters('batchSize')]"
+                    },
+                    "replication": {
+                        "value": "[parameters('replication')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2016-02-01",
+            "name": "masterNodeTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('storageAccountName')]",
+                "[variables('loadBalancerName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'),'/master_node.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('clusterName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('masterNodeVMSize')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "loadBalancerName": {
+                        "value": "[variables('loadBalancerName')]"
+                    },
+                    "numberWorkerNodes": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    },
+                    "replication": {
+                        "value": "[parameters('replication')]"
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2016-02-01",
+            "name": "jumpBoxTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "masterNodeTemplate",
+                "workerNodeTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'),'/jumpbox_node.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('clusterName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('masterNodeVMSize')]"
+                    },
+                    "numberWorkerNodes": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "loadBalancerName": {
+                        "value": "[variables('loadBalancerName')]"
+                    },
+                    "replication": {
+                        "value": "[parameters('replication')]"
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

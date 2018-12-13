@@ -25,7 +25,7 @@ $azureSubscriptionId = "<Your Azure subscription id (Get-AzureSubscription).Subs
 
 $azureAdIdUri = "https://azureadiduri"
 
-$azureAdPassword = "azureadpwd123"
+$azureAdPassword = "<PASSWORD>"
 
 $azureAdDisplayName = "azureaddisplayname"
 

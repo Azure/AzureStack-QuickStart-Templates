@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <description>
+            The hostname of the RM.
+        </description>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>CLUSTER_NAMEResourceManager</value>
+    </property>
+    <property>
+        <description>
+            A comma separated list of services where service name should only contain a-zA-Z0-9_ and can not start with
+            numbers
+        </description>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <description>
+            The MapReduce shuffle class
+        </description>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+    <property>
+        <description>
+            Enable auto-detection of node capabilities such as memory and CPU.
+        </description>
+        <name>yarn.nodemanager.resource.detect-hardware-capabilities</name>
+        <value>true</value>
+    </property>
+    <property>
+        <description>
+            The class to use as the resource scheduler.
+        </description>
+        <name>yarn.resourcemanager.scheduler.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+    </property>
+</configuration>

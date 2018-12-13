@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <description>
+            The amount of memory to request from the scheduler for each map task.
+        </description>
+        <name>mapreduce.map.memory.mb</name>
+        <value>1536</value>
+    </property>
+    <property>
+        <description>
+            The amount of memory to request from the scheduler for each reduce task.
+        </description>
+        <name>mapreduce.reduce.memory.mb</name>
+        <value>3072</value>
+    </property>
+    <property>
+        <description>
+            Java opts only for the child processes that are maps. If set, this will be used instead of
+            mapred.child.java.opts.
+        </description>
+        <name>mapreduce.map.java.opts</name>
+        <value>-Xmx1024M</value>
+    </property>
+    <property>
+        <description>
+            Java opts only for the child processes that are reduces. If set, this will be used instead of
+            mapred.child.java.opts.
+        </description>
+        <name>mapreduce.reduce.java.opts</name>
+        <value>-Xmx2560M</value>
+    </property>
+    <property>
+        <description>
+            The number of threads used to move files.
+        </description>
+        <name>mapreduce.jobhistory.move.thread-count</name>
+        <value>3</value>
+    </property>
+    <property>
+        <description>
+            The soft limit in the serialization buffer. Once reached, a thread will begin to spill the contents to disk
+            in the background. Note that collection will not block if this threshold is exceeded while a spill is
+            already in progress, so spills may be larger than this threshold when it is set to less than .5
+        </description>
+        <name>mapreduce.map.sort.spill.percent</name>
+        <value>0.99</value>
+    </property>
+    <property>
+        <description>
+            The threshold, in terms of the number of files for the in-memory merge process. When we accumulate
+            threshold number of files we initiate the in-memory merge and spill to disk. A value of 0 or less than 0
+            indicates we want to DON'T have any threshold and instead depend only on the ramfs's memory consumption to
+            trigger the merge.
+        </description>
+        <name>mapreduce.reduce.merge.inmem.threshold</name>
+        <value>0</value>
+    </property>
+    <property>
+        <description>
+            Fraction of the number of maps in the job which should be complete before reduces are scheduled for the job.
+        </description>
+        <name>mapreduce.job.reduce.slowstart.completedmaps</name>
+        <value>1</value>
+    </property>
+    <property>
+        <description>
+            If true, then multiple instances of some map tasks may be executed in parallel.
+        </description>
+        <name>mapreduce.map.speculative</name>
+        <value>false</value>
+    </property>
+    <property>
+        <description>
+            If true, then multiple instances of some reduce tasks may be executed in parallel.
+        </description>
+        <name>mapreduce.reduce.speculative</name>
+        <value>false</value>
+    </property>
+    <property>
+        <description>
+            Should the outputs of the maps be compressed before being sent across the network. Uses SequenceFile
+            compression.
+        </description>
+        <name>mapreduce.map.output.compress</name>
+        <value>false</value>
+    </property>
+    <property>
+        <description>
+            The default number of reduce tasks per job. Typically set to 99% of the cluster's reduce capacity, so that
+            if a node fails the reduces can still be executed in a single wave. Ignored when mapreduce.framework.name
+            is "local".
+        </description>
+        <name>mapreduce.job.reduces</name>
+        <value>160</value>
+    </property>
+    <property>
+        <description>
+            The total amount of buffer memory to use while sorting files, in megabytes. By default, gives each merge
+            stream 1MB, which should minimize seeks.
+        </description>
+        <name>mapreduce.task.io.sort.mb</name>
+        <value>512</value>
+    </property>
+    <property>
+        <description>
+            The number of streams to merge at once while sorting files. This determines the number of open file handles.
+        </description>
+        <name>mapreduce.task.io.sort.factor</name>
+        <value>400</value>
+    </property>
+    <property>
+        <description>
+            The default number of parallel transfers run by reduce during the copy(shuffle) phase.
+        </description>
+        <name>mapreduce.reduce.shuffle.parallelcopies</name>
+        <value>50</value>
+    </property>
+    <property>
+        <description>
+            The runtime framework for executing MapReduce jobs. Can be one of local, classic or yarn.
+        </description>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+    <property>
+        <description>
+            The replication level for submitted job files. This should be around the square root of the number of nodes.
+        </description>
+        <name>mapreduce.client.submit.file.replication</name>
+        <value>REPLICATION</value>
+        <final>true</final>
+    </property>
+</configuration>
