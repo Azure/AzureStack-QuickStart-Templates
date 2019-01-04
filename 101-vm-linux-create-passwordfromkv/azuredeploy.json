@@ -15,10 +15,10 @@
       "metadata": {
         "description": "Using password or ssh."
       },
-      "defaultValue": "[cat ~/.ssh/id_rsa.pub]"
+      "defaultValue": "[cat ~/.ssh/id_rsa.pub]",
       "allowedValues": [
         "ssh",
-      "password"
+        "password"
       ],
     },
     "adminPassword": {
@@ -164,11 +164,9 @@
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          if (authentication-type ="ssh"){
+          if ("authentication-type" =="ssh"){
           "ssh-key-value": "[parameters('sshPassword')]";
-          }
-          else
-          {
+          } else {
           "adminPassword": "[parameters('adminPassword')]";
         }
         },
