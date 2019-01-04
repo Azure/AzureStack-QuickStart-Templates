@@ -10,6 +10,17 @@
       },
       "defaultValue": "vmadmin1"
     },
+    "authentication-type": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Using password or ssh."
+      },
+      "defaultValue": "[cat ~/.ssh/id_rsa.pub]"
+      "allowedValues": [
+        "ssh",
+      "password"
+      ],
+    },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
@@ -153,10 +164,13 @@
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          if (authentication-type ="ssh")
-          "ssh-key-value": "[parameters('sshPassword')]"
+          if (authentication-type ="ssh"){
+          "ssh-key-value": "[parameters('sshPassword')]";
+          }
           else
-          "adminPassword": "[parameters('adminPassword')]"
+          {
+          "adminPassword": "[parameters('adminPassword')]";
+        }
         },
         "storageProfile": {
           "imageReference": {
