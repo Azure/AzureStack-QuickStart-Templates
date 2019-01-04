@@ -164,11 +164,11 @@
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          if ("authentication-type" =="ssh"){
-          "ssh-key-value": "[parameters('sshPassword')]";
-          } else {
-          "adminPassword": "[parameters('adminPassword')]";
-        }
+          "if" : [
+          {"==": [{"var":"authentication-type"}, "ssh"] }, 
+          "ssh-key-value": "[parameters('sshPassword')]",
+          "adminPassword": "[parameters('adminPassword')]"
+          ]
         },
         "storageProfile": {
           "imageReference": {
