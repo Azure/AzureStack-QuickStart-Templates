@@ -15,7 +15,6 @@
       "metadata": {
         "description": "Using password or ssh."
       },
-      "defaultValue": "[cat ~/.ssh/id_rsa.pub]",
       "allowedValues": [
         "ssh",
         "password"
