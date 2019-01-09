@@ -16,6 +16,18 @@
         "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
       },
       "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+    },
+    "windowsImageSKU": {
+      "type": "string",
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter-Server-Core",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, 2016-Datacenter."
+      }
     }
   },
   "variables": {
@@ -27,7 +39,6 @@
     "virtualNetworkAddressRange": "10.0.0.0/16",
     "windowsImagePublisher": "MicrosoftWindowsServer",
     "windowsImageOffer": "WindowsServer",
-    "windowsImageSKU": "2012-R2-Datacenter",
     "windowsImageVersion": "latest",
     "dataDiskSize": 2,
     "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/201-vm-windows-comprehensive-with-managed-disks",
@@ -228,7 +239,7 @@
           "imageReference": {
             "publisher": "[variables('windowsImagePublisher')]",
             "offer": "[variables('windowsImageOffer')]",
-            "sku": "[variables('windowsImageSKU')]",
+            "sku": "[parameters('windowsImageSKU')]",
             "version": "[variables('windowsImageVersion')]"
           },
           "osDisk": {
