@@ -138,13 +138,13 @@ try
 
     Log "Start App Service file server configuration."
 
-    $cmd = ".\FileServer\single.ps1 `
-        -fileServerAdminUserName $(Quote-String fileServerAdminUserName) `
-        -fileServerAdminPassword $(Quote-String fileServerAdminPassword) `
-        -fileShareOwnerUserName $(Quote-String fileShareOwnerUserName) `
-        -fileShareOwnerPassword $(Quote-String fileShareOwnerPassword) `
-        -fileShareUserUserName $(Quote-String fileShareUserUserName) `
-        -fileShareUserPassword $(Quote-String fileShareUserPassword)"
+    $cmd = ".\FileServer\single.ps1 "+
+        "-fileServerAdminUserName $(Quote-String $fileServerAdminUserName) "+
+        "-fileServerAdminPassword $(Quote-String $fileServerAdminPassword) "+
+        "-fileShareOwnerUserName $(Quote-String $fileShareOwnerUserName) "+
+        "-fileShareOwnerPassword $(Quote-String $fileShareOwnerPassword) "+
+        "-fileShareUserUserName $(Quote-String $fileShareUserUserName) "+
+        "-fileShareUserPassword $(Quote-String $fileShareUserPassword)"
 
     $process = Start-Process -FilePath Powershell.exe -ArgumentList $cmd -Wait -NoNewWindow -PassThru
     if ($process.ExitCode -ne 0)
