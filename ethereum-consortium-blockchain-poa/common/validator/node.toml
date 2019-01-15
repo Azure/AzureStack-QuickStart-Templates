@@ -1,0 +1,25 @@
+[parity]
+chain = "config/spec.json"
+base_path = "/opt/parity"
+[network]
+port = 30300
+reserved_peers = "bootnodes.txt"
+nat = "extip:#EXTERNALIP#"
+[ipc]
+disable = false
+apis = ["web3", "eth", "net", "personal", "parity", "parity_set", "traces", "rpc", "parity_accounts", "secretstore", "pubsub"]
+[rpc]
+port = #ETH_RPC_PORT
+apis = ["web3", "eth", "net", "parity", "traces", "rpc"]
+interface = "all"
+cors = ["all"]
+[ui]
+port = 8180
+[websockets]
+port = 8546
+[account]
+password = ["node.pwd"]
+[mining]
+engine_signer = "#ENGINE_SIGNER"
+reseal_on_txs = "none"
+force_sealing = true

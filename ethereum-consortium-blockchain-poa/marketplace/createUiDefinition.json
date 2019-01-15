@@ -1,0 +1,1433 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Compute.MultiVm",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "isJoining",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Create a new network or join existing network?",
+                "toolTip": "If you are joining an existing network, you will be prompted for joining parameters.",
+                "defaultValue": "Create new",
+                "constraints": {
+                    "required": true,
+                    "allowedValues": [
+                        {
+                            "label": "Create new",
+                            "value": false
+                        },
+                        {
+                            "label": "Join existing",
+                            "value": true
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "emailAddress",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Email Address",
+                "toolTip": "You'll receive an email notification when your deployment completes with information about your deployment.",
+                "constraints": {
+                    "required": false,
+                    "regex": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",
+                    "validationMessage": "Please enter a valid email address"
+                }
+            },
+            {
+                "name": "adminUsername",
+                "type": "Microsoft.Compute.UserNameTextBox",
+                "label": "VM user name",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[A-Za-z0-9]{4,15}$",
+                    "validationMessage": "Admin username between 5 and 16 characters long, and can contain only letters and numbers without whitespace."
+                },
+                "toolTip": "Admin username for all of the deployed virtual machines.",
+                "osPlatform": "Linux"
+            },
+            {
+                "name": "adminCredentials",
+                "type": "Microsoft.Compute.CredentialsCombo",
+                "label": {
+                    "authenticationType": "Authentication type",
+                    "password": "Password",
+                    "confirmPassword": "Confirm password",
+                    "sshPublicKey": "SSH public key"
+                },
+                "toolTip": {
+                    "authenticationType": "Authentication type for the admin user",
+                    "password": "VM password must be 12 characters and have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character.",
+                    "sshPublicKey": "Virtual machine SSH public key"
+                },
+                "constraints": {
+                    "required": true
+                },
+                "options": {
+                    "hideConfirmation": false
+                },
+                "osPlatform": "Linux",
+                "visible": true
+            }
+        ],
+        "steps": [
+            {
+                "name": "regCnt",
+                "label": "Deployment regions",
+                "bladeTitle": "Deployment regions",
+                "subLabel": {
+                    "preValidation": "Required",
+                    "postValidation": "Done"
+                },
+                "elements": [
+                    {
+                        "name": "regionCnt",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Number of region(s)",
+                        "toolTip": "Select the number of region(s) to deploy virtual machines into.",
+                        "defaultValue": "1",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "1",
+                                    "value": 1
+                                },
+                                {
+                                    "label": "2",
+                                    "value": 2
+                                },
+                                {
+                                    "label": "3",
+                                    "value": 3
+                                },
+                                {
+                                    "label": "4",
+                                    "value": 4
+                                },
+                                {
+                                    "label": "5",
+                                    "value": 5
+                                }
+                            ]
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "loc1",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "First region",
+                        "toolTip": "Select the first region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Australia East",
+                                    "value": "australiaeast"
+                                },
+                                {
+                                    "label": "Australia Southeast",
+                                    "value": "australiasoutheast"
+                                },
+                                {
+                                    "label": "Brazil South",
+                                    "value": "brazilsouth"
+                                },
+                                {
+                                    "label": "Canada Central",
+                                    "value": "canadacentral"
+                                },
+                                {
+                                    "label": "Canada East",
+                                    "value": "canadaeast"
+                                },
+                                {
+                                    "label": "Central India",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "label": "Central US",
+                                    "value": "centralus"
+                                },
+                                {
+                                    "label": "East Asia",
+                                    "value": "eastasia"
+                                },
+                                {
+                                    "label": "East US",
+                                    "value": "eastus"
+                                },
+                                {
+                                    "label": "East US 2",
+                                    "value": "eastus2"
+                                },
+                                {
+                                    "label": "Japan East",
+                                    "value": "japaneast"
+                                },
+                                {
+                                    "label": "Japan West",
+                                    "value": "japanwest"
+                                },
+                                {
+                                    "label": "Korea Central",
+                                    "value": "koreacentral"
+                                },
+                                {
+                                    "label": "Korea South",
+                                    "value": "koreasouth"
+                                },
+                                {
+                                    "label": "North Central US",
+                                    "value": "northcentralus"
+                                },
+                                {
+                                    "label": "North Europe",
+                                    "value": "northeurope"
+                                },
+                                {
+                                    "label": "South Central US",
+                                    "value": "southcentralus"
+                                },
+                                {
+                                    "label": "South India",
+                                    "value": "southindia"
+                                },
+                                {
+                                    "label": "Southeast Asia",
+                                    "value": "southeastasia"
+                                },
+                                {
+                                    "label": "UK South",
+                                    "value": "uksouth"
+                                },
+                                {
+                                    "label": "UK West",
+                                    "value": "ukwest"
+                                },
+                                {
+                                    "label": "West Central US",
+                                    "value": "westcentralus"
+                                },
+                                {
+                                    "label": "West Europe",
+                                    "value": "westeurope"
+                                },
+                                {
+                                    "label": "West US",
+                                    "value": "westus"
+                                },
+                                {
+                                    "label": "West US 2",
+                                    "value": "westus2"
+                                }
+                            ]
+                        },
+                        "visible": "[not(or(contains(toLower(location()), 'gov'), contains(toLower(location()), 'dod')))]"
+                    },
+                    {
+                        "name": "loc1dod",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "First region",
+                        "toolTip": "Select the first region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USDoD Central",
+                                    "value": "usdodcentral"
+                                },
+                                {
+                                    "label": "USDoD East",
+                                    "value": "usdodeast"
+                                }
+                            ]
+                        },
+                        "visible": "[contains(toLower(location()), 'dod')]"
+                    },
+                    {
+                        "name": "loc1gov",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "First region",
+                        "toolTip": "Select the first region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USGov Arizona",
+                                    "value": "usgovarizona"
+                                },
+                                {
+                                    "label": "USGov Texas",
+                                    "value": "usgovtexas"
+                                },
+                                {
+                                    "label": "USGov Virginia",
+                                    "value": "usgovvirginia"
+                                }
+                            ]
+                        },
+                        "visible": "[contains(toLower(location()), 'gov')]"
+                    },
+                    {
+                        "name": "loc2",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Second region",
+                        "toolTip": "Select the second region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Australia East",
+                                    "value": "australiaeast"
+                                },
+                                {
+                                    "label": "Australia Southeast",
+                                    "value": "australiasoutheast"
+                                },
+                                {
+                                    "label": "Brazil South",
+                                    "value": "brazilsouth"
+                                },
+                                {
+                                    "label": "Canada Central",
+                                    "value": "canadacentral"
+                                },
+                                {
+                                    "label": "Canada East",
+                                    "value": "canadaeast"
+                                },
+                                {
+                                    "label": "Central India",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "label": "Central US",
+                                    "value": "centralus"
+                                },
+                                {
+                                    "label": "East Asia",
+                                    "value": "eastasia"
+                                },
+                                {
+                                    "label": "East US",
+                                    "value": "eastus"
+                                },
+                                {
+                                    "label": "East US 2",
+                                    "value": "eastus2"
+                                },
+                                {
+                                    "label": "Japan East",
+                                    "value": "japaneast"
+                                },
+                                {
+                                    "label": "Japan West",
+                                    "value": "japanwest"
+                                },
+                                {
+                                    "label": "Korea Central",
+                                    "value": "koreacentral"
+                                },
+                                {
+                                    "label": "Korea South",
+                                    "value": "koreasouth"
+                                },
+                                {
+                                    "label": "North Central US",
+                                    "value": "northcentralus"
+                                },
+                                {
+                                    "label": "North Europe",
+                                    "value": "northeurope"
+                                },
+                                {
+                                    "label": "South Central US",
+                                    "value": "southcentralus"
+                                },
+                                {
+                                    "label": "South India",
+                                    "value": "southindia"
+                                },
+                                {
+                                    "label": "Southeast Asia",
+                                    "value": "southeastasia"
+                                },
+                                {
+                                    "label": "UK South",
+                                    "value": "uksouth"
+                                },
+                                {
+                                    "label": "UK West",
+                                    "value": "ukwest"
+                                },
+                                {
+                                    "label": "West Central US",
+                                    "value": "westcentralus"
+                                },
+                                {
+                                    "label": "West Europe",
+                                    "value": "westeurope"
+                                },
+                                {
+                                    "label": "West US",
+                                    "value": "westus"
+                                },
+                                {
+                                    "label": "West US 2",
+                                    "value": "westus2"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 2), not(or(contains(toLower(location()), 'gov'), contains(toLower(location()), 'dod'))))]"
+                    },
+                    {
+                        "name": "loc2dod",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Second region",
+                        "toolTip": "Select the second region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USDoD Central",
+                                    "value": "usdodcentral"
+                                },
+                                {
+                                    "label": "USDoD East",
+                                    "value": "usdodeast"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 2), contains(toLower(location()), 'dod'))]"
+                    },
+                    {
+                        "name": "loc2gov",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Second region",
+                        "toolTip": "Select the second region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USGov Arizona",
+                                    "value": "usgovarizona"
+                                },
+                                {
+                                    "label": "USGov Texas",
+                                    "value": "usgovtexas"
+                                },
+                                {
+                                    "label": "USGov Virginia",
+                                    "value": "usgovvirginia"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 2), contains(toLower(location()), 'gov'))]"
+                    },
+                    {
+                        "name": "loc3",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Third region",
+                        "toolTip": "Select the third region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Australia East",
+                                    "value": "australiaeast"
+                                },
+                                {
+                                    "label": "Australia Southeast",
+                                    "value": "australiasoutheast"
+                                },
+                                {
+                                    "label": "Brazil South",
+                                    "value": "brazilsouth"
+                                },
+                                {
+                                    "label": "Canada Central",
+                                    "value": "canadacentral"
+                                },
+                                {
+                                    "label": "Canada East",
+                                    "value": "canadaeast"
+                                },
+                                {
+                                    "label": "Central India",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "label": "Central US",
+                                    "value": "centralus"
+                                },
+                                {
+                                    "label": "East Asia",
+                                    "value": "eastasia"
+                                },
+                                {
+                                    "label": "East US",
+                                    "value": "eastus"
+                                },
+                                {
+                                    "label": "East US 2",
+                                    "value": "eastus2"
+                                },
+                                {
+                                    "label": "Japan East",
+                                    "value": "japaneast"
+                                },
+                                {
+                                    "label": "Japan West",
+                                    "value": "japanwest"
+                                },
+                                {
+                                    "label": "Korea Central",
+                                    "value": "koreacentral"
+                                },
+                                {
+                                    "label": "Korea South",
+                                    "value": "koreasouth"
+                                },
+                                {
+                                    "label": "North Central US",
+                                    "value": "northcentralus"
+                                },
+                                {
+                                    "label": "North Europe",
+                                    "value": "northeurope"
+                                },
+                                {
+                                    "label": "South Central US",
+                                    "value": "southcentralus"
+                                },
+                                {
+                                    "label": "South India",
+                                    "value": "southindia"
+                                },
+                                {
+                                    "label": "Southeast Asia",
+                                    "value": "southeastasia"
+                                },
+                                {
+                                    "label": "UK South",
+                                    "value": "uksouth"
+                                },
+                                {
+                                    "label": "UK West",
+                                    "value": "ukwest"
+                                },
+                                {
+                                    "label": "West Central US",
+                                    "value": "westcentralus"
+                                },
+                                {
+                                    "label": "West Europe",
+                                    "value": "westeurope"
+                                },
+                                {
+                                    "label": "West US",
+                                    "value": "westus"
+                                },
+                                {
+                                    "label": "West US 2",
+                                    "value": "westus2"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 3), not(or(contains(toLower(location()), 'gov'), contains(toLower(location()), 'dod'))))]"
+                    },
+                    {
+                        "name": "loc3dod",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Third region",
+                        "toolTip": "Select the third region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USDoD Central",
+                                    "value": "usdodcentral"
+                                },
+                                {
+                                    "label": "USDoD East",
+                                    "value": "usdodeast"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 3), contains(toLower(location()), 'dod'))]"
+                    },
+                    {
+                        "name": "loc3gov",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Third region",
+                        "toolTip": "Select the third region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USGov Arizona",
+                                    "value": "usgovarizona"
+                                },
+                                {
+                                    "label": "USGov Texas",
+                                    "value": "usgovtexas"
+                                },
+                                {
+                                    "label": "USGov Virginia",
+                                    "value": "usgovvirginia"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 3), contains(toLower(location()), 'gov'))]"
+                    },
+                    {
+                        "name": "loc4",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Fourth region",
+                        "toolTip": "Select the fourth region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Australia East",
+                                    "value": "australiaeast"
+                                },
+                                {
+                                    "label": "Australia Southeast",
+                                    "value": "australiasoutheast"
+                                },
+                                {
+                                    "label": "Brazil South",
+                                    "value": "brazilsouth"
+                                },
+                                {
+                                    "label": "Canada Central",
+                                    "value": "canadacentral"
+                                },
+                                {
+                                    "label": "Canada East",
+                                    "value": "canadaeast"
+                                },
+                                {
+                                    "label": "Central India",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "label": "Central US",
+                                    "value": "centralus"
+                                },
+                                {
+                                    "label": "East Asia",
+                                    "value": "eastasia"
+                                },
+                                {
+                                    "label": "East US",
+                                    "value": "eastus"
+                                },
+                                {
+                                    "label": "East US 2",
+                                    "value": "eastus2"
+                                },
+                                {
+                                    "label": "Japan East",
+                                    "value": "japaneast"
+                                },
+                                {
+                                    "label": "Japan West",
+                                    "value": "japanwest"
+                                },
+                                {
+                                    "label": "Korea Central",
+                                    "value": "koreacentral"
+                                },
+                                {
+                                    "label": "Korea South",
+                                    "value": "koreasouth"
+                                },
+                                {
+                                    "label": "North Central US",
+                                    "value": "northcentralus"
+                                },
+                                {
+                                    "label": "North Europe",
+                                    "value": "northeurope"
+                                },
+                                {
+                                    "label": "South Central US",
+                                    "value": "southcentralus"
+                                },
+                                {
+                                    "label": "South India",
+                                    "value": "southindia"
+                                },
+                                {
+                                    "label": "Southeast Asia",
+                                    "value": "southeastasia"
+                                },
+                                {
+                                    "label": "UK South",
+                                    "value": "uksouth"
+                                },
+                                {
+                                    "label": "UK West",
+                                    "value": "ukwest"
+                                },
+                                {
+                                    "label": "West Central US",
+                                    "value": "westcentralus"
+                                },
+                                {
+                                    "label": "West Europe",
+                                    "value": "westeurope"
+                                },
+                                {
+                                    "label": "West US",
+                                    "value": "westus"
+                                },
+                                {
+                                    "label": "West US 2",
+                                    "value": "westus2"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 4), not(or(contains(toLower(location()), 'gov'), contains(toLower(location()), 'dod'))))]"
+                    },
+                    {
+                        "name": "loc4dod",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Fourth region",
+                        "toolTip": "Select the fourth region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USDoD Central",
+                                    "value": "usdodcentral"
+                                },
+                                {
+                                    "label": "USDoD East",
+                                    "value": "usdodeast"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 4), contains(toLower(location()), 'dod'))]"
+                    },
+                    {
+                        "name": "loc4gov",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Fourth region",
+                        "toolTip": "Select the fourth region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USGov Arizona",
+                                    "value": "usgovarizona"
+                                },
+                                {
+                                    "label": "USGov Texas",
+                                    "value": "usgovtexas"
+                                },
+                                {
+                                    "label": "USGov Virginia",
+                                    "value": "usgovvirginia"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 4), contains(toLower(location()), 'gov'))]"
+                    },
+                    {
+                        "name": "loc5",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Fifth region",
+                        "toolTip": "Select the fifth region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Australia East",
+                                    "value": "australiaeast"
+                                },
+                                {
+                                    "label": "Australia Southeast",
+                                    "value": "australiasoutheast"
+                                },
+                                {
+                                    "label": "Brazil South",
+                                    "value": "brazilsouth"
+                                },
+                                {
+                                    "label": "Canada Central",
+                                    "value": "canadacentral"
+                                },
+                                {
+                                    "label": "Canada East",
+                                    "value": "canadaeast"
+                                },
+                                {
+                                    "label": "Central India",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "label": "Central US",
+                                    "value": "centralus"
+                                },
+                                {
+                                    "label": "East Asia",
+                                    "value": "eastasia"
+                                },
+                                {
+                                    "label": "East US",
+                                    "value": "eastus"
+                                },
+                                {
+                                    "label": "East US 2",
+                                    "value": "eastus2"
+                                },
+                                {
+                                    "label": "Japan East",
+                                    "value": "japaneast"
+                                },
+                                {
+                                    "label": "Japan West",
+                                    "value": "japanwest"
+                                },
+                                {
+                                    "label": "Korea Central",
+                                    "value": "koreacentral"
+                                },
+                                {
+                                    "label": "Korea South",
+                                    "value": "koreasouth"
+                                },
+                                {
+                                    "label": "North Central US",
+                                    "value": "northcentralus"
+                                },
+                                {
+                                    "label": "North Europe",
+                                    "value": "northeurope"
+                                },
+                                {
+                                    "label": "South Central US",
+                                    "value": "southcentralus"
+                                },
+                                {
+                                    "label": "South India",
+                                    "value": "southindia"
+                                },
+                                {
+                                    "label": "Southeast Asia",
+                                    "value": "southeastasia"
+                                },
+                                {
+                                    "label": "UK South",
+                                    "value": "uksouth"
+                                },
+                                {
+                                    "label": "UK West",
+                                    "value": "ukwest"
+                                },
+                                {
+                                    "label": "West Central US",
+                                    "value": "westcentralus"
+                                },
+                                {
+                                    "label": "West Europe",
+                                    "value": "westeurope"
+                                },
+                                {
+                                    "label": "West US",
+                                    "value": "westus"
+                                },
+                                {
+                                    "label": "West US 2",
+                                    "value": "westus2"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 5), not(or(contains(toLower(location()), 'gov'), contains(toLower(location()), 'dod'))))]"
+                    },
+                    {
+                        "name": "loc5dod",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Fifth region",
+                        "toolTip": "Select the fifth region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USDoD Central",
+                                    "value": "usdodcentral"
+                                },
+                                {
+                                    "label": "USDoD East",
+                                    "value": "usdodeast"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt,5), contains(toLower(location()), 'dod'))]"
+                    },
+                    {
+                        "name": "loc5gov",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Fifth region",
+                        "toolTip": "Select the fifth region.",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USGov Arizona",
+                                    "value": "usgovarizona"
+                                },
+                                {
+                                    "label": "USGov Texas",
+                                    "value": "usgovtexas"
+                                },
+                                {
+                                    "label": "USGov Virginia",
+                                    "value": "usgovvirginia"
+                                }
+                            ]
+                        },
+                        "visible": "[and(greaterOrEquals(steps('regCnt').regionCnt, 5), contains(toLower(location()), 'gov'))]"
+                    }
+                ]
+            },
+            {
+                "name": "NetworkSize",
+                "label": "Network size and performance",
+                "subLabel": {
+                    "preValidation": "Define the number and size of validator nodes in the network",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Network Size and Performance",
+                "elements": [
+                    {
+                        "name": "vlSection",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Validator Nodes",
+                        "elements": [
+                            {
+                                "name": "numVLNodes",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Number of load balanced validator nodes",
+                                "defaultValue": "2",
+                                "toolTip": "An application or user interacts with a load balanced set of validator nodes to submit transactions to the network.  Choose the number of nodes that meets your availability requirements.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "2",
+                                            "value": 2
+                                        },
+                                        {
+                                            "label": "3",
+                                            "value": 3
+                                        },
+                                        {
+                                            "label": "4",
+                                            "value": 4
+                                        },
+                                        {
+                                            "label": "5",
+                                            "value": 5
+                                        },
+                                        {
+                                            "label": "6",
+                                            "value": 6
+                                        },
+                                        {
+                                            "label": "7",
+                                            "value": 7
+                                        },
+                                        {
+                                            "label": "8",
+                                            "value": 8
+                                        },
+                                        {
+                                            "label": "9",
+                                            "value": 9
+                                        },
+                                        {
+                                            "label": "10",
+                                            "value": 10
+                                        },
+                                        {
+                                            "label": "11",
+                                            "value": 11
+                                        },
+                                        {
+                                            "label": "12",
+                                            "value": 12
+                                        },
+                                        {
+                                            "label": "13",
+                                            "value": 13
+                                        },
+                                        {
+                                            "label": "14",
+                                            "value": 14
+                                        },
+                                        {
+                                            "label": "15",
+                                            "value": 15
+                                        }
+                                    ]
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "vlStoragePerformance",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Validator node storage performance",
+                                "defaultValue": "Standard",
+                                "toolTip": "Managed Disks is an abstraction of current Standard and Premium storage disk in Azure Storage. You only need to specify the type (Standard or Premium) you need, in your selected Azure region, and Azure will create and manage the Disk accordingly.",
+                                "constraints": {
+                                    "required": true,
+                                    "allowedValues": [
+                                        {
+                                            "label": "Standard",
+                                            "value": "Standard_LRS"
+                                        },
+                                        {
+                                            "label": "Premium",
+                                            "value": "Premium_LRS"
+                                        }
+                                    ]
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "vlNodeVMSizeHDD",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "Validator node virtual machine size",
+                                "recommendedSizes": [
+                                    "Standard_D1_v2",
+                                    "Standard_D1",
+                                    "Standard_F1"
+                                ],
+                                "constraints": {
+                                    "allowedSizes": [
+                                        "Standard_A1",
+                                        "Standard_A2",
+                                        "Standard_A3",
+                                        "Standard_A4",
+                                        "Standard_A5",
+                                        "Standard_A6",
+                                        "Standard_A7",
+                                        "Standard_A8",
+                                        "Standard_A9",
+                                        "Standard_A10",
+                                        "Standard_A11",
+                                        "Standard_D1",
+                                        "Standard_D2",
+                                        "Standard_D3",
+                                        "Standard_D4",
+                                        "Standard_D11",
+                                        "Standard_D12",
+                                        "Standard_D13",
+                                        "Standard_D14",
+                                        "Standard_D1_v2",
+                                        "Standard_D2_v2",
+                                        "Standard_D3_v2",
+                                        "Standard_D4_v2",
+                                        "Standard_D5_v2",
+                                        "Standard_D11_v2",
+                                        "Standard_D12_v2",
+                                        "Standard_D13_v2",
+                                        "Standard_D14_v2",
+                                        "Standard_D15_v2",
+                                        "Standard_D2_v3",
+                                        "Standard_D3_v3",
+                                        "Standard_D4_v3",
+                                        "Standard_D8_v3",
+                                        "Standard_F1",
+                                        "Standard_F2",
+                                        "Standard_F4",
+                                        "Standard_F8",
+                                        "Standard_F16"
+                                    ]
+                                },
+                                "osPlatform": "Linux",
+                                "count": "[steps('NetworkSize').vlSection.numVLNodes]",
+                                "visible": "[equals(steps('NetworkSize').vlSection.vlStoragePerformance, 'Standard_LRS')]"
+                            },
+                            {
+                                "name": "vlNodeVMSizeSSD",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "Validator node virtual machine size",
+                                "recommendedSizes": [
+                                    "Standard_DS1_v2",
+                                    "Standard_DS1",
+                                    "Standard_F1s"
+                                ],
+                                "constraints": {
+                                    "allowedSizes": [
+                                        "Standard_DS1",
+                                        "Standard_DS2",
+                                        "Standard_DS3",
+                                        "Standard_DS4",
+                                        "Standard_DS11",
+                                        "Standard_DS12",
+                                        "Standard_DS13",
+                                        "Standard_DS14",
+                                        "Standard_DS1_v2",
+                                        "Standard_DS2_v2",
+                                        "Standard_DS3_v2",
+                                        "Standard_DS4_v2",
+                                        "Standard_DS5_v2",
+                                        "Standard_DS11_v2",
+                                        "Standard_DS12_v2",
+                                        "Standard_DS13_v2",
+                                        "Standard_DS14_v2",
+                                        "Standard_DS15_v2",
+                                        "Standard_D2s_v3",
+                                        "Standard_D4s_v3",
+                                        "Standard_D8s_v3",
+                                        "Standard_F1s",
+                                        "Standard_F2s",
+                                        "Standard_F4s",
+                                        "Standard_F8s",
+                                        "Standard_F16s"
+                                    ]
+                                },
+                                "osPlatform": "Linux",
+                                "count": "[steps('NetworkSize').vlSection.numVLNodes]",
+                                "visible": "[equals(steps('NetworkSize').vlSection.vlStoragePerformance, 'Premium_LRS')]"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "EthereumSettings",
+                "label": "Ethereum Settings",
+                "subLabel": {
+                    "preValidation": "Configure the Ethereum nodes",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Ethereum Settings",
+                "elements": [
+                    {
+                        "name": "consortiumMemberIdValue",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Consortium Member Id",
+                        "toolTip": "The Id associated with each member participating in the consortium network. Consortium member Id should be unique across different members in the same network and must be between 0 and 255.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?:25[0-5]|2[0-4]\\d|[01]\\d\\d|\\d?\\d)$",
+                            "validationMessage": "Must be between 0 and 255"
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "ethereumNetworkID",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Network ID",
+                        "defaultValue": "10101010",
+                        "toolTip": "ID used to name the private Ethereum network created.  Only nodes that share the same ID peer with each other.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[0-9]{1,9}$",
+                            "validationMessage": "Only numeric values up to 9 characters long allowed."
+                        },
+                        "visible": "[not(basics('isJoining'))]"
+                    },
+                    {
+                        "name": "ethereumAdminPublicKey",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Admin Ethereum Address",
+                        "defaultValue": "",
+                        "toolTip": "Ethereum account address that represents the initial Admin account",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^0x([A-Fa-f0-9]{40})$",
+                            "validationMessage": "Must be a valid Ethereum account address. Start with '0x' followed by 40 alphanumeric characters"
+                        }
+                    },
+                    {
+                        "name": "consortiumInformation",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Consortium Data Url",
+                        "defaultValue": "",
+                        "toolTip": "The URL pointing to the consortium configuration data provided by another member's deployment",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?:http(s)?:\/\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$",
+                            "validationMessage": "Must be a valid URI."
+                        },
+                        "visible": "[basics('isJoining')]"
+                    },  
+                    {
+                        "name": "connectionSharedKey",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Shared Key for Connection",
+                        "defaultValue": "",
+                        "toolTip": "A mixture of letters and numbers, used to establish encryption for the connection.  The same shared key must be used in both the virtual network gateways",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[A-Za-z0-9]{1,128}$",
+                            "validationMessage": "Must only be letters and numbers between 1 and 128 characters."
+                        },
+                        "visible": "[and(basics('isJoining'), not(coalesce(steps('EthereumSettings').deployUsingPublicIP, true)))]"
+                    },
+                    {
+                        "name": "consortiumMemberGateway",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "VNet Gateway to Connect to",
+                        "defaultValue": "",
+                        "toolTip": "Resource Id of the Virtual Network Gateway to connect to",
+                        "visible": "[and(basics('isJoining'), not(coalesce(steps('EthereumSettings').deployUsingPublicIP, true)))]",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[\\S]*$",
+                            "validationMessage": "Must not be empty or should not contain a whitespace."
+                        }
+                    },
+                    {
+                        "name": "enableAdvancedEthOptions",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Advanced Options",
+                        "toolTip": "Enable to show advanced Ethereum network configuration options",
+                        "defaultValue": "Disable",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Enable",
+                                    "value": true
+                                },
+                                {
+                                    "label": "Disable",
+                                    "value": false
+                                }
+                            ]
+                        }
+                    },                   
+                    {
+                        "name": "deployUsingPublicIP",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deploy using Public IP?",
+                        "toolTip": "Choose whether this network will use Public IP or VPN for connectivity",
+                        "visible": "[steps('EthereumSettings').enableAdvancedEthOptions]",
+                        "defaultValue": "Public IP",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Public IP",
+                                    "value": true
+                                },
+                                {
+                                    "label": "Private VNet",
+                                    "value": false
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "transactionPermissioningContract",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Transaction Permission Contract",
+                        "toolTip": "Bytecode for the transaction permissioning contract",
+                        "visible": "[and(steps('EthereumSettings').enableAdvancedEthOptions, not(basics('isJoining')))]",
+                        "constraints": {
+                            "required": false,
+                            "regex": "^[A-Za-z0-9]*$",
+                            "validationMessage": "Bytecode must be alphanumeric characters only"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "omsStep",
+                "label": "Azure Monitor",
+                "bladeTitle": "Azure Monitor",
+                "bladeSubtitle": "Azure Monitor",
+                "subLabel": {
+                    "preValidation": "Create new or connect to existing Log Analytics instance",
+                    "postValidation": "Done"
+                },
+                "elements": [
+                    {
+                        "name": "enableOms",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Monitoring",
+                        "toolTip": "Azure Monitor is an optional component that provides logs and analytics for your consortium ledger.",
+                        "defaultValue": "Enable",
+                        "visible": "[not(contains(toLower(location()), 'dod'))]",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Enable",
+                                    "value": true
+                                },
+                                {
+                                    "label": "Disable",
+                                    "value": false
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "joinExistingOmsInstance",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Connect to existing Log Analytics instance?",
+                        "toolTip": "If you are joining an existing Log Analytics instance, you will be prompted for ID and Primary Key.",
+                        "defaultValue": "Create new",
+                        "visible": "[and(not(contains(toLower(location()), 'dod')), coalesce(steps('omsStep').enableOms, true))]",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Create new",
+                                    "value": false
+                                },
+                                {
+                                    "label": "Join existing",
+                                    "value": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "omsLocation",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Azure Monitor Location",
+                        "visible": "[and(not(or(contains(toLower(location()), 'gov'), contains(toLower(location()), 'dod'))), not(coalesce(steps('omsStep').joinExistingOmsInstance, true)), coalesce(steps('omsStep').enableOms, true))]",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Australia Southeast",
+                                    "value": "australiasoutheast"
+                                },
+                                {
+                                    "label": "Canada Central",
+                                    "value": "canadacentral"
+                                },
+                                {
+                                    "label": "Central India",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "label": "East US",
+                                    "value": "eastus"
+                                },
+                                {
+                                    "label": "Japan East",
+                                    "value": "japaneast"
+                                },
+                                {
+                                    "label": "Southeast Asia",
+                                    "value": "southeastasia"
+                                },
+                                {
+                                    "label": "UK South",
+                                    "value": "uksouth"
+                                },
+                                {
+                                    "label": "West Europe",
+                                    "value": "westeurope"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "omsGovLocation",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Azure Monitor Location",
+                        "defaultValue": "USGov Virginia",
+                        "visible": "[and(contains(toLower(location()), 'gov'), not(coalesce(steps('omsStep').joinExistingOmsInstance, true)), coalesce(steps('omsStep').enableOms, true))]",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "USGov Virginia",
+                                    "value": "usgovvirginia"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "omsWorkspaceId",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Existing Log Analytics Workspace Id",
+                        "defaultValue": "",
+                        "toolTip": "Workspace ID of an existing Log Analytics instance",
+                        "visible": "[and(not(contains(toLower(location()), 'dod')), coalesce(steps('omsStep').joinExistingOmsInstance, true), coalesce(steps('omsStep').enableOms, true))]",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-zA-Z0-9-]*$",
+                            "validationMessage": "OMS Workspace ID can contain only alphanumeric characters separated by dash."
+                        }
+                    },
+                    {
+                        "name": "omsPrimaryKey",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Existing Log Analytics Primary Key",
+                        "defaultValue": "",
+                        "toolTip": "Primary key to connect to an existing Log Analytics instance",
+                        "visible": "[and(not(contains(toLower(location()), 'dod')), coalesce(steps('omsStep').joinExistingOmsInstance, true), coalesce(steps('omsStep').enableOms, true))]",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$",
+                            "validationMessage": "OMS primary key must be a Base64 encoded string."
+                        }
+                    },
+                    {
+                        "name": "omsNotAvailable",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Azure Monitor is not available in your cloud.",
+                        "visible": "[contains(toLower(location()), 'dod')]",
+                        "elements": [
+                            {
+                                "name": "dummyElement",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Needed to make schema parser happy",
+                                "visible": false,
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^[a-zA-Z0-9-]*$",
+                                    "validationMessage": ""
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "isJoiningExistingNetwork": "[basics('isJoining')]",
+            "regionCount": "[steps('regCnt').regionCnt]",
+            "location_1": "[coalesce(steps('regCnt').loc1, steps('regCnt').loc1dod, steps('regCnt').loc1gov)]",
+            "location_2": "[coalesce(steps('regCnt').loc2, steps('regCnt').loc2dod, steps('regCnt').loc2gov)]",
+            "location_3": "[coalesce(steps('regCnt').loc3, steps('regCnt').loc3dod, steps('regCnt').loc3gov)]",
+            "location_4": "[coalesce(steps('regCnt').loc4, steps('regCnt').loc4dod, steps('regCnt').loc4gov)]",
+            "location_5": "[coalesce(steps('regCnt').loc5, steps('regCnt').loc5dod, steps('regCnt').loc5gov)]",
+            "emailAddress": "[basics('emailAddress')]",
+            "authType": "[basics('adminCredentials').authenticationType]",
+            "adminUsername": "[basics('adminUsername')]",
+            "adminPassword": "[basics('adminCredentials').password]",
+            "adminSSHKey": "[basics('adminCredentials').sshPublicKey]",
+            "ethereumNetworkID": "[int(coalesce(steps('EthereumSettings').ethereumNetworkID, '10101010'))]",
+            "consortiumMemberId": "[int(steps('EthereumSettings').consortiumMemberIdValue)]",
+            "ethereumAdminPublicKey": "[steps('EthereumSettings').ethereumAdminPublicKey]",
+            "numVLNodesRegion": "[steps('NetworkSize').vlSection.numVLNodes]",
+            "vlNodeVMSize": "[coalesce(steps('NetworkSize').vlSection.vlNodeVMSizeHDD, steps('NetworkSize').vlSection.vlNodeVMSizeSSD)]",
+            "vlStorageAccountType": "[steps('NetworkSize').vlSection.vlStoragePerformance]",
+            "connectionSharedKey": "[steps('EthereumSettings').connectionSharedKey]",
+            "consortiumMemberGatewayId": "[steps('EthereumSettings').consortiumMemberGateway]",
+            "consortiumDataURL": "[steps('EthereumSettings').consortiumInformation]",
+            "transactionPermissioningContract": "[steps('EthereumSettings').transactionPermissioningContract]",
+            "omsDeploy": "[and(not(contains(toLower(location()), 'dod')), coalesce(steps('omsStep').enableOms, true))]",
+            "omsWorkspaceId": "[steps('omsStep').omsWorkspaceId]",
+            "omsPrimaryKey": "[steps('omsStep').omsPrimaryKey]",
+            "omsLocation": "[coalesce(steps('omsStep').omsLocation, steps('omsStep').omsGovLocation)]",
+            "deployUsingPublicIP": "[coalesce(steps('EthereumSettings').deployUsingPublicIP, true)]"
+        }
+    }
+}

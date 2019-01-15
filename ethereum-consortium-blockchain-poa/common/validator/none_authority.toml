@@ -1,0 +1,14 @@
+[parity]
+chain = "config/spec.json"
+base_path = "/opt/parity"
+[network]
+port = 30300
+[ipc]
+disable = false
+apis = ["parity_accounts"]
+[rpc]
+disable = true
+[ui]
+disable = true
+[websockets]
+disable = true

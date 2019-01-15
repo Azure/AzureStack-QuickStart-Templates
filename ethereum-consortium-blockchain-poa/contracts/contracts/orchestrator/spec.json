@@ -1,0 +1,51 @@
+
+{
+    "name": "PoA",
+    "engine": {
+        "authorityRound": {
+            "params": {
+                "stepDuration": "2",
+                "validators" : {
+                    "safeContract": "0x0000000000000000000000000000000000000006"
+                },
+            "gasLimitBoundDivisor": "0x400",
+            "maximumExtraDataSize": "0x2A",
+            "minGasLimit": "0x2FAF080",
+            "networkID" : "#ETH_NETWORK_ID"
+            }
+        }
+    },
+    "params": {
+        "gasLimitBoundDivisor": "0x400",
+        "maximumExtraDataSize": "0x2A",
+        "minGasLimit": "0x2FAF080",
+        "transactionPermissionContract": "0x0000000000000000000000000000000000000005",
+        "networkID" : "#ETH_NETWORK_ID",
+        "eip140Transition": "0x0",
+        "eip211Transition": "0x0",
+        "eip214Transition": "0x0",
+        "eip658Transition": "0x0",
+        "wasmActivationTransition": "0x0",
+        "maxCodeSize": 49152,
+        "maxCodeSizeTransition": "0x0"
+
+    },
+    "genesis": {
+        "seal": {
+            "authorityRound": {
+                "step": "0x0",
+                "signature": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+            }
+        },
+        "difficulty": "0x20000",
+        "gasLimit": "0x2FAF080"
+    },
+    "accounts": {
+        "0x0000000000000000000000000000000000000001": { "balance": "1", "builtin": { "name": "ecrecover", "pricing": { "linear": { "base": 3000, "word": 0 } } } },
+        "0x0000000000000000000000000000000000000002": { "balance": "1", "builtin": { "name": "sha256", "pricing": { "linear": { "base": 60, "word": 12 } } } },
+        "0x0000000000000000000000000000000000000003": { "balance": "1", "builtin": { "name": "ripemd160", "pricing": { "linear": { "base": 600, "word": 120 } } } },
+        "0x0000000000000000000000000000000000000004": { "balance": "1", "builtin": { "name": "identity", "pricing": { "linear": { "base": 15, "word": 3 } } } },
+        "0x0000000000000000000000000000000000000005": { "balance": "0", "constructor" : "#TRANSACTION_PERMISSION_CONTRACT" },
+        "0x0000000000000000000000000000000000000006": { "balance": "0", "constructor" : "#CONTRACT_BYTE_CODE" }
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "components": [
+    {
+      "component": {
+        "npmjs.org": {
+          "name": "web3",
+          "version": "0.19.1"
+        }
+      },
+      "usageDetails": "Used to query and submit transactions to the Ethereum blockchain",
+	  "integrationApproach": "Dynamic"
+    }
+  ]
+}

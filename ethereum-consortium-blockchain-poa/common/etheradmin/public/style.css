@@ -1,0 +1,55 @@
+h2 { font-weight: bold;}
+
+#menuTab {
+    font-size: 1.3em;
+    background-color: #f4f4f4;
+    padding: .3em;
+    padding-left: .5em;
+}
+.menuItem {
+    margin-right: 2em;
+    padding-bottom: .5em;
+    cursor: pointer;
+}
+.tabSelected {
+    border-bottom: 2px solid #106ebe;
+    font-weight: bold;
+}
+
+.statusBar { 
+    margin-top:1em;
+    display: none;
+    height:1.5em;
+    background-color: #f4f4f4;
+    padding:.1em;
+}
+
+.statusMessage {
+    padding-left: .5em;
+    position: relative;
+    top: -.4em;
+    color: #525252;
+}
+
+.statusIcon {
+    height: 1.5em;
+}
+
+#adminContent {
+    padding-top: 2em;
+}
+#validatorContent {
+    padding-top: 2em;
+}
+
+#validatorsHeader {
+    padding-top: 1em;
+}
+
+#updateAliasLink {
+    font-size: .8em;
+}
+
+#aliasDisplay {
+    font-size: 1.4em;
+}

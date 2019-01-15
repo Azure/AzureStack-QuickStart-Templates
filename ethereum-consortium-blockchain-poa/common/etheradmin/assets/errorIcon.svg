@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5492 827.999 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        opacity: 0.75;
+      }
+
+      .cls-3 {
+        fill: rgba(170,9,9,0.09);
+        stroke: #aa0909;
+        stroke-miterlimit: 1;
+        stroke-width: 0.997px;
+      }
+
+      .cls-4 {
+        fill: rgba(0,0,0,0.1);
+      }
+
+      .cls-4, .cls-5 {
+        fill-rule: evenodd;
+      }
+
+      .cls-5 {
+        fill: #aa0909;
+      }
+    </style>
+  </defs>
+  <g id="error" transform="translate(5476.01 539.998)">
+    <g id="Group_12045" data-name="Group 12045">
+      <g id="error-2" data-name="error">
+        <g id="Group_12039" data-name="Group 12039">
+          <rect id="Rectangle_13501" data-name="Rectangle 13501" class="cls-1" width="16" height="16" transform="translate(15.99 288.001)"/>
+        </g>
+        <g id="Group_12042" data-name="Group 12042">
+          <g id="Group_12041" data-name="Group 12041" class="cls-2">
+            <g id="Group_12040" data-name="Group 12040">
+              <ellipse id="Ellipse_2280" data-name="Ellipse 2280" class="cls-3" cx="6" cy="6" rx="6" ry="6" transform="translate(17.485 289.501)"/>
+            </g>
+          </g>
+        </g>
+        <g id="Group_12043" data-name="Group 12043">
+          <path id="Path_7860" data-name="Path 7860" class="cls-4" d="M2345.988,234v1h-1v-1Zm0-6v5h-1v-5Z" transform="translate(-2321.998 65)"/>
+        </g>
+        <g id="Group_12044" data-name="Group 12044">
+          <path id="Path_7861" data-name="Path 7861" class="cls-5" d="M2345.988,234v1h-1v-1Zm0-6v5h-1v-5Z" transform="translate(-2321.998 64)"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

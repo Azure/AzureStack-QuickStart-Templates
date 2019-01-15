@@ -1,0 +1,23 @@
+{
+  "components": [
+    {
+      "component": {
+        "npmjs.org": {
+          "name": "graceful-fs",
+          "version": "4.1.11"
+        }
+      },
+      "usageDetails": "Used by express-handlebars for admin website"
+    },
+    {
+      "component": {
+        "npmjs.org": {
+          "name": "web3",
+          "version": "0.19.1"
+        }
+      },
+      "usageDetails": "Used to query and submit transactions to the Ethereum blockchain",
+	  "integrationApproach": "Dynamic"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+    "name": "orchestrator",
+    "version": "1.0.0",
+    "description": "Node.js app for compiling smart contracts",
+    "author": "",
+    "main": "compile-contract.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+      "solc": "0.4.21"
+    }
+  }

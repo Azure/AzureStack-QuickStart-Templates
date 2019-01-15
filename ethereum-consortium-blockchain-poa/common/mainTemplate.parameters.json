@@ -1,0 +1,78 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "redmond"
+    },
+    "ethereumAdminPublicKey": {
+      "value": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf"
+    },
+    "adminUsername": {
+      "value": "azureAdmin"
+    },
+    "adminPassword": {
+      "value": "Containers44"
+    },
+    "adminSSHKey": {
+      "value": ""
+    },
+    "consortiumMemberId": {
+      "value": 0
+    },
+    "vlNodeVMSize": {
+      "value": "Standard_D1_v2"
+    },
+    "vlStorageAccountType": {
+      "value" : "Standard_LRS"
+    },
+    "consortiumMemberGatewayId": {
+      "value": ""
+    },
+    "consortiumDataURL": {
+      "value": ""
+    },
+    "omsDeploy": {
+      "value": false
+    },
+    "msiDeploy": {
+      "value": false
+    },
+    "servicePrincipalId": {
+      "value": "7def3ae7-992a-492e-88fe-94e2053e74c7"
+    },
+    "servicePrincipalSecret": {
+      "value": "f9eilhdz/hr8GDIwc39uSxfwo+e+6eoV6wCoJrb8TBU="
+    },
+    "endpointFqdn": {
+      "value": "redmond.ext-n22r1002.masd.stbtest.microsoft.com"
+    },
+    "tenantId": {
+      "value": "8272fdc6-5ec8-4aed-b10c-c09e3221910c"
+    },
+    "dockerRepository": {
+      "value": "blockchainazurestack.azurecr.io"
+    },
+    "dockerLogin": {
+      "value": "blockchainazurestack"
+    },
+    "dockerPassword": {
+      "value": "37xdgrQJbLdnbYh9W=Y7xsidIIRzeGZU"
+    },
+    "dockerImagePoaOrchestrator": {
+      "value": "orchestrator"
+    },
+    "dockerImageEtheradmin": {
+      "value": "etheradmin"
+    },
+    "dockerImageEthstat": {
+      "value": "ethstat"
+    },
+    "dockerImageValidator": {
+      "value": "validator"
+    },
+    "enableSshAccess": {
+      "value": true
+    }
+  }
+}

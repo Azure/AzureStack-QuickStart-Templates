@@ -1,0 +1,998 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "workspaceName"
+            }
+        },
+        "dataRetention": {
+            "type": "int",
+            "defaultValue": 30,
+            "minValue": 7,
+            "maxValue": 730,
+            "metadata": {
+                "description": "Number of days of retention. Free plans can only have 7 days, Standalone and OMS plans include 30 days for free"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "eastus"
+        },
+        "omsWorkspaceId": {
+            "type": "string"
+        },
+        "omsPrimaryKey": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "serviceTier" : "Standalone"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-04-26-preview",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "name": "[parameters('workspaceName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": {
+                    "Name": "[variables('serviceTier')]"
+                },
+                "retention": "[parameters('dataRetention')]"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "sampleSyslog1",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxSyslog",
+                    "properties": {
+                        "syslogName": "kern",
+                        "syslogSeverities": [
+                            {
+                                "severity": "emerg"
+                            },
+                            {
+                                "severity": "alert"
+                            },
+                            {
+                                "severity": "crit"
+                            },
+                            {
+                                "severity": "err"
+                            },
+                            {
+                                "severity": "warning"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "sampleSyslogCollection1",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxSyslogCollection",
+                    "properties": {
+                        "state": "Enabled"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "linuxDiskPerf",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "% Used Inodes"
+                            },
+                            {
+                                "counterName": "Free Megabytes"
+                            },
+                            {
+                                "counterName": "% Used Space"
+                            },
+                            {
+                                "counterName": "Disk Transfers/sec"
+                            },
+                            {
+                                "counterName": "Disk Reads/sec"
+                            },
+                            {
+                                "counterName": "Disk Writes/sec"
+                            }
+                        ],
+                        "objectName": "Logical Disk",
+                        "instanceName": "*",
+                        "intervalSeconds": 10
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "linuxMemoryPerf",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "% Available Memory"
+                            },
+                            {
+                                "counterName": "Available MBytes Memory"
+                            },
+                            {
+                                "counterName": "Used Memory MBytes"
+                            }
+                        ],
+                        "objectName": "Memory",
+                        "instanceName": "*",
+                        "intervalSeconds": 10
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "linuxNetworkPerf",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "Total Bytes Transmitted"
+                            },
+                            {
+                                "counterName": "Total Bytes Received"
+                            },
+                            {
+                                "counterName": "Total Bytes"
+                            }
+                        ],
+                        "objectName": "Network",
+                        "instanceName": "*",
+                        "intervalSeconds": 10
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "linuxProcessorPerf",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "% Processor Time"
+                            }
+                        ],
+                        "objectName": "Processor",
+                        "instanceName": "*",
+                        "intervalSeconds": 10
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "linuxSystemPerf",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "Uptime"
+                            }
+                        ],
+                        "objectName": "System",
+                        "instanceName": "*",
+                        "intervalSeconds": 60
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "sampleLinuxPerfCollection1",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceCollection",
+                    "properties": {
+                        "state": "Enabled"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "DataSource_CustomLogCollection",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "CustomLogCollection",
+                    "properties": {
+                        "state": "LinuxLogsEnabled"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "parityLogCustomLog",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "CustomLog",
+                    "properties": {
+                        "customLogName": "ParityLog_CL",
+                        "description": "Parity client log",
+                        "extractions": [
+                            {
+                                "extractionName": "TimeGenerated",
+                                "extractionType": "DateTime",
+                                "extractionProperties": {
+                                    "dateTimeExtraction": {
+                                        "regex": [
+                                            {
+                                                "matchIndex": 0,
+                                                "pattern": "((\\d{2})|(\\d{4}))-([0-1]\\d)-(([0-3]\\d)|(\\d))\\s((\\d)|([0-1]\\d)|(2[0-4])):[0-5][0-9]:[0-5][0-9]"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        ],
+                        "inputs": [
+                            {
+                                "location": {
+                                    "fileSystemLocations": {
+                                        "linuxFileTypeLogPaths": [
+                                            "/var/log/parity/parity.log"
+                                        ],
+                                        "windowsFileTypeLogPaths": null
+                                    }
+                                },
+                                "recordDelimiter": {
+                                    "regexDelimiter": {
+                                        "matchIndex": 0,
+                                        "numberdGroup": null,
+                                        "pattern": "(^.*((\\d{2})|(\\d{4}))-([0-1]\\d)-(([0-3]\\d)|(\\d))\\s((\\d)|([0-1]\\d)|(2[0-4])):[0-5][0-9]:[0-5][0-9].*$)"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "configCustomLog",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "CustomLog",
+                    "properties": {
+                        "customLogName": "ConfigLog_CL",
+                        "description": "Configuration Log File",
+                        "inputs": [
+                            {
+                                "location": {
+                                    "fileSystemLocations": {
+                                        "linuxFileTypeLogPaths": [
+                                            "/var/log/deployment/config.log"
+                                        ]
+                                    }
+                                },
+                                "recordDelimiter": {
+                                    "regexDelimiter": {
+                                        "pattern": "\\n",
+                                        "matchIndex": 0,
+                                        "matchIndexSpecified": true,
+                                        "numberedGroup": null
+                                    }
+                                }
+                            }
+                        ],
+                        "extractions": [
+                            {
+                                "extractionName": "TimeGenerated",
+                                "extractionType": "DateTime",
+                                "extractionProperties": {
+                                    "dateTimeExtraction": {
+                                        "regex": null,
+                                        "joinStringRegex": null
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "adminSiteCustomLog",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "CustomLog",
+                    "properties": {
+                        "customLogName": "AdminSiteLog_CL",
+                        "description": "Admin Site Log File",
+                        "inputs": [
+                            {
+                                "location": {
+                                    "fileSystemLocations": {
+                                        "linuxFileTypeLogPaths": [
+                                            "/var/log/adminsite/etheradmin.log"
+                                        ]
+                                    }
+                                },
+                                "recordDelimiter": {
+                                    "regexDelimiter": {
+                                        "pattern": "\\n",
+                                        "matchIndex": 0,
+                                        "matchIndexSpecified": true,
+                                        "numberedGroup": null
+                                    }
+                                }
+                            }
+                        ],
+                        "extractions": [
+                            {
+                                "extractionName": "TimeGenerated",
+                                "extractionType": "DateTime",
+                                "extractionProperties": {
+                                    "dateTimeExtraction": {
+                                        "regex": null,
+                                        "joinStringRegex": null
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "statsCustomLog",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "CustomLog",
+                    "properties": {
+                        "customLogName": "StatsLog_CL",
+                        "description": "Stats Log File",
+                        "inputs": [
+                            {
+                                "location": {
+                                    "fileSystemLocations": {
+                                        "linuxFileTypeLogPaths": [
+                                            "/var/log/stats/ethstat.log"
+                                        ]
+                                    }
+                                },
+                                "recordDelimiter": {
+                                    "regexDelimiter": {
+                                        "pattern": "\\n",
+                                        "matchIndex": 0,
+                                        "matchIndexSpecified": true,
+                                        "numberedGroup": null
+                                    }
+                                }
+                            }
+                        ],
+                        "extractions": [
+                            {
+                                "extractionName": "TimeGenerated",
+                                "extractionType": "DateTime",
+                                "extractionProperties": {
+                                    "dateTimeExtraction": {
+                                        "regex": null,
+                                        "joinStringRegex": null
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "Node Overview",
+                    "type": "views",
+                    "dependson": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "properties": {
+                        "Id": "Node Overview",
+                        "Name": "Node Overview",
+                        "Source": "Local",
+                        "Version": 2,
+                        "Dashboard": [
+                            {
+                                "Id": "NumberTileListBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "# of active nodes in last 30 minutes",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Tile": {
+                                        "Legend": "# of Validator Nodes",
+                                        "Query": "Heartbeat | where TimeGenerated >= ago(30m) | summarize dcountif(Computer, Computer startswith('vl-'))",
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "Perf | where CounterName == \"Uptime\" | where TimeGenerated > ago(30m) | summarize (LastUpdate, Uptime) = argmax(TimeGenerated, CounterValue / 86400) by Computer | order by Uptime asc ",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "ColumnsTitle": {
+                                            "Name": "Validator",
+                                            "Value": "Uptime (Days)"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "search {selected item} | sort by TimeGenerated desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "search {selected item} | sort by TimeGenerated desc"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Validator Node Performance",
+                                        "newGroup": false
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "Avg Proc Usage",
+                                                "Subtitle": "Average Processor Usage % per node (15m intervals)"
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where Computer startswith \"vl-\" | where ObjectName == \"Processor\" and InstanceName == \"_Total\" | summarize AvgProcUsage = avg(CounterValue) by Computer, bin(TimeGenerated, 15m)",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "% Available Memory",
+                                                "Subtitle": "Percentage of available memory per node (15m intervals)"
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where Computer startswith \"vl-\" and ObjectName == \"Memory\" and CounterName == \"% Available Memory\"  | summarize PercentAvailableMemory = avg(CounterValue) by Computer, bin(TimeGenerated, 15m)",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "% Used Disk Space",
+                                                "Subtitle": "Percentage of used disk space per node and mount (15m intervals)"
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where Computer startswith \"vl-\" and ObjectName == \"Logical Disk\" and CounterName == \"% Used Space\" and InstanceName !startswith \"_\"  | project TimeGenerated ,  CounterValue , DiskName = strcat(Computer, \" - \" , InstanceName ) | summarize PercentUsedSpace = avg(CounterValue) by DiskName, bin(TimeGenerated, 15m)",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "Filters": [],
+                        "OverviewTile": {
+                            "Id": "SingleNumberBuilderTile",
+                            "Type": "OverviewTile",
+                            "Version": 2,
+                            "Configuration": {
+                                "Tile": {
+                                    "Legend": "Nodes reporting heartbeats in past 30 minutes",
+                                    "Query": "Heartbeat | where TimeGenerated >= ago(30m)  | summarize dcount(Computer)"
+                                },
+                                "Advanced": {
+                                    "DataFlowVerification": {
+                                        "Enabled": true,
+                                        "Query": "Heartbeat | limit 1 | project TimeGenerated",
+                                        "Message": "Waiting for nodes to report to Log Analytics"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "Network Stats",
+                    "type": "views",
+                    "dependson": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "properties": {
+                        "Id": "Average Block Time",
+                        "Name": "Average Block Time",
+                        "Source": "Local",
+                        "Version": 2,
+                        "Dashboard": [
+                            {
+                                "Id": "TwoNumberTileListBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Block Overview",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Tile": {
+                                        "Legend": "Highest Reported Block",
+                                        "Query": "MinedBlock_CL | where TimeGenerated > ago(1h) | summarize BestBlock = max(BlockNumber_d)"
+                                    },
+                                    "SecondTile": {
+                                        "Legend": "Avg Block Time (Sec)",
+                                        "Query": "let UniqueBlocks = MinedBlock_CL | where BlockTimestamp_t > ago(24h) | distinct BlockNumber_d, BlockTimestamp_t, BlockHash_s, BlockParentHash_s; UniqueBlocks | join (     UniqueBlocks ) on $left.BlockHash_s == $right.BlockParentHash_s | extend BlockTime = datetime_diff('second', BlockTimestamp_t1, BlockTimestamp_t ) | summarize avg(BlockTime) "
+                                    },
+                                    "List": {
+                                        "Query": "let UniqueBlocks = MinedBlock_CL | where BlockTimestamp_t > ago(24h) | distinct BlockNumber_d, BlockTimestamp_t, BlockHash_s, BlockParentHash_s; UniqueBlocks | join (UniqueBlocks) on $left.BlockHash_s == $right.BlockParentHash_s | extend BlockTime = datetime_diff('second', BlockTimestamp_t1, BlockTimestamp_t ) | order by BlockNumber_d1 desc | project BlockNumber_d = trim_end(\".0\", tostring(BlockNumber_d1)), BlockTime",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "ColumnsTitle": {
+                                            "Name": "Block",
+                                            "Value": "Time (Sec)"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "MinedBlock_CL| where {selected item}",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "MinedBlock_CL| where {selected item}"
+                                        }
+                                    },
+                                    "Blade": {
+                                        "NavigationSelect": {}
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "TwoNumberTileListBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Nodes",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Tile": {
+                                        "Legend": "Last hour active nodes",
+                                        "Query": "MinedBlock_CL | where TimeGenerated > ago(1h) | distinct NodeProvider_s | count "
+                                    },
+                                    "SecondTile": {
+                                        "Legend": "Total Nodes",
+                                        "Query": "MinedBlock_CL | distinct NodeProvider_s | count "
+                                    },
+                                    "List": {
+                                        "Query": "let CurrentNodes = MinedBlock_CL | where TimeGenerated > ago(1h) | summarize BlocksReported = dcount(BlockNumber_d) by  NodeProvider_s ; MinedBlock_CL | where TimeGenerated > ago(7d) | distinct NodeProvider_s | join kind = leftouter (CurrentNodes) on NodeProvider_s | project NodeProvider_s, BlocksReported = coalesce(BlocksReported, 0)",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                            "Name": "Node",
+                                            "Value": "Blocks Reported last hour"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "MinedBlock_CL| where {selected item}| sort by BlockNumber_d desc | render table",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "MinedBlock_CL| where {selected item}| sort by BlockNumber_d desc | render table"
+                                        }
+                                    },
+                                    "Blade": {
+                                        "NavigationSelect": {}
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Validator Overview",
+                                        "newGroup": false
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "RPC Requests/sec",
+                                                "Subtitle": "Avg RPC Requests per second"
+                                            },
+                                            "LineChart": {
+                                                "Query": "ParityLog_CL | where RawData matches regex \".+INFO import\\\\s+(\\\\d+)\\\\/(\\\\d+) peers\" | extend Rpc_Requests_Sec = extract(\".*RPC:.*conn,\\\\s+(\\\\d+).*req\\\\/s\", 1, RawData, typeof(int)) | summarize Requests = avg(Rpc_Requests_Sec) by bin(TimeGenerated, 5m) | order by TimeGenerated desc",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Transactions",
+                                                "Subtitle": "Transactions per minute"
+                                            },
+                                            "LineChart": {
+                                                "Query": "MinedBlock_CL | distinct BlockNumber_d, BlockTimestamp_t, BlockTransactionCount_d | summarize sum(BlockTransactionCount_d) by bin(BlockTimestamp_t, 1m) | project Transactions = sum_BlockTransactionCount_d, TimeGenerated = BlockTimestamp_t ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Gas Used",
+                                                "Subtitle": "Gas used per minute"
+                                            },
+                                            "LineChart": {
+                                                "Query": "MinedBlock_CL | distinct BlockNumber_d, BlockTimestamp_t, BlockGasUsed_d | summarize GasUsed = sum(BlockGasUsed_d) by bin(BlockTimestamp_t, 1m) | project GasUsed, TimeGenerated = BlockTimestamp_t ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Propagation",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Network Progagation",
+                                        "Subtitle": ""
+                                    },
+                                    "LineChart": {
+                                        "Query": "let LatestPeerCount = toscalar(MinedBlock_CL | where TimeGenerated > ago(1h) | distinct NodeProvider_s | count); MinedBlock_CL | where TimeGenerated > ago(12h) | summarize PeerCount = count(), MinTime = min(ListenerReceivedTimestamp_t), MaxTime = max(ListenerReceivedTimestamp_t) by BlockNumber_d | where PeerCount >= (LatestPeerCount / 1.5) | extend BlockPropagationTime = datetime_diff('Millisecond',  MaxTime,MinTime) | order by BlockNumber_d desc | project BlockNumber_d = trim_end(\".0\", tostring(BlockNumber_d)), BlockPropagationTime",
+                                        "Callout": {
+                                            "Title": "Avg MS",
+                                            "Series": "",
+                                            "Operation": "Average"
+                                        },
+                                        "yAxis": {
+                                            "isLogarithmic": false,
+                                            "units": {
+                                                "baseUnitType": "TimeRange",
+                                                "baseUnit": "Milliseconds",
+                                                "displayUnit": "Milliseconds"
+                                            },
+                                            "customLabel": "Avg Prop Time"
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "let LatestPeerCount = toscalar(MinedBlock_CL | where TimeGenerated > ago(1h) | distinct NodeProvider_s | count); MinedBlock_CL | where TimeGenerated > ago(12h) | summarize PeerCount = count(), MinTime = min(ListenerReceivedTimestamp_t), MaxTime = max(ListenerReceivedTimestamp_t) by BlockNumber_d | where PeerCount >= (LatestPeerCount / 1.5) | extend BlockPropagationTime = datetime_diff('Millisecond',  MaxTime,MinTime) | order by BlockNumber_d desc | project BlockNumber_d = trim_end(\".0\", tostring(BlockNumber_d)), BlockPropagationTime",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                            "Name": "Block",
+                                            "Value": "Propagation Time (MS)"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": true,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "750",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "1000",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "MinedBlock_CL | where {selected item} | render table",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "MinedBlock_CL | where {selected item} | render table"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "TwoTrendsAndListBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "BLOCKS ADDED DURING SELECTED TIME RANGE",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Trend1": {
+                                        "Legend": "Blocks Added",
+                                        "LegendColor": "#00188f",
+                                        "ChartQuery": "MinedBlock_CL | summarize dcount(BlockNumber_d) by bin(BlockTimestamp_t, 15m)",
+                                        "Calculation": {
+                                            "Operation": "Sum"
+                                        }
+                                    },
+                                    "Trend2": {
+                                        "Legend": "Transactions",
+                                        "LegendColor": "#0072c6",
+                                        "ChartQuery": "MinedTransaction_CL | summarize FirstTimeStamp = min(ListenerReceivedTimestamp_t) by BlockNumber_d, TransactionHash_s | project Transaction = TransactionHash_s, FirstTimeStamp  | summarize count(Transaction) by bin(FirstTimeStamp, 15m)",
+                                        "Calculation": {
+                                            "Operation": "Sum"
+                                        }
+                                    },
+                                    "List": {
+                                        "Query": "MinedBlock_CL | summarize dcount(BlockHash_s) by BlockExtraData_s | order by BlockExtraData_s asc ",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                            "Name": "Consortium Member",
+                                            "Value": "Blocks Added"
+                                        },
+                                        "Color": "#00d8cc",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "MinedBlock_CL | where {selected item} | order by BlockNumber_d desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "MinedBlock_CL | where {selected item} | order by BlockNumber_d desc"
+                                        }
+                                    },
+                                    "Blade": {
+                                        "NavigationSelect": {}
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "NotableQueriesBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "List of queries",
+                                        "newGroup": false,
+                                        "preselectedFilters": "",
+                                        "renderMode": "grid"
+                                    },
+                                    "queries": [
+                                        {
+                                            "query": "PendingTransaction_CL | join kind = leftanti (MinedTransaction_CL) on TransactionHash_s",
+                                            "displayName": "Pending Transactions"
+                                        },
+                                        {
+                                            "query": "let UniqueBlocks = MinedBlock_CL | where BlockTimestamp_t > ago(24h) | distinct BlockNumber_d, BlockTimestamp_t, BlockHash_s, BlockParentHash_s; UniqueBlocks | join (     UniqueBlocks ) on $left.BlockHash_s == $right.BlockParentHash_s | extend BlockTime = datetime_diff('second', BlockTimestamp_t1, BlockTimestamp_t ) | order by BlockNumber_d1 desc | project Block = trim_end(\".0\", tostring(BlockNumber_d1)), BlockTime",
+                                            "displayName": "Time Per Block"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "Filters": [],
+                        "OverviewTile": {
+                            "Id": "DoubleNumberBuilderTile",
+                            "Type": "OverviewTile",
+                            "Version": 2,
+                            "Configuration": {
+                                "TileOne": {
+                                    "Legend": "Average Block Time (Seconds)",
+                                    "Query": "let UniqueBlocks = MinedBlock_CL | where BlockTimestamp_t > ago(24h) | distinct BlockNumber_d, BlockTimestamp_t, BlockHash_s, BlockParentHash_s; UniqueBlocks | join (     UniqueBlocks ) on $left.BlockHash_s == $right.BlockParentHash_s | extend BlockTime = datetime_diff('second', BlockTimestamp_t1, BlockTimestamp_t ) | summarize avg(BlockTime)"
+                                },
+                                "TileTwo": {
+                                    "Legend": "Last Reported Block Number (Seconds Ago)",
+                                    "Query": "MinedBlock_CL | summarize max(BlockTimestamp_t)  | project SecondsAgo = datetime_diff('second', now(), max_BlockTimestamp_t )"
+                                },
+                                "Advanced": {
+                                    "DataFlowVerification": {
+                                        "Enabled": true,
+                                        "Query": "search * | where Type == 'MinedBlock_CL' | take 1",
+                                        "Message": "Waiting on data from network"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "workspaceName": {
+            "type": "string",
+            "value": "[parameters('workspaceName')]"
+        },
+        "workspaceId": {
+            "type": "string",
+            "value": "[reference(parameters('workspaceName'), '2017-04-26-preview').customerId]"
+        },
+        "portalUrl": {
+            "type": "string",
+            "value": "[reference(parameters('workspaceName'), '2017-04-26-preview').portalUrl]"
+        },
+        "primarySharedKey": {
+            "type": "string",
+            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2017-04-26-preview').primarySharedKey]"
+        }
+    }
+}
