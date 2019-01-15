@@ -214,7 +214,7 @@
 				"description": "The base URL for dependent assets",
 				"artifactsBaseUrl": ""
 			},
-			"defaultValue": "https://raw.githubusercontent.com/seyadava/bc/master/BlockChain-PoA/common/"
+			"defaultValue": "https://raw.githubusercontent.com/azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain-poa/common"
 		},
 		"omsDeploy": {
 			"type": "bool",
