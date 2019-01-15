@@ -1,64 +1,112 @@
-# Error code messages
+# Deploy Ethereum Proof-Of-Authority on Azure Stack
+This template deploys all of the resources required for Ethereum POA.   
 
-| File	        | Code           | Message  |
-| ------------------- |--------------|------|
-|	configure-poa.sh	|	1	|	Insufficient parameters supplied |
-|		                |	2	|	Invalid deployment mode |
-|		                |	3	|	Failed to setup rc.local for restart on VM reboot
-|		                |	4	|	Failed to install a new key from packages.microsoft.com server
-|		                |	5	|	Failed to $2 after $NOOFTRIES number of attempts | 
-|		                |	6	|	Failed to authenticate with azure key vault | 
-|		                |	7	|	Failed to download docker image $image
-|		                |	8	|	Unable to run docker image $image
-|		                |	9	|	Unable to orchestrate poa |	
+## Prerequisites
+* Download following images from the Marketplace:
+..* Ubuntu Server 16.04 LTS (any version)
+..* Custom Script for Linux 2.0
 
-||||
-|	orchestrate-poa.bash	|	21	|	Insufficient parameters supplied |
-|		                |	22	|	Unable to generate account address from recovery phrase |
-|		                |	23	|	Unable to set a secret for passphrase in azure key vault |
-|		                |	24	|	Generated address list should not be empty or null |
-|		                |	25	|	Failed to start parity node in dev mode. |
- 
+* Create a service principal and save it's ID and secret
+* On your subscription, assign Contributor role to your service principal
+* Install MetaMask extension on Chrome
 
-||||
-|	configure-validator.sh	|	30	|	Unable to login to azure container registry	|
-|		                |	31	|	Failed to download docker image $image|
-|		                |	32	|	Unable to run docker image $ETHADMIN_DOCKER_IMAGE |
-|		                |	33	|	Failed to start container from image $ETHSTAT_DOCKER_IMAGE |
-|		                |	34	|	Unable to get boot nodes from leader network |
-|		                |	35	|	Insufficient parameters supplied    |
-|		                |	36	|	Unable to start validator node. The expected number of lease records and config files were not found in blob container  
+## Leader deployment
+1. Login in to MetaMask and create an [account](https://medium.com/publicaio/how-to-create-a-metamask-account-e6d0ef156176). 
+2. Download Ethereum POA template from [here](https://github.com/Azure/AzureStack-QuickStart-Templates/blob/master/Blockchain_PoA/common/mainTemplate.json)
+3. On Azure Stack portal, create a custom deployment by using the downloaded template
+4. Use the following parameter values:
 
-||||
-|	run-validator.sh	|	40	|	Unable to start validator node. Passphrase url should not be empty	|
-|		                |	41	|	Unable to start validator node. Passphrase should not be empty |
-|		                |	42	|	Unable to run docker image $VALIDATOR_DOCKER_IMAGE |
-|		                |	43	|	Insufficient parameters supplied    |
+| Parameter Name | Value                                    |
+|----------------|:----------------------------------------:|
+| Location       | Location of your Azure Stack environment |
+| isJoiningExistingNetwork | False - This should be false for leader deployment |
+| regionCount | 1 - This is always 1 for Azure Stack |
+| Location_1 | Location of your Azure Stack environment |
+| Location_2 | N/A (don't change the default value) |
+| Location_3 | N/A (don't change the default value) |
+| Location_4 | N/A (don't change the default value) |
+| Location_5 | N/A (don't change the default value) |
+| AuthType | password |
+| AdminUserName | Username of your Linux admin account |
+| AdminPassword | Password of your Linux admin account |
+| AdminSSHKey | You can use SSH Keys instead of password to access your Linux account |
+| EthereumNetworkID | Arbitary value less than 2147483647 |
+| ConsortiumMemberID | The ID associated with each member of the consortium network. This ID should be unique in the network |
+| EthereumAdminPublicKey | Ethereum account address that is used for participating in PoA member management. Use address of the MetaMask account that was created on Step 1 |
+| DeployUsingPublicIP | True |
+| NumVLNodesRegion | Number of load balanced validator nodes |
+| VlNodeVMSize | Standard_D1_v2 |
+| VlStorageAccountType | Standard_LRS |
+| ConnectionSharedKey | N/A | 
+| ConsortiumMemberGatewayId | N/A |
+| ConsortiumDataURL | N/A for leader deployment |
+| TransactionPermissioningContract | N/A |
+| PublicRPCEndpoint | True | 
+| OmsDeploy | False | 
+| omsWorkspaceId | N/A | 
+| omsPrimaryKey | N/A | 
+| omsLocation | N/A | 
+| emailAddress | N/A | 
+| enableSshAccess | True | 
+| azureStackDeployment | True | 
+| servicePrincipalId | Service principal ID | 
+| servicePrincipalSecret | Service principal secret | 
+| endpointFqdn | Azure Stack environment FQDN | 
+| tenantId | Azure stack tenant ID | 
 
-||||
-|	validator.sh	    |	45	|	Parity is not configured properly. The enode url is not valid	|
-|		                |	46	|	Failed to add bootnode to parity |
-|		                |	47	|	Unable to generate validator address from passphrase   |
-|		                |	48	|	Unable to generate validator address from passphrase   |
-|		                |	49	|	Insufficient parameters supplied
 
+## Member deployment 
+1. Login in to MetaMask and create an [account](https://medium.com/publicaio/how-to-create-a-metamask-account-e6d0ef156176). 
+2. Go to leader's resource group deployments. From the deployments list click on Microsoft.Template deployment and go to Outputs section and save CONSORTIUM_DATA_URL value.  
+3. Download Ethereum POA template from [here](https://github.com/Azure/AzureStack-QuickStart-Templates/blob/master/Blockchain_PoA/common/mainTemplate.json)
+4. On Azure Stack portal, create a custom deployment by using the downloaded template
+5. Use the following parameter values:
 
-||||
-|	poa-utility.sh	    |	51	|	Failed to authenticate with azure key vault |
-|		                |	52	|	Unable to download file $file after $numAttempt number of attempts. |
-|		                |	53	|	Failed to $2 after $numAttempt number of attempts.
+| Parameter Name | Value                                    |
+|----------------|:----------------------------------------:|
+| Location       | Location of your Azure Stack environment |
+| isJoiningExistingNetwork | True - This should be true for joining member deployment |
+| regionCount | 1 - This is always 1 for Azure Stack |
+| Location_1 | Location of your Azure Stack environment |
+| Location_2 | N/A (don't change the default value) |
+| Location_3 | N/A (don't change the default value) |
+| Location_4 | N/A (don't change the default value) |
+| Location_5 | N/A (don't change the default value) |
+| AuthType | password |
+| AdminUserName | Username of your Linux admin account |
+| AdminPassword | Password of your Linux admin account |
+| AdminSSHKey | You can use SSH Keys instead of password to access your Linux account |
+| EthereumNetworkID | Same as leader Network ID |
+| ConsortiumMemberID | The ID associated with each member of the consortium network. This ID should be unique in the network |
+| EthereumAdminPublicKey | Ethereum account address that is used for participating in PoA member management. Use address of the MetaMask account that was created on Step 1 |
+| DeployUsingPublicIP | True |
+| NumVLNodesRegion | Number of load balanced validator nodes |
+| VlNodeVMSize | Standard_D1_v2 |
+| VlStorageAccountType | Standard_LRS |
+| ConnectionSharedKey | N/A | 
+| ConsortiumMemberGatewayId | N/A |
+| ConsortiumDataURL | ConsortiumDataURL from leader deployment output from step 2 |
+| TransactionPermissioningContract | N/A |
+| PublicRPCEndpoint | True | 
+| OmsDeploy | False | 
+| omsWorkspaceId | N/A | 
+| omsPrimaryKey | N/A | 
+| omsLocation | N/A | 
+| emailAddress | N/A | 
+| enableSshAccess | True | 
+| azureStackDeployment | True | 
+| servicePrincipalId | Service principal ID | 
+| servicePrincipalSecret | Service principal secret | 
+| endpointFqdn | Azure Stack environment FQDN | 
+| tenantId | Azure stack tenant ID | 
 
-
-||||
-|	orchestrate-util.bash	|	60	|	Unable to generate prefund passphrase |
-|		                |	61	|	Unable to generate prefund account address |
-|		                |	62	|	Unable to upload prefund passphrase file to azure storage blob after $NOTRIES attempts |
-|		                |	63	|	Contract bytecode should not be empty or null |
-|		                |	64	|	Unable to upload $BLOB_NAME file to azure storage blob after $uploadAttempts attempts |
-|		                |	65	|	Unable to upload passphrase URI file - $uriFile - to azure storage blob after $uploadAttempts attempts |
-|		                |	66	|	Unable to upload address list file to azure storage blob after $uploadAttempts attempts |
-|		                |	67	|	Unable to download file $file after $numAttempt number of attempts |
-|		                |	68	|	Unable to get data from url $url after $numAttempt number of attempts |
-
-# OMS Parity Logging
-Parity logs are read into OMS at path /var/log/parity/parity.log
+## Troubleshoot deployment issues
+To review the deployment logs for errors/failure :
+1. Using the Azure Stack tenant portal locate the load balancer in the resource group where you deploy the consortium member and click it to open its blade.
+2. Select "Inbound NAT rules"
+3. Pick the IP address of any of the VMSS instances and make note of the port from "SERVICE" column.
+4. Using an SSH console app such as Putty connect to it using the user name and password you provided in the input parameters. Default user name is "adminuser". 
+5. There are three log files that are generated as part of Ethereum POA deployment:
+..* Ethereum Deployment log located at /var/log/deployment/config.log
+..* Parity (Blockchain Application) log located at /var/log/parity/parity.log
+..* Admin website log located at /var/log/adminsite/etheradmin.log
