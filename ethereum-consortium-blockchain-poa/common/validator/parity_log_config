@@ -1,8 +1,0 @@
-LOG_PATH {
-    daily
-    size 10G
-    rotate 7
-    compress
-    notifempty
-    missingok
-}

@@ -1,7 +1,0 @@
-{
-  "name": "testing",
-  "devDependencies": {
-    "solc": "^0.4.21",
-    "web3": "^0.15.3"
-  }
-}
