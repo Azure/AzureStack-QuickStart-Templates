@@ -286,7 +286,7 @@
         ],
         "properties": {
           "hardwareProfile": {
-            "vmSize": "[variables('vmSize')]"
+            "vmSize": "[parameters('vmSize')]"
           },
           "osProfile": {
             "computerName": "[variables('vmName')]",
@@ -364,7 +364,7 @@
         ],
         "properties": {
           "hardwareProfile": {
-            "vmSize": "[variables('vmSize')]"
+            "vmSize": "[parameters('vmSize')]"
           },
           "osProfile": {
             "computerName": "[variables('vmName')]",
