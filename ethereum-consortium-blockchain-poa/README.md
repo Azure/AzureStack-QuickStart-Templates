@@ -3,8 +3,8 @@ This template deploys all of the resources required for Ethereum POA.
 
 ## Prerequisites
 * Download following images from the Marketplace:
-..* Ubuntu Server 16.04 LTS (any version)
-..* Custom Script for Linux 2.0
+    - Ubuntu Server 16.04 LTS (any version)
+    - Custom Script for Linux 2.0
 
 * Create a service principal and save it's ID and secret
 * On your subscription, assign Contributor role to your service principal
@@ -107,6 +107,6 @@ To review the deployment logs for errors/failure :
 3. Pick the IP address of any of the VMSS instances and make note of the port from "SERVICE" column.
 4. Using an SSH console app such as Putty connect to it using the user name and password you provided in the input parameters. Default user name is "adminuser". 
 5. There are three log files that are generated as part of Ethereum POA deployment:
-..* Ethereum Deployment log located at /var/log/deployment/config.log
-..* Parity (Blockchain Application) log located at /var/log/parity/parity.log
-..* Admin website log located at /var/log/adminsite/etheradmin.log
+    - Ethereum Deployment log located at /var/log/deployment/config.log
+    - Parity (Blockchain Application) log located at /var/log/parity/parity.log
+    - Admin website log located at /var/log/adminsite/etheradmin.log
