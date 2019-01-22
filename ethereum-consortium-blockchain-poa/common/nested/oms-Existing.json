@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "workspaceName"
+            }
+        },
+        "dataRetention": {
+            "type": "int",
+            "defaultValue": 30,
+            "minValue": 7,
+            "maxValue": 730,
+            "metadata": {
+                "description": "Number of days of retention. Free plans can only have 7 days, Standalone and OMS plans include 30 days for free"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "eastus"
+        },
+        "omsWorkspaceId": {
+            "type": "string"
+        },
+        "omsPrimaryKey": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [],
+    "outputs": {
+        "workspaceName": {
+            "type": "string",
+            "value": "[parameters('workspaceName')]"
+        },
+        "workspaceId": {
+            "type": "string",
+            "value": "[parameters('omsWorkspaceId')]"
+        },
+        "portalUrl": {
+            "type": "string",
+            "value": "Contact the OMS Workspace ID provider for URL and credentials"
+        },
+        "primarySharedKey": {
+            "type": "string",
+            "value": "[parameters('omsPrimaryKey')]"
+        }
+    }
+}

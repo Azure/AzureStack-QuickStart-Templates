@@ -69,6 +69,13 @@ function Decode-Parameter($parameter)
     return $parameter
 }
 
+function Quote-String($str) {
+	# Put single quote around the string
+	# Escape single quote
+    # Also escape double quote else it will be trimmed by ArgumentList
+	return "'" + $str.Replace("'", "''").Replace('"', '\"') + "'"
+}
+
 try
 {
     Log "Decode parameters"
@@ -100,7 +107,7 @@ try
 
             if (Test-Path $zipFile) 
             {
-                Expand-ZIPFile -file $zipFile -destination "$pwd"           
+                Expand-ZIPFile -file $zipFile -destination "$pwd"
                 Move-Item -Path $zipFile -Destination "$zipFile.expanded" -Force
             }
         }   
@@ -131,16 +138,13 @@ try
 
     Log "Start App Service file server configuration."
 
-    $cmd = ".\FileServer\single.ps1 " +
-        "-fileServerAdminUserName '$fileServerAdminUserName' " +
-        "-fileServerAdminPassword '$fileServerAdminPassword' " +
-        "-fileShareOwnerUserName '$fileShareOwnerUserName' " +
-        "-fileShareOwnerPassword '$fileShareOwnerPassword' " +
-        "-fileShareUserUserName '$fileShareUserUserName' " +
-        "-fileShareUserPassword '$fileShareUserPassword' "
-
-    # Escape double quote else it will be trimmed by ArgumentList
-    $cmd = $cmd.Replace('"','\"')
+    $cmd = ".\FileServer\single.ps1 "+
+        "-fileServerAdminUserName $(Quote-String $fileServerAdminUserName) "+
+        "-fileServerAdminPassword $(Quote-String $fileServerAdminPassword) "+
+        "-fileShareOwnerUserName $(Quote-String $fileShareOwnerUserName) "+
+        "-fileShareOwnerPassword $(Quote-String $fileShareOwnerPassword) "+
+        "-fileShareUserUserName $(Quote-String $fileShareUserUserName) "+
+        "-fileShareUserPassword $(Quote-String $fileShareUserPassword)"
 
     $process = Start-Process -FilePath Powershell.exe -ArgumentList $cmd -Wait -NoNewWindow -PassThru
     if ($process.ExitCode -ne 0)
