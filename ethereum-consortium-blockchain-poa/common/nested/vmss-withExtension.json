@@ -118,7 +118,7 @@
 			"identity": {
 				"type": "SystemAssigned"
 			},
-			"apiVersion": "2016-03-30",
+			"apiVersion": "2018-04-01",
 			"sku": {
 				"name": "[variables('vlNodeVMSize')]",
 				"tier": "Standard",
@@ -176,7 +176,7 @@
 		{
 			"type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
 			"name": "[concat(variables('vlVmssName'),'/omsAgentDeploy')]",
-			"apiVersion": "2016-03-30",
+			"apiVersion": "2018-04-01",
 			"dependsOn": [
 				"[variables('vlVmssName')]"
 			],
