@@ -15,9 +15,6 @@
                                          },
                        "dnsLabelPrefix":  {
                                               "value":  "mydns882017"
-                                          },
-                       "windowsOSVersion":  {
-                                                "value":  "2016-Datacenter"
-                                            }
+                                          }
                    }
 }

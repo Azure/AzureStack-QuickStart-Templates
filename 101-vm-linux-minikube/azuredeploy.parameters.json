@@ -9,7 +9,7 @@
             "value": "azureuser"
         },
         "adminPassword": {
-            "value": "secret"
+            "value": "GEN-PASSWORD"
         }
     }
 }

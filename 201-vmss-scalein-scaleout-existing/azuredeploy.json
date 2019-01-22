@@ -1,17 +1,18 @@
 {
-  "$schema":"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-  "contentVersion":"1.0.0.0",
-  "parameters":{
-    "existingVmssName":{
-      "type":"string",
-      "metadata":{
-        "description":"Name of existing VM Scale Set."
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "existingVmssName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of existing VM Scale Set."
       }
     },
-    "newCapacity":{
-      "type":"int",
-      "metadata":{
-        "description":"Number of desired VM instances."
+    "newCapacity": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of desired VM instances."
       }
     },
     "vmSku": {
@@ -22,16 +23,15 @@
       }
     }
   },
-  "resources":[
+  "resources": [
     {
-      "type":"Microsoft.Compute/virtualMachineScaleSets",
-      "apiVersion":"2016-03-30",
-      "name":"[parameters('existingVmssName')]",
-      "location":"[resourceGroup().location]",
-      "sku":{
-        "name":"[parameters('vmSku')]",
-        "tier":"Standard",
-        "capacity":"[parameters('newCapacity')]"
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "name": "[parameters('existingVmssName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "[parameters('vmSku')]",
+        "tier": "Standard",
+        "capacity": "[parameters('newCapacity')]"
       }
     }
   ]

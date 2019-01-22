@@ -3,5 +3,5 @@
   "description": "Deploys the VM Access extension to modify an existing Linux VM",
   "summary": "This template deploys the Linux VMAccess extension to an existing VM in the Azure Stack POC environment, allowing for the modification of users and passwords.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

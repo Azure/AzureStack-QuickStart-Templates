@@ -3,5 +3,5 @@
     "description": "Tempate that deploys a windows VM and configures it for AD",
     "summary": "This template has default values for all the parameters",
     "githubUsername": "azurestack",
-    "dateUpdated": "2016-09-22"
+    "dateUpdated": "2018-11-06"
 }

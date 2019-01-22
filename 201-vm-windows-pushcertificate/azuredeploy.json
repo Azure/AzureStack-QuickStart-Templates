@@ -1,6 +1,7 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
   "parameters": {
     "newStorageAccountName": {
       "type": "string",
@@ -61,7 +62,7 @@
       "type": "string",
       "metadata": {
         "description": "Url of the certificate in Key Vault"
-      }, 
+      },
       "defaultValue": "https://testkv001.vault.local.azurestack.external:443/secrets/testcert002/xxxx"
     },
     "osImageSku": {
@@ -70,26 +71,26 @@
       "allowedValues": [
         "2012-R2-Datacenter",
         "2016-Datacenter-Server-Core",
-	      "2016-Datacenter"
+        "2016-Datacenter"
       ],
       "metadata": {
         "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, 2016-Datacenter."
       }
     },
-     "osImagePublisher": {
-            "type": "string",
-            "defaultValue": "MicrosoftWindowsServer",
-            "metadata": {
-                "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
-            }
-        },
-        "osImageOffer": {
-            "type": "string",
-            "defaultValue": "WindowsServer",
-            "metadata": {
-                "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
-            }
-        }
+    "osImagePublisher": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer",
+      "metadata": {
+        "description": "Maps to the publisher in the Azure Stack Platform Image Repository manifest file."
+      }
+    },
+    "osImageOffer": {
+      "type": "string",
+      "defaultValue": "WindowsServer",
+      "metadata": {
+        "description": "Maps to the Offer in the Azure Stack Platform Image Repository manifest file."
+      }
+    }
   },
   "variables": {
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
@@ -100,20 +101,18 @@
     "virtualNetworkName": "certVNET",
     "addressPrefix": "10.0.0.0/16",
     "publicIPName": "certPublicIP",
-    "publicIPAddressType": "Dynamic"    
+    "publicIPAddressType": "Dynamic"
   },
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('newStorageAccountName')]",
-      "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[parameters('storageAccountType')]"
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPName')]",
       "location": "[resourceGroup().location]",
@@ -122,7 +121,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[resourceGroup().location]",
@@ -143,7 +141,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
       "location": "[resourceGroup().location]",
@@ -169,7 +166,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('vmName')]",
       "location": "[resourceGroup().location]",

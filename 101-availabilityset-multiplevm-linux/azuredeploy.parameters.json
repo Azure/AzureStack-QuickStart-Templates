@@ -6,7 +6,7 @@
         "value": "ecsadmin"
       },
       "adminPassword": {
-        "value": "Password123!"
+        "value": "GEN-PASSWORD"
       },
       "vmNamePrefix": {
         "value": "ECS"

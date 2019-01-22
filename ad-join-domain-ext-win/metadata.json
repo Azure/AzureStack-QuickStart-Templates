@@ -3,6 +3,6 @@
     "description": "Deploy a Windows VM and joins to an existing AD present on Azure Stack",
     "summary": "This template has default values for all the parameters which works with AD template of Azure stack github",
     "githubUsername": "azurestack",
-    "dateUpdated": "2016-09-22"
+    "dateUpdated": "2018-11-06"
 }
 

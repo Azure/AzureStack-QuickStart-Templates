@@ -3,5 +3,5 @@
   "description": "Deploys the Linux Custom Script extension on an existing Linux VM",
   "summary": "This template deploys the Linux Custom Script extension to an existing VM in the Azure Stack POC environment.",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }

@@ -3,6 +3,6 @@
   "description": "Deploys a Linux Ubuntu VM and OSpatching extension",
   "summary": "This template has default values for all the parameters and deploys a Linux Ubuntu VM and OSPatching extension",
   "githubUsername": "azurestack",
-  "dateUpdated": "2016-09-20"
+  "dateUpdated": "2018-11-06"
 }
 
