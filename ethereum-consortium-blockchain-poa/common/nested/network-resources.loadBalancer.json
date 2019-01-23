@@ -58,6 +58,9 @@
 		},
 		"currentRegionCount": {
 			"type": "int"
+		},
+		"ethNetworkPort": {
+			"type": "int"
 		}
 	},
 	"variables": {
@@ -130,6 +133,24 @@
 								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe2')]"
 							},
 							"loadDistribution": "SourceIPProtocol"
+						}
+					},
+					{
+						"name": "LB-Rule3",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/frontendIPConfigurations/',parameters('lbFrontEndIpConfigName'))]"
+							},
+							"backendAddressPool": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/backendAddressPools/', parameters('backendAddressPoolName'))]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": "[parameters('ethNetworkPort')]",
+							"backendPort": "[parameters('ethNetworkPort')]",
+							"idleTimeoutInMinutes": 5,
+							"probe": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe1')]"
+							}
 						}
 					}
 				],

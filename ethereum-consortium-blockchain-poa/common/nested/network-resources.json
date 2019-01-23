@@ -290,6 +290,9 @@
 					},
 					"currentRegionCount":{
 						"value": "[copyIndex()]"
+					},
+					"ethNetworkPort":{
+						"value": "[parameters('ethNetworkPort')]"
 					}
 				}
 			}

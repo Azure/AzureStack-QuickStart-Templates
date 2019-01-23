@@ -4,7 +4,7 @@
 	"parameters": {
 		"location": {
 			"type": "string",
-			"defaultValue": "redmond",
+			"defaultValue": "[resourceGroup().location]",
 			"metadata": {
 				"description": "Resource group location for current deployment"
 			}
@@ -32,7 +32,7 @@
 		},
 		"location_1": {
 			"type": "string",
-			"defaultValue": "redmond",
+			"defaultValue": "[resourceGroup().location]",
 			"metadata": {
 				"description": "Select the first region."
 			}
@@ -208,21 +208,9 @@
 				"description": "Should RPC endpoint be exposed over public IP?"
 			}
 		},
-		"baseUrl": {
-			"type": "string",
-			"metadata": {
-				"description": "The base URL for dependent assets",
-				"artifactsBaseUrl": ""
-			},
-			"defaultValue": "https://raw.githubusercontent.com/azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain-poa/common"
-		},
 		"omsDeploy": {
 			"type": "bool",
-			"defaultValue": false
-		},
-		"msiDeploy": {
-			"type": "bool",
-			"defaultValue": false
+			"defaultValue": true
 		},
 		"omsWorkspaceId": {
 			"type": "string",
@@ -261,15 +249,22 @@
 		"enableSshAccess":
 		{
 			"type": "bool",
-			"defaultValue": true,
+			"defaultValue": false,
 			"metadata": {
 				"description": "Enables or Disables the Network Security Group rule to allow SSH port access"
+			}
+		},
+		"azureStackDeployment": {
+			"type": "bool",
+			"defaultValue": false,
+			"metadata": {
+				"description": "Whether or not deployment is taking place on an Azure Stack environment."
 			}
 		},
 		"servicePrincipalId": 
 		{
 			"type": "string",
-			"defaultValue": "454c6c39-2ff0-4342-8ed5-8450af307701",
+			"defaultValue": "",
 			"metadata": {
 				"description": "Optional - Service principal ID for environments that do not support MSI."
 			}
@@ -277,7 +272,7 @@
 		"servicePrincipalSecret": 
 		{
 			"type": "string",
-			"defaultValue": "sJIJGsiO+nO3FLDN76FFEMluGRaB3dqSRODKFtmhHgI=",
+			"defaultValue": "",
 			"metadata": {
 				"description": "Optional - Service principal secret for environments that do not support MSI."
 			}
@@ -285,7 +280,7 @@
 		"endpointFqdn": 
 		{
 			"type": "string",
-			"defaultValue": "redmond.ext-n22r1002.masd.stbtest.microsoft.com",
+			"defaultValue": "",
 			"metadata": {
 				"description": "The FQDN of the Azure Stack environemt. (e.g. local.azurestack.external)."
 			}
@@ -293,71 +288,22 @@
 		"tenantId": 
 		{
 			"type": "string",
-			"defaultValue": "73103a66-894e-4622-8ca7-da73c5c00c0b",
+			"defaultValue": "",
 			"metadata": {
 				"description": "The name or ID or the AAD tenant. (e.g. mydomain.onmicrosoft.com)."
-			}
-		},
-		"dockerRepository": 
-		{
-			"type": "string",
-			"defaultValue": "blockchainazurestack.azurecr.io",
-			"metadata": {
-				"description": "Docker repository"
-			}
-		},
-		"dockerLogin": 
-		{
-			"type": "string",
-			"defaultValue": "blockchainazurestack",
-			"metadata": {
-				"description": "Docker user name"
-			}
-		},
-		"dockerPassword": 
-		{
-			"type": "string",
-			"defaultValue": "37xdgrQJbLdnbYh9W=Y7xsidIIRzeGZU",
-			"metadata": {
-				"description": "Docker password"
-			}
-		},
-		"dockerImagePoaOrchestrator": 
-		{
-			"type": "string",
-			"defaultValue": "orchestrator:latest18",
-			"metadata": {
-				"description": "Docker Orchestrator repository"
-			}
-		},
-		"dockerImageEtheradmin": 
-		{
-			"type": "string",
-			"defaultValue": "etheradmin:latest18",
-			"metadata": {
-				"description": "Docker EtherAdmin repository"
-			}
-		},
-		"dockerImageEthstat": 
-		{
-			"type": "string",
-			"defaultValue": "ethstat:latest18",
-			"metadata": {
-				"description": "Docker Ethstat repository"
-			}
-		},
-		"dockerImageValidator": 
-		{
-			"type": "string",
-			"defaultValue": "validator:latest18",
-			"metadata": {
-				"description": "Docker Validator repository"
 			}
 		}
 	},
 	"variables": {
-		"baseUrl": "[parameters('baseUrl')]",
-		"accessType": "[if(parameters('msiDeploy'), 'MSI', 'SPN')]",
+		"dockerRepository": "ethererumregistry.azurecr.io",
+		"dockerLogin": "ethererumregistry",
+		"dockerPassword": "yn0SK6sDw/FvP2Rg9FlaqYbuB6OPrMoZ",
+		"dockerImagePoaOrchestrator": "orchestrator:latest",
+		"dockerImageEtheradmin": "etheradmin:latest",
+		"dockerImageEthstat": "ethstat:latest",
+		"dockerImageValidator": "validator:latest",
+		"baseUrl": "https://raw.githubusercontent.com/azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain-poa/common/",
+		"accessType": "[if(parameters('azureStackDeployment'), 'SPN', 'MSI')]",
 		"deploymentMode": "[if(parameters('isJoiningExistingNetwork'),'Member', 'Leader')]",
 		"deploymentGuid": "[if(parameters('isJoiningExistingNetwork'),'pid-fff6cb36-716f-46e8-bd34-10b25aabce22', 'pid-a5842b51-d2c6-486a-82e7-2bc2257ff545')]",
 		"poaScriptUrl": "[uri(variables('baseUrl'),'scripts/configure-poa.sh')]",
@@ -375,15 +321,8 @@
 		"sshNATFrontEndEndingPort": 4050,
 		"ethRpcPort": 8540,
 		"ethNetworkPort": 30300,
-		"dockerRepository": "[parameters('dockerRepository')]",
-        "dockerLogin": "[parameters('dockerLogin')]",
-        "dockerPassword": "[parameters('dockerPassword')]",
-		"dockerImagePoaOrchestrator": "[parameters('dockerImagePoaOrchestrator')]",
-		"dockerImageEtheradmin": "[parameters('dockerImageEtheradmin')]",
-		"dockerImageEthstat": "[parameters('dockerImageEthstat')]",
-		"dockerImageValidator": "[parameters('dockerImageValidator')]",
 		"linkedUrls": {
-			"vmssSetupUrl": "[uri(variables('baseUrl'),concat('nested/vmss-', if(parameters('msiDeploy'), 'with', 'without'), 'Extension.json'))]",
+			"vmssSetupUrl": "[uri(variables('baseUrl'),concat('nested/vmss-', if(parameters('azureStackDeployment'), 'without', 'with'), 'Extension.json'))]",
 			"vmssConfigUrl": "[uri(variables('baseUrl'),'nested/vmss-config.json')]",
 			"vmssNotificationUrl": "[uri(variables('baseUrl'),'nested/vmss-notification.json')]",
 			"connectionsSetupUrl": "[uri(variables('baseUrl'),'nested/connections.json')]",
@@ -392,7 +331,7 @@
 			"vnetgatewayUrl": "[uri(variables('baseUrl'),'nested/vnet-gateway.json')]",
 			"omsDeployUrl": "[uri(variables('baseUrl'),concat('nested/oms-', if(and(parameters('omsDeploy'), empty(parameters('omsWorkspaceId'))), 'DeployNew', 'Existing'), '.json'))]",
 			"keyVaultDeployUrl": "[uri(variables('baseUrl'),'nested/createKeyVault.json')]",
-			"storageDeployUrl": "[uri(variables('baseUrl'),'nested/storage.json')]"
+			"storageDeployUrl": "[uri(variables('baseUrl'),concat('nested/storage-', if(parameters('azureStackDeployment'), 'noacl', 'acl'), '.json'))]"
 		},
 		"vnetName": "[concat(variables('namingInfix'), '-vnet')]",
 		"vlSubnetName": "snet-vl",
@@ -687,7 +626,7 @@
 									"name": "accessPolicies",
 									"count": "[parameters('regionCount')]",
 									"input": {
-										"objectId": "[if(parameters('msiDeploy'), reference(variables('vmssDeploymentNames')[copyIndex('accessPolicies')].name).outputs.Result.value.vmssPrincipalId, parameters('servicePrincipalId'))]",
+										"objectId": "[if(parameters('azureStackDeployment'), parameters('servicePrincipalId'), reference(variables('vmssDeploymentNames')[copyIndex()].name).outputs.Result.value.vmssPrincipalId)]",
 										"tenantId": "[subscription().tenantId]",
 										"permissions": {
 											"keys": [
