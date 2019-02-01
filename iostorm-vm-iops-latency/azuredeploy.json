@@ -73,7 +73,22 @@
         "Standard_DS11_v2",
         "Standard_DS12_v2",
         "Standard_DS13_v2",
-        "Standard_DS14_v2"
+        "Standard_DS14_v2",
+        "Standard_F1",
+        "Standard_F2",
+        "Standard_F4",
+        "Standard_F8",
+        "Standard_F16",
+        "Standard_F1s",
+        "Standard_F2s",
+        "Standard_F4s",
+        "Standard_F8s",
+        "Standard_F16s",
+        "Standard_F1s_v2",
+        "Standard_F2s_v2",
+        "Standard_F4s_v2",
+        "Standard_F8s_v2",
+        "Standard_F16s_v2"
       ],
       "metadata": {
         "description": "VM size supported by Azure Stack."
@@ -290,7 +305,7 @@
           {
             "name": "ipconfigprivate",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -365,7 +380,7 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[variables('vmName')]",
+          "computerName":  "[concat(variables('vmName'),copyIndex())]",
           "adminUsername": "[variables('vmAdminUsername')]",
           "adminPassword": "[parameters('vmAdminPassword')]"
         },
