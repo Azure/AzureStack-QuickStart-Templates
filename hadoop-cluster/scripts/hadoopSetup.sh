@@ -182,7 +182,7 @@ attach_disks () {
 
     for DISK in "${DISKS[@]}";
     do
-        NUM_PARTS=$((NUM_PARTS + 1))
+        NUM_DISKS=$((NUM_DISKS + 1))
         echo "Working on ${DISK}"
         is_partitioned ${DISK}
         if [ ${?} -ne 0 ];
