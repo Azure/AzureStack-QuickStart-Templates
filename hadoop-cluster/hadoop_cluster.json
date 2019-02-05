@@ -340,6 +340,7 @@
         {
             "name": "workerNodeTemplate",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('storageAccountName')]",
                 "[variables('loadBalancerName')]"
@@ -399,6 +400,7 @@
         {
             "name": "masterNodeTemplate",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('storageAccountName')]",
                 "[variables('loadBalancerName')]"
@@ -452,6 +454,7 @@
         {
             "name": "jumpBoxTemplate",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "masterNodeTemplate",
                 "workerNodeTemplate"
