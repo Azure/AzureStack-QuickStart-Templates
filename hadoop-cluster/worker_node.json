@@ -136,7 +136,7 @@
                             "name": "dataDisks",
                             "count": "[parameters('numberDataDisks')]",
                             "input": {
-                                "name": "[concat('workerdatadisk_',copyIndex('workerNodes'),'_',copyIndex('numberDataDisks'))]",
+                                "name": "[concat('workerdatadisk_',copyIndex('workerNodes'),'_',copyIndex('dataDiskSize'))]",
                                 "diskSizeGB": "[parameters('dataDiskSize')]",
                                 "vhd": {
                                     "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex('workerNodes'),'/')),'data-',copyIndex('datadisks'),'.vhd')]"
