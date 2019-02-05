@@ -121,86 +121,97 @@ preinstall () {
 
 attach_disks () {
 
+    BLACKLIST="/dev/sdz|/dev/sdy"
+
+    scan_for_new_disks() {
+        # Looks for unpartitioned disks
+        declare -a RET
+        DEVS=($(ls -1 /dev/sd*|egrep -v "${BLACKLIST}"|egrep -v "[0-9]$"))
+        for DEV in "${DEVS[@]}";
+        do
+            # Check each device if there is a "1" partition.  If not,
+            # "assume" it is not partitioned.
+            if [ ! -b ${DEV}1 ];
+            then
+                RET+="${DEV} "
+            fi
+        done
+        echo "${RET}"
+    }
+
+    is_partitioned() {
+    # Checks if there is a valid partition table on the
+    # specified disk
+        OUTPUT=$(sfdisk -l ${1} 2>&1)
+        grep "No partitions found" "${OUTPUT}" >/dev/null 2>&1
+        return "${?}"
+    }
+
+    do_partition() {
+    # This function creates one (1) primary partition on the
+    # disk, using all available space
+        DISK=${1}
+        echo "n
+    p
+    1
+
+
+    t
+    fd
+    w"| fdisk "${DISK}" > /dev/null 2>&1
+
+        #
+        # Use the bash-specific $PIPESTATUS to ensure we get the correct exit code
+        # from fdisk and not from echo
+        if [ ${PIPESTATUS[1]} -ne 0 ];
+        then
+            echo "An error occurred partitioning ${DISK}" >&2
+            echo "I cannot continue" >&2
+            exit 2
+        fi
+    }
+
     #
     # Locate the datadisk
     #
+    DISKS=($(scan_for_new_disks))
+    PARTLIST=""
+    NUM_DISKS=0
 
-    Log "Everything under /dev\n$(ls /dev)"
+    echo "Disks are ${DISKS[@]}"
 
-    # List all disks.
-    Log "lsblk: \n$(lsblk)"
-
-    local DISKS=`lsblk -d | grep "disk" | awk -F ' ' '{print $1}'`
-    Log "DISKS=$DISKS"
-
-    # List all partitions.
-    local PARTS=`lsblk | grep part`
-    Log "PARTS=$PARTS"
-
-    # Get the disk without any partitions.
-    local DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
-    Log "DD=$DD"
-
-    #
-    # Format/Create partitions
-    #
-
-    Log "Creating label"
-    local n=0
-    until [ $n -ge 5 ];
+    for DISK in "${DISKS[@]}";
     do
-        parted /dev/$DD mklabel gpt && break
-        n=$[$n + 1]
-        Log "Label creation failures $n"
-        sleep 10
+        NUM_PARTS=$((NUM_PARTS + 1))
+        echo "Working on ${DISK}"
+        is_partitioned ${DISK}
+        if [ ${?} -ne 0 ];
+        then
+            echo "${DISK} is not partitioned, partitioning"
+            do_partition ${DISK}
+        fi
+        PARTITION=$(fdisk -l ${DISK}|grep -A 1 Device|tail -n 1|awk '{print $1}')
+        MOUNTPOINT=${PARTITION}
+        PARTLIST="${PARTLIST} ${PARTITION}"
+        echo "Next mount point appears to be ${MOUNTPOINT}"
+        echo "Partition ${PARTITION}"
+        read UUID UNUSED < <(blkid -u filesystem ${PARTITION}|awk -F "[= ]" '{print $3" "$5}'|tr -d "\"")
+        echo -e "\t${UUID}\t${MOUNTPOINT}\t${UNUSED}"
     done
 
-    Log "Creating partition"
-    n=0
-    until [ $n -ge 5 ];
-    do
-        parted -a opt /dev/$DD mkpart primary ext4 0% 100% && break
-        n=$[$n + 1]
-        Log "Partition creation failures $n"
-        sleep 10
-    done
+    echo "PARTLIST = ${PARTLIST}"
 
-    # write file-system lazily for performance reasons.
-    n=0
-    until [ $n -ge 5 ];
-    do
-        mkfs.ext4 -L datapartition /dev/${DD}1 -F && break
-        n=$[$n + 1]
-        Log "FS creation failures $n"
-        sleep 10
-    done
+    echo "Create software raid array"
+    mkdir $MOUNT
+    mdadm --create /dev/md127 --level 0 --raid-devices $NUM_DISKS ${PARTLIST##*( )}
+    mkfs -t ext4 /dev/md127
+    echo "/dev/md127 $MOUNT   ext4 defaults,nofail  0   2" >> /etc/fstab
+    mount -a
+    mount
 
-    # Create mount point
-    mkdir $MOUNT -p
+    df -BG
 
-    #
-    # Add to FSTAB
-    #
-
-    # Get the UUID
-    blkid -s none
-    local UUID=`blkid -s UUID -o value /dev/${DD}1`
-    local LINE=""
-
-    if [ -z "$UUID" ]; then
-        # Fall back to disk
-        LINE="$/dev/${DD}1\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-    else
-        # Use UUID
-        LINE="UUID=$UUID\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-    fi
-
-    Log "Adding '$LINE' to FSTAB"
-    echo -e "$LINE" >> /etc/fstab
-
-    # mount
-    mount $MOUNT
-    check_error $? "Could not mount $DD to $MOUNT"
+    chmod -R 0777 $MOUNT
 }
 
 ############################################################

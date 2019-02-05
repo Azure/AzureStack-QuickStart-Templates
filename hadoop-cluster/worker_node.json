@@ -21,6 +21,9 @@
         "dataDiskSize": {
             "type": "int"
         },
+        "numberDataDisks": {
+            "type": "int"
+        },
         "storageAccountName": {
             "type": "string"
         },
@@ -41,8 +44,8 @@
             "minValue": 1,
             "maxValue": 40
         },
-        "replication" : {
-            "type" : "int"
+        "replication": {
+            "type": "int"
         }
     },
     "variables": {
@@ -60,7 +63,6 @@
     "resources": [
         {
             "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
@@ -87,7 +89,6 @@
         },
         {
             "comments": "Worker nodes.",
-            "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('defaultName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
@@ -130,16 +131,20 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
                     },
-                    "dataDisks": [
+                    "copy": [
                         {
-                            "name": "[concat('workerdatadisk',copyIndex())]",
-                            "diskSizeGB": "[parameters('dataDiskSize')]",
-                            "vhd": {
-                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'data.vhd')]"
-                            },
-                            "lun": 0,
-                            "caching": "ReadWrite",
-                            "createOption": "Empty"
+                            "name": "dataDisks",
+                            "count": "[parameters('numberDataDisks')]",
+                            "input": {
+                                "name": "[concat('workerdatadisk',copyIndex('workerNodes'))]",
+                                "diskSizeGB": "[parameters('dataDiskSize')]",
+                                "vhd": {
+                                    "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex('workerNodes'),'/')),'data-',copyIndex('datadisks'),'.vhd')]"
+                                },
+                                "lun": "[copyIndex('dataDisks')]",
+                                "caching": "ReadWrite",
+                                "createOption": "Empty"
+                            }
                         }
                     ]
                 },
@@ -169,7 +174,6 @@
                 "name": "workerHadoopSetup",
                 "count": "[parameters('numberWorkerNodes')]"
             },
-            "apiVersion": "2016-03-30",
             "tags": {
                 "displayName": "hadoopSetup"
             },
