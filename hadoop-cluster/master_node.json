@@ -62,7 +62,6 @@
     "resources": [
         {
             "comments": "Network interfaces for each master node. This has a public and private IP address.",
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
@@ -99,7 +98,6 @@
         },
         {
             "comments": "These are the master nodes.",
-            "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('vmName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
@@ -171,7 +169,6 @@
         {
             "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/masterCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "masterNodes"

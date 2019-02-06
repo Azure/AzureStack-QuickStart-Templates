@@ -16,7 +16,7 @@
             operations.
         </description>
         <name>io.file.buffer.size</name>
-        <value>131072</value>
+        <value>32768</value>
     </property>
     <property>
         <description>
