@@ -424,10 +424,10 @@ setup_node () {
 
     }
 
-    echo -e 'soft nofile 38768' >> /etc/security/limits.conf
-    echo -e 'hard nofile 38768' >> /etc/security/limits.conf
-    echo -e 'soft nproc 38768' >> /etc/security/limits.conf
-    echo -e 'hard nproc 38768' >> /etc/security/limits.conf
+    echo -e '* soft nofile 38768' >> /etc/security/limits.conf
+    echo -e '* hard nofile 38768' >> /etc/security/limits.conf
+    echo -e '* soft nproc 38768' >> /etc/security/limits.conf
+    echo -e '* hard nproc 38768' >> /etc/security/limits.conf
 
     echo -e '
 if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
