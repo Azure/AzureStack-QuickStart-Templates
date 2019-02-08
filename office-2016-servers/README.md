@@ -1,9 +1,9 @@
 # Office 2016 Workloads
 
 Office workloads (Exchange 2016, SharePoint 2016 and Skype for Business 2015) designed & validated to run on Azure Stack for up to 250 users.
-Additional required workloads: Active Directory, Certificate Authority, FileServer using S2D, SQL Server 2017 
+Additional required workloads: Active Directory, Certificate Authority, FileServer using S2D, SQL Server 2017, AD FS, Windows Application Proxy (WAP)
 
-The preview templates are designed,validated and supported to work with Azure Stack beeing conneted or disconnected. Any changes to the templates will break supportability. 
+The preview templates are designed, validated and supported to work with Azure Stack beeing connected or disconnected. Any changes to the templates will break supportability. 
 
 
 ## Requirements
@@ -18,6 +18,8 @@ THe following Marketplace Items must be installed on Azure Stack:
 - Antimalware Extension
 - SQL IAAS Extension
 - Custom Script Extension for Windows
+- Azure Diagnostic Extension for Windows
+- Azure Performance Diagnostic
 
 
 ### Exchange 2016
@@ -31,7 +33,7 @@ UcmaRuntimeSetup.exe file stored in .\artifacts\exchange2016-ha folder
 
 (https://www.microsoft.com/en-us/download/details.aspx?id=34992)
 
-Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter. CU 10 is not supported for initial deployment and must be applied manually post deployment
+Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter. 
 
 ### Skype for Business 2015
 
@@ -48,12 +50,13 @@ Skype for Business 2015 ISO file stored in .\artifacts\SFB folder
 2. Download additional files like ISO as called out for the individual products
 3. Create Storage Account, Blob Container with access set to blob
 4. Upload the content from the artifacts folder
-5. Deploy the Templates in the following order: AD, CA, S2D, Exchange 2016, SQL 2017
+5. Deploy the Templates in the following order: AD, WAP, CA, S2D, Exchange 2016, SQL 2017, Skype, ADFS
 
 ### Deploy automated via PowerShell
 1. Download artifacts and content
 2. Download additional files like ISO as called out for the individual products
-3. Run the PrepareaAndDeploy.ps1 PowerShell script
+3. Adjust each .\Template\Example\azuredeploy.parameters.json file with your values 
+3. Run the PrepareAndDeploy.ps1 PowerShell script
 
 ### Connect
 
@@ -66,7 +69,7 @@ a site to site VPN to access via the internal network. Publishing is done via Wi
 This folder contains all the individual product templates
 
 .\Artifacts
-This folder contains requires DSC and Setup files
+This folder contains required DSC, Custom scripts and Setup files
 
 .\PrepareOnly.ps1
 This will create a storage account and uploads all artifacts. This is typically used when you plan to deploy the templates manually one by one using Portal, PS or CLI

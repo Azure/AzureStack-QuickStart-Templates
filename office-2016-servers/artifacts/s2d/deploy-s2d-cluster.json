@@ -1,6 +1,7 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
     "parameters": {
         "namePrefix": {
             "type": "string",
@@ -106,10 +107,22 @@
         },
         "workloadsLocation": {
             "type": "string"
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of diagnostic storage account"
+            }
+          },
+        "storageAccountEndPoint": {
+            "type": "string",
+            "defaultValue": "local.azurestack.external",
+            "metadata": {
+                "description": "Endpoint domain"
+            }
         }
     },
     "variables": {
-        "apiVersionStorage": "2016-01-01",
         "storageNamePrefix": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'vm')]",
         "witnessStorageName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'cw')]",
         "witnessStorageType": "Standard_LRS",
@@ -126,14 +139,12 @@
         {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "[variables('vmAvailabilitySetName')]",
-            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "properties": {}
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('witnessStorageName')]",
-            "apiVersion": "2016-01-01",
             "location": "[resourceGroup().location]",
             "sku": {
                 "name": "[variables('witnessStorageType')]"
@@ -143,7 +154,6 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[concat(variables('storageNamePrefix'),copyindex())]",
-            "apiVersion": "2016-01-01",
             "copy": {
                 "name": "storageAccountLoop",
                 "count": "[parameters('vmCount')]"
@@ -158,7 +168,6 @@
             "name": "[concat(variables('vmNamePrefix'), copyindex(), '-nic')]",
             "type": "Microsoft.Network/networkInterfaces",
             "location": "[resourceGroup().location]",
-            "apiVersion": "2015-06-15",
             "copy": {
                 "name": "nicLoop",
                 "count": "[parameters('vmCount')]"
@@ -179,7 +188,6 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
             "copy": {
                 "name": "virtualMachineLoop",
                 "count": "[parameters('vmCount')]"
@@ -200,7 +208,7 @@
                         "value": "[concat(variables('vmNamePrefix'), copyindex())]"
                     },
                     "storageAccountUri": {
-                        "value": "[reference(concat('Microsoft.Storage/storageAccounts/',variables('StorageNamePrefix'),copyIndex()),variables('apiVersionStorage')).primaryEndpoints.blob]"
+                        "value": "[reference(concat('Microsoft.Storage/storageAccounts/',variables('StorageNamePrefix'),copyIndex()),'2016-01-01').primaryEndpoints.blob]"
                     },
                     "vmAvailabilitySetName": {
                         "value": "[variables('vmAvailabilitySetName')]"
@@ -234,6 +242,12 @@
                     },
                     "imageVersion": {
                         "value": "[parameters('imageVersion')]"
+                    },
+                    "diagnosticsStorageAccountName": {
+                        "value": "[parameters('diagnosticsStorageAccountName')]"
+                    },
+                    "storageAccountEndPoint": {
+                        "value": "[parameters('storageAccountEndPoint')]"
                     }
                 }
             }
@@ -241,7 +255,6 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmNamePrefix'),copyindex(1),'/s2dPrep')]",
-            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "virtualMachineLoop"
@@ -276,7 +289,6 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('vmNamePrefix'),'0/s2dConfig')]",
-            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "virtualMachineLoop",
@@ -314,7 +326,7 @@
                 "protectedSettings": {
                     "items": {
                         "adminPassword": "[parameters('adminPassword')]",
-                        "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"
+                        "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),'2016-01-01').keys[0].value]"
                     }
                 }
             }

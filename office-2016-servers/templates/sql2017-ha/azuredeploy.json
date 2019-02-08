@@ -1,6 +1,7 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
     "parameters": {
         "SqlAvailabilitySetName": {
             "defaultValue": "SqlAvSet",
@@ -17,14 +18,14 @@
             }
         },
         "workloadsLocation": {
-            "defaultValue": "https://mafon.blob.local.azurestack.external/workload",
+            "defaultValue": "https://colab.blob.local.azurestack.external/workload",
             "type": "String",
             "metadata": {
                 "description": "Location of workloads"
             }
         },
-		"vmPrefix": {
-            "defaultValue": "server",
+        "vmPrefix": {
+            "defaultValue": "srv",
             "type": "String",
             "minLength": 3,
             "maxLength": 8,
@@ -105,9 +106,53 @@
                 "description": "The ip address of load balancer for AO"
             },
             "defaultValue": "10.0.0.180"
+        },
+        "sizeInGb": {
+            "type": "int",
+            "minValue": 50,
+            "maxValue": 500,
+            "defaultValue": 50,
+            "metadata": {
+                "description": "Size of each stripe disk"
+            }
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of diagnostic storage account"
+            }
+        },
+        "storageAccountEndPoint": {
+            "type": "string",
+            "defaultValue": "local.azurestack.external",
+            "metadata": {
+                "description": "Endpoint domain"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS4",
+            "metadata": {
+                "description": "The size of the VM"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "[concat('ADStaticSubnet',resourceGroup().name)]",
+            "metadata": {
+                "description": "The subnet name."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "[concat('ADVNET',resourceGroup().name)]",
+            "metadata": {
+                "description": "The virtual network name"
+            }
         }
     },
     "variables": {
+        "vmCount": 2,
         "sqlPrefix": "[concat(parameters('vmPrefix'),'-sql-')]",
         "storageAccountType": "Standard_LRS",
         "uniqueStorageAccountName": "[tolower(concat('sa-',variables('sqlPrefix'), resourceGroup().name))]",
@@ -116,14 +161,11 @@
         "location": "[resourceGroup().location]",
         "vmOsDiskName": "[concat('od-',variables('sqlPrefix'))]",
         "vmDataDiskName": "[concat('dd-',variables('sqlPrefix'))]",
-        "vmSize": "Standard_DS4",
         "clusterName": "[concat(parameters('vmPrefix'),'-sql-fc')]",
         "modulesPath": "[concat(parameters('workloadsLocation'),'/')]",
         "vmNicName": "[tolower(concat(variables('sqlPrefix'),'nic-'))]",
-        "staticSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
-        "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
         "sqlAOPrepareModulesURL": "[concat(parameters('workloadsLocation'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
         "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
         "createClusterModulesURL": "[concat(parameters('workloadsLocation'),'/CreateFailoverCluster.ps1.zip')]",
@@ -131,27 +173,24 @@
         "sqlAOEPName": "[concat(parameters('vmPrefix'),'-hadr')]",
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
-        "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]"
+        "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
+        "diagnosticStorageUrl": "[concat(parameters('diagnosticsStorageAccountName'),'.blob.',parameters('storageAccountEndPoint'))]",
+        "diagnosticStorageId": "[resourceId(ResourceGroup().name, 'Microsoft.Storage/storageAccounts',parameters('diagnosticsStorageAccountName'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "[parameters('SqlAvailabilitySetName')]",
-            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
-            "properties": {}
-        },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[tolower(variables('uniqueStorageAccountName'))]",
-            "location": "[variables('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
             "properties": {
-                "accountType": "[variables('storageAccountType')]"
+                "platformUpdateDomainCount": 1,
+                "platformFaultDomainCount": 1
             }
         },
         {
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "sngsql",
             "location": "[variables('location')]",
@@ -174,7 +213,6 @@
             }
         },
         {
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('vmNicName'),copyIndex())]",
             "location": "[variables('location')]",
@@ -190,98 +228,99 @@
                     {
                         "name": "ipconfigpublic",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",                    
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('staticSubnetId')]"
-                            },                   
-                    "loadBalancerBackendAddressPools": [
-                      {
-                        "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
-                      }
-                    ]           
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                                }
+                            ]
                         }
                     }
                 ]
             }
         },
-          {
-            "apiVersion": "2015-05-01-preview",
+        {
             "name": "[variables('lbName')]",
             "type": "Microsoft.Network/loadBalancers",
             "location": "[resourceGroup().location]",
             "properties": {
                 "frontendIPConfigurations": [
                     {
-                      "properties": {
-                        "subnet": {
-                          "id": "[variables('staticSubnetId')]"
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('staticSubnetId')]"
+                            },
+                            "privateIPAddress": "[parameters('lbIpAddress')]",
+                            "privateIPAllocationMethod": "Static"
                         },
-                        "privateIPAddress": "[parameters('lbIpAddress')]",
-                        "privateIPAllocationMethod": "Static"
-                      },
-                      "name": "LoadBalancerFrontend"
+                        "name": "LoadBalancerFrontend"
                     }
-                  ],
-              "backendAddressPools": [
-                {
-                  "name": "BackendPool1"
-                }
-              ],
-              "loadBalancingRules": [
-                {
-                  "name": "LBRule",
-                  "properties": {
-                    "frontendIPConfiguration": {
-                      "id": "[variables('frontEndIPConfigID')]"
-                    },
-                    "backendAddressPool": {
-                    "id":  "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
-                    },
-                    "protocol": "Tcp",
-                    "frontendPort": 1433,
-                    "backendPort": 1433,
-                    "enableFloatingIP": false,
-                    "idleTimeoutInMinutes": 5,
-                    "probe": {
-                      "id": "[variables('lbProbeID')]"
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "BackendPool1"
                     }
-                  }
-                }
-              ],
-              "probes": [
-                {
-                  "name": "tcpProbe",
-                  "properties": {
-                    "protocol": "Tcp",
-                    "port": 59999,
-                    "intervalInSeconds": 5,
-                    "numberOfProbes": 2
-                  }
-                }
-              ]
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "LBRule",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPort": 1433,
+                            "backendPort": 1433,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 15,
+                            "probe": {
+                                "id": "[variables('lbProbeID')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "tcpProbe",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 59999,
+                            "intervalInSeconds": 20,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ]
             }
-          },
+        },
         {
             "name": "[concat(variables('SqlPrefix'),copyIndex())]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "copy": {
                 "name": "vmLoop",
                 "count": 2
             },
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]"
             ],
             "properties": {
                 "osProfile": {
                     "computerName": "[concat(variables('SqlPrefix'),copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true",
+                        "enableAutomaticUpdates": false
+                    }
                 },
                 "hardwareProfile": {
-                    "vmSize": "[variables('vmSize')]"
+                    "vmSize": "[parameters('vmSize')]"
                 },
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('SqlAvailabilitySetName'))]"
@@ -294,32 +333,92 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "osdisk",
-                        "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmOsDiskName'),copyIndex(),'.vhd')]"
-                        },
+                        "name": "[concat(variables('SqlPrefix'),copyIndex(),'-osdisk')]",
                         "caching": "ReadWrite",
-                        "createOption": "FromImage"
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
                     },
                     "dataDisks": [
                         {
                             "createOption": "empty",
                             "lun": 0,
-                            "diskSizeGB": "1023",
+                            "diskSizeGB": "[parameters('sizeInGb')]",
                             "caching": "ReadOnly",
                             "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-1')]",
-                            "vhd": {
-                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-1','.vhd')]"
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
                             }
                         },
                         {
                             "createOption": "empty",
                             "lun": 1,
-                            "diskSizeGB": "1023",
+                            "diskSizeGB": "[parameters('sizeInGb')]",
                             "caching": "ReadOnly",
                             "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-2')]",
-                            "vhd": {
-                                "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('uniqueStorageAccountContainerName'),'/',variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-2','.vhd')]"
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 2,
+                            "diskSizeGB": "[parameters('sizeInGb')]",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-3')]",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 3,
+                            "diskSizeGB": "[parameters('sizeInGb')]",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-4')]",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 4,
+                            "diskSizeGB": "[parameters('sizeInGb')]",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-5')]",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 5,
+                            "diskSizeGB": "[parameters('sizeInGb')]",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-6')]",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 6,
+                            "diskSizeGB": "[parameters('sizeInGb')]",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-7')]",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        },
+                        {
+                            "createOption": "empty",
+                            "lun": 7,
+                            "diskSizeGB": "[parameters('sizeInGb')]",
+                            "caching": "ReadOnly",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex(),'-datadisk-8')]",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
                             }
                         }
                     ]
@@ -330,21 +429,275 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
                         }
                     ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://',variables('diagnosticStorageUrl'),'/')]"
+                    }
                 }
             }
         },
         {
-            "apiVersion": "2015-06-15",
+            "name": "[concat(variables('SqlPrefix'),copyIndex(),'/IaaSDiagnostics')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "copy": {
+                "name": "vmLoop",
+                "count": 2
+            },
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Diagnostics",
+                "type": "IaaSDiagnostics",
+                "typeHandlerVersion": "1.5",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "StorageAccount": "[parameters('diagnosticsStorageAccountName')]",
+                    "WadCfg": {
+                        "DiagnosticMonitorConfiguration": {
+                            "overallQuotaInMB": 5120,
+                            "Metrics": {
+                                "resourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/', 'Microsoft.Compute/virtualMachines/', variables('SqlPrefix'),copyIndex())]",
+                                "MetricAggregation": [
+                                    {
+                                        "scheduledTransferPeriod": "PT1H"
+                                    },
+                                    {
+                                        "scheduledTransferPeriod": "PT1M"
+                                    }
+                                ]
+                            },
+                            "DiagnosticInfrastructureLogs": {
+                                "scheduledTransferLogLevelFilter": "Error"
+                            },
+                            "PerformanceCounters": {
+                                "scheduledTransferPeriod": "PT1M",
+                                "PerformanceCounterConfiguration": [
+                                    {
+                                        "counterSpecifier": "\\Processor Information(_Total)\\% Processor Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Processor Information(_Total)\\% Privileged Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Processor Information(_Total)\\% User Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Processor Information(_Total)\\Processor Frequency",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\System\\Processes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Process(_Total)\\Thread Count",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Process(_Total)\\Handle Count",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\System\\System Up Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\System\\Context Switches/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\System\\Processor Queue Length",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\% Committed Bytes In Use",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Available Bytes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Committed Bytes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Cache Bytes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Pool Paged Bytes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Pool Nonpaged Bytes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Pages/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Memory\\Page Faults/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Process(_Total)\\Working Set",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Process(_Total)\\Working Set - Private",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Read Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Write Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\% Idle Time",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Transfers/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Reads/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Writes/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\% Free Space",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\LogicalDisk(_Total)\\Free Megabytes",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Bytes Total/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Bytes Sent/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Bytes Received/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Packets/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Packets Sent/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Packets Received/sec",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Packets Outbound Errors",
+                                        "sampleRate": "PT1M"
+                                    },
+                                    {
+                                        "counterSpecifier": "\\Network Interface(*)\\Packets Received Errors",
+                                        "sampleRate": "PT1M"
+                                    }
+                                ]
+                            },
+                            "WindowsEventLog": {
+                                "scheduledTransferPeriod": "PT1M",
+                                "DataSource": [
+                                    {
+                                        "name": "Application!*[System[(Level = 1 or Level = 2 or Level = 3)]]"
+                                    },
+                                    {
+                                        "name": "Security!*[System[band(Keywords,4503599627370496)]]"
+                                    },
+                                    {
+                                        "name": "System!*[System[(Level = 1 or Level = 2 or Level = 3)]]"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[parameters('diagnosticsStorageAccountName')]",
+                    "storageAccountKey": "[listKeys(variables('diagnosticStorageId'),'2015-06-15').key1]",
+                    "storageAccountEndPoint": "[concat('https://',parameters('storageAccountEndPoint'),'/')]"
+                }
+            }
+        },
+        {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('SqlPrefix'),copyIndex(), '/SqlIaasExtension')]",
             "location": "[variables('location')]",
-            "dependsOn": [ 
-                "[concat('Microsoft.Compute/virtualMachines/', variables('SqlPrefix'),copyIndex())]" 
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('SqlPrefix'),copyIndex())]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),copyIndex(),'/extensions/','IaaSDiagnostics')]"
             ],
             "copy": {
                 "name": "vmLoop",
                 "count": 2
-             },
+            },
             "properties": {
                 "type": "SqlIaaSAgent",
                 "publisher": "Microsoft.SqlServer.Management",
@@ -374,8 +727,8 @@
                             "SQLWorkloadType": "OLTP"
                         },
                         "SQLStorageUpdateSettings": {
-                            "DiskCount": 2,
-                            "NumberOfColumns": 2,
+                            "DiskCount": 8,
+                            "NumberOfColumns": 8,
                             "StartingDeviceID": 2,
                             "DiskConfigurationType": "NEW"
                         },
@@ -390,106 +743,104 @@
                 }
             }
         },
-        {  
-            "type":"Microsoft.Compute/virtualMachines/extensions",
-            "name":"[concat(variables('SqlPrefix'),'0/sqlAOPrepare')]",
-            "apiVersion":"2015-06-15",
-            "location":"[variables('location')]",
-            "dependsOn":[  
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('SqlPrefix'),'0/sqlAOPrepare')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),'0','/extensions/','SqlIaasExtension')]",
                 "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),'1','/extensions/','SqlIaasExtension')]"
             ],
-            "properties":{  
-               "publisher":"Microsoft.Powershell",
-               "type":"DSC",
-               "typeHandlerVersion":"2.76",
-               "autoUpgradeMinorVersion":true,
-               "settings":{  
-                  "modulesURL":"[variables('sqlAOPrepareModulesURL')]",
-                  "configurationFunction":"[variables('sqlAOPrepareConfigurationFunction')]",
-                  "properties":{  
-                     "domainName":"[parameters('domainName')]",
-                     "sqlAlwaysOnEndpointName":"[variables('sqlAOEPName')]",
-                     "adminCreds":{  
-                        "userName":"[parameters('adminUserName')]",
-                        "password":"privateSettingsRef:AdminPassword"
-                     },
-                     "sqlServiceCreds":{  
-                        "userName":"[parameters('sqlServerServiceAccountUserName')]",
-                        "password":"privateSettingsRef:SqlServerServiceAccountPassword"
-                     },
-                     "NumberOfDisks":2,
-                     "WorkloadType":"OLTP",
-					 "BaseUrl":"[variables('modulesPath')]"
-                  }
-               },
-               "protectedSettings":{  
-                  "items":{  
-                     "adminPassword":"[parameters('adminPassword')]",
-                     "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]"
-                  }
-               }
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.76",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesURL": "[variables('sqlAOPrepareModulesURL')]",
+                    "configurationFunction": "[variables('sqlAOPrepareConfigurationFunction')]",
+                    "properties": {
+                        "domainName": "[parameters('domainName')]",
+                        "sqlAlwaysOnEndpointName": "[variables('sqlAOEPName')]",
+                        "adminCreds": {
+                            "userName": "[parameters('adminUserName')]",
+                            "password": "privateSettingsRef:AdminPassword"
+                        },
+                        "sqlServiceCreds": {
+                            "userName": "[parameters('sqlServerServiceAccountUserName')]",
+                            "password": "privateSettingsRef:SqlServerServiceAccountPassword"
+                        },
+                        "NumberOfDisks": 2,
+                        "WorkloadType": "OLTP",
+                        "BaseUrl": "[variables('modulesPath')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]",
+                        "sqlServerServiceAccountPassword": "[parameters('sqlServerServiceAccountPassword')]"
+                    }
+                }
             }
-         },
-         {  
-            "type":"Microsoft.Compute/virtualMachines/extensions",
-            "name":"[concat(variables('sqlPrefix'),'1/configuringAlwaysOn')]",
-            "apiVersion":"2015-06-15",
-            "location":"[variables('location')]",
-            "dependsOn":[  
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('sqlPrefix'),'1/configuringAlwaysOn')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/',variables('SqlPrefix'),'0','/extensions/','sqlAOPrepare')]"
-             ],
-            "properties":{  
-               "publisher":"Microsoft.Powershell",
-               "type":"DSC",
-               "typeHandlerVersion":"2.76",
-               "autoUpgradeMinorVersion":true,
-               "settings":{  
-                  "modulesURL":"[variables('createClusterModulesURL')]",
-                  "configurationFunction":"[variables('createClusterConfigurationFunction')]",
-                  "properties":{  
-                     "domainName":"[parameters('domainName')]",
-                     "clusterName":"[variables('clusterName')]",
-                     "sharePath":"[parameters('WitnessUnc')]",
-                     "nodes":[  
-                        "[concat(variables('sqlPrefix'),'0')]",
-                        "[concat(variables('sqlPrefix'),'1')]"
-                     ],
-                     "sqlAlwaysOnEndpointName":"[variables('sqlAOEPName')]",
-                     "sqlAlwaysOnAvailabilityGroupName":"[parameters('sqlAOAGName')]",
-                     "sqlAlwaysOnAvailabilityGroupListenerName":"[parameters('sqlAOListenerName')]",
-                     "SqlAlwaysOnAvailabilityGroupListenerPort":"[parameters('sqlAOListenerPort')]",
-                     "databaseNames":"testHA",
-                     "lbName":"[variables('lbName')]",
-                     "lbAddress":"[parameters('lbIpAddress')]",
-                     "primaryReplica":"[concat(variables('sqlPrefix'),'1')]",
-                     "secondaryReplica":"[concat(variables('sqlPrefix'),'0')]",
-                     "dnsServerName":"",
-                     "adminCreds":{  
-                        "userName":"[parameters('adminUserName')]",
-                        "password":"privateSettingsRef:adminPassword"
-                     },
-                     "sqlServiceCreds":{  
-                        "userName":"[parameters('sqlServerServiceAccountUserName')]",
-                        "password":"privateSettingsRef:sqlServerServiceAccountPassword"
-                     },
-                     "SQLAuthCreds":{  
-                        "userName":"sqlsa",
-                        "password":"privateSettingsRef:sqlAuthPassword"
-                     },
-                     "NumberOfDisks":2,
-                     "WorkloadType":"OLTP",
-					 "BaseUrl":"[variables('modulesPath')]"
-                  }
-               },
-               "protectedSettings":{  
-                  "items":{  
-                     "adminPassword":"[parameters('adminPassword')]",
-                     "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]",
-                     "sqlAuthPassword":"[parameters('sqlServerServiceAccountPassword')]"
-                  }
-               }
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.76",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesURL": "[variables('createClusterModulesURL')]",
+                    "configurationFunction": "[variables('createClusterConfigurationFunction')]",
+                    "properties": {
+                        "domainName": "[parameters('domainName')]",
+                        "clusterName": "[variables('clusterName')]",
+                        "sharePath": "[parameters('WitnessUnc')]",
+                        "nodes": [
+                            "[concat(variables('sqlPrefix'),'0')]",
+                            "[concat(variables('sqlPrefix'),'1')]"
+                        ],
+                        "sqlAlwaysOnEndpointName": "[variables('sqlAOEPName')]",
+                        "sqlAlwaysOnAvailabilityGroupName": "[parameters('sqlAOAGName')]",
+                        "sqlAlwaysOnAvailabilityGroupListenerName": "[parameters('sqlAOListenerName')]",
+                        "SqlAlwaysOnAvailabilityGroupListenerPort": "[parameters('sqlAOListenerPort')]",
+                        "databaseNames": "testHA",
+                        "lbName": "[variables('lbName')]",
+                        "lbAddress": "[parameters('lbIpAddress')]",
+                        "primaryReplica": "[concat(variables('sqlPrefix'),'1')]",
+                        "secondaryReplica": "[concat(variables('sqlPrefix'),'0')]",
+                        "dnsServerName": "",
+                        "adminCreds": {
+                            "userName": "[parameters('adminUserName')]",
+                            "password": "privateSettingsRef:adminPassword"
+                        },
+                        "sqlServiceCreds": {
+                            "userName": "[parameters('sqlServerServiceAccountUserName')]",
+                            "password": "privateSettingsRef:sqlServerServiceAccountPassword"
+                        },
+                        "SQLAuthCreds": {
+                            "userName": "sqlsa",
+                            "password": "privateSettingsRef:sqlAuthPassword"
+                        },
+                        "NumberOfDisks": 2,
+                        "WorkloadType": "OLTP",
+                        "BaseUrl": "[variables('modulesPath')]"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]",
+                        "sqlServerServiceAccountPassword": "[parameters('sqlServerServiceAccountPassword')]",
+                        "sqlAuthPassword": "[parameters('sqlServerServiceAccountPassword')]"
+                    }
+                }
             }
-         }
+        }
     ]
 }

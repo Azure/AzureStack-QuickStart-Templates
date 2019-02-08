@@ -10,19 +10,22 @@
       "value": "thoroetadm"
     },
     "workloadsLocation": {
-      "value": "https://office.blob.local.azurestack.external/workload"  
+      "value": "https://colab.blob.local.azurestack.external/workload"  
   },
   "WitnessName": {
     "value": "FS01"
 },
 "exchangeIsoUrl": {
-  "value": "https://office.blob.local.azurestack.external/workload/ExchangeServer2016-x64-cu9.iso"
+  "value": "https://colab.blob.local.azurestack.external/workload/ExchangeServer2016-x64-cu9.iso"
 },
 "DagName": {
   "value": "DAG1"
 },
+"primaryAD": {
+  "value": "srv-dc-1.contoso.com"
+},
 "licensekey": {
-  "value": "ENTERPRISEKEY"
+  "value": "EnterpriseKey"
 }
   }
 }

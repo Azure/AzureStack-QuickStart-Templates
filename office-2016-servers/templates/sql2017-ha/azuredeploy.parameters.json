@@ -5,12 +5,12 @@
     "vmPrefix": {
       "value": "srv"
     },
-
+    
     "adminUsername": {
       "value": "thoroetadm"
     },
     "workloadsLocation": {
-      "value": "https://office.blob.local.azurestack.external/workload"
+      "value": "https://colab.blob.local.azurestack.external/workload"  
   },
 "SqlAvailabilitySetName": {
   "value": "SqlAvSet"
@@ -22,10 +22,10 @@
   "value": '\\\\fs01\\data'
 },
 "sqlAuthPassword": {
-  "value": "GEN-PASSWORD"
+  "value": "MySecurePassword"
 },
 "sqlServerServiceAccountPassword": {
-  "value": "GEN-PASSWORD"
+  "value": "MySecurePassword"
 }
   }
 }

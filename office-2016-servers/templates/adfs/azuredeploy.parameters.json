@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "thoroetadm"
+    },
+    "VMPrefix": {
+      "value": "srv"
+    },
+    "workloadsLocation": {
+      "value": "https://colab.blob.local.azurestack.external/workload"  
+  },
+"domainName": {
+  "value": "contoso.com"
+},
+"AdfsSvcPassword": {
+  "value": "MySecurePassword"
+},
+"CAName": {
+  "value": "contoso-SRV-ADCS-CA"
+},
+"SharePath": {
+  "value": "\\\\fs01\\data"
+},
+"CAFQDN": {
+  "value": "srv-adcs.contoso.com"
+},
+"ilbIP": {
+  "value": "10.0.0.210"
+},
+"SqlAOListener": {
+  "value": "aon-listener.contoso.com"
+},
+"DnsName": {
+  "value": "adfs.contoso.com"
+}
+  }
+}

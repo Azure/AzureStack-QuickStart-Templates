@@ -9,7 +9,7 @@
             "value": "thoroetadm"
         },
         "workloadsLocation": {
-            "value": "https://office.blob.local.azurestack.external/workload"
+            "value": "https://colab.blob.local.azurestack.external/workload"
         },
         "vmPrefix": {
             "value": "srv"
