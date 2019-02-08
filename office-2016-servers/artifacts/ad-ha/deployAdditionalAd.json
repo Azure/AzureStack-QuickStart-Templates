@@ -1,6 +1,7 @@
 ﻿{
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
     "parameters": {
         "additionalADName": {
             "type": "string",
@@ -53,13 +54,6 @@
         }
     },
     "variables": {
-        "apiVersion": {
-            "compute": {
-                "virtualMachines": {
-                    "extensions": "2015-06-15"
-                }
-            }
-        },
         "adADCModulesURL": "[concat(parameters('assetLocation'),'/CreateADReplicaDC.ps1.zip')]",
         "adADCConfigurationFunction": "CreateADReplicaDC.ps1\\CreateADReplicaDC"
     },
@@ -68,7 +62,6 @@
             "name": "[concat(parameters('additionalADName'),'/InstallDomainController')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').compute.virtualMachines.extensions]",
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",

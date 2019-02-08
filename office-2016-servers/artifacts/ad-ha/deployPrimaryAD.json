@@ -1,6 +1,7 @@
 ﻿{
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
     "parameters": {
         "primaryADName": {
             "type": "string",
@@ -48,13 +49,6 @@
 		
     },
     "variables": {
-        "apiVersion": {
-            "compute": {
-                "virtualMachines": {
-                    "extensions": "2015-06-15"
-                }
-            }
-        },
         "adPDCModulesURL": "[concat(parameters('assetLocation'),'/CreateADPDC.ps1.zip')]",
         "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC"
     },
@@ -63,7 +57,6 @@
             "name": "[concat(parameters('primaryADName'),'/InstallDomainController')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').compute.virtualMachines.extensions]",
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",

@@ -11,14 +11,14 @@
     "adminUsername": {
       "value": "thoroetadm"
     },
-    "existingVirtualNetworkName": {
+    "virtualNetworkName": {
       "value": "ADVNETvalirg"
     },  
-    "existingSubnetName": {
+    "subnetName": {
       "value": "ADStaticSubnetvalirg"
     },
     "workloadsLocation": {
-      "value": "https://office.blob.local.azurestack.external/workload"
+      "value": "https://colab.blob.local.azurestack.external/workload"
   }
   }
 }

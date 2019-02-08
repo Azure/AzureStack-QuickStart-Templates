@@ -14,7 +14,8 @@ Add-AzureRmEnvironment -Name AzureStack -ARMEndpoint https://management.$RegionN
 Login-AzureRmAccount -Environment "AzureStack" -TenantId $TenantId
 
 #Create Resource Group
-New-AzureRmResourceGroup -Name $ResourceGroup -Location $RegionName 
+New-AzureRmResourceGroup -Name $ResourceGroup -Location $RegionName
+start-sleep -Seconds 5
 
 #Create Storage Account
 New-AzureRmStorageAccount -Name $StorageAccountName -ResourceGroupName $ResourceGroup -Type Standard_LRS -Location $RegionName
@@ -25,8 +26,10 @@ New-AzureStorageContainer -Name $StorageContainerName -Context $StorageContext -
 #Upload Artifacts
 
 ls -file .\artifacts\ad-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file .\artifacts\WAP -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
 ls -file .\artifacts\ca -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
 ls -file .\artifacts\s2d -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
 ls -file .\artifacts\exchange2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
 ls -file .\artifacts\sql2017-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
 ls -file .\artifacts\sfb2015 -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file .\artifacts\ADFS -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force

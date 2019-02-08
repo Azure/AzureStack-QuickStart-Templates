@@ -1,9 +1,10 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
     "parameters": {
         "workloadsLocation": {
-            "defaultValue": "https://templates.blob.orlando.azurestack.corp.microsoft.com/workloads",
+            "defaultValue": "https://colab.blob.local.azurestack.external/workload",
             "type": "String",
             "metadata": {
                 "description": "Location of workloads"
@@ -38,7 +39,7 @@
             }
         },
 		"vmPrefix": {
-            "defaultValue": "srvdc",
+            "defaultValue": "srv",
             "type": "String",
             "metadata": {
                 "description": "Prefix per vms name"
@@ -82,28 +83,44 @@
             "metadata": {
                 "description": "The IP of NTP Server"
             }
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of diagnostic storage account"
+            }
+        },
+        "storageAccountEndPoint": {
+            "type": "string",
+            "defaultValue": "local.azurestack.external",
+            "metadata": {
+                "description": "Endpoint domain"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "metadata": {
+                "description": "The size of the VMs."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "[concat('ADStaticSubnet',resourceGroup().name)]",
+            "metadata": {
+                "description": "The subnet name."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "[concat('ADVNET',resourceGroup().name)]",
+            "metadata": {
+                "description": "The virtual network name"
+              }
         }
     },
     "variables": {
-        "apiVersion": {
-            "storage": {
-                "storageAccounts": "2015-06-15"
-            },
-            "compute": {
-                "virtualMachines": "2015-06-15"
-            },
-            "resources": {
-                "deployments": "2015-01-01"
-            },
-            "network": {
-                "virtualNetworks": "2015-05-01-preview",
-                "loadBalancers": "2015-05-01-preview",
-                "publicIPAddresses": "2015-05-01-preview",
-                "networkSecurityGroups": "2015-05-01-preview"
-            }
-        },
         "assetLocation": "[parameters('workloadsLocation')]",
-        "adVMSize": "Standard_A2",
         "storageAccountType": "Standard_LRS",
         "adTemplateURL": "[concat(variables('assetLocation'),'/adVmTemplate.json')]",
         "adStorageName": "[tolower(concat('adsa',resourceGroup().name))]",
@@ -113,8 +130,8 @@
         "adVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment'))]",
         "adVmDeployment2": "CreateADVM2s",
         "adVmDeployment2Id": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment2'))]",
-        "adPDCVMName": "[concat(parameters('vmPrefix'),'-dc-1')]",
-        "adADCVMName": "[concat(parameters('vmPrefix'),'-dc-2')]",
+        "adPDCVMName": "[concat(parameters('vmPrefix'),'-dc-0')]",
+        "adADCVMName": "[concat(parameters('vmPrefix'),'-dc-1')]",
         "deployPrimaryAdTemplateURL": "[concat(variables('assetLocation'),'/deployPrimaryAD.json')]",
         "deployAdditionalAdTemplateURL": "[concat(variables('assetLocation'),'/deployAdditionalAd.json')]",
         "deployPrimaryAd": "ConfigureAD",
@@ -149,13 +166,11 @@
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
         "adNICName1": "ADNic1",
         "adNICName2": "ADNic2",
-        "staticSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
-        "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
         "subnets": [
             {
-                "name": "[variables('staticSubnetName')]",
+                "name": "[parameters('subnetName')]",
                 "properties": {
                     "addressPrefix": "[parameters('vmNetworkSubnet')]",
                     "networkSecurityGroup": {
@@ -170,7 +185,6 @@
             "name": "[variables('adStorageName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "location": "[resourceGroup().location]",
-            "apiVersion": "[variables('apiVersion').storage.storageAccounts]",
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }
@@ -178,14 +192,12 @@
         {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "[parameters('ADAvailabilitySetName')]",
-            "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "properties": {}
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('nsgName')]",
-            "apiVersion": "[variables('apiVersion').network.networkSecurityGroups]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "securityRules": [
@@ -207,8 +219,7 @@
         },
         {
             "type": "Microsoft.Network/virtualNetworks",
-            "name": "[variables('virtualNetworkName')]",
-            "apiVersion": "[variables('apiVersion').network.virtualNetworks]",
+            "name": "[parameters('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "addressSpace": {
@@ -228,7 +239,6 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "[variables('adVmDeployment')]",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -258,23 +268,28 @@
                         "value": "[variables('adPDCVMName')]"
                     },
                     "vmSize": {
-                        "value": "[variables('adVMSize')]"
+                        "value": "[parameters('vmSize')]"
                     },
                     "adDNicName": {
                         "value": "[variables('adNICName1')]"
                     },
                     "primaryAdIpAddress": {
                         "value": "[parameters('primaryAdIpAddress')]"
+                    },
+                    "diagnosticsStorageAccountName": {
+                        "value": "[parameters('diagnosticsStorageAccountName')]"
+                    },
+                    "storageAccountEndPoint": {
+                        "value": "[parameters('storageAccountEndPoint')]"
                     }
                 }
             },
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/',variables('adStorageName'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]"
             ]
         },
         { 
-            "apiVersion": "2015-06-15", 
             "type": "Microsoft.Compute/virtualMachines/extensions", 
             "name": "[concat(variables('adPDCVMName'),'/', 'IaaSAntimalware')]", 
             "location": "[resourceGroup().location]", 
@@ -301,7 +316,6 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "[variables('adVmDeployment2')]",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -331,23 +345,28 @@
                         "value": "[variables('adADCVMName')]"
                     },
                     "vmSize": {
-                        "value": "[variables('adVMSize')]"
+                        "value": "[parameters('vmSize')]"
                     },
                     "adDNicName": {
                         "value": "[variables('adNICName2')]"
                     },
                     "primaryAdIpAddress": {
                         "value": "[parameters('additionalAdIpAddress')]"
+                    },
+                    "diagnosticsStorageAccountName": {
+                        "value": "[parameters('diagnosticsStorageAccountName')]"
+                    },
+                    "storageAccountEndPoint": {
+                        "value": "[parameters('storageAccountEndPoint')]"
                     }
                 }
             },
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/',variables('adStorageName'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]"
             ]
         },
         { 
-            "apiVersion": "2015-06-15", 
             "type": "Microsoft.Compute/virtualMachines/extensions", 
             "name": "[concat(variables('adADCVMName'),'/', 'IaaSAntimalware')]", 
             "location": "[resourceGroup().location]", 
@@ -374,7 +393,6 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "[variables('deployPrimaryAd')]",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -413,7 +431,6 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "[variables('updateVNetDNS1')]",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -422,7 +439,7 @@
                 },
                 "parameters": {
                     "virtualNetworkName": {
-                        "value": "[variables('virtualNetworkName')]"
+                        "value": "[parameters('virtualNetworkName')]"
                     },
                     "virtualNetworkAddressRange": {
                         "value": "[parameters('virtualNetworkAddressRange')]"
@@ -445,7 +462,6 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "[variables('deployAdditionalAd')]",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -487,7 +503,6 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "[variables('updateVNetDNS2')]",
-            "apiVersion": "[variables('apiVersion').resources.deployments]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -496,7 +511,7 @@
                 },
                 "parameters": {
                     "virtualNetworkName": {
-                        "value": "[variables('virtualNetworkName')]"
+                        "value": "[parameters('virtualNetworkName')]"
                     },
                     "virtualNetworkAddressRange": {
                         "value": "[parameters('virtualNetworkAddressRange')]"
