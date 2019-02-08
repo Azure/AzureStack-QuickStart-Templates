@@ -20,6 +20,9 @@
         "numberWorkerNodes": {
             "value": 4
         },
+        "numberDataDisks": {
+            "value": 1
+        },
         "dataDiskSize": {
             "value": 512
         },

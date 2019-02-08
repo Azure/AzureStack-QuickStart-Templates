@@ -102,6 +102,15 @@
                 "description": "Size of the attached data disks in GB."
             }
         },
+        "numberDataDisks" : {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 32,
+            "metadata": {
+                "description": "The number of data disks to attach to each VM."
+            }
+        },
         "batchSize": {
             "type": "int",
             "defaultValue": 10,
@@ -144,7 +153,6 @@
             "comments": "Storage account which holds all containers and logs.",
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[toLower(variables('storageAccountName'))]",
-            "apiVersion": "2016-01-01",
             "location": "[variables('location')]",
             "properties": {
                 "accountType": "[parameters('storageAccountType')]"
@@ -152,7 +160,6 @@
         },
         {
             "comments": "Virtual network in which the nodes will reside.",
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[variables('location')]",
@@ -174,7 +181,6 @@
         },
         {
             "comments": "The public IP addresses for NAT.",
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('publicIPAddressName')]",
             "location": "[variables('location')]",
@@ -188,7 +194,6 @@
         {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "hadoop",
-            "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "properties": {
                 "platformFaultDomainCount": 1,
@@ -197,7 +202,6 @@
         },
         {
             "comments": "Network security group for the network.",
-            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('networkSecurityGroupName')]",
             "location": "[variables('location')]",
@@ -261,7 +265,6 @@
         {
             "name": "[variables('loadBalancerName')]",
             "type": "Microsoft.Network/loadBalancers",
-            "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
                 "frontendIPConfigurations": [
@@ -335,9 +338,9 @@
             ]
         },
         {
-            "apiVersion": "2016-02-01",
             "name": "workerNodeTemplate",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('storageAccountName')]",
                 "[variables('loadBalancerName')]"
@@ -363,6 +366,9 @@
                     },
                     "numberWorkerNodes": {
                         "value": "[parameters('numberWorkerNodes')]"
+                    },
+                    "numberDataDisks" : {
+                        "value": "[parameters('numberDataDisks')]"
                     },
                     "dataDiskSize": {
                         "value": "[parameters('dataDiskSize')]"
@@ -392,9 +398,9 @@
             }
         },
         {
-            "apiVersion": "2016-02-01",
             "name": "masterNodeTemplate",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "[variables('storageAccountName')]",
                 "[variables('loadBalancerName')]"
@@ -446,9 +452,9 @@
             }
         },
         {
-            "apiVersion": "2016-02-01",
             "name": "jumpBoxTemplate",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
             "dependsOn": [
                 "masterNodeTemplate",
                 "workerNodeTemplate"
