@@ -18,6 +18,8 @@ This template deploys a Linux VM from a Custom Image using Managed Disk
 
 ## Prerequisites
 
+AzureStack must be 1901 or greater to support Custom Images 
+
 Prepare or Download a Customized Linux Image Template
 Follow the below links to create/download a Linux Image 
 
