@@ -95,16 +95,6 @@ acquire_lease_on_container()
     storageAccountName=$2
     accountKey=$3
 
-	################################################
-	# Copy required certificates for Azure CLI
-	################################################
-	setup_cli_certificates
-
-	################################################
-	# Configure Cloud Endpoints in Azure CLI
-	################################################
-	configure_endpoints
-
     az storage container create --name $containerName --account-name $storageAccountName --account-key $accountKey --fail-on-exist;
     if [ $? -ne 0 ]; then
         echo "Attempt to create the lease container on storage account has failed." >> $CONFIG_LOG_FILE_PATH;
@@ -166,13 +156,13 @@ orchestrate_poa()
 	isSuccessful=""
 
 	for LOOPCOUNT in `seq 1 $NumAttempt`; do	
-		if [ "$ACCESS_TYPE" = "SPN" ]; then
-			ACCESS_TOKEN=$(get_access_token_spn "$ENDPOINTS_FQDN" "$SPN_APPID" "$SPN_KEY" "$AAD_TENANTID");
-		else
-			ACCESS_TOKEN=$(get_access_token);
-		fi
-
-		containerId=$(sudo docker run -d -v $DEPLOYMENT_LOG_PATH:$DEPLOYMENT_LOG_PATH -v $PARITY_DEV_PATH:$PARITY_DEV_PATH -e NODE_ENV=production -e NodeCount=$NodeCount -e MODE=$MODE -e KEY_VAULT_BASE_URL=$KEY_VAULT_BASE_URL -e STORAGE_ACCOUNT=$STORAGE_ACCOUNT -e CONTAINER_NAME=$CONTAINER_NAME -e STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY -e ETH_NETWORK_ID=$ETH_NETWORK_ID -e VALIDATOR_ADMIN_ACCOUNT=$VALIDATOR_ADMIN_ACCOUNT -e CONSORTIUM_DATA_URL=$CONSORTIUM_DATA_URL -e ACCESS_TOKEN=$ACCESS_TOKEN -e CONFIG_LOG_FILE_PATH=$CONFIG_LOG_FILE_PATH -e TRANSACTION_PERMISSION_CONTRACT=$TRANSACTION_PERMISSION_CONTRACT -e AAD_TENANTID=$AAD_TENANTID -e SPN_KEY=$SPN_KEY -e SPN_APPID=$SPN_APPID -e RG_NAME=$RG_NAME -e KV_NAME=$KV_NAME --network host $ORCHESTRATOR_DOCKER_IMAGE);
+		# if [ "$ACCESS_TYPE" = "SPN" ]; then
+		# 	ACCESS_TOKEN=$(get_access_token_spn "$ENDPOINTS_FQDN" "$SPN_APPID" "$SPN_KEY" "$AAD_TENANTID");
+		# else
+		# 	ACCESS_TOKEN=$(get_access_token);
+		# fi
+		ACCESS_TOKEN=""
+		containerId=$(sudo docker run -d -v $DEPLOYMENT_LOG_PATH:$DEPLOYMENT_LOG_PATH -v $PARITY_DEV_PATH:$PARITY_DEV_PATH -v $CERTIFICATE_PATH:$CERTIFICATE_PATH -e NODE_ENV=production -e NodeCount=$NodeCount -e MODE=$MODE -e KEY_VAULT_BASE_URL=$KEY_VAULT_BASE_URL -e STORAGE_ACCOUNT=$STORAGE_ACCOUNT -e CONTAINER_NAME=$CONTAINER_NAME -e STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY -e ETH_NETWORK_ID=$ETH_NETWORK_ID -e VALIDATOR_ADMIN_ACCOUNT=$VALIDATOR_ADMIN_ACCOUNT -e CONSORTIUM_DATA_URL=$CONSORTIUM_DATA_URL -e ACCESS_TOKEN=$ACCESS_TOKEN -e CONFIG_LOG_FILE_PATH=$CONFIG_LOG_FILE_PATH -e TRANSACTION_PERMISSION_CONTRACT="$TRANSACTION_PERMISSION_CONTRACT" -e AAD_TENANTID=$AAD_TENANTID -e SPN_KEY=$SPN_KEY -e SPN_APPID=$SPN_APPID -e RG_NAME=$RG_NAME -e KV_NAME=$KV_NAME -e ENDPOINTS_FQDN=$ENDPOINTS_FQDN -e IS_ADFS=$IS_ADFS --network host $ORCHESTRATOR_DOCKER_IMAGE);
 		if [ $? -ne 0 ]; then
 			unsuccessful_exit "Unable to run docker image $ORCHESTRATOR_DOCKER_IMAGE." 8;
 			break;
@@ -200,7 +190,7 @@ orchestrate_poa()
 setup_rc_local()
 {
 	echo "===== Started setup_rc_local =====";
-    echo -e '#!/bin/bash' "\nsudo -u $AZUREUSER /bin/bash $HOMEDIR/configure-validator.sh \"$AZUREUSER\" \"$NodeCount\" \"$KEY_VAULT_BASE_URL\" \"$STORAGE_ACCOUNT\" \"$CONTAINER_NAME\" \"$STORAGE_ACCOUNT_KEY\" \"$VALIDATOR_ADMIN_ACCOUNT\" \"$NUM_BOOT_NODES\" \"$RPC_PORT\" \"$OMS_WORKSPACE_ID\" \"$OMS_PRIMARY_KEY\" \"$ADMIN_SITE_PORT\" \"$CONSORTIUM_MEMBER_ID\" \"$MODE\" \"$CONSORTIUM_DATA_URL\" \"$DOCKER_REPOSITORY\" \"$DOCKER_LOGIN\" \"$DOCKER_PASSWORD\" \"$DOCKER_IMAGE_ETHERADMIN\" \"$DOCKER_IMAGE_ETHSTAT\" \"$DOCKER_IMAGE_VALIDATOR\" \"$MUST_DEPLOY_GATEWAY\" \"$ACCESS_TYPE\" \"$ENDPOINTS_FQDN\" \"$SPN_APPID\" \"$SPN_KEY\" \"$AAD_TENANTID\" >> $CONFIG_LOG_FILE_PATH 2>&1 & " | sudo tee /etc/rc.local 2>&1 1>/dev/null	
+    echo -e '#!/bin/bash' "\nsudo -u $AZUREUSER /bin/bash $HOMEDIR/configure-validator.sh \"$AZUREUSER\" \"$NodeCount\" \"$KEY_VAULT_BASE_URL\" \"$STORAGE_ACCOUNT\" \"$CONTAINER_NAME\" \"$STORAGE_ACCOUNT_KEY\" \"$VALIDATOR_ADMIN_ACCOUNT\" \"$NUM_BOOT_NODES\" \"$RPC_PORT\" \"$OMS_WORKSPACE_ID\" \"$OMS_PRIMARY_KEY\" \"$ADMIN_SITE_PORT\" \"$CONSORTIUM_MEMBER_ID\" \"$MODE\" \"$CONSORTIUM_DATA_URL\" \"$DOCKER_REPOSITORY\" \"$DOCKER_LOGIN\" \"$DOCKER_PASSWORD\" \"$DOCKER_IMAGE_ETHERADMIN\" \"$DOCKER_IMAGE_ETHSTAT\" \"$DOCKER_IMAGE_VALIDATOR\" \"$MUST_DEPLOY_GATEWAY\" \"$ACCESS_TYPE\" \"$ENDPOINTS_FQDN\" \"$SPN_APPID\" \"$SPN_KEY\" \"$AAD_TENANTID\" \"$RG_NAME\" \"$IS_ADFS\" >> $CONFIG_LOG_FILE_PATH 2>&1 & " | sudo tee /etc/rc.local 2>&1 1>/dev/null	
 	if [ $? -ne 0 ]; then
 		unsuccessful_exit "Failed to setup rc.local for restart on VM reboot." 3;
 	fi
@@ -239,6 +229,27 @@ setup_cli_certificates()
 		sudo update-ca-certificates
 		export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 		sudo sed -i -e "\$aREQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt" /etc/environment
+	fi
+
+	if [[ ! -z "$IS_ADFS" ]]; then
+		#if [[ $SPN_KEY != *"servicePrincipalCertificate.pem"* ]]; then
+		spCertName="$SPN_KEY.crt"
+		spCertKey="$SPN_KEY.prv"
+		sudo cp /var/lib/waagent/$spCertName /home/
+		sudo cp /var/lib/waagent/$spCertKey /home/
+		sudo cat /home/$spCertName /home/$spCertKey > /home/servicePrincipalCertificate.pem
+		sudo chmod 644 /home/servicePrincipalCertificate.pem
+		#SPN_KEY=/home/servicePrincipalCertificate.pem
+		az cloud register -n AzureStackCloud --endpoint-resource-manager "https://management.$ENDPOINTS_FQDN" --suffix-storage-endpoint "$ENDPOINTS_FQDN" --suffix-keyvault-dns ".vault.$ENDPOINTS_FQDN"
+		az cloud set -n AzureStackCloud
+		az cloud update --profile 2018-03-01-hybrid
+		az login --service-principal -u $SPN_APPID -p /home/servicePrincipalCertificate.pem --tenant $AAD_TENANTID
+		#fi
+	else
+		az cloud register -n AzureStackCloud --endpoint-resource-manager "https://management.$ENDPOINTS_FQDN" --suffix-storage-endpoint "$ENDPOINTS_FQDN" --suffix-keyvault-dns ".vault.$ENDPOINTS_FQDN"
+		az cloud set -n AzureStackCloud
+		az cloud update --profile 2018-03-01-hybrid
+		az login --service-principal -u $SPN_APPID -p $SPN_KEY --tenant $AAD_TENANTID
 	fi
 }
 
@@ -289,11 +300,49 @@ ENDPOINTS_FQDN=${29}
 AAD_TENANTID=${30}
 RG_NAME=${31}
 KV_NAME=${32}
+IS_ADFS=${33}
+
+# Echo out the parameters
+echo "--- configure-poa.sh starting up ---"
+echo "AZUREUSER = $AZUREUSER"
+echo "ARTIFACTS_URL_PREFIX = $ARTIFACTS_URL_PREFIX"
+echo "NUM_BOOT_NODES = $NUM_BOOT_NODES"
+echo "NodeCount = $NodeCount"
+echo "MODE=$MODE"
+echo "OMS_WORKSPACE_ID=$OMS_WORKSPACE_ID"
+echo "OMS_PRIMARY_KEY=$OMS_PRIMARY_KEY"
+echo "KEY_VAULT_BASE_URL = $KEY_VAULT_BASE_URL"
+echo "STORAGE_ACCOUNT = $STORAGE_ACCOUNT"
+echo "STORAGE_ACCOUNT_KEY = $STORAGE_ACCOUNT_KEY"
+echo "RPC_PORT = $RPC_PORT"
+echo "ADMIN_SITE_PORT = $ADMIN_SITE_PORT"
+echo "CONSORTIUM_MEMBER_ID = $CONSORTIUM_MEMBER_ID"
+echo "ETH_NETWORK_ID = $ETH_NETWORK_ID"
+echo "VALIDATOR_ADMIN_ACCOUNT = $VALIDATOR_ADMIN_ACCOUNT"
+echo "TRANSACTION_PERMISSION_CONTRACT = $TRANSACTION_PERMISSION_CONTRACT"
+echo "CONSORTIUM_DATA_URL=$CONSORTIUM_DATA_URL"
+echo "DOCKER_REPOSITORY=$DOCKER_REPOSITORY"
+echo "DOCKER_LOGIN=$DOCKER_LOGIN"
+echo "DOCKER_PASSWORD=$DOCKER_PASSWORD"
+echo "DOCKER_IMAGE_POA_ORCHESTRATOR = $DOCKER_IMAGE_POA_ORCHESTRATOR"
+echo "DOCKER_IMAGE_ETHERADMIN=$DOCKER_IMAGE_ETHERADMIN"
+echo "DOCKER_IMAGE_ETHSTAT=$DOCKER_IMAGE_ETHSTAT"
+echo "DOCKER_IMAGE_VALIDATOR = $DOCKER_IMAGE_VALIDATOR"
+echo "MUST_DEPLOY_GATEWAY=$MUST_DEPLOY_GATEWAY"
+echo "ACCESS_TYPE=$ACCESS_TYPE"
+echo "SPN_APPID=$SPN_APPID"
+echo "SPN_KEY=$SPN_KEY"
+echo "ENDPOINTS_FQDN=$ENDPOINTS_FQDN"
+echo "AAD_TENANTID=$AAD_TENANTID"
+echo "RG_NAME = $RG_NAME"
+echo "KV_NAME = $KV_NAME"
+echo "IS_ADFS = $IS_ADFS"
 
 #####################################################################################
 # Log Folder Locations
 #####################################################################################
 DEPLOYMENT_LOG_PATH="/var/log/deployment"
+CERTIFICATE_PATH="/var/lib/waagent"
 PARITY_LOG_PATH="/var/log/parity"
 PARITY_RUN_PATH="/opt/parity"
 ADMINSITE_LOG_PATH="/var/log/adminsite"
@@ -363,6 +412,9 @@ wget_with_retry "${ARTIFACTS_URL_PREFIX}/scripts/run-validator.sh";
 cd "$HOMEDIR";
 setup_dependencies
 
+# Add user to docker group and install docker
+sudo usermod -aG docker ${USER}
+install_docker
 ################################################
 # Copy required certificates for Azure CLI
 ################################################
@@ -371,11 +423,7 @@ setup_cli_certificates
 ################################################
 # Configure Cloud Endpoints in Azure CLI
 ################################################
-configure_endpoints
-
-# Add user to docker group and install docker
-sudo usermod -aG docker ${USER}
-install_docker
+#configure_endpoints
 sudo -u $AZUREUSER /bin/bash -c "mkdir -p $ETHERADMIN_HOME/public";
 download_docker_images
 
@@ -391,7 +439,7 @@ fi
 # Run validator node.
 ################################################################################################
 setup_rc_local
-sudo -u $AZUREUSER /bin/bash /home/$AZUREUSER/configure-validator.sh "$AZUREUSER" "$NodeCount" "$KEY_VAULT_BASE_URL" "$STORAGE_ACCOUNT" "$CONTAINER_NAME" "$STORAGE_ACCOUNT_KEY" "$VALIDATOR_ADMIN_ACCOUNT" "$NUM_BOOT_NODES" "$RPC_PORT" "$OMS_WORKSPACE_ID" "$OMS_PRIMARY_KEY" "$ADMIN_SITE_PORT" "$CONSORTIUM_MEMBER_ID" "$MODE" "$CONSORTIUM_DATA_URL" "$DOCKER_REPOSITORY" "$DOCKER_LOGIN" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_ETHERADMIN" "$DOCKER_IMAGE_ETHSTAT" "$DOCKER_IMAGE_VALIDATOR" "$MUST_DEPLOY_GATEWAY" "$ACCESS_TYPE" "$ENDPOINTS_FQDN" "$SPN_APPID" "$SPN_KEY" "$AAD_TENANTID" >> $CONFIG_LOG_FILE_PATH 2>&1 &
+sudo -u $AZUREUSER /bin/bash /home/$AZUREUSER/configure-validator.sh "$AZUREUSER" "$NodeCount" "$KEY_VAULT_BASE_URL" "$STORAGE_ACCOUNT" "$CONTAINER_NAME" "$STORAGE_ACCOUNT_KEY" "$VALIDATOR_ADMIN_ACCOUNT" "$NUM_BOOT_NODES" "$RPC_PORT" "$OMS_WORKSPACE_ID" "$OMS_PRIMARY_KEY" "$ADMIN_SITE_PORT" "$CONSORTIUM_MEMBER_ID" "$MODE" "$CONSORTIUM_DATA_URL" "$DOCKER_REPOSITORY" "$DOCKER_LOGIN" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_ETHERADMIN" "$DOCKER_IMAGE_ETHSTAT" "$DOCKER_IMAGE_VALIDATOR" "$MUST_DEPLOY_GATEWAY" "$ACCESS_TYPE" "$ENDPOINTS_FQDN" "$SPN_APPID" "$SPN_KEY" "$AAD_TENANTID" "$RG_NAME" "$IS_ADFS" >> $CONFIG_LOG_FILE_PATH 2>&1 &
 
 ############### Deployment Completed #########################
 echo "Commands succeeded. Exiting";

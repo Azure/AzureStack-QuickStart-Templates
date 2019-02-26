@@ -1,10 +1,11 @@
 {
 	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
 	"parameters": {
 		"location": {
 			"type": "string",
-			"defaultValue": "redmond",
+			"defaultValue": "",
 			"metadata": {
 				"description": "Resource group location for current deployment"
 			}
@@ -14,55 +15,6 @@
 			"defaultValue": false,
 			"metadata": {
 				"description": "Will this deployment be joining an existing ethereum network?"
-			}
-		},
-		"regionCount": {
-			"type": "int",
-			"defaultValue": 1,
-			"allowedValues": [
-				1,
-				2,
-				3,
-				4,
-				5
-			],
-			"metadata": {
-				"description": "Select the number of region(s) to deploy virtual machines into."
-			}
-		},
-		"location_1": {
-			"type": "string",
-			"defaultValue": "redmond",
-			"metadata": {
-				"description": "Select the first region."
-			}
-		},
-		"location_2": {
-			"type": "string",
-			"defaultValue": "eastus2",
-			"metadata": {
-				"description": "Select the second region."
-			}
-		},
-		"location_3": {
-			"type": "string",
-			"defaultValue": "centralus",
-			"metadata": {
-				"description": "Select the third region."
-			}
-		},
-		"location_4": {
-			"type": "string",
-			"defaultValue": "eastus",
-			"metadata": {
-				"description": "Select the fourth region."
-			}
-		},
-		"location_5": {
-			"type": "string",
-			"defaultValue": "westus",
-			"metadata": {
-				"description": "Select the fifth region."
 			}
 		},
 		"authType": {
@@ -84,7 +36,7 @@
 			}
 		},
 		"adminPassword": {
-			"type": "securestring",
+			"type": "string",
 			"defaultValue": "",
 			"metadata": {
 				"description": "Administrator password for each deployed VM"
@@ -121,13 +73,6 @@
 			"defaultValue": "0x0000000000000000000000000000000000000001",
 			"metadata": {
 				"description": "Ethereum account address that is used for participating in PoA member management"				
-			}
-		},
-		"deployUsingPublicIP":{
-			"type": "bool",
-			"defaultValue": true,
-			"metadata": {
-				"description": "Deploy using Public IP space or behind Vnet Gateway"
 			}
 		},
 		"numVLNodesRegion": {
@@ -173,20 +118,6 @@
 				"description": "Type of managed disks to create"
 			}
 		},
-		"connectionSharedKey": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "Shared Key for the Gateway Connection"
-			}
-		},
-		"consortiumMemberGatewayId": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "The ResourceId of the Consortium Member VNet Gateawy to which to connect to"
-			}
-		},
 		"consortiumDataURL": {
 			"type": "string",
 			"defaultValue": "",
@@ -194,13 +125,6 @@
 				"description": "The URL pointing to the consortium configuration data provided by another member's deployment"
 			}
 		},		
-		"transactionPermissioningContract": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "Bytecode for the permissioning contract"
-			}
-		},
 		"publicRPCEndpoint": {
 			"type": "bool",
 			"defaultValue": true,
@@ -208,60 +132,10 @@
 				"description": "Should RPC endpoint be exposed over public IP?"
 			}
 		},
-		"baseUrl": {
-			"type": "string",
-			"metadata": {
-				"description": "The base URL for dependent assets",
-				"artifactsBaseUrl": ""
-			},
-			"defaultValue": "https://raw.githubusercontent.com/azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain-poa/common"
-		},
-		"omsDeploy": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"msiDeploy": {
-			"type": "bool",
-			"defaultValue": false
-		},
-		"omsWorkspaceId": {
-			"type": "string",
-			"defaultValue": ""
-		},
-		"omsPrimaryKey": {
-			"type": "string",
-			"defaultValue": ""
-		},
-		"omsLocation": {
-			"type": "string",
-			"defaultValue": "eastus",
-			"metadata": {
-				"description": "Select region to deploy the Log Analytics instance"
-			},
-			"allowedValues": [
-				"eastus",
-				"westcentralus",
-				"canadacentral",
-				"westeurope",
-				"uksouth",
-				"southeastasia",
-				"australiasoutheast",
-				"centralindia",
-				"japaneast",
-				"usgovvirginia"
-			]
-		},
-		"emailAddress": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "Email for deployment notification"
-			}
-		},
 		"enableSshAccess":
 		{
 			"type": "bool",
-			"defaultValue": true,
+			"defaultValue": false,
 			"metadata": {
 				"description": "Enables or Disables the Network Security Group rule to allow SSH port access"
 			}
@@ -269,7 +143,7 @@
 		"servicePrincipalId": 
 		{
 			"type": "string",
-			"defaultValue": "454c6c39-2ff0-4342-8ed5-8450af307701",
+			"defaultValue": "",
 			"metadata": {
 				"description": "Optional - Service principal ID for environments that do not support MSI."
 			}
@@ -277,7 +151,7 @@
 		"servicePrincipalSecret": 
 		{
 			"type": "string",
-			"defaultValue": "sJIJGsiO+nO3FLDN76FFEMluGRaB3dqSRODKFtmhHgI=",
+			"defaultValue": "",
 			"metadata": {
 				"description": "Optional - Service principal secret for environments that do not support MSI."
 			}
@@ -285,7 +159,7 @@
 		"endpointFqdn": 
 		{
 			"type": "string",
-			"defaultValue": "redmond.ext-n22r1002.masd.stbtest.microsoft.com",
+			"defaultValue": "",
 			"metadata": {
 				"description": "The FQDN of the Azure Stack environemt. (e.g. local.azurestack.external)."
 			}
@@ -293,78 +167,51 @@
 		"tenantId": 
 		{
 			"type": "string",
-			"defaultValue": "73103a66-894e-4622-8ca7-da73c5c00c0b",
+			"defaultValue": "",
 			"metadata": {
 				"description": "The name or ID or the AAD tenant. (e.g. mydomain.onmicrosoft.com)."
 			}
 		},
-		"dockerRepository": 
-		{
+		"deployUsingPublicIP": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"isAdfs": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"certKeyVaultId": {
 			"type": "string",
-			"defaultValue": "blockchainazurestack.azurecr.io",
+			"defaultValue": "",
 			"metadata": {
-				"description": "Docker repository"
+				"description": "The ID of the KeyVault that holds ADFS service principal certificate"
 			}
 		},
-		"dockerLogin": 
-		{
+		"certSecretUrl": {
 			"type": "string",
-			"defaultValue": "blockchainazurestack",
+			"defaultValue": "",
 			"metadata": {
-				"description": "Docker user name"
-			}
-		},
-		"dockerPassword": 
-		{
-			"type": "string",
-			"defaultValue": "37xdgrQJbLdnbYh9W=Y7xsidIIRzeGZU",
-			"metadata": {
-				"description": "Docker password"
-			}
-		},
-		"dockerImagePoaOrchestrator": 
-		{
-			"type": "string",
-			"defaultValue": "orchestrator:latest18",
-			"metadata": {
-				"description": "Docker Orchestrator repository"
-			}
-		},
-		"dockerImageEtheradmin": 
-		{
-			"type": "string",
-			"defaultValue": "etheradmin:latest18",
-			"metadata": {
-				"description": "Docker EtherAdmin repository"
-			}
-		},
-		"dockerImageEthstat": 
-		{
-			"type": "string",
-			"defaultValue": "ethstat:latest18",
-			"metadata": {
-				"description": "Docker Ethstat repository"
-			}
-		},
-		"dockerImageValidator": 
-		{
-			"type": "string",
-			"defaultValue": "validator:latest18",
-			"metadata": {
-				"description": "Docker Validator repository"
+				"description": "The URL of the secret that holds ADFS service principal certificate"
 			}
 		}
 	},
 	"variables": {
-		"baseUrl": "[parameters('baseUrl')]",
-		"accessType": "[if(parameters('msiDeploy'), 'MSI', 'SPN')]",
+		"regionCount": 1,
+		"transactionPermissioningContract": "",
+		"dockerRepository": "ethererumregistry.azurecr.io",
+		"dockerLogin": "ethererumregistry",
+		"dockerPassword": "yn0SK6sDw/FvP2Rg9FlaqYbuB6OPrMoZ",
+		"dockerImagePoaOrchestrator": "orchestrator:hybrid",
+		"dockerImageEtheradmin": "etheradmin:hybrid",
+		"dockerImageEthstat": "ethstat:hybrid",
+		"dockerImageValidator": "validator:hybrid",
+		"baseUrl": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain-poa/common",
+		"accessType": "SPN",
+		"vmssDeploymentNames": "vmss-deploy",
 		"deploymentMode": "[if(parameters('isJoiningExistingNetwork'),'Member', 'Leader')]",
 		"deploymentGuid": "[if(parameters('isJoiningExistingNetwork'),'pid-fff6cb36-716f-46e8-bd34-10b25aabce22', 'pid-a5842b51-d2c6-486a-82e7-2bc2257ff545')]",
-		"poaScriptUrl": "[uri(variables('baseUrl'),'scripts/configure-poa.sh')]",
+		"poaScriptUrl": "[concat(variables('baseUrl'),'/scripts/configure-poa.sh')]",
 		"poaScriptFilename": "configure-poa.sh",
-		"notificationScriptUrl": "[uri(variables('baseUrl'),'scripts/trigger-deployment-email.sh')]",
-		"notificationScriptUrl": "[uri(variables('baseUrl'),'scripts/trigger-deployment-email.sh')]",
-		"notificationFilename": "trigger-deployment-email.sh",
 		"namePrefix": "eth",
 		"namingInfix": "[toLower(take(concat(variables('namePrefix'),uniqueString(resourceGroup().id),parameters('location')), 9))]",
 		"maxPeers": 30,
@@ -375,24 +222,12 @@
 		"sshNATFrontEndEndingPort": 4050,
 		"ethRpcPort": 8540,
 		"ethNetworkPort": 30300,
-		"dockerRepository": "[parameters('dockerRepository')]",
-        "dockerLogin": "[parameters('dockerLogin')]",
-        "dockerPassword": "[parameters('dockerPassword')]",
-		"dockerImagePoaOrchestrator": "[parameters('dockerImagePoaOrchestrator')]",
-		"dockerImageEtheradmin": "[parameters('dockerImageEtheradmin')]",
-		"dockerImageEthstat": "[parameters('dockerImageEthstat')]",
-		"dockerImageValidator": "[parameters('dockerImageValidator')]",
 		"linkedUrls": {
-			"vmssSetupUrl": "[uri(variables('baseUrl'),concat('nested/vmss-', if(parameters('msiDeploy'), 'with', 'without'), 'Extension.json'))]",
-			"vmssConfigUrl": "[uri(variables('baseUrl'),'nested/vmss-config.json')]",
-			"vmssNotificationUrl": "[uri(variables('baseUrl'),'nested/vmss-notification.json')]",
-			"connectionsSetupUrl": "[uri(variables('baseUrl'),'nested/connections.json')]",
-			"networkResourcesUrl": "[uri(variables('baseUrl'),'nested/network-resources.json')]",
-			"loadBalancerUrl": "[uri(variables('baseUrl'),'nested/network-resources.loadBalancer.json')]",
-			"vnetgatewayUrl": "[uri(variables('baseUrl'),'nested/vnet-gateway.json')]",
-			"omsDeployUrl": "[uri(variables('baseUrl'),concat('nested/oms-', if(and(parameters('omsDeploy'), empty(parameters('omsWorkspaceId'))), 'DeployNew', 'Existing'), '.json'))]",
-			"keyVaultDeployUrl": "[uri(variables('baseUrl'),'nested/createKeyVault.json')]",
-			"storageDeployUrl": "[uri(variables('baseUrl'),'nested/storage.json')]"
+			"vmssSetupUrl": "[concat(variables('baseUrl'),'/nested/vmss.json')]",
+			"networkResourcesUrl": "[concat(variables('baseUrl'),'/nested/network-resources.json')]",
+			"loadBalancerUrl": "[concat(variables('baseUrl'),'/nested/network-resources.loadBalancer.json')]",
+			"keyVaultDeployUrl": "[concat(variables('baseUrl'),'/nested/createKeyVault.json')]",
+			"storageDeployUrl": "[concat(variables('baseUrl'),'/nested/storage.json')]"
 		},
 		"vnetName": "[concat(variables('namingInfix'), '-vnet')]",
 		"vlSubnetName": "snet-vl",
@@ -464,18 +299,11 @@
 			"ethereumNetworkID": "[parameters('ethereumNetworkID')]",
 			"maxPeers": "[variables('maxPeers')]",
 			"ethNetworkPort": "[variables('ethNetworkPort')]",
-			"numBootNodes": "[if(lessOrEquals(mul(parameters('numVLNodesRegion'), parameters('regionCount')),2),1,2)]",
-			"numVLNodes": "[mul(parameters('numVLNodesRegion'), parameters('regionCount'))]",
+			"numBootNodes": "[if(lessOrEquals(mul(parameters('numVLNodesRegion'), variables('regionCount')),2),1,2)]",
+			"numVLNodes": "[mul(parameters('numVLNodesRegion'), variables('regionCount'))]",
 			"vlVMNamePrefix": "vl",
 			"adminSitePort": "[variables('adminSitePort')]",
 			"consortiumId": "[parameters('consortiumMemberId')]"
-		},
-		"connectionSettings": {
-			"connectionName": "conn",
-			"gatewayName": "[variables('gatewaySettings').gatewayName]",
-			"connectionSharedKey": "[parameters('connectionSharedKey')]",
-			"regionCount": "[parameters('regionCount')]",
-			"connectionMemName": "conn-to-other-gateway"
 		},
 		"vnetSettings": [
 			{
@@ -610,11 +438,7 @@
 			}
 		],
 		"locationArray": [
-			"[parameters('location_1')]",
-			"[parameters('location_2')]",
-			"[parameters('location_3')]",
-			"[parameters('location_4')]",
-			"[parameters('location_5')]"
+			"[parameters('location')]"
 		],
 		"suffixArray": [
 			"reg1",
@@ -623,32 +447,16 @@
 			"reg4",
 			"reg5"
 		],
-		"copy": [
-			{
-				"name": "vmssDeploymentNames",
-				"count": "[parameters('regionCount')]",
-				"input": {
-					"name": "[concat('vmss-dep-',variables('suffixArray')[copyIndex('vmssDeploymentNames')])]"
-				}
-			}
-		],
 		"scriptReqVmss": 
-			{
-				"fileUri": "[variables('poaScriptUrl')]",
-				"filename": "[variables('poaScriptFilename')]",
-				"consortiumData": "[parameters('consortiumDataURL')]",
-				"mode": "[variables('deploymentMode')]"
-			},
-		"scriptReqNotification": {
-			"fileUri": "[variables('notificationScriptUrl')]",
-			"filename": "[variables('notificationFilename')]"
-		},
-		"omsWorkspaceName": "[concat(variables('namingInfix'),'-oms')]",
-		"sendEmailNotification": "[not(equals(parameters('emailAddress'), ''))]"
+		{
+			"fileUri": "[variables('poaScriptUrl')]",
+			"filename": "[variables('poaScriptFilename')]",
+			"consortiumData": "[parameters('consortiumDataURL')]",
+			"mode": "[variables('deploymentMode')]"
+		}
 	},
 	"resources": [
 		{
-			"apiVersion": "2018-02-01",
 			"name": "[variables('deploymentGuid')]",
 			"type": "Microsoft.Resources/deployments",
 			"properties": {
@@ -661,12 +469,9 @@
 			}
 		},
 		{
-			"apiVersion": "2018-02-01",
 			"name": "keyVaultDeploy",
 			"type": "Microsoft.Resources/deployments",
-			"dependsOn": [
-				"vmssDeployLoop"
-			],
+			"dependsOn": [],
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
@@ -685,9 +490,9 @@
 							"Copy": [
 								{
 									"name": "accessPolicies",
-									"count": "[parameters('regionCount')]",
+									"count": "[variables('regionCount')]",
 									"input": {
-										"objectId": "[if(parameters('msiDeploy'), reference(variables('vmssDeploymentNames')[copyIndex('accessPolicies')].name).outputs.Result.value.vmssPrincipalId, parameters('servicePrincipalId'))]",
+										"objectId": "[parameters('servicePrincipalId')]",
 										"tenantId": "[subscription().tenantId]",
 										"permissions": {
 											"keys": [
@@ -706,33 +511,6 @@
 			}
 		},
 		{
-			"apiVersion": "2018-02-01",
-			"name": "deployOMS",
-			"type": "Microsoft.Resources/deployments",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('linkedUrls').omsDeployUrl]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"workspaceName": {
-						"value": "[variables('omsWorkspaceName')]"
-					},
-					"location": {
-						"value": "[parameters('omsLocation')]"
-					},
-					"omsWorkspaceId": {
-						"value": "[parameters('omsWorkspaceId')]"
-					},
-					"omsPrimaryKey": {
-						"value": "[parameters('omsPrimaryKey')]"
-					}
-				}
-			}
-		},
-		{
-			"apiVersion": "2018-02-01",
 			"name": "network-resources-deploy",
 			"type": "Microsoft.Resources/deployments",
 			"properties": {
@@ -746,7 +524,7 @@
 						"value": "[variables('vnetSettings')]"
 					},
 					"regionCount": {
-						"value": "[parameters('regionCount')]"
+						"value": "[variables('regionCount')]"
 					},
 					"locationArray": {
 						"value": "[variables('locationArray')]"
@@ -825,15 +603,14 @@
 			}
 		},
 		{
-			"apiVersion": "2018-02-01",
-			"name": "[variables('vmssDeploymentNames')[copyIndex()].name]",
+			"name": "[variables('vmssDeploymentNames')]",
 			"type": "Microsoft.Resources/deployments",
 			"dependsOn": [
 				"network-resources-deploy"
 			],
 			"copy": {
 				"name": "vmssDeployLoop",
-				"count": "[parameters('regionCount')]"
+				"count": "[variables('regionCount')]"
 			},
 			"properties": {
 				"mode": "Incremental",
@@ -860,71 +637,17 @@
 					"vnetName": {
 						"value": "[variables('vnetSettings')[copyIndex()].vnetName]"
 					},
-					"omsWorkspaceId": {
-						"value": "[reference('deployOMS').outputs.workspaceId.value]"
-					},
-					"omsPrimaryKey": {
-						"value": "[reference('deployOMS').outputs.primarySharedKey.value]"
-					},
 					"mustDeployVnetGateway":{
 						"value": "[variables('mustDeployVnetGateway')]"
-					}
-				}
-			}
-		},
-		{
-			"apiVersion": "2018-02-01",
-			"name": "[concat(variables('vmssDeploymentNames')[copyIndex()].name, '-config')]",
-			"type": "Microsoft.Resources/deployments",
-			"dependsOn": [
-				"vmssDeployLoop"
-			],
-			"copy": {
-				"name": "vmssConfigLoop",
-				"count": "[parameters('regionCount')]"
-			},
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('linkedUrls').vmssConfigUrl]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"authenticationSettings": {
-						"value": "[variables('authenticationSettings')]"
-					},
-					"vlVmssSettings": {
-						"value": "[variables('vlVmssSettings')]"
-					},
-					"extensionSettings": {
-						"value": "[variables('extensionSettings')]"
-					},
-					"consortiumDataUrl": {
-						"value": "[if(parameters('isJoiningExistingNetwork'), parameters('consortiumDataURL'), concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value))]"
 					},
 					"scriptReq": {
 						"value": "[variables('scriptReqVmss')]"
 					},
-					"location": {
-						"value": "[variables('locationArray')[copyIndex()]]"
-					},
-					"suffix": {
-						"value": "[variables('suffixArray')[copyIndex()]]"
-					},
-					"omsWorkspaceId": {
-						"value": "[reference('deployOMS').outputs.workspaceId.value]"
-					},
-					"omsPrimaryKey": {
-						"value": "[reference('deployOMS').outputs.primarySharedKey.value]"
+					"extensionSettings": {
+						"value": "[variables('extensionSettings')]"
 					},
 					"keyVaultUrl": {
 						"value": "[reference('keyVaultDeploy').outputs.KeyVaultUrl.value]"
-					},
-					"keyVaultName": {
-						"value": "[variables('keyVaultSettings').name]"
-					},
-					"rgName": {
-						"value": "[resourceGroup().name]"
 					},
 					"storageAccountName": {
 						"value": "[reference('storageDeploy').outputs.StorageAccountName.value]"
@@ -932,11 +655,11 @@
 					"storagePrimaryKey": {
 						"value": "[reference('storageDeploy').outputs.StoragePrimaryKey.value]"
 					},
-					"transactionPermissioningContract": {
-						"value": "[parameters('transactionPermissioningContract')]"
-					},
 					"ethRpcPort": {
 						"value": "[variables('ethRpcPort')]"
+					},
+					"transactionPermissioningContract": {
+						"value": "[variables('transactionPermissioningContract')]"
 					},
 					"dockerRepository": {
 						"value": "[variables('dockerRepository')]"
@@ -959,117 +682,28 @@
 					"dockerImageValidator": {
 						"value": "[variables('dockerImageValidator')]"
 					},
-					"mustDeployVnetGateway":{
-						"value": "[variables('mustDeployVnetGateway')]"
+					"rgName": {
+						"value": "[resourceGroup().name]"
+					},
+					"keyVaultName": {
+						"value": "[variables('keyVaultSettings').name]"
+					},
+					"isAdfs": {
+						"value": "[parameters('isAdfs')]"
+					},
+					"certKeyVaultId": {
+						"value": "[parameters('certKeyVaultId')]"
+					},
+					"certSecretUrl": {
+						"value": "[parameters('certSecretUrl')]"
+					},
+					"consortiumDataUrl": {
+						"value": "[if(parameters('isJoiningExistingNetwork'), parameters('consortiumDataURL'), concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value))]"
 					}
 				}
 			}
 		},
 		{
-			"apiVersion": "2018-02-01",
-			"name": "vnet-gateway-deploy",
-			"type": "Microsoft.Resources/deployments",
-			"dependsOn": [
-				"network-resources-deploy"
-			],
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('linkedUrls').vnetgatewayUrl]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"vnetSettings": {
-						"value": "[variables('vnetSettings')]"
-					},
-					"regionCount": {
-						"value": "[parameters('regionCount')]"
-					},
-					"locationArray": {
-						"value": "[variables('locationArray')]"
-					},
-					"suffixArray": {
-						"value": "[variables('suffixArray')]"
-					},
-					"gatewayPublicIPName": {
-						"value": "[variables('gatewaySettings').gatewayPublicIPName]"
-					},
-					"gatewayName": {
-						"value": "[variables('gatewaySettings').gatewayName]"
-					},
-					"gatewaySubnetName": {
-						"value": "[variables('gatewaySettings').gatewaySubnetName]"
-					},
-					"gatewaySku": {
-						"value": "[variables('gatewaySettings').gatewaySku]"
-					},
-					"mustDeployVnetGateway": {
-						"value": "[variables('mustDeployVnetGateway')]"
-					}
-				}
-			}
-		},
-		{
-			"condition": "[and(variables('mustDeployVnetGateway'), greater(parameters('regionCount'),1))]",
-			"apiVersion": "2018-02-01",
-			"name": "connections-deploy",
-			"type": "Microsoft.Resources/deployments",			
-			"dependsOn": [
-				"vnet-gateway-deploy"
-			],
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('linkedUrls').connectionsSetupUrl]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"connectionName": {
-						"value": "[variables('connectionSettings').connectionName]"
-					},
-					"locationArray": {
-						"value": "[variables('locationArray')]"
-					},
-					"suffixArray": {
-						"value": "[variables('suffixArray')]"
-					},
-					"regionCount": {
-						"value": "[variables('connectionSettings').regionCount]"
-					},
-					"connectionSharedKey": {
-						"value": "[uniqueString(resourceGroup().id)]"
-					},
-					"gatewayName": {
-						"value": "[variables('connectionSettings').gatewayName]"
-					}
-				}
-			}
-		},
-		{
-			"condition": "[and(parameters('isJoiningExistingNetwork'), variables('mustDeployVnetGateway'))]",
-			"apiVersion": "2017-10-01",
-			"type": "Microsoft.Network/connections",
-			"dependsOn": [
-				"vnet-gateway-deploy"
-			],
-			"name": "[concat(variables('connectionSettings').connectionMemName)]",
-			"location": "[variables('locationArray')[0]]",
-			"comments": "This is the VPN connection to a consortium member",
-			"properties": {
-				"virtualNetworkGateway1": {
-					"id": "[resourceId('Microsoft.Network/virtualNetworkGateways',concat(variables('connectionSettings').gatewayName,'-',variables('suffixArray')[0]))]"
-				},
-				"virtualNetworkGateway2": {
-					"id": "[parameters('consortiumMemberGatewayId')]"
-				},
-				"connectionType": "Vnet2Vnet",
-				"sharedKey": "[parameters('connectionSharedKey')]",
-				"routingWeight": 3,
-				"enableBGP": true
-			}
-		},
-		{
-			"apiVersion": "2018-02-01",
 			"name": "storageDeploy",
 			"type": "Microsoft.Resources/deployments",
 			"dependsOn": [],
@@ -1084,56 +718,7 @@
 						"value": "[variables('storageSettings').name]"
 					},
 					"location": {
-						"value": "[parameters('location_1')]"
-					}
-				}
-			}
-		},
-		{
-			"apiVersion": "2018-02-01",
-			"name": "PostDeploymentNotification",
-			"type": "Microsoft.Resources/deployments",
-			"dependsOn": [
-				"vmssDeployLoop",
-				"vnet-gateway-deploy"
-			],
-			"condition": "[variables('sendEmailNotification')]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('linkedUrls').vmssNotificationUrl]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"vlVmssSettings": {
-						"value": "[variables('vlVmssSettings')]"
-					},
-					"suffix": {
-						"value": "[variables('suffixArray')[0]]"
-					},
-					"scriptReq": {
-						"value": "[variables('scriptReqNotification')]"
-					},
-					"location": {
-						"value": "[variables('locationArray')[0]]"
-					},
-					"emailAddress": {
-						"value": "[parameters('emailAddress')]"
-					},
-					"admin_site": {
-						"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value)]"
-					},
-					"oms_portal_url": {
-						"value": "[if(and(parameters('omsDeploy'), empty(parameters('omsWorkspaceId'))), reference('deployOMS').outputs.portalUrl.value, '')]"
-					},
-					"ethereum_rpc_endpoint": {
-						"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value, ':', variables('ethRpcPort'))]"
-					},
-					"consortium_data_URL": {
-						"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value)]"
-					},
-					"consortium_member_gateway_id_region1": {
-						"value": "[if(variables('mustDeployVnetGateway'), resourceId('Microsoft.Network/virtualNetworkGateways', concat(variables('gatewaySettings').gatewayName, '-', variables('suffixArray')[0])), '')]"
+						"value": "[parameters('location')]"
 					}
 				}
 			}
@@ -1143,10 +728,6 @@
 		"admin_site": {
 			"type": "string",
 			"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value)]"
-		},
-		"oms_portal_url": {
-			"type": "string",
-			"value": "[if(and(parameters('omsDeploy'), empty(parameters('omsWorkspaceId'))), reference('deployOMS').outputs.portalUrl.value, 'OMS Portal not deployed')]"
 		},
 		"ethereum_rpc_endpoint": {
 			"type": "string",
