@@ -36,7 +36,7 @@
 			}
 		},
 		"adminPassword": {
-			"type": "string",
+			"type": "securestring",
 			"defaultValue": "",
 			"metadata": {
 				"description": "Administrator password for each deployed VM"
