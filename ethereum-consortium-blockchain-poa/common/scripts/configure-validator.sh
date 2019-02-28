@@ -26,16 +26,44 @@ setup_docker() {
 
 setup_cli_certificates()
 {
-	if [ "$ACCESS_TYPE" = "SPN" ]; then
+    if [ "$ACCESS_TYPE" = "SPN" ]; then
 		sudo cp /var/lib/waagent/Certificates.pem /usr/local/share/ca-certificates/azsCertificate.crt
 		sudo update-ca-certificates
 		export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 		sudo sed -i -e "\$aREQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt" /etc/environment
 	fi
+    
+	if [[ ! -z "$IS_ADFS" ]]; then
+		#if [[ $SPN_KEY != *"servicePrincipalCertificate.pem"* ]]; then
+		spCertName="$SPN_KEY.crt"
+		spCertKey="$SPN_KEY.prv"
+		sudo cp /var/lib/waagent/$spCertName /home/
+		sudo cp /var/lib/waagent/$spCertKey /home/
+		sudo cat /home/$spCertName /home/$spCertKey > /home/servicePrincipalCertificate.pem
+		sudo chmod 644 /home/servicePrincipalCertificate.pem
+		#SPN_KEY=/home/servicePrincipalCertificate.pem
+		az cloud register -n AzureStackCloud --endpoint-resource-manager "https://management.$ENDPOINTS_FQDN" --suffix-storage-endpoint "$ENDPOINTS_FQDN" --suffix-keyvault-dns ".vault.$ENDPOINTS_FQDN"
+		az cloud set -n AzureStackCloud
+		az cloud update --profile 2018-03-01-hybrid
+		az login --service-principal -u $SPN_APPID -p /home/servicePrincipalCertificate.pem --tenant $AAD_TENANTID
+		#fi
+	else
+		az cloud register -n AzureStackCloud --endpoint-resource-manager "https://management.$ENDPOINTS_FQDN" --suffix-storage-endpoint "$ENDPOINTS_FQDN" --suffix-keyvault-dns ".vault.$ENDPOINTS_FQDN"
+		az cloud set -n AzureStackCloud
+		az cloud update --profile 2018-03-01-hybrid
+		az login --service-principal -u $SPN_APPID -p $SPN_KEY --tenant $AAD_TENANTID
+	fi
 }
 
 configure_endpoints()
 {
+    if [ "$ACCESS_TYPE" = "SPN" ]; then
+		sudo cp /var/lib/waagent/Certificates.pem /usr/local/share/ca-certificates/azsCertificate.crt
+		sudo update-ca-certificates
+		export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+		sudo sed -i -e "\$aREQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt" /etc/environment
+	fi
+    
     az cloud register -n AzureStackCloud --endpoint-resource-manager "https://management.$ENDPOINTS_FQDN" --suffix-storage-endpoint "$ENDPOINTS_FQDN" --suffix-keyvault-dns ".vault.$ENDPOINTS_FQDN"
     az cloud set -n AzureStackCloud
     az cloud update --profile 2018-03-01-hybrid
@@ -45,7 +73,7 @@ configure_endpoints()
 alreadyLoggedEthStatWarning=0;
 
 start_ethstat() {
-    if [[ -z "$OMS_WORKSPACE_ID" ]]; 
+    if [ -z "$OMS_WORKSPACE_ID" -a "$ACCESS_TYPE" != "SPN" ]; 
     then
         if [ $alreadyLoggedEthStatWarning -eq 0 ];
         then
@@ -77,8 +105,17 @@ start_admin_website(){
     if [ ! -z $cid ]; then
        sudo docker kill $cid
     fi
+
+    #if [ "$ACCESS_TYPE" = "SPN" ]; then
+    #    STORAGE_DNS_SUFFIX=$ENDPOINTS_FQDN
+    #else
+    #    STORAGE_DNS_SUFFIX="core.windows.net"
+    #fi
     
-    containerId=$(sudo docker run -d -v $ADMINSITE_LOG_PATH:$ADMINSITE_LOG_PATH -v $PARITY_VOLUME:$PARITY_VOLUME -v $ETHERADMIN_HOME/public:/usr/src/app/share -e NODE_ENV=production -e listenPort="$ADMIN_SITE_PORT" -e consortiumId="$CONSORTIUM_MEMBER_ID" -e azureStorageAccount="$STORAGE_ACCOUNT" -e azureStorageAccessKey="$STORAGE_ACCOUNT_KEY" -e containerName="$CONTAINER_NAME" -e identityBlobPrefix="$BLOB_NAME_PREFIX" -e ethRpcPort="$RPC_PORT" -e validatorListBlobName="$VALIDATOR_LIST_BLOB_NAME" -e paritySpecBlobName="$PARITY_SPEC_BLOB_NAME" -e valSetContractBlobName="$VALSET_CONTRACT_BLOB_NAME" -e adminContractBlobName="$ADMIN_CONTRACT_BLOB_NAME" -e adminContractABIBlobName="$ADMIN_CONTRACT_ABI_BLOB_NAME" -e adminSiteLogFile="$ADMINSITE_LOG_FILE" --network host $ETHERADMIN_DOCKER_IMAGE);
+    STORAGE_DNS_SUFFIX=$ENDPOINTS_FQDN
+    STORAGE_API_VERSION="2017-04-17"
+
+    containerId=$(sudo docker run -d -v "/var/lib/waagent/":"/var/lib/waagent/" -v $ADMINSITE_LOG_PATH:$ADMINSITE_LOG_PATH -v $PARITY_VOLUME:$PARITY_VOLUME -v $ETHERADMIN_HOME/public:/usr/src/app/share -e NODE_ENV=production -e listenPort="$ADMIN_SITE_PORT" -e consortiumId="$CONSORTIUM_MEMBER_ID" -e azureStorageAccount="$STORAGE_ACCOUNT" -e azureStorageAccessKey="$STORAGE_ACCOUNT_KEY" -e containerName="$CONTAINER_NAME" -e identityBlobPrefix="$BLOB_NAME_PREFIX" -e ethRpcPort="$RPC_PORT" -e validatorListBlobName="$VALIDATOR_LIST_BLOB_NAME" -e paritySpecBlobName="$PARITY_SPEC_BLOB_NAME" -e valSetContractBlobName="$VALSET_CONTRACT_BLOB_NAME" -e adminContractBlobName="$ADMIN_CONTRACT_BLOB_NAME" -e adminContractABIBlobName="$ADMIN_CONTRACT_ABI_BLOB_NAME" -e adminSiteLogFile="$ADMINSITE_LOG_FILE" -e storageDnsSuffix="$STORAGE_DNS_SUFFIX" -e storageApiVersion="$STORAGE_API_VERSION" -e userCert="$CERT_FILE" -e AZURE_STORAGE_DNS_SUFFIX="$STORAGE_DNS_SUFFIX" -e NODE_EXTRA_CA_CERTS="$CERT_FILE" --network host $ETHERADMIN_DOCKER_IMAGE);
     if [ $? -ne 0 ]; then
         unsuccessful_exit "Unable to run docker image $ETHADMIN_DOCKER_IMAGE." 32;
     fi
@@ -93,7 +130,7 @@ start_admin_website(){
 # Starts a validator node. 
 run_validator()
 {
-    sudo -u $AZUREUSER /bin/bash /home/$AZUREUSER/run-validator.sh "$AZUREUSER" "$NODE_COUNT" "$STORAGE_ACCOUNT" "$CONTAINER_NAME" "$STORAGE_ACCOUNT_KEY" "$ADMINID" "$NUM_BOOT_NODES" "$RPC_PORT" "$MODE" "$VALIDATOR_DOCKER_IMAGE" "$CONSORTIUM_DATA_URL" "$MUST_DEPLOY_GATEWAY" "$ACCESS_TYPE" "$ENDPOINTS_FQDN" "$SPN_APPID" "$SPN_KEY" "$AAD_TENANTID" >> $CONFIG_LOG_FILE_PATH 2>&1 & 
+    sudo -u $AZUREUSER /bin/bash /home/$AZUREUSER/run-validator.sh "$AZUREUSER" "$NODE_COUNT" "$STORAGE_ACCOUNT" "$CONTAINER_NAME" "$STORAGE_ACCOUNT_KEY" "$ADMINID" "$NUM_BOOT_NODES" "$RPC_PORT" "$MODE" "$VALIDATOR_DOCKER_IMAGE" "$CONSORTIUM_DATA_URL" "$MUST_DEPLOY_GATEWAY" "$ACCESS_TYPE" "$ENDPOINTS_FQDN" "$SPN_APPID" "$SPN_KEY" "$AAD_TENANTID" "$RG_NAME" "$IS_ADFS" >> $CONFIG_LOG_FILE_PATH 2>&1 & 
 }
 
 join_leaders_network() {
@@ -136,7 +173,7 @@ is_etheradmin_up(){
 
 is_ethstat_up(){
     id=$(sudo docker ps | grep '-ethstat' | awk '{print $1}');
-    if [ ! -z $id ]; then echo 1; else echo 0; fi
+    if [ ! -z "$id" -a "$ACCESS_TYPE" = "SPN" ]; then echo 1; else echo 0; fi
 }
 
 ####################################################################################
@@ -173,6 +210,8 @@ ENDPOINTS_FQDN=${24}
 SPN_APPID=${25}
 SPN_KEY=${26}
 AAD_TENANTID=${27}
+RG_NAME=${28}
+IS_ADFS=${29}
 
 # Echo out the parameters
 echo "--- configure-validator.sh starting up ---"
@@ -202,6 +241,8 @@ echo "ENDPOINTS_FQDN=$ENDPOINTS_FQDN"
 echo "SPN_APPID=$SPN_APPID"
 echo "SPN_KEY=$SPN_KEY"
 echo "AAD_TENANTID=$AAD_TENANTID"
+echo "RG_NAME=$RG_NAME"
+echo "IS_ADFS=$IS_ADFS"
 
 #####################################################################################
 # Log Folder Locations
@@ -210,6 +251,7 @@ PARITY_LOG_PATH="/var/log/parity"
 ADMINSITE_LOG_PATH="/var/log/adminsite"
 STATS_LOG_PATH="/var/log/stats"
 DEPLOYMENT_LOG_PATH="/var/log/deployment"
+CERT_FILE="/var/lib/waagent/Certificates.pem"
 CONFIG_LOG_FILE_PATH="$DEPLOYMENT_LOG_PATH/config.log";
 ADMINSITE_LOG_FILE="$ADMINSITE_LOG_PATH/etheradmin.log"
 ETHSTAT_LOG_FILE="$STATS_LOG_PATH/ethstat.log"
@@ -241,7 +283,7 @@ setup_cli_certificates
 ################################################
 # Configure Cloud Endpoints in Azure CLI
 ################################################
-configure_endpoints
+#configure_endpoints
 
 ##########################################################################################################
 #	Wait for orchestrator to finish

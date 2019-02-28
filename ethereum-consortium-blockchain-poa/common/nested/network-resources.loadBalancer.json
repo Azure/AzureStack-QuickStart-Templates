@@ -1,6 +1,7 @@
 {
 	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
 	"parameters": {
 		"regionCount": {
 			"type": "int"
@@ -58,6 +59,9 @@
 		},
 		"currentRegionCount": {
 			"type": "int"
+		},
+		"ethNetworkPort": {
+			"type": "int"
 		}
 	},
 	"variables": {
@@ -77,7 +81,6 @@
 	},
 	"resources": [
 		{
-			"apiVersion": "2017-10-01",
 			"name": "[concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])]",
 			"type": "Microsoft.Network/loadBalancers",
 			"location": "[parameters('locationArray')[parameters('currentRegionCount')]]",
@@ -130,6 +133,24 @@
 								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe2')]"
 							},
 							"loadDistribution": "SourceIPProtocol"
+						}
+					},
+					{
+						"name": "LB-Rule3",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/frontendIPConfigurations/',parameters('lbFrontEndIpConfigName'))]"
+							},
+							"backendAddressPool": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/backendAddressPools/', parameters('backendAddressPoolName'))]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": "[parameters('ethNetworkPort')]",
+							"backendPort": "[parameters('ethNetworkPort')]",
+							"idleTimeoutInMinutes": 5,
+							"probe": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe1')]"
+							}
 						}
 					}
 				],
