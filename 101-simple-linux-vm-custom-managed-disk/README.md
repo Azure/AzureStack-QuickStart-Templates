@@ -32,13 +32,13 @@ Follow the below links to create/download a Linux Image
 for all deployments, a vhd file and a ssh public key is required.
 the powershell script option reads the key from a specified sshKeyfile ( your_keyfile.pub)
 
-![ResourceGroup](/images/rg.png)
+![ResourceGroup](images/rg.png)
 
 1. Deploy to Azure Stack portal using custom deployment
 Upload the Image to a Storage Account, with Public read Access
 During Deployment, Specify the imageUri Parameter of the vhd
 Deploy the Image using the Quickstart templates from Template Deployment
-![template](/images/template.png)
+![template](images/template.png)
 
 2. Deploy through Visual Studio
 Upload the Image to a Storage Account, with Public read Access
@@ -50,7 +50,7 @@ Follow the below link to configure the Azure Stack environment with Add-AzureRmE
 https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-powershell-configure
   
 
-the [ExampleScript](/deploy_image.ps1)  will create
+the [ExampleScript](deploy_image.ps1)  will create
 - a Storage Account and Image Resource Group ( Default: image in image_rg)
 - upload the Linux Image
 - Deploy the vhd to Deployment resource Group
