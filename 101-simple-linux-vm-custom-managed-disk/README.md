@@ -8,7 +8,7 @@
 
 This template deploys a Linux VM from a Custom Image using Managed Disk  
 
-![ManagedDisks](/images/image.png)
+![ManagedDisks](images/image.png)
 
 `Tags: [Linux]`
 
