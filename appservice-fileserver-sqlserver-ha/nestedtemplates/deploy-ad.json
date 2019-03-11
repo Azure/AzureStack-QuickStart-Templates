@@ -1,5 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "apiProfile": "2018-03-01-hybrid",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "namePrefix": {
@@ -31,18 +32,6 @@
         },
         "staticIP":{
             "type": "array"
-        },
-        "storageAccountType": {
-            "type": "string",
-            "allowedValues": [
-                "Standard_LRS",
-                "Standard_GRS",
-                "Standard_RAGRS",
-                "Premium_LRS"
-            ],
-            "metadata": {
-                "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
-            }
         },
         "nicSubnetUri": {
             "type": "string",
@@ -111,8 +100,6 @@
         }
     },
     "variables": {
-        "apiVersionStorage": "2016-01-01",
-        "storageNamePrefix": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'vm')]",
         "vmNamePrefix": "[concat(parameters('namePrefix'),'-ad-')]",
         "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
         "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
@@ -127,21 +114,10 @@
             "name": "[variables('vmAvailabilitySetName')]",
             "apiVersion": "2015-06-15",
             "location": "[parameters('location')]",
-            "properties": {}
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[concat(variables('storageNamePrefix'),copyindex())]",
-            "apiVersion": "2016-01-01",
-            "copy": {
-                "name": "storageAccountLoop",
-                "count": "[parameters('vmCount')]"
-            },
-            "location": "[parameters('location')]",
+            "properties": {},
             "sku": {
-                "name": "[parameters('storageAccountType')]"
-            },
-            "kind": "Storage"
+                "name": "Aligned"
+            }
         },
         {
             "name": "[concat(variables('vmNamePrefix'), copyindex(), '-nic')]",
@@ -169,7 +145,6 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2015-01-01",
             "copy": {
                 "name": "virtualMachineLoop",
                 "count": "[parameters('vmCount')]"
@@ -188,9 +163,6 @@
                 "parameters": {
                     "vmName": {
                         "value": "[concat(variables('vmNamePrefix'), copyindex())]"
-                    },
-                    "storageAccountUri": {
-                        "value": "[reference(concat('Microsoft.Storage/storageAccounts/',variables('StorageNamePrefix'),copyIndex()),variables('apiVersionStorage')).primaryEndpoints.blob]"
                     },
                     "vmAvailabilitySetName": {
                         "value": "[variables('vmAvailabilitySetName')]"
@@ -234,7 +206,6 @@
         {
             "name": "[concat(variables('vmNamePrefix'),'0/CreateADForest')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2016-03-30",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[concat(variables('vmNamePrefix'),'0-newVM')]"
@@ -265,7 +236,6 @@
         {
             "name": "[concat(variables('vmNamePrefix'),'1/PrepADBDC')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2016-03-30",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions',  concat(variables('vmNamePrefix'),'0'), 'CreateADForest')]"

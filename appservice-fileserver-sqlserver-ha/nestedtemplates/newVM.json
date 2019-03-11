@@ -82,7 +82,7 @@
             "version": "[parameters('imageVersion')]"
           },
           "osDisk": {
-            "name": "osdisk",
+            "name": "[concat(parameters('vmName'),'-osdisk')]",
             "vhd": {
               "uri": "[concat(parameters('storageAccountUri'), 'vhds/',parameters('vmName'),'-osdisk.vhd')]"
             },
@@ -94,14 +94,11 @@
               "name": "dataDisks",
               "count": "[parameters('vmDiskCount')]",
               "input": {
-                "name":"[concat('vmnam', '-data-disk',copyIndex('dataDisks'))]",
+                "name":"[concat(parameters('vmName'), '-data-disk',copyIndex('dataDisks'))]",
                 "lun": "[copyIndex('dataDisks')]",
                 "createOption": "Empty",
                 "caching":"None",
-                "diskSizeGB": "[parameters('vmDiskSize')]",
-                "vhd":{
-                  "uri":"[concat(parameters('storageAccountUri'),'vhds/',parameters('vmName'), '-data-disk',copyIndex('dataDisks'),'.vhd')]"
-                }
+                "diskSizeGB": "[parameters('vmDiskSize')]"
               }
             }
           ]

@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
@@ -43,18 +44,6 @@
     },
     "SqlListenerIP":{
       "type": "string"
-    },
-    "storageAccountType": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ],
-      "metadata": {
-        "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
-      }
     },
     "nicSubnetUri": {
       "type": "string",
@@ -124,7 +113,6 @@
   },
   "variables": {
     "apiVersionStorage": "2016-01-01",
-    "storageNamePrefix": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'sqlvm')]",
     "witnessStorageName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'sqlcw')]",
     "witnessStorageType": "Standard_LRS",
     "vmNamePrefix": "[concat(parameters('namePrefix'),'-sql-')]",
@@ -154,14 +142,15 @@
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('vmAvailabilitySetName')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "properties": {}
+      "properties": {},
+      "sku": {
+        "name": "Aligned"
+      }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('witnessStorageName')]",
-      "apiVersion": "2016-01-01",
       "location": "[parameters('location')]",
       "sku": {
         "name": "[variables('witnessStorageType')]"
@@ -169,21 +158,6 @@
       "kind": "Storage"
     },
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[concat(variables('storageNamePrefix'),copyindex())]",
-      "apiVersion": "2016-01-01",
-      "copy": {
-        "name": "storageAccountLoop",
-        "count": "[parameters('vmCount')]"
-      },
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('storageAccountType')]"
-      },
-      "kind": "Storage"
-    },
-    {
-      "apiVersion": "2015-06-15",
       "name": "[variables('sqllbName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[parameters('location')]",
@@ -242,7 +216,6 @@
       "name": "[concat(variables('vmNamePrefix'), copyindex(), '-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('location')]",
-      "apiVersion": "2015-06-15",
       "dependsOn": [
         "[variables('sqllbName')]"
       ],
@@ -271,7 +244,6 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('vmCount')]"
@@ -290,9 +262,6 @@
         "parameters": {
           "vmName": {
             "value": "[concat(variables('vmNamePrefix'), copyindex())]"
-          },
-          "storageAccountUri": {
-            "value": "[reference(concat('Microsoft.Storage/storageAccounts/',variables('StorageNamePrefix'),copyIndex()),variables('apiVersionStorage')).primaryEndpoints.blob]"
           },
           "vmAvailabilitySetName": {
             "value": "[variables('vmAvailabilitySetName')]"
@@ -334,7 +303,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmNamePrefix'),copyindex(),'/SqlVmIaasExtension')]",
       "location": "[parameters('location')]",
@@ -376,7 +344,6 @@
     {  
       "type":"Microsoft.Compute/virtualMachines/extensions",
       "name":"[concat(variables('vmNamePrefix'),'0/sqlAOPrepare')]",
-      "apiVersion":"2015-06-15",
       "location":"[parameters('location')]",
       "dependsOn":[
         "virtualMachineExtensionLoop"
@@ -415,7 +382,6 @@
    {  
     "type":"Microsoft.Compute/virtualMachines/extensions",
     "name":"[concat(variables('vmNamePrefix'),'1/configuringAlwaysOn')]",
-    "apiVersion":"2015-06-15",
     "location":"[parameters('location')]",
     "dependsOn": [
       "[resourceId('Microsoft.Compute/virtualMachines/extensions',  concat(variables('vmNamePrefix'),'0'), 'sqlAOPrepare')]"

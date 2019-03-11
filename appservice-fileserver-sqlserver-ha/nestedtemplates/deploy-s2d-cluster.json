@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
@@ -65,18 +66,6 @@
       "minLength": 12,
       "metadata": {
         "description": "Password of the fileshareuser account"
-      }
-    },
-    "storageAccountType": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ],
-      "metadata": {
-        "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
       }
     },
     "nicSubnetUri": {
@@ -147,7 +136,6 @@
   },
   "variables": {
     "apiVersionStorage": "2016-01-01",
-    "storageNamePrefix": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'fsvm')]",
     "witnessStorageName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'fscw')]",
     "witnessStorageType": "Standard_LRS",
     "vmNamePrefix": "[concat(parameters('namePrefix'),'-s2d-')]",
@@ -165,12 +153,14 @@
       "name": "[variables('vmAvailabilitySetName')]",
       "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "properties": {}
+      "properties": {},
+      "sku": {
+        "name": "Aligned"
+      }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('witnessStorageName')]",
-      "apiVersion": "2016-01-01",
       "location": "[parameters('location')]",
       "sku": {
         "name": "[variables('witnessStorageType')]"
@@ -178,24 +168,9 @@
       "kind": "Storage"
     },
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[concat(variables('storageNamePrefix'),copyindex())]",
-      "apiVersion": "2016-01-01",
-      "copy": {
-        "name": "storageAccountLoop",
-        "count": "[parameters('vmCount')]"
-      },
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('storageAccountType')]"
-      },
-      "kind": "Storage"
-    },
-    {
       "name": "[concat(variables('vmNamePrefix'), copyindex(), '-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('location')]",
-      "apiVersion": "2015-06-15",
       "copy": {
         "name": "nicLoop",
         "count": "[parameters('vmCount')]"
@@ -216,7 +191,6 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('vmCount')]"
@@ -235,9 +209,6 @@
         "parameters": {
           "vmName": {
             "value": "[concat(variables('vmNamePrefix'), copyindex())]"
-          },
-          "storageAccountUri": {
-            "value": "[reference(concat('Microsoft.Storage/storageAccounts/',variables('StorageNamePrefix'),copyIndex()),variables('apiVersionStorage')).primaryEndpoints.blob]"
           },
           "vmAvailabilitySetName": {
             "value": "[variables('vmAvailabilitySetName')]"
@@ -281,7 +252,6 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmNamePrefix'),copyindex(1),'/s2dPrep')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "dependsOn": [
         "virtualMachineLoop"
@@ -316,7 +286,6 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmNamePrefix'),'0/s2dConfig')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "dependsOn": [
         "virtualMachineLoop",
