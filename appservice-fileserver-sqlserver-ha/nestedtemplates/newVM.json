@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmName": {
@@ -57,7 +58,6 @@
   "resources": [
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "name": "[parameters('vmName')]",
       "dependsOn": [

@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
@@ -247,7 +248,6 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').adNsg]",
       "location": "[parameters('location')]",
@@ -256,7 +256,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').fsNsg]",
       "location": "[parameters('location')]",
@@ -265,7 +264,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').sqlNsg]",
       "location": "[parameters('location')]",
@@ -276,7 +274,6 @@
     {
       "name": "NetworkDeployment",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -301,7 +298,6 @@
     {
       "name": "deployAD",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeployment"
       ],
@@ -360,7 +356,6 @@
     {
       "name": "NetworkDeploymentDNS",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -386,7 +381,6 @@
     {
       "name": "deployS2DCluster",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeploymentDNS"
       ],
@@ -460,7 +454,6 @@
     {
       "name": "DeploySQL",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeploymentDNS"
       ],
