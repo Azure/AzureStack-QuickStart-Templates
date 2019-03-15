@@ -42,12 +42,20 @@ function DownloadFile($uri)
 
 function Expand-ZIPFile($file, $destination)
 {
-    $shell = new-object -com shell.application
-    $zip = $shell.NameSpace($file)
-    foreach($item in $zip.items())
+    if (Get-Command Expand-Archive -ErrorAction SilentlyContinue) 
     {
-        # 16 - Respond with "Yes to All" for any dialog box that is displayed.
-        $shell.Namespace($destination).copyhere($item, 16)
+        Expand-Archive -Path $file -DestinationPath $destination
+    }
+    else
+    {
+        # Fall back to COM to expand the zip 
+        $shell = new-object -com shell.application
+        $zip = $shell.NameSpace($file)
+        foreach($item in $zip.items())
+        {
+            # 16 - Respond with "Yes to All" for any dialog box that is displayed.
+            $shell.Namespace($destination).copyhere($item, 16)
+        }
     }
 }
 

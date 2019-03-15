@@ -6,7 +6,9 @@ This template deploys all of the resources required for Ethereum POA.
     - Ubuntu Server 16.04 LTS (any version)
     - Custom Script for Linux 2.0
 
-* Create a service principal and save it's ID and secret
+* Create a service principal. 
+    - On AAD environment save service principal's ID and secret. 
+    - On ADFS environment, save service principal's ID and Thumbprint. In addition, create a keyvault with a secret and store service principal's certificate in the keyvault's secret.
 * On your subscription, assign Contributor role to your service principal
 * Install MetaMask extension on Chrome
 
@@ -18,41 +20,30 @@ This template deploys all of the resources required for Ethereum POA.
 
 | Parameter Name | Value                                    |
 |----------------|:----------------------------------------:|
-| Location       | Location of your Azure Stack environment |
+| location       | Location of your Azure Stack environment |
 | isJoiningExistingNetwork | False - This should be false for leader deployment |
 | regionCount | 1 - This is always 1 for Azure Stack |
-| Location_1 | Location of your Azure Stack environment |
-| Location_2 | N/A (don't change the default value) |
-| Location_3 | N/A (don't change the default value) |
-| Location_4 | N/A (don't change the default value) |
-| Location_5 | N/A (don't change the default value) |
-| AuthType | password |
-| AdminUserName | Username of your Linux admin account |
-| AdminPassword | Password of your Linux admin account |
-| AdminSSHKey | You can use SSH Keys instead of password to access your Linux account |
-| EthereumNetworkID | Arbitary value less than 2147483647 |
-| ConsortiumMemberID | The ID associated with each member of the consortium network. This ID should be unique in the network |
-| EthereumAdminPublicKey | Ethereum account address that is used for participating in PoA member management. Use address of the MetaMask account that was created on Step 1 |
-| DeployUsingPublicIP | True |
-| NumVLNodesRegion | Number of load balanced validator nodes |
-| VlNodeVMSize | Standard_D1_v2 |
-| VlStorageAccountType | Standard_LRS |
-| ConnectionSharedKey | N/A | 
-| ConsortiumMemberGatewayId | N/A |
-| ConsortiumDataURL | N/A for leader deployment |
-| TransactionPermissioningContract | N/A |
-| PublicRPCEndpoint | True | 
-| OmsDeploy | False | 
-| omsWorkspaceId | N/A | 
-| omsPrimaryKey | N/A | 
-| omsLocation | N/A | 
-| emailAddress | N/A | 
-| enableSshAccess | True | 
-| azureStackDeployment | True | 
+| authType | password or sshPublicKey |
+| adminUserName | Username of your Linux admin account |
+| adminPassword | Password of your Linux admin account |
+| adminSSHKey | You can use SSH Keys instead of password to access your Linux account |
+| ethereumNetworkID | Arbitary value less than 2147483647 |
+| consortiumMemberID | The ID associated with each member of the consortium network. This ID should be unique in the network |
+| ethereumAdminPublicKey | Ethereum account address that is used for participating in PoA member management. Use address of the MetaMask account that was created on Step 1 |
+| numVLNodesRegion | Number of load balanced validator nodes |
+| vlNodeVMSize | Size of the virtual machine for transaction nodes |
+| vlStorageAccountType | Type of managed disks to create. Allowed values: Standard_LRS, Premium_LRS |
+| consortiumDataURL | N/A for leader deployment |
+| publicRPCEndpoint | True - This should be True for Azure Stack environments | 
+| enableSshAccess | Enables or Disables the Network Security Group rule to allow SSH port access | 
 | servicePrincipalId | Service principal ID | 
 | servicePrincipalSecret | Service principal secret | 
 | endpointFqdn | Azure Stack environment FQDN | 
-| tenantId | Azure stack tenant ID | 
+| tenantId | Azure stack tenant ID |
+| deployUsingPublicIP | True | 
+| isAdfs | Set to True if using template on ADFS environment |
+| certKeyVaultId | Only for ADFS environments - The ID of the KeyVault that holds ADFS service principal certificate |
+| certSecretUrl | Only for ADFS environments - The URL of the secret that holds ADFS service principal certificate | 
 
 
 ## Member deployment 
@@ -64,41 +55,29 @@ This template deploys all of the resources required for Ethereum POA.
 
 | Parameter Name | Value                                    |
 |----------------|:----------------------------------------:|
-| Location       | Location of your Azure Stack environment |
+| location       | Location of your Azure Stack environment |
 | isJoiningExistingNetwork | True - This should be true for joining member deployment |
-| regionCount | 1 - This is always 1 for Azure Stack |
-| Location_1 | Location of your Azure Stack environment |
-| Location_2 | N/A (don't change the default value) |
-| Location_3 | N/A (don't change the default value) |
-| Location_4 | N/A (don't change the default value) |
-| Location_5 | N/A (don't change the default value) |
-| AuthType | password |
-| AdminUserName | Username of your Linux admin account |
-| AdminPassword | Password of your Linux admin account |
-| AdminSSHKey | You can use SSH Keys instead of password to access your Linux account |
-| EthereumNetworkID | Same as leader Network ID |
-| ConsortiumMemberID | The ID associated with each member of the consortium network. This ID should be unique in the network |
-| EthereumAdminPublicKey | Ethereum account address that is used for participating in PoA member management. Use address of the MetaMask account that was created on Step 1 |
-| DeployUsingPublicIP | True |
-| NumVLNodesRegion | Number of load balanced validator nodes |
-| VlNodeVMSize | Standard_D1_v2 |
-| VlStorageAccountType | Standard_LRS |
-| ConnectionSharedKey | N/A | 
-| ConsortiumMemberGatewayId | N/A |
-| ConsortiumDataURL | ConsortiumDataURL from leader deployment output from step 2 |
-| TransactionPermissioningContract | N/A |
-| PublicRPCEndpoint | True | 
-| OmsDeploy | False | 
-| omsWorkspaceId | N/A | 
-| omsPrimaryKey | N/A | 
-| omsLocation | N/A | 
-| emailAddress | N/A | 
-| enableSshAccess | True | 
-| azureStackDeployment | True | 
+| authType | password or sshPublicKey |
+| adminUserName | Username of your Linux admin account |
+| adminPassword | Password of your Linux admin account |
+| adminSSHKey | You can use SSH Keys instead of password to access your Linux account |
+| ethereumNetworkID | Same as leader Network ID |
+| consortiumMemberID | The ID associated with each member of the consortium network. This ID should be unique in the network |
+| ethereumAdminPublicKey | Ethereum account address that is used for participating in PoA member management. Use address of the MetaMask account that was created on Step 1 |
+| numVLNodesRegion | Number of load balanced validator nodes |
+| vlNodeVMSize | Size of the virtual machine for transaction nodes |
+| vlStorageAccountType | Type of managed disks to create. Allowed values: Standard_LRS, Premium_LRS |
+| consortiumDataURL | ConsortiumDataURL from leader deployment output from step 2 |
+| publicRPCEndpoint | True - This should be True for Azure Stack environments | 
+| enableSshAccess | Enables or Disables the Network Security Group rule to allow SSH port access | 
 | servicePrincipalId | Service principal ID | 
 | servicePrincipalSecret | Service principal secret | 
 | endpointFqdn | Azure Stack environment FQDN | 
-| tenantId | Azure stack tenant ID | 
+| tenantId | Azure stack tenant ID |
+| deployUsingPublicIP | True | 
+| isAdfs | Set to True if using template on ADFS environment |
+| certKeyVaultId | Only for ADFS environments - The ID of the KeyVault that holds ADFS service principal certificate |
+| certSecretUrl | Only for ADFS environments - The URL of the secret that holds ADFS service principal certificate |  
 
 ## Troubleshoot deployment issues
 To review the deployment logs for errors/failure :
