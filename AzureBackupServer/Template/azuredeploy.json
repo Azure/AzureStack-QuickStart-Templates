@@ -1,0 +1,266 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "MabsAvailabiliySetName": {
+            "type": "string",
+            "defaultValue": "MabsASet"
+        },
+        "vmPrefix": {
+            "type": "string",
+            "defaultValue": "srv"
+        },
+        "domainName": {
+            "type": "string",
+            "defaultValue": "contoso.com"
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Domain Admin username"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Domain Admin password"
+            }
+        },
+        "passPhrase": {
+            "type": "securestring",
+            "minLength": 16,
+            "metadata": {
+                "description": "Mabs Passphrase, min 16 chars"
+            }
+        },
+        "workloadsLocation": {
+            "type": "string",
+            "defaultValue": "https://workloads.blob.orlando.azurestack.corp.microsoft.com/workload"
+        },
+        "vaultCredentialFileName": {
+            "type": "string",
+            "defaultValue": "vaultprem.VaultCredentials",
+            "metadata": {
+                "description": "name of the VaultCredential file"
+            }
+        },
+        "NoOfDisks": {
+            "type": "int",
+            "defaultValue": "2",
+            "metadata": {
+                "description": "Number of disks for striped volume"
+            }
+        },
+        "StorageSize": {
+            "type": "int",
+            "defaultValue": "500",
+            "metadata": {
+                "description": "size of each disk of striped volume"
+            }
+        }
+    },
+    "variables": {
+        "mabsPrefix": "[concat(parameters('vmPrefix'),'-mabs')]",
+        "vmNicName": "[tolower(concat(variables('mabsPrefix'),'-nic'))]",
+        "prereqFileNames" : "System_Center_Microsoft_Azure_Backup_Server_v3-1.bin,System_Center_Microsoft_Azure_Backup_Server_v3-2.bin,System_Center_Microsoft_Azure_Backup_Server_v3-3.bin,System_Center_Microsoft_Azure_Backup_Server_v3-4.bin,System_Center_Microsoft_Azure_Backup_Server_v3-5.bin,System_Center_Microsoft_Azure_Backup_Server_v3-6.bin,System_Center_Microsoft_Azure_Backup_Server_v3-7.bin,System_Center_Microsoft_Azure_Backup_Server_v3.exe",
+        "imagePublisher": "MicrosoftWindowsServer",
+        "imageOffer": "WindowsServer",
+        "uniqueStorageAccountName": "[tolower(concat('sa-',variables('mabsPrefix'),'-', resourceGroup().name))]",
+        "location": "[resourceGroup().location]",
+        "vmOsSku": "2016-Datacenter",
+        "vmDataDiskName": "[concat('dd-',variables('mabsPrefix'), resourceGroup().name)]",
+        "vmSize": "Standard_DS3",
+        "nsgName": "[concat('MABSNsg',resourceGroup().name)]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+        "staticSubnetName": "[concat('ADStaticSubnet',resourceGroup().name)]",
+        "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('staticSubnetName'))]",
+        "modulesPath": "[concat(parameters('workloadsLocation'),'/')]",
+        "modulesMabsDownload": "CSDownloadMabs.ps1",
+        "MabsInstallerPath":"MabsInstaller",
+        "modulesUrlMabsDownload": "[concat(variables('modulesPath'),variables('modulesMabsDownload'))]",
+        "AzCopyURL": "[concat(variables('modulesPath'),'MicrosoftAzureStorageTools.msi')]",
+        "ModulesURL": "[concat(parameters('workloadsLocation'),'/MabsWorkload.ps1.zip')]",
+        "ConfigurationFunction": "MabsWorkload.ps1\\InstallAndConfigureMabs"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('MabsAvailabiliySetName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Aligned"
+                },
+                "properties": {
+                "platformUpdateDomainCount": 1,
+                "platformFaultDomainCount": 1
+                }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgsrule",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmNicName'))]",
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ],
+            "location": "[variables('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigpublic",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('staticSubnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('mabsPrefix'))]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('MabsAvailabiliySetName'))]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('mabsPrefix'))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('vmOsSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('mabsPrefix'),'osdisk')]",
+                        "managedDisk" : {
+                            "storageAccountType" : "Premium_LRS"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "copy": [
+                        {
+                          "name": "dataDisks",
+                          "count": "[parameters('NoOfDisks')]",
+                          "input": {
+                            "caching": "None",
+                            "diskSizeGB": "[parameters('StorageSize')]",
+                            "lun": "[copyIndex('dataDisks')]",
+                            "name": "[concat(variables('vmDataDiskName'),'-',copyIndex('dataDisks'))]",
+                            "managedDisk" : {
+                                "storageAccountType" :"Premium_LRS"
+                            },
+                            "createOption": "Empty"
+                          }
+                        }
+                      ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName')))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('mabsPrefix'),'/CustomScriptExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('mabsPrefix'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[variables('modulesUrlMabsDownload')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('modulesMabsDownload'),' -destination ',variables('MabsInstallerPath'),' -urlMSFTAST ',variables('AzCopyURL'),' -baseUrl ',parameters('workloadsLocation'),' -prereqList ',variables('prereqFileNames'),' -vaultName ',parameters('vaultCredentialFileName'))]"
+                }
+            }
+        },
+        {
+            "name": "[concat(variables('mabsPrefix'),'/dscExtension')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', concat(variables('mabsPrefix'),'/extensions/','CustomScriptExtension'))]"
+            ],
+            "tags": {
+                "displayName": "adfsDSCConfiguration"
+            },
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.76",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesUrl": "[variables('ModulesURL')]",
+                    "configurationFunction": "[variables('ConfigurationFunction')]",
+                    "properties": {
+                        "domainName": "[parameters('domainName')]",
+                        "AdminCreds": {
+                            "userName": "[parameters('adminUserName')]",
+                            "password": "PrivateSettingsRef:adminPassword"
+                        },
+                        "MABS_SecurityPassphrase": {
+                            "userName": "[parameters('adminUserName')]",
+                            "password": "PrivateSettingsRef:passPhrase"
+                        },
+                        "NoOfDisks": "[parameters('NoOfDisks')]",
+                        "VaultCredentialFilePath": "[concat('c:\\vaultProfile\\',parameters('vaultCredentialFileName'))]",
+                        "PassphraseSaveLocation": "c:\\vaultProfile\\"
+                    }
+                },
+                "protectedSettings": {
+                    "items": {
+                        "adminPassword": "[parameters('adminPassword')]",
+                        "passPhrase": "[parameters('passPhrase')]"
+                    }
+                }
+            }
+        }
+    ]
+}
