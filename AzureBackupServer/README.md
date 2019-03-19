@@ -36,8 +36,5 @@ THe following Marketplace Items must be installed on Azure Stack:
 
 ### Content
 
-.\Template
-This folder contains product template
-
 .\Artifacts
 This folder contains required DSC, Custom scripts and Setup files
