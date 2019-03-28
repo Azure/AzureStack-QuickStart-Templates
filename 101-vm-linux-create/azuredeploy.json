@@ -68,9 +68,11 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[toLower(variables('storageAccountName'))]",
       "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "properties": {}
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
