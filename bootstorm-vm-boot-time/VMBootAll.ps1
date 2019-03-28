@@ -146,6 +146,8 @@ Configuration ConfigureVMBootAll
                 $installFinished = $false
                 while (!$installFinished -and $count -lt 5) {
                     try {
+                        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+                        Set-PSRepository -InstallationPolicy Trusted -Name PSGallery                    
                         Install-Module -Name AzureRM -RequiredVersion 1.2.10 -Scope AllUsers -ErrorAction Stop -Confirm:0
                         $installFinished = $true
                     }
