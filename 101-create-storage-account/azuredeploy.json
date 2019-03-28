@@ -19,15 +19,16 @@
   },
   "resources": [
     {
-      "name": "[variables('storageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[parameters('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "properties": {}
     }
   ],
   "outputs": {}
-
 }
 
