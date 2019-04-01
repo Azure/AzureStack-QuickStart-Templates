@@ -98,9 +98,10 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageName')]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
+      "sku": {
+        "name": "[variables('storageAccountType')]"
       },
+      "kind": "Storage",
       "dependsOn": [
         "[variables('publiclbName')]"
       ]

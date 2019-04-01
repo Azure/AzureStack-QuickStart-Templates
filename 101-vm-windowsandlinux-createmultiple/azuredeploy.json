@@ -222,9 +222,10 @@
       "tags": {
         "displayName": "sa"
       },
-      "properties": {
-        "accountType": "[parameters('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "name": "[concat(variables('linuxNicName'), copyIndex())]",
