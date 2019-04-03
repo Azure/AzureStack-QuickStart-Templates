@@ -42,7 +42,6 @@
     {
       "type": "Microsoft.Network/dnszones/a",
       "name": "[concat(parameters('newZoneName'), '/', parameters('newRecordName'))]",
-      "apiVersion": "2016-04-01",
       "location": "global",
       "dependsOn": [
         "[parameters('newZoneName')]"

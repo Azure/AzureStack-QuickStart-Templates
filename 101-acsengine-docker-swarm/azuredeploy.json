@@ -1221,7 +1221,6 @@
       "type": "Microsoft.Network/loadBalancers"
     },
     {
-      "apiVersion": "2017-10-01",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "masterLbLoopNode"
@@ -1243,7 +1242,6 @@
       "type": "Microsoft.Network/loadBalancers/inboundNatRules"
     },
     {
-      "apiVersion": "2017-10-01",
       "dependsOn": [
         "[variables('masterLbID')]"
       ],

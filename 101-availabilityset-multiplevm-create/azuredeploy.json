@@ -204,7 +204,6 @@
       }
     },
     {
-      "apiVersion": "2017-10-01",
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
       "name": "[concat(variables('publicLBName'), '/RDP-VM', copyIndex())]",
       "location": "[resourceGroup().location]",

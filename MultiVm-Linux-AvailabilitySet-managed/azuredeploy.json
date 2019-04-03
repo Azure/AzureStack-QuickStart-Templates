@@ -267,8 +267,6 @@
     },
 
     {
-
-      "apiVersion": "2017-10-01",
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
       "name": "[concat(variables('publicLBName'), '/ssh-VM', copyIndex())]",
       "location": "[resourceGroup().location]",
