@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmPrefix": {
+      "value": "srv"
+    },
+    
+    "adminUsername": {
+      "value": "thoroetadm"
+    },
+    "workloadsLocation": {
+      "value": "https://colab.blob.local.azurestack.external/workload"  
+  },
+"SpAvailabilitySetName": {
+  "value": "SpAvSet"
+},
+"domainName": {
+  "value": "contoso.com"
+},
+"ProductKey": {
+  "value": "Product Key"
+},
+"SpIsoUrl": {
+  "value": "https://colab.blob.local.azurestack.external/workload/en_sharepoint_server_2016_x64_dvd_8419458.iso"
+},
+"farmUsersPassword": {
+  "value": "Enter Secure Password"
+},
+"sharePointFarmPassphrasePassword": {
+  "value": "Enter Secure Password"
+},
+"sqlAONAME": {
+  "value": "alwayson-ag"
+}
+  }
+}

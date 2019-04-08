@@ -2,6 +2,7 @@
 $FQDN = Read-Host "Enter External FQDN"
 $RegionName = Read-Host "Enter Azure Stack Region Name"
 $TenantId = Read-Host "Enter Tenant ID"
+$Workfolder = Read-Host "Enter local path that contains templates and artifacts - Example c:\office"
 
 #Deployment Parameters
 $StorageAccountName = Read-Host "Enter Name for New Storage Account"
@@ -25,11 +26,12 @@ New-AzureStorageContainer -Name $StorageContainerName -Context $StorageContext -
 
 #Upload Artifacts
 
-ls -file .\artifacts\ad-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\WAP -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\ca -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\s2d -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\exchange2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\sql2017-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\sfb2015 -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\ADFS -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\ad-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\WAP -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\ca -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\s2d -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\exchange2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\sql2017-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\sfb2015 -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\sp2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\ADFS -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
