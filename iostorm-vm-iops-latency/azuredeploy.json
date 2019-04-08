@@ -200,9 +200,10 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[tolower(variables('uniqueStorageAccountName'))]",
       "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -380,7 +381,7 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computerName":  "[concat(variables('vmName'),copyIndex())]",
+          "computerName": "[concat(variables('vmName'),copyIndex())]",
           "adminUsername": "[variables('vmAdminUsername')]",
           "adminPassword": "[parameters('vmAdminPassword')]"
         },

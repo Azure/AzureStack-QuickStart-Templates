@@ -914,9 +914,10 @@
       ],
       "location": "[variables('location')]",
       "name": "[concat(variables('storageAccountPrefixes')[mod(add(copyIndex(),variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(copyIndex(),variables('agentpublicStorageAccountOffset')),variables('storageAccountPrefixesCount'))],variables('agentpublicAccountName'))]",
-      "properties": {
-        "accountType": "[variables('vmSizesMap')[variables('agentpublicVMSize')].storageAccountType]"
+      "sku": {
+        "name": "[variables('vmSizesMap')[variables('agentpublicVMSize')].storageAccountType]"
       },
+      "kind": "Storage",
       "type": "Microsoft.Storage/storageAccounts"
     },
     {
@@ -1139,9 +1140,10 @@
       ],
       "location": "[variables('location')]",
       "name": "[variables('masterStorageAccountName')]",
-      "properties": {
-        "accountType": "[variables('vmSizesMap')[variables('masterVMSize')].storageAccountType]"
+      "sku": {
+        "name": "[variables('vmSizesMap')[variables('masterVMSize')].storageAccountType]"
       },
+      "kind": "Storage",
       "type": "Microsoft.Storage/storageAccounts"
     },
     {
@@ -1214,7 +1216,6 @@
       "type": "Microsoft.Network/loadBalancers"
     },
     {
-      "apiVersion": "2017-10-01",
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "masterLbLoopNode"
@@ -1236,7 +1237,6 @@
       "type": "Microsoft.Network/loadBalancers/inboundNatRules"
     },
     {
-      "apiVersion": "2017-10-01",
       "dependsOn": [
         "[variables('masterLbID')]"
       ],

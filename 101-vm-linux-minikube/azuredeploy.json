@@ -95,17 +95,19 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('diagnosticsStorageAccountName')]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('diagnosticsStorageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('diagnosticsStorageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/publicIpAddresses",

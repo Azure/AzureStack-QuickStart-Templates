@@ -185,9 +185,10 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[tolower(variables('uniqueStorageAccountName'))]",
       "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -236,19 +237,19 @@
       }
     },
     {
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[variables('publicIPAddressName')]",
-        "apiVersion": "2015-05-01-preview",
-        "location": "[resourceGroup().location]",
-        "properties": {
-            "publicIPAllocationMethod": "Dynamic",
-            "dnsSettings": {
-                "domainNameLabel": "[variables('dnsPrefix')]"
-            }
-        },
-        "dependsOn": [
-            "[variables('vnetID')]"
-        ]
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsPrefix')]"
+        }
+      },
+      "dependsOn": [
+        "[variables('vnetID')]"
+      ]
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -310,7 +311,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-            "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
@@ -432,7 +433,7 @@
             "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
             "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
             "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]",
-            "WaitForIoStormCompletion" : "[parameters('WaitForIoStormCompletion')]",
+            "WaitForIoStormCompletion": "[parameters('WaitForIoStormCompletion')]",
             "FixedIops": "[parameters('vmFixedIops')]",
             "RunFixedIoLatencyTestAfterGoalSeek": "[parameters('vmRunFixedIoLatencyTestAfterGoalSeek')]",
             "DataDisks": "[parameters('vmDataDiskCount')]"
