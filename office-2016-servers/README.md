@@ -37,10 +37,25 @@ Note: A Product Key for Exchange 2016 Enterprise has to be provided as parameter
 
 ### Skype for Business 2015
 
-Does install 3 Skype for Business - Front End Servers and 2 Edge Servers
+Does install 3 Skype for Business - 2 Front End Servers and 2 Edge Servers
 
 #### Requirements not provided with the download
-Skype for Business 2015 ISO file stored in .\artifacts\SFB folder
+Skype for Business 2015 ISO file stored in .\artifacts\sfb2015 folder
+
+### SharePoint 2016
+Does install SharePoint 2016 with 2 Front End and 2 Application Servers
+
+#### Requirements not provided with the download
+
+SharePoint 2016 ISO file stored in .\artifacts\sp2016-ha folder
+
+sts2016-kb4032256-fullfile-x64-glb.exe file stored in .\artifacts\sp2016-ha folder
+(https://www.microsoft.com/en-us/download/details.aspx?id=57222)
+
+wssloc2016-kb4022231-fullfile-x64-glb.exe file stored in .\artifacts\sp2016-ha folder
+(https://www.microsoft.com/en-us/download/details.aspx?id=57236)
+
+Note: A Product Key has to be provided as parameter. 
 
 
 ## Deployment
@@ -50,7 +65,7 @@ Skype for Business 2015 ISO file stored in .\artifacts\SFB folder
 2. Download additional files like ISO as called out for the individual products
 3. Create Storage Account, Blob Container with access set to blob
 4. Upload the content from the artifacts folder
-5. Deploy the Templates in the following order: AD, WAP, CA, S2D, Exchange 2016, SQL 2017, Skype, ADFS
+5. Deploy the Templates in the following order: AD, WAP, CA, S2D, Exchange 2016, SQL 2017, SharePoint 2016, Skype for Business 2015, ADFS
 
 ### Deploy automated via PowerShell
 1. Download artifacts and content

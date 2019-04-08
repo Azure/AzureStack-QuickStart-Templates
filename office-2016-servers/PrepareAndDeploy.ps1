@@ -27,14 +27,15 @@ New-AzureStorageContainer -Name $StorageContainerName -Context $StorageContext -
 
 #Upload Artifacts
 
-ls -file .\artifacts\ad-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\WAP -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\ca -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\s2d -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\exchange2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\sql2017-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\sfb2015 -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
-ls -file .\artifacts\ADFS -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\ad-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\WAP -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\ca -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\s2d -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\exchange2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\sql2017-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\sfb2015 -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\sp2016-ha -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
+ls -file $Workfolder\artifacts\ADFS -Recurse|Set-AzureStorageBlobContent -Container $StorageContainerName -Context $StorageContext -Force
 
 
 #Deploy AD
@@ -64,6 +65,11 @@ New-AzureRmResourceGroupDeployment -Name MSX -ResourceGroupName $ResourceGroup -
 $S2DJOB=get-job|? name -contains "Long Running Operation for 'New-AzureRmResourceGroupDeployment' on resource 'S2D'"
 Wait-Job $S2DJOB
 New-AzureRmResourceGroupDeployment -Name SQL -ResourceGroupName $ResourceGroup -TemplateFile "$Workfolder\templates\sql2017-ha\azuredeploy.json" -TemplateParameterFile "$Workfolder\templates\sql2017-ha\azuredeploy.parameters.json" -adminPassword $AdminPassword -storageAccountEndPoint "$RegionName.$FQDN" -diagnosticsStorageAccountName $StorageAccountName -AsJob
+
+#Deploy SP
+$SQLJOB=get-job|? name -contains "Long Running Operation for 'New-AzureRmResourceGroupDeployment' on resource 'SQL'"
+Wait-Job $SQLJOB
+New-AzureRmResourceGroupDeployment -Name SP -ResourceGroupName $ResourceGroup -TemplateFile "$Workfolder\templates\sp2016-ha\azuredeploy.json" -TemplateParameterFile "$Workfolder\templates\sp2016-ha\azuredeploy.parameters.json" -adminPassword $AdminPassword -storageAccountEndPoint "$RegionName.$FQDN" -diagnosticsStorageAccountName $StorageAccountName -AsJob
 
 #Deploy SFB
 $SQLJOB=get-job|? name -contains "Long Running Operation for 'New-AzureRmResourceGroupDeployment' on resource 'SQL'"

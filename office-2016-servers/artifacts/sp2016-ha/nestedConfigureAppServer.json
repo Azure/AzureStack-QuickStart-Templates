@@ -1,0 +1,220 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "vmPrefix": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "vmFePrefix": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "prepareSpModule" : {
+            "type": "string"
+        },
+        "configurationPrepareSp" : {
+            "type": "string"
+        },
+        "prepareAddSpModule" : {
+            "type": "string"
+        },
+        "configurationPrepareAddSp" : {
+            "type": "string"
+        },
+        "domainName" : {
+            "type": "string"
+        },
+        "adminUserName" : {
+            "type": "string"
+        },
+        "sharePointSetupUserAccountUserName" : {
+            "type": "string"
+        },
+        "sharePointFarmAccountUserName" : {
+            "type": "string"
+        },
+        "sharePointServiceAccountUserName": {
+            "type": "string"
+        },
+        "sharePointPoolAccountUserName": {
+            "type": "string"
+        },
+        "configDatabaseName" : {
+            "type": "string"
+        },
+        "administrationContentDatabaseName" : {
+            "type": "string"
+        },
+        "sqlAOListener" : {
+            "type": "string"
+        },
+        "adminPassword" : {
+            "type": "securestring"
+        },
+        "sharePointSetupUserAccountPassword" : {
+            "type": "securestring"
+        },
+        "sharePointFarmAccountPassword" : {
+            "type": "securestring"
+        },
+        "sharePointServiceAccountPassword": {
+            "type": "securestring"
+        },
+        "sharePointPoolAccountPassword": {
+            "type": "securestring"
+        },
+        "sharePointFarmPassphrasePassword" : {
+            "type": "securestring"
+        },
+        "SqlAOName" : {
+            "type": "string"
+        },
+        "FileShare" : {
+            "type": "string"
+        },
+        "CuPackageName": {
+            "type": "string",
+            "defaultValue": "sts2016-kb4032256-fullfile-x64-glb.exe"
+        },
+        "LangPackName": {
+            "type": "string",
+            "defaultValue": "wssloc2016-kb4022231-fullfile-x64-glb.exe"
+        },
+        "ProductKey": {
+            "type": "string"
+        },
+        "FarmUsersPrefix": {
+            "type": "string"
+        },
+        "MySitePrefix": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmPrefix'),'0','/ConfigureAppServer')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.76",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "ModulesUrl": "[parameters('prepareSpModule')]",
+                    "ConfigurationFunction": "[parameters('configurationPrepareSp')]",
+                    "Properties": {
+                        "DomainName": "[parameters('domainName')]",
+                        "AdminCreds": {
+                            "UserName": "[parameters('adminUserName')]",
+                            "Password": "PrivateSettingsRef:AdminPassword"
+                        },
+                        "SharePointSetupUserAccountcreds": {
+                            "UserName": "[parameters('sharePointSetupUserAccountUserName')]",
+                            "Password": "PrivateSettingsRef:SharePointSetupUserAccountPassword"
+                        },
+                        "SharePointFarmAccountcreds": {
+                            "UserName": "[parameters('sharePointFarmAccountUserName')]",
+                            "Password": "PrivateSettingsRef:SharePointFarmAccountPassword"
+                        },
+                        "SharePointFarmPassphrasecreds": {
+                            "UserName": "ignore",
+                            "Password": "PrivateSettingsRef:SharePointFarmPassphrasePassword"
+                        },
+                        "DatabaseName": "[parameters('configDatabaseName')]",
+                        "AdministrationContentDatabaseName": "[parameters('administrationContentDatabaseName')]",
+                        "DatabaseServer": "[concat(parameters('sqlAOListener'),'.',parameters('domainName'))]",
+                        "AonName": "[parameters('sqlAONAME')]",
+                        "FileShare": "[parameters('FileShare')]",
+                        "CuPackageName": "[parameters('CuPackageName')]",
+                        "LangPackName":  "[parameters('LangPackName')]",
+                        "ProductKey": "[parameters('ProductKey')]",
+                        "FarmUsersPrefix": "[parameters('FarmUsersPrefix')]"            
+                    }
+                },
+                "protectedSettings": {
+                    "Items": {
+                        "AdminPassword": "[parameters('adminPassword')]",
+                        "SharePointSetupUserAccountPassword": "[parameters('sharePointSetupUserAccountPassword')]",
+                        "SharePointFarmAccountPassword": "[parameters('sharePointFarmAccountPassword')]",
+                        "SharePointFarmPassphrasePassword": "[parameters('sharePointFarmPassphrasePassword')]"      
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmPrefix'),'1','/ConfigureAppServer')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',parameters('vmPrefix'),'0','/extensions/','ConfigureAppServer')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.76",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "ModulesUrl": "[parameters('prepareAddSpModule')]",
+                    "ConfigurationFunction": "[parameters('configurationPrepareAddSp')]",
+                    "Properties": {
+                        "firstSPFe": "[concat(parameters('vmFePrefix'),'0')]",
+                        "DomainName": "[parameters('domainName')]",
+                        "AdminCreds": {
+                            "UserName": "[parameters('adminUserName')]",
+                            "Password": "PrivateSettingsRef:AdminPassword"
+                        },
+                        "SharePointSetupUserAccountcreds": {
+                            "UserName": "[parameters('sharePointSetupUserAccountUserName')]",
+                            "Password": "PrivateSettingsRef:SharePointSetupUserAccountPassword"
+                        },
+                        "SharePointFarmAccountcreds": {
+                            "UserName": "[parameters('sharePointFarmAccountUserName')]",
+                            "Password": "PrivateSettingsRef:SharePointFarmAccountPassword"
+                        },
+                        "SharePointFarmPassphrasecreds": {
+                            "UserName": "ignore",
+                            "Password": "PrivateSettingsRef:SharePointFarmPassphrasePassword"
+                        },
+                        "SPServicePoolAccount": {
+                            "UserName": "[parameters('sharePointServiceAccountUserName')]",
+                            "Password": "PrivateSettingsRef:SharePointServiceAccountPassword"
+                        },
+                        "SPWebPoolAccount": {
+                            "UserName": "[parameters('sharePointPoolAccountUserName')]",
+                            "Password": "PrivateSettingsRef:SharePointPoolAccountPassword"
+                        },
+                        "DatabaseName": "[parameters('configDatabaseName')]",
+                        "AdministrationContentDatabaseName": "[parameters('administrationContentDatabaseName')]",
+                        "DatabaseServer": "[concat(parameters('sqlAOListener'),'.',parameters('domainName'))]",
+                        "AonName": "[parameters('sqlAONAME')]",
+                        "FileShare": "[parameters('FileShare')]",
+                        "CuPackageName": "[parameters('CuPackageName')]",
+                        "LangPackName":  "[parameters('LangPackName')]",
+                        "ProductKey": "[parameters('ProductKey')]",
+                        "FarmUsersPrefix": "[parameters('FarmUsersPrefix')]",
+                        "MySitePrefix": "[parameters('MySitePrefix')]"            
+                    }
+                },
+                "protectedSettings": {
+                    "Items": {
+                        "AdminPassword": "[parameters('adminPassword')]",
+                        "SharePointSetupUserAccountPassword": "[parameters('sharePointSetupUserAccountPassword')]",
+                        "SharePointFarmAccountPassword": "[parameters('sharePointFarmAccountPassword')]",
+                        "SharePointFarmPassphrasePassword": "[parameters('sharePointFarmPassphrasePassword')]",
+                        "SharePointServiceAccountPassword":"[parameters('sharePointServiceAccountPassword')]",
+                        "SharePointPoolAccountPassword":"[parameters('sharePointPoolAccountPassword')]"      
+                    }
+                }
+            }
+        }
+    ]
+}
