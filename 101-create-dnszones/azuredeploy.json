@@ -7,28 +7,28 @@
       "type": "string",
       "defaultValue": "[concat(uniqueString(resourceGroup().id), '.azurestackquickstart.org')]",
       "metadata": {
-        "description": "The name of the DNS zone to be created.  Must have at least 2 segements, e.g. hostname.org"
+        "description": "The name of the DNS zone to be created. Must contain at least 2 segements, e.g. hostname.org"
       }
     },
     "newRecordName": {
       "type": "string",
       "defaultValue": "www",
       "metadata": {
-        "description": "The name of the DNS record to be created.  The name is relative to the zone, not the FQDN."
+        "description": "The name of the DNS record to be created. The name is relative to the zone, not to the FQDN."
       }
     },
     "firstRecordIPAddress": {
       "type": "string",
       "defaultValue": "1.2.3.4",
       "metadata": {
-        "description": "The ipv4Address for the first record."
+        "description": "The IPv4 address for the first record."
       }
     },
     "secondRecordIPAddress": {
       "type": "string",
       "defaultValue": "1.2.3.5",
       "metadata": {
-        "description": "The ipv4Address for the second record."
+        "description": "The IPv4 address for the second record."
       }
     }
   },
