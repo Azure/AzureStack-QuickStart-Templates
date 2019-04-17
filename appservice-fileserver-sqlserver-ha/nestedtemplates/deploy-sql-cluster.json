@@ -108,10 +108,10 @@
       "type": "string",
       "defaultValue": "latest"
     },
-    "_artifactsLocation": {
+    "artifactsLocation": {
       "type": "string"
     },
-    "_artifactsLocationSasToken": {
+    "artifactsLocationSasToken": {
       "type": "string"
     },
     "location": {
@@ -129,7 +129,7 @@
     "witnessStorageType": "Standard_LRS",
     "vmNamePrefix": "[concat(parameters('namePrefix'),'-sql-')]",
     "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
-    "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
+    "vmLoopTemplateURL": "[concat(parameters('artifactsLocation'),'/nestedtemplates/newVM.json',parameters('artifactsLocationSasToken'))]",
     "sqllbName":"[concat(parameters('namePrefix'),'-sql-lb')]",
     "sqlLBFE":"[concat(parameters('namePrefix'),'-sql-lbfe')]",
     "sqlLBBE":"[concat(parameters('namePrefix'),'-sql-lbbe')]",
@@ -138,9 +138,9 @@
     "sqlLBBEID":"[concat(variables('SqlLBID'),'/backendAddressPools/',variables('sqlLBBE'))]",
     "sqllbFEConfigID":"[concat(variables('SqlLBID'),'/frontendIPConfigurations/',variables('sqlLBFE'))]",
     "sqllbProbeID":"[concat(variables('SqlLBID'),'/probes/',variables('SQLAOProbe'))]",
-    "createClusterModulesURL":"[concat(parameters('_artifactsLocation'),'/dsc/config-sql.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "createClusterModulesURL":"[concat(parameters('artifactsLocation'),'/dsc/config-sql.ps1.zip',parameters('artifactsLocationSasToken'))]",
     "createClusterConfigurationFunction":"config-sql.ps1\\config-sql",
-    "sqlAOPrepareModulesURL":"[concat(parameters('_artifactsLocation'),'/dsc/prep-sql.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "sqlAOPrepareModulesURL":"[concat(parameters('artifactsLocation'),'/dsc/prep-sql.ps1.zip',parameters('artifactsLocationSasToken'))]",
     "sqlAOPrepareConfigurationFunction":"prep-sql.ps1\\prep-sql",
     "sqlAOEPName":"aodns-hadr",
     "clusterName":"aodns-fc",
@@ -312,11 +312,11 @@
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
           },
-          "_artifactsLocationSasToken": {
-            "value": "[parameters('_artifactsLocationSasToken')]"
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
           },
           "imagePublisher": {
             "value": "[parameters('imagePublisher')]"

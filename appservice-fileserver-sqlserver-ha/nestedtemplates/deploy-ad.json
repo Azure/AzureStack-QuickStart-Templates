@@ -96,10 +96,10 @@
             "type": "string",
             "defaultValue": "latest"
         },
-        "_artifactsLocation": {
+        "artifactsLocation": {
             "type": "string"
         },
-        "_artifactsLocationSasToken": {
+        "artifactsLocationSasToken": {
             "type": "string"
         },
         "location": {
@@ -115,10 +115,10 @@
         "storageNamePrefix": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'vm')]",
         "vmNamePrefix": "[concat(parameters('namePrefix'),'-ad-')]",
         "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
-        "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
-        "adPDCModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/prep-adforest.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+        "vmLoopTemplateURL": "[concat(parameters('artifactsLocation'),'/nestedtemplates/newVM.json',parameters('artifactsLocationSasToken'))]",
+        "adPDCModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/prep-adforest.ps1.zip',parameters('artifactsLocationSasToken'))]",
         "adPDCConfigurationFunction": "prep-adforest.ps1\\prep-adforest",
-        "adBDCModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-second-dc.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+        "adBDCModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/config-second-dc.ps1.zip',parameters('artifactsLocationSasToken'))]",
         "adBDCConfigurationFunction": "config-second-dc.ps1\\config-second-dc"
     },
     "resources": [
@@ -210,11 +210,11 @@
                     "adminPassword": {
                         "value": "[parameters('adminPassword')]"
                     },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
+                    "artifactsLocation": {
+                        "value": "[parameters('artifactsLocation')]"
                     },
-                    "_artifactsLocationSasToken": {
-                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    "artifactsLocationSasToken": {
+                        "value": "[parameters('artifactsLocationSasToken')]"
                     },
                     "imagePublisher": {
                         "value": "[parameters('imagePublisher')]"
