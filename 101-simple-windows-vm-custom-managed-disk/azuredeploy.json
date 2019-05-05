@@ -1,0 +1,224 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the VM"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for the Virtual Machine. Default value is localadmin"
+            },
+            "defaultValue": "admin"
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "AdminPassword"
+            }
+        },
+        "imageName": {
+            "type": "string",
+            "defaultValue": "myimage",
+            "metadata": {
+                "description": "Maps to the Image Name"
+            }
+        },
+        "imageUri": {
+            "type": "string",
+            "defaultValue": "https://preimages.blob.local.azurestack.external/vhds/Server2019.vhd",
+            "metadata": {
+                "description": "uri of the Image "
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_F2",
+            "metadata": {
+                "description": "The size of the Virtual Machine."
+            }
+        }
+    },
+    "variables": {
+        "PublicIPName": "[concat('PublicIP_', parameters('vmName'))]",
+        "dnsNameForPublicIP": "[tolower(concat('dns', uniquestring(resourceGroup().id)))]",
+        "location": "[resourceGroup().location]",
+        "nicName": "[tolower(concat('nic',uniquestring(resourceGroup().id)))]",
+        "addressPrefix": "10.0.0.0/24",
+        "subnetName": "[tolower(concat('subnet',uniquestring(resourceGroup().id)))]",
+        "subnetPrefix": "10.0.0.0/24",
+        "diagnosticsStorageAccountName": "[concat('diag', uniquestring(resourceGroup().id))]",
+        "storageAccountType": "Standard_LRS",
+        "virtualNetworkName": "[tolower(concat('vnet',uniquestring(resourceGroup().id)))]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "networkSecurityGroupName": "[tolower(concat('nsg',uniquestring(resourceGroup().id)))]",
+        "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/images",
+            "apiVersion": "2017-03-30",
+            "name": "[parameters('ImageName')]",
+            "location": "[variables('location')]",
+            "tags": {
+                "provisioner": "Image_Deploy"
+            },
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "osType": "Windows",
+                        "osState": "Generalized",
+                        "blobUri": "[parameters('ImageUri')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 40
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[toLower(variables('diagnosticsStorageAccountName'))]",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            },
+            "sku": {
+                "name": "Standard_LRS"
+              },
+            "kind": "Storage"
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "description": "Allow RDP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('PublicIPName')]",
+            "location": "[variables('location')]",
+            "tags": {
+              "provisioner": "image_deploy"
+            },
+            "properties": {
+              "publicIPAllocationMethod": "Static"
+            }
+          },    
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('nicName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[variables('networkSecurityGroupName')]"
+            ],
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceID('Microsoft.Network/publicIPAddresses/',variables('PublicIPName'))]"
+                              }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
+                "[concat('Microsoft.Compute/images/', parameters('imageName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "id": "[resourceId('Microsoft.Compute/images', Parameters('imageName'))]"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob)]"
+                    }
+                }
+            }
+        }
+    ]
+}
