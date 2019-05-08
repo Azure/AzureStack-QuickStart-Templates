@@ -131,10 +131,10 @@
       "type": "string",
       "defaultValue": "latest"
     },
-    "_artifactsLocation": {
+    "artifactsLocation": {
       "type": "string"
     },
-    "_artifactsLocationSasToken": {
+    "artifactsLocationSasToken": {
       "type": "string"
     },
     "location": {
@@ -153,10 +153,10 @@
     "vmNamePrefix": "[concat(parameters('namePrefix'),'-s2d-')]",
     "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
     "clusterName": "[concat(variables('vmNamePrefix'),'c')]",
-    "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
-    "s2dPrepModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/prep-s2d.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "vmLoopTemplateURL": "[concat(parameters('artifactsLocation'),'/nestedtemplates/newVM.json',parameters('artifactsLocationSasToken'))]",
+    "s2dPrepModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/prep-s2d.ps1.zip',parameters('artifactsLocationSasToken'))]",
     "s2dPrepFunction": "PrepS2D.ps1\\PrepS2D",
-    "s2dConfigModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-s2d.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "s2dConfigModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/config-s2d.ps1.zip',parameters('artifactsLocationSasToken'))]",
     "s2dConfigFunction": "ConfigS2D.ps1\\ConfigS2D"
   },
   "resources": [
@@ -257,11 +257,11 @@
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
           },
-          "_artifactsLocationSasToken": {
-            "value": "[parameters('_artifactsLocationSasToken')]"
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
           },
           "imagePublisher": {
             "value": "[parameters('imagePublisher')]"

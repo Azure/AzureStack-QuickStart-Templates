@@ -38,10 +38,10 @@
     "imageVersion": {
       "type": "string"
     },
-    "_artifactsLocation": {
+    "artifactsLocation": {
       "type": "string"
     },
-    "_artifactsLocationSasToken": {
+    "artifactsLocationSasToken": {
       "type": "string"
     },
     "location": {
