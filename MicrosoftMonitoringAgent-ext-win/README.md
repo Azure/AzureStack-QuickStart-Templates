@@ -3,7 +3,7 @@
 ## Prerequisites
 This template requires:
 - an existing Azure Stack Windows VM
-- the latest version of the "Microsoft Monitoring Agent Extension for Windows Virtual Machines” extension downloaded in the Azure Stack Marketplace
+- the latest version of the "Azure Monitor, Update and Configuration Management” extension downloaded in the Azure Stack Marketplace
 - an LogAnalytics workspace created in Azure (more info see [this link](https://docs.microsoft.com/en-us/azure/log-analytics/log-analytics-quick-create-workspace))
 
 
