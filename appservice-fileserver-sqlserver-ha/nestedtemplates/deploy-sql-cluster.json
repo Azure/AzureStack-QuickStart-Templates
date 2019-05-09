@@ -143,7 +143,10 @@
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('vmAvailabilitySetName')]",
       "location": "[parameters('location')]",
-      "properties": {},
+      "properties": {
+        "platformUpdateDomainCount": "[parameters('vmCount')]",
+        "platformFaultDomainCount": "[parameters('vmCount')]"
+      },
       "sku": {
         "name": "Aligned"
       }
@@ -250,7 +253,6 @@
       },
       "name": "[concat(variables('vmNamePrefix'),copyindex(),'-newVM')]",
       "dependsOn": [
-        "storageAccountLoop",
         "nicLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
       ],

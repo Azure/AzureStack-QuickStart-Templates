@@ -6,9 +6,6 @@
     "vmName": {
       "type": "string"
     },
-    "storageAccountUri": {
-      "type": "string"
-    },
     "vmAvailabilitySetName": {
       "type": "string"
     },
@@ -83,9 +80,6 @@
           },
           "osDisk": {
             "name": "[concat(parameters('vmName'),'-osdisk')]",
-            "vhd": {
-              "uri": "[concat(parameters('storageAccountUri'), 'vhds/',parameters('vmName'),'-osdisk.vhd')]"
-            },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },

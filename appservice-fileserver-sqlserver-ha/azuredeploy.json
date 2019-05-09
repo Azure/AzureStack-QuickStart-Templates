@@ -147,7 +147,6 @@
     }
   },
   "variables": {
-    "storageAccountType": "Premium_LRS",
     "names": {
       "adNsg": "[concat(parameters('namePrefix'), '-ad-Nsg')]",
       "sqlNsg": "[concat(parameters('namePrefix'), '-sql-Nsg')]",
@@ -323,9 +322,6 @@
           "staticIP":{
             "value":"[variables('adStatipIP')]"
           },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
-          },
           "nicSubnetUri": {
             "value": "[variables('adsubnetRef')]"
           },
@@ -415,9 +411,6 @@
           "fileShareUserPassword": {
             "value": "[parameters('fileShareUserPassword')]"
           },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
-          },
           "nicSubnetUri": {
             "value": "[variables('fileserversubnetRef')]"
           },
@@ -490,9 +483,6 @@
           },
           "SqlListenerIP":{
             "value":"[variables('sqllistenerip')]"
-          },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
           },
           "nicSubnetUri": {
             "value": "[variables('sqlsubnetRef')]"
