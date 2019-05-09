@@ -55,8 +55,8 @@ This template uses Azure Stack Marketplace images. These need to be available on
 | sqlLoginPassword | password for SQL login account | secure string |
 | sofsName | Name of the Scale-out File Server | string | sofs01
 | shareName | Name of the Fileshare | string | WebSites
-| _artifactsLocation | Blob store where all deployment artifacts are stored | string |  https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/appservice-fileserver-sqlserver-ha  
-| _artifactsLocationSasToken | SAS token for artifact location if required | secure string |  
+| artifactsLocation | Blob store where all deployment artifacts are stored | string |  https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/appservice-fileserver-sqlserver-ha  
+| artifactsLocationSasToken | SAS token for artifact location if required | secure string |  
 | location | location to be used for the deployment | string |
 
 ## Outputs

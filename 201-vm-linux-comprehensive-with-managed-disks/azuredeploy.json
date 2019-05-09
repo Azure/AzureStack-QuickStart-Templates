@@ -85,9 +85,10 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[toLower(variables('storageAccountName'))]",
       "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -237,7 +238,7 @@
         "typeHandlerVersion": "2.0",
         "autoUpgradeMinorVersion": "true",
         "settings": {
-          "fileUris": ["[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]"],
+          "fileUris": [ "[concat(parameters('_artifactsLocation'), variables('scriptName'), '.sh')]" ],
           "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]"
         }
       }

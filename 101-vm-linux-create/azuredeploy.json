@@ -68,9 +68,10 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[toLower(variables('storageAccountName'))]",
       "location": "[variables('location')]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -180,9 +181,9 @@
             }
           ]
         },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
+        "diagnosticsProfile": { 
+          "bootDiagnostics": { 
+            "enabled": "true", 
             "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob)]"
           }
         }

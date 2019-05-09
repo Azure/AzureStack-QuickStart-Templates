@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "domainName": {
+            "value": "contoso.com"
+        },
+        "adminUsername": {
+            "value": "thoroetadm"
+        },
+        "workloadsLocation": {
+            "value": "https://colab.blob.local.azurestack.external/workload"
+        },
+        "vmPrefix": {
+            "value": "srv"
+        },
+        "vaultCredentialFileName": {
+            "value": "Profile.VaultCredentials"
+        },
+        "NoOfDisks": {
+            "value": "2"
+        },
+         "StorageSize": {
+            "value": "100"
+        }
+    }
+}
