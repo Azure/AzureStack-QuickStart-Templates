@@ -1,6 +1,6 @@
 # Docker Registry on Azure Stack
 
-This template deploys a unsecure (no TLS encryption) docker registry that uses an existing Azure Stack storage account to persist your container images.
+This template deploys an unsecure (no TLS encryption) docker registry that uses an existing Azure Stack storage account to persist your container images.
 
 This template is just for illustrative purposes only and it is **not** recommended for production environments.
 
