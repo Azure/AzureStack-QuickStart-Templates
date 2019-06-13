@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
@@ -146,7 +147,6 @@
     }
   },
   "variables": {
-    "storageAccountType": "Premium_LRS",
     "names": {
       "adNsg": "[concat(parameters('namePrefix'), '-ad-Nsg')]",
       "sqlNsg": "[concat(parameters('namePrefix'), '-sql-Nsg')]",
@@ -247,7 +247,6 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').adNsg]",
       "location": "[parameters('location')]",
@@ -256,7 +255,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').fsNsg]",
       "location": "[parameters('location')]",
@@ -265,7 +263,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').sqlNsg]",
       "location": "[parameters('location')]",
@@ -276,7 +273,6 @@
     {
       "name": "NetworkDeployment",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -301,7 +297,6 @@
     {
       "name": "deployAD",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeployment"
       ],
@@ -326,9 +321,6 @@
           },
           "staticIP":{
             "value":"[variables('adStatipIP')]"
-          },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
           },
           "nicSubnetUri": {
             "value": "[variables('adsubnetRef')]"
@@ -360,7 +352,6 @@
     {
       "name": "NetworkDeploymentDNS",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -386,7 +377,6 @@
     {
       "name": "deployS2DCluster",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeploymentDNS"
       ],
@@ -420,9 +410,6 @@
           },
           "fileShareUserPassword": {
             "value": "[parameters('fileShareUserPassword')]"
-          },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
           },
           "nicSubnetUri": {
             "value": "[variables('fileserversubnetRef')]"
@@ -460,7 +447,6 @@
     {
       "name": "DeploySQL",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeploymentDNS"
       ],
@@ -497,9 +483,6 @@
           },
           "SqlListenerIP":{
             "value":"[variables('sqllistenerip')]"
-          },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
           },
           "nicSubnetUri": {
             "value": "[variables('sqlsubnetRef')]"
