@@ -79,6 +79,24 @@
             "metadata": {
                 "description": "The subnet address prefix."
             }
+        },
+        "keyVaultResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "The Key Vault resource identifier."
+            }
+        },
+        "certificateUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "Absolute URL to the Key Vault secret that stores the pfx certificate."
+            }
+        },
+        "certificateFingerprint": {
+            "type": "string",
+            "metadata": {
+                "description": "The fingerprint of the .crt file."
+            }
         }
     },
     "variables": {
@@ -88,7 +106,7 @@
         "nicName": "[concat(parameters('virtualMachineName'),'-nic')]",
         "nsgName": "[concat(parameters('virtualMachineName'),'-nsg')]",
         "pipName": "[concat(parameters('virtualMachineName'),'-pip')]",
-        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainerName'),' REGISTRY_STORAGE_AZURE_REALM=', parameters('storageAccountRealm'))]"
+        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainerName'),' REGISTRY_STORAGE_AZURE_REALM=', parameters('storageAccountRealm'),' CERT_FINGERPRINT=', parameters('certificateFingerprint'))]"
     },
     "resources": [
         {
@@ -110,7 +128,19 @@
                                 }
                             ]
                         }
-                    }
+                    },
+                    "secrets": [
+                        {
+                            "sourceVault": {
+                                "id": "[parameters('keyVaultResourceId')]"
+                            },
+                            "vaultCertificates": [
+                                {
+                                    "certificateUrl": "[parameters('certificateUrl')]"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 "hardwareProfile": {
                     "vmSize": "[parameters('virtualMachineSize')]"
