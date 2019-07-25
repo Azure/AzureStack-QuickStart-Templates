@@ -21,11 +21,13 @@ Standalone file server is not HA and should only be used in dev and test scenari
 </a>
 
 
-## Deploying from Portal
+## Deploying from Azure Stack portal
 
-+   Login into Azurestack portal
-+   Click "New" -> "Custom" -> "Template deployment"
-+   Copy conent in azuredeploy.json, Click "Edit Template" and paste content, then Click "Save"
-+   Fill the parameters
-+   Click "Create new" to create new Resource Group
-+   Click "Create"
++   Copy azuredeploy.json content to clipboard.
++   Sign in to portal.
++   Click "+ Create a resource" -> "Custom" -> "Template deployment".
++   Click "Edit template"
++   Delete existing content, paste in content from clipboard, then click "Save".
++   Click "Edit parameters" to complete any missing/incorrect parameters, then click "OK".
++   Specify the appropriate subscription and resource group settings.
++   Click "Create".
