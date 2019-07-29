@@ -194,3 +194,15 @@ You can use `openssl` to create a .pfx out of a public and private key.
 ```bash
 openssl pkcs12 -export -in cert.crt -inkey cert.pem  -passin pass:${PASSWORD} -out cert.pfx -passout pass:${PASSWORD}
 ```
+
+### The ARM deployment went through fine, but the registry does not seem to be working. How can I troubleshoot it?
+
+The provisioning logs will be located here: `/var/log/azure/docker-registry.log`
+
+If that's not enough, looking at the container logs should give you an idea of what the problem may be.
+
+```bash
+docker logs registry
+```
+
+Take into account that the template blocks the SSH port (TCP 22) by default. You will have to open that port by updating the NSG rules before you can connect to the server.
