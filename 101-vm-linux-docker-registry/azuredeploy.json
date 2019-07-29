@@ -286,21 +286,6 @@
                             "destinationAddressPrefix": "*",
                             "destinationPortRange": "443"
                         }
-                    },
-                    {
-                        "name": "SSH",
-                        "properties": {
-                            "priority": 340,
-                            "protocol": "Tcp",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourceApplicationSecurityGroups": [],
-                            "destinationApplicationSecurityGroups": [],
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "22"
-                        }
                     }
                 ]
             }
