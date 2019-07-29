@@ -1,6 +1,6 @@
 # Docker Registry v2 on Azure Stack
 
-This template deploys an Ubuntu Server 16.04-LTS virtual machine along with a [custom script extension](cse.sh) that installs and configures a [docker registry](https://docs.docker.com/registry/) container.
+This template deploys an Ubuntu Server 16.04-LTS virtual machine along with a [custom script extension](script.sh) that installs and configures a [docker registry](https://docs.docker.com/registry/) container.
 
 The deployed registry will be configured to persist container images in an Azure Stack storage account, encrypt traffic using TLS, and restrict access using basic HTTP authentication.
 
@@ -32,7 +32,7 @@ htpasswd -Bb .htpasswd my-user my-password
 
 #### Anonymous access
 
-To allow anonymous access to the registry, update the `docker run` command executed by the [CSE script](cse.sh) **before** you start the [storage configuration](#storage-configuration) step.
+To allow anonymous access to the registry, update the `docker run` command executed by the [CSE script](script.sh) **before** you start the [storage configuration](#storage-configuration) step.
 
 Deleting the lines that set container variables REGISTRY_AUTH, REGISTRY_AUTH_HTPASSWD_PATH AND REGISTRY_AUTH_HTPASSWD_REALM will disable basic authentication.
 
@@ -69,9 +69,9 @@ $container = New-AzureStorageContainer -Name $saContainer
 
 # Upload the CSE script so the template can later fetch it during deployment
 Write-Host "Uploading configuration script"
-Set-AzureStorageBlobContent -Container $saContainer -File cse.sh | out-null
-$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "cse.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
-$cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/cse.sh" + $cseToken
+Set-AzureStorageBlobContent -Container $saContainer -File script.sh | out-null
+$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
+$cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/script.sh" + $cseToken
 
 # The CSE script needs the .htpasswd file to configure the container registry
 Write-Host "Uploading .htpasswd file"
@@ -143,7 +143,7 @@ New-AzureRmResourceGroupDeployment `
 
 ### Upgrade
 
-In order to upgrade the guest OS or the container registry itself, update [azuredeploy.json](azuredeploy.json) and/or [cse.sh](cse.sh) as needed and run once again `New-AzureRmResourceGroupDeployment` as previously indicated.
+In order to upgrade the guest OS or the container registry itself, update [azuredeploy.json](azuredeploy.json) and/or [script.sh](script.sh) as needed and run once again `New-AzureRmResourceGroupDeployment` as previously indicated.
 
 ## Usage
 

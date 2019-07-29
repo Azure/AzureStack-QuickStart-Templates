@@ -39,9 +39,9 @@ $container = New-AzureStorageContainer -Name $saContainer
 
 # Upload configuration script
 Write-Host "Uploading configuration script"
-Set-AzureStorageBlobContent -Container $saContainer -File cse.sh | out-null
-$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "cse.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
-$cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/cse.sh" + $cseToken
+Set-AzureStorageBlobContent -Container $saContainer -File script.sh | out-null
+$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
+$cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/script.sh" + $cseToken
 
 # Upload htpasswd
 Write-Host "Uploading htpasswd file"

@@ -189,7 +189,7 @@
                         "[parameters('cseLocation')]",
                         "[parameters('htpasswdLocation')]"
                     ],
-                    "commandToExecute": "[concat(variables('provisionScriptParameters'),' LOCATION=',variables('location'),' FQDN=', '\"', reference(resourceId('Microsoft.Network/publicIPAddresses', 'registry-pip'),'2017-10-01').dnsSettings.fqdn,'\"',' ./cse.sh >> /var/log/azure/docker-registry.log 2>&1')]"
+                    "commandToExecute": "[concat(variables('provisionScriptParameters'),' LOCATION=',variables('location'),' FQDN=', '\"', reference(resourceId('Microsoft.Network/publicIPAddresses', 'registry-pip'),'2017-10-01').dnsSettings.fqdn,'\"',' ./script.sh >> /var/log/azure/docker-registry.log 2>&1')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {},
