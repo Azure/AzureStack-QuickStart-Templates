@@ -78,7 +78,7 @@ docker run -d \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:5000 \
   -e REGISTRY_HTTP_TLS_KEY=/etc/ssl/certs/registry/${KEY_FILE} \
   -e REGISTRY_HTTP_TLS_CERTIFICATE=/etc/ssl/certs/registry/${CRT_FILE} \
-  registry:2
+  registry:2.7.1
 
 echo waiting for container to start
 sleep 10
