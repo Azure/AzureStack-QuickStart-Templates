@@ -13,7 +13,7 @@ It also creates the following resources:
 ## Notes
 Standalone file server is not HA and should only be used in dev and test scenarios.
 
-This template uses an Azure Stack Marketplace images, which must be downloaded from Azure Marketplace and made available on your Azure Stack instance:
+This template uses an Azure Stack Marketplace image, which must be downloaded from Azure Marketplace and made available on your Azure Stack instance:
 - The latest version of Windows Server 2016 Datacenter
 
 <!--
