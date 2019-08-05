@@ -197,7 +197,9 @@ openssl pkcs12 -export -in cert.crt -inkey cert.pem  -passin pass:${PASSWORD} -o
 
 ### The ARM deployment went through fine, but the registry does not seem to be working. How can I troubleshoot it?
 
-The provisioning logs will be located here: `/var/log/azure/docker-registry.log`
+The template blocks SSH traffic (TCP 22) by default. You need to add a new inbound rule to allow SSH traffic through the Network Security Group.
+
+Once you are able to remote into the virtual machine, you can inspect the provisioning logs at `/var/log/azure/docker-registry.log`
 
 If that's not enough, looking at the container logs should give you an idea of what the problem may be.
 
