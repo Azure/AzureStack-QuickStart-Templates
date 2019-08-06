@@ -155,7 +155,7 @@ Your registry can store images you produce yourself or images from any public re
 
 ```powershell
 # login if needed
-docker login -u my-user -p my-password  my-registry.com/registry:2
+docker login -u my-user -p my-password  my-registry.com
 # fetch an image from docker hub
 docker pull hello-world:latest
 # re-tag it using your registry information
