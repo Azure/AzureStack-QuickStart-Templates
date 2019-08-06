@@ -58,7 +58,8 @@ cp "/var/lib/waagent/${KEY_FILE}" "${STORE}/${KEY_FILE}"
 echo moving .htpasswd to mount point
 HTPASSWD_DIR="/root/auth"
 mkdir -p $HTPASSWD_DIR
-mv .htpasswd $HTPASSWD_DIR
+awk '{ sub("\r$", ""); print }' .htpasswd > .htpasswd.tmp
+cp .htpasswd.tmp $HTPASSWD_DIR/.htpasswd
 
 echo starting registry container
 docker run -d \
