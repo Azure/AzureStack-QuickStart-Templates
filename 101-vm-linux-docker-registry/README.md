@@ -134,6 +134,8 @@ $tp = Get-PfxCertificate -FilePath $pfxPath
 Once setup is completed and the required parameters populated in [azuredeploy.parameters.json](azuredeploy.parameters.json), you can deploy the template with the following command:
 
 ```powershell
+$resourceGroup=""
+
 New-AzureRmResourceGroupDeployment `
   -Name "RegistryDeployment-$((Get-Date).ToString("yyyyMMddHHmmss"))" `
   -ResourceGroupName $resourceGroup `
@@ -171,9 +173,10 @@ Yes. You can use this PowerShell snipped to generate a self-signed certificate.
 
 ```powershell
 $PASSWORD=""
+$CN=""
 
 # Create a self-signed certificate
-$ssc = New-SelfSignedCertificate -certstorelocation cert:\LocalMachine\My -dnsname "example.com"
+$ssc = New-SelfSignedCertificate -certstorelocation cert:\LocalMachine\My -dnsname $CN
 $crt = "cert:\localMachine\my\" + $ssc.Thumbprint
 $pwd = ConvertTo-SecureString -String $PASSWORD -Force -AsPlainText
 Export-PfxCertificate -cert $crt -FilePath "cert.pfx" -Password $pwd
@@ -182,7 +185,10 @@ Export-PfxCertificate -cert $crt -FilePath "cert.pfx" -Password $pwd
 or using `openssl`
 
 ```bash
-openssl req -x509 -newkey rsa:2048 -subj "/CN=example.com" -days 365 -out cert.crt -keyout cert.pem -passout pass:${PASSWORD}
+PASSWORD=""
+CN=""
+
+openssl req -x509 -newkey rsa:2048 -subj "/CN=${CN}" -days 365 -out cert.crt -keyout cert.pem -passout pass:${PASSWORD}
 ```
 
 Restart the docker daemon once the self-signed certificate is trusted by the registry client.
