@@ -96,6 +96,7 @@ EXTERNAL_FQDN="${FQDN//$PIP_LABEL.$LOCATION.cloudapp.}"
 REGISTRY_STORAGE_AZURE_REALM=${LOCATION}.${EXTERNAL_FQDN}
 CRT_FILE="${CERT_THUMBPRINT}.crt"
 KEY_FILE="${CERT_THUMBPRINT}.prv"
+SECRET=$(openssl rand -base64 32)
 
 if [ -f /var/log.vhd/azure/golden-image-install.complete ]; then
     echo "golden image; skipping dependencies installation"
@@ -133,30 +134,46 @@ awk '{ sub("\r$", ""); print }' .htpasswd > .htpasswd.tmp
 cp .htpasswd.tmp $HTPASSWD_DIR/.htpasswd
 
 echo starting registry container
-docker run -d \
-  --name registry \
-  --restart=always \
-  -p 443:5000 \
-  -v /etc/ssl/certs:/etc/ssl/certs:ro \
-  -v /root/auth:/auth \
-  -e REGISTRY_STORAGE="azure" \
-  -e REGISTRY_STORAGE_AZURE_ACCOUNTNAME=${REGISTRY_STORAGE_AZURE_ACCOUNTNAME} \
-  -e REGISTRY_STORAGE_AZURE_ACCOUNTKEY=${REGISTRY_STORAGE_AZURE_ACCOUNTKEY} \
-  -e REGISTRY_STORAGE_AZURE_CONTAINER=${REGISTRY_STORAGE_AZURE_CONTAINER} \
-  -e REGISTRY_STORAGE_AZURE_REALM=${REGISTRY_STORAGE_AZURE_REALM} \
-  -e REGISTRY_AUTH="htpasswd" \
-  -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/.htpasswd \
-  -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
-  -e REGISTRY_HTTP_ADDR=0.0.0.0:5000 \
-  -e REGISTRY_HTTP_TLS_KEY=/etc/ssl/certs/registry/${KEY_FILE} \
-  -e REGISTRY_HTTP_TLS_CERTIFICATE=/etc/ssl/certs/registry/${CRT_FILE} \
-  registry:2.7.1
+cat <<EOF >> docker-compose.yml
+version: '3'
+services:
+  registry:
+    image: registry:2.7.1
+    deploy:
+      mode: replicated
+      replicas: 5
+      restart_policy:
+        condition: on-failure
+        delay: 5s          
+    ports:
+      - "443:5000"
+    volumes:
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+      - /root/auth:/auth
+    environment:
+      - REGISTRY_STORAGE=azure
+      - REGISTRY_STORAGE_AZURE_ACCOUNTNAME=${REGISTRY_STORAGE_AZURE_ACCOUNTNAME}
+      - REGISTRY_STORAGE_AZURE_ACCOUNTKEY=${REGISTRY_STORAGE_AZURE_ACCOUNTKEY}
+      - REGISTRY_STORAGE_AZURE_CONTAINER=${REGISTRY_STORAGE_AZURE_CONTAINER}
+      - REGISTRY_STORAGE_AZURE_REALM=${REGISTRY_STORAGE_AZURE_REALM}
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/.htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm"
+      - REGISTRY_HTTP_ADDR=0.0.0.0:5000
+      - REGISTRY_HTTP_SECRET=${SECRET}
+      - REGISTRY_HTTP_TLS_KEY=/etc/ssl/certs/registry/${KEY_FILE}
+      - REGISTRY_HTTP_TLS_CERTIFICATE=/etc/ssl/certs/registry/${CRT_FILE}
+EOF
+
+docker swarm init
+docker stack deploy registry -c docker-compose.yml
 
 echo waiting for container to start
-sleep 10
+sleep 20
 
 echo validationg container status
-STATUS=$(docker inspect registry | jq ".[0].State.Status" | xargs)
+CID=$(docker ps | grep 'registry_registry.1\.' | head -c 12)
+STATUS=$(docker inspect ${CID} | jq ".[0].State.Status" | xargs)
 if [[ ! $STATUS == "running" ]]; then 
     exit $ERR_REGISTRY_NOT_RUNNING
 fi
