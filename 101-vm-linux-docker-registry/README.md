@@ -1,6 +1,6 @@
 # Docker Registry v2 on Azure Stack
 
-This template deploys an Ubuntu Server 16.04-LTS virtual machine along with a [custom script extension](script.sh) that installs and configures a [docker registry](https://docs.docker.com/registry/) container.
+This template deploys an Ubuntu Server 16.04-LTS virtual machine along with a [custom script extension](script.sh) that installs and configures a [container registry](https://docs.docker.com/registry/) as a docker swarm service.
 
 The deployed registry will be configured to persist container images in an Azure Stack storage account, encrypt traffic using TLS, and restrict access using basic HTTP authentication.
 
@@ -34,7 +34,7 @@ htpasswd -Bb .htpasswd my-user my-password
 
 To allow anonymous access to the registry, update the `docker run` command executed by the [CSE script](script.sh) **before** you start the [storage configuration](#storage-configuration) step.
 
-Deleting the lines that set container variables REGISTRY_AUTH, REGISTRY_AUTH_HTPASSWD_PATH AND REGISTRY_AUTH_HTPASSWD_REALM will disable basic authentication.
+Deleting the lines that set variables REGISTRY_AUTH, REGISTRY_AUTH_HTPASSWD_PATH AND REGISTRY_AUTH_HTPASSWD_REALM will disable basic authentication.
 
 ### Storage configuration
 
@@ -210,7 +210,5 @@ Once you are able to remote into the virtual machine, you can inspect the provis
 If that's not enough, looking at the container logs should give you an idea of what the problem may be.
 
 ```bash
-docker logs registry
+docker logs registry ${CONTAINER_ID}
 ```
-
-Take into account that the template blocks the SSH port (TCP 22) by default. You will have to open that port by updating the NSG rules before you can connect to the server.
