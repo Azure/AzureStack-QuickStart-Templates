@@ -91,6 +91,8 @@ echo CERT_THUMBPRINT:                    ${CERT_THUMBPRINT}
 echo FQDN:                               ${FQDN}
 echo LOCATION:                           ${LOCATION}
 echo PIP_LABEL:                          ${PIP_LABEL}
+echo REGISTRY_TAG:                       ${REGISTRY_TAG}
+echo REGISTRY_REPLICAS:                  ${REGISTRY_REPLICAS}
 
 EXTERNAL_FQDN="${FQDN//$PIP_LABEL.$LOCATION.cloudapp.}"
 REGISTRY_STORAGE_AZURE_REALM=${LOCATION}.${EXTERNAL_FQDN}
@@ -138,10 +140,10 @@ cat <<EOF >> docker-compose.yml
 version: '3'
 services:
   registry:
-    image: registry:2.7.1
+    image: registry:${REGISTRY_TAG}
     deploy:
       mode: replicated
-      replicas: 5
+      replicas: ${REGISTRY_REPLICAS}
       restart_policy:
         condition: on-failure
         delay: 5s          
@@ -177,3 +179,5 @@ STATUS=$(docker inspect ${CID} | jq ".[0].State.Status" | xargs)
 if [[ ! $STATUS == "running" ]]; then 
     exit $ERR_REGISTRY_NOT_RUNNING
 fi
+
+sudo docker system prune -a -f &

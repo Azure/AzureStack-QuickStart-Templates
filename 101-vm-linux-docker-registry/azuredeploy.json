@@ -92,6 +92,20 @@
                 "description": "The certificate thumbprint."
             }
         },
+        "registryTag": {
+            "type": "string",
+            "defaultValue": "2.7.1",
+            "metadata": {
+                "description": "Docker registry version (image tag)."
+            }
+        },
+        "registryReplicas": {
+            "type": "int",
+            "defaultValue": 10,
+            "metadata": {
+                "description": "Docker registry replicas."
+            }
+        },
         "cseLocation": {
             "type": "string",
             "metadata": {
@@ -109,7 +123,7 @@
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', 'registry-vnet')]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
         "location": "[resourceGroup().location]",
-        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainer'),' CERT_THUMBPRINT=', parameters('certificateThumbprint'),' PIP_LABEL=', parameters('domainNameLabel'))]"
+        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainer'),' CERT_THUMBPRINT=', parameters('certificateThumbprint'),' PIP_LABEL=', parameters('domainNameLabel'),' REGISTRY_TAG=', parameters('registryTag'),' REGISTRY_REPLICAS=', parameters('registryReplicas'))]"
     },
     "resources": [
         {
