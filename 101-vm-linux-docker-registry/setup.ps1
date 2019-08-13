@@ -3,6 +3,9 @@ function Random-Name {
   -join ((97..122) | Get-Random -Count $length | % {[char]$_})
 }
 
+# Set variables to match your environment
+#########################################
+
 $location = ""
 $resourceGroup = ""
 $saName = Random-Name 10
@@ -14,7 +17,8 @@ $kvName = Random-Name 10
 $secretName = Random-Name 10
 $pfxPath = ""
 $pfxPass = ""
-
+$dnsSubDomain = ""
+$sshKey = ""
 
 # RESOURCE GROUP
 # =============================================
@@ -109,11 +113,11 @@ $jsonCertificateThumbprint | Add-Member -MemberType NoteProperty -Name value -Va
 $jsonParameters | Add-Member -MemberType NoteProperty -Name certificateThumbprint -Value $jsonCertificateThumbprint
 
 $jsonAdminPublicKey = New-Object -TypeName PSObject
-$jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value ""
+$jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value $dnsSubDomain
 $jsonParameters | Add-Member -MemberType NoteProperty -Name adminPublicKey -Value $jsonAdminPublicKey
 
 $jsonDomainNameLabel = New-Object -TypeName PSObject
-$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value ""
+$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $sshKey
 $jsonParameters | Add-Member -MemberType NoteProperty -Name domainNameLabel -Value $jsonDomainNameLabel
 
 $jsonCseLocation = New-Object -TypeName PSObject
