@@ -1,23 +1,35 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "adminPublicKey": {
-            "value": ""
-        },
         "storageAccountName": {
             "value": ""
         },
-        "storageAccountContainerName": {
-            "value": ""
-        },
-        "storageAccountRealm": {
+        "storageAccountContainer": {
             "value": ""
         },
         "storageAccountKey": {
             "value": ""
         },
+        "keyVaultResourceId": {
+            "value": ""
+        },
+        "keyVaultSecretUrl": {
+            "value": ""
+        },
+        "certificateThumbprint": {
+            "value": ""
+        },
+        "adminPublicKey": {
+            "value": ""
+        },
         "domainNameLabel": {
+            "value": ""
+        },
+        "cseLocation": {
+            "value": ""
+        },
+        "htpasswdLocation": {
             "value": ""
         }
     }
