@@ -113,11 +113,11 @@ $jsonCertificateThumbprint | Add-Member -MemberType NoteProperty -Name value -Va
 $jsonParameters | Add-Member -MemberType NoteProperty -Name certificateThumbprint -Value $jsonCertificateThumbprint
 
 $jsonAdminPublicKey = New-Object -TypeName PSObject
-$jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value $dnsSubDomain
+$jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value $sshKey
 $jsonParameters | Add-Member -MemberType NoteProperty -Name adminPublicKey -Value $jsonAdminPublicKey
 
 $jsonDomainNameLabel = New-Object -TypeName PSObject
-$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $sshKey
+$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $dnsSubDomain 
 $jsonParameters | Add-Member -MemberType NoteProperty -Name domainNameLabel -Value $jsonDomainNameLabel
 
 $jsonCseLocation = New-Object -TypeName PSObject

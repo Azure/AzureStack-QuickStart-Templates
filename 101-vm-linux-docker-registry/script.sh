@@ -170,14 +170,12 @@ EOF
 docker swarm init
 docker stack deploy registry -c docker-compose.yml
 
-echo waiting for container to start
-sleep 20
+sleep 30
+sudo docker system prune -a -f &
 
 echo validationg container status
-CID=$(docker ps | grep 'registry_registry.1\.' | head -c 12)
+CID=$(docker ps | grep "registry_registry.1\." | head -c 12)
 STATUS=$(docker inspect ${CID} | jq ".[0].State.Status" | xargs)
 if [[ ! $STATUS == "running" ]]; then 
     exit $ERR_REGISTRY_NOT_RUNNING
 fi
-
-sudo docker system prune -a -f &

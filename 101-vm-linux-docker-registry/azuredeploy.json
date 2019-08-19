@@ -17,7 +17,7 @@
         },
         "virtualMachineSize": {
             "type": "string",
-            "defaultValue": "Standard_DS11_v2",
+            "defaultValue": "Standard_F8s_v2",
             "metadata": {
                 "description": "The VM size."
             }
@@ -101,7 +101,7 @@
         },
         "registryReplicas": {
             "type": "int",
-            "defaultValue": 10,
+            "defaultValue": 20,
             "metadata": {
                 "description": "Docker registry replicas."
             }
