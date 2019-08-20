@@ -10,7 +10,7 @@ This template deploys two SQL Server Enterprise, Standard or Developer instances
 * One VM (WS2016) configured as Domain Controller for a new forest with a single domain
 * Two VM (WS2016) configured as SQL Server 2016 SP1 or SP2 Enterprise/Standard/Developer (must use the marketplace images)
 * One VM (WS2016) configured as File Share Witness for the cluster
-* One Availability Set containing the SQL and FSW 2016 VMs
+* Two Availability Sets, one containing the SQL and FSW 2016 VMs, the other containing the Domain Controller VM.
 
 ## Notes
 
