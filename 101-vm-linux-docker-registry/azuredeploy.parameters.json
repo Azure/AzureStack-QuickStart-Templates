@@ -29,7 +29,13 @@
         "cseLocation": {
             "value": ""
         },
-        "htpasswdLocation": {
+        "servicePrincipalClientId": {
+            "value": ""
+        },
+        "servicePrincipalClientSecret": {
+            "value": ""
+        },
+        "credentialsKeyVaultName": {
             "value": ""
         }
     }

@@ -1,15 +1,15 @@
 #!/bin/bash -x
 
-ERR_APT_INSTALL_TIMEOUT=9 # Timeout installing required apt packages
-ERR_MISSING_CRT_FILE=10 # Bad cert thumbprint OR pfx not in key vault OR template misconfigured VM secrets section
-ERR_MISSING_KEY_FILE=11 # Bad cert thumbprint OR pfx not in key vault OR template misconfigured VM secrets section
-ERR_REGISTRY_NOT_RUNNING=13 # the container registry failed to start successfully
-ERR_MOBY_APT_LIST_TIMEOUT=25 # Timeout waiting for moby apt sources
-ERR_MS_GPG_KEY_DOWNLOAD_TIMEOUT=26 # Timeout waiting for MS GPG key download
-ERR_MOBY_INSTALL_TIMEOUT=27 # Timeout waiting for moby install
+ERR_APT_INSTALL_TIMEOUT=9           # Timeout installing required apt packages
+ERR_MISSING_CRT_FILE=10             # Bad cert thumbprint OR pfx not in key vault OR template misconfigured VM secrets section
+ERR_MISSING_KEY_FILE=11             # Bad cert thumbprint OR pfx not in key vault OR template misconfigured VM secrets section
+ERR_REGISTRY_NOT_RUNNING=13         # the container registry failed to start successfully
+ERR_MOBY_APT_LIST_TIMEOUT=25        # Timeout waiting for moby apt sources
+ERR_MS_GPG_KEY_DOWNLOAD_TIMEOUT=26  # Timeout waiting for MS GPG key download
+ERR_MOBY_INSTALL_TIMEOUT=27         # Timeout waiting for moby install
 ERR_MS_PROD_DEB_DOWNLOAD_TIMEOUT=42 # Timeout waiting for https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
-ERR_MS_PROD_DEB_PKG_ADD_FAIL=43 # Failed to add repo pkg file
-ERR_APT_UPDATE_TIMEOUT=99 # Timeout waiting for apt-get update to complete
+ERR_MS_PROD_DEB_PKG_ADD_FAIL=43     # Failed to add repo pkg file
+ERR_APT_UPDATE_TIMEOUT=99           # Timeout waiting for apt-get update to complete
 
 UBUNTU_RELEASE=$(lsb_release -r -s)
 MOBY_VERSION="3.0.6"
@@ -72,7 +72,7 @@ installDeps() {
     retrycmd_if_failure 10  5 10 cp /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/ || exit $ERR_MS_GPG_KEY_DOWNLOAD_TIMEOUT
     apt_get_update || exit $ERR_APT_UPDATE_TIMEOUT
     
-    apt_get_install 20 30 120 moby-engine=${MOBY_VERSION} moby-cli=${MOBY_VERSION} --allow-downgrades || exit $ERR_MOBY_INSTALL_TIMEOUT
+    apt_get_install 20 30 120 apache2-utils moby-engine=${MOBY_VERSION} moby-cli=${MOBY_VERSION} --allow-downgrades || exit $ERR_MOBY_INSTALL_TIMEOUT
     usermod -aG docker ${ADMIN_USER_NAME}
     
     for apt_package in curl jq; do
@@ -82,17 +82,53 @@ installDeps() {
       fi
     done
 }
+fetchCredentials(){
+    METADATA=$(mktemp)
+    curl -s https://management.${REGISTRY_STORAGE_AZURE_REALM}/metadata/endpoints?api-version=2015-01-01 > ${METADATA}
 
-echo ADMIN_USER_NAME:                    ${ADMIN_USER_NAME}
-echo REGISTRY_STORAGE_AZURE_ACCOUNTNAME: ${REGISTRY_STORAGE_AZURE_ACCOUNTNAME}
-echo REGISTRY_STORAGE_AZURE_ACCOUNTKEY:  ${REGISTRY_STORAGE_AZURE_ACCOUNTKEY}
-echo REGISTRY_STORAGE_AZURE_CONTAINER:   ${REGISTRY_STORAGE_AZURE_CONTAINER}
-echo CERT_THUMBPRINT:                    ${CERT_THUMBPRINT}
-echo FQDN:                               ${FQDN}
-echo LOCATION:                           ${LOCATION}
-echo PIP_LABEL:                          ${PIP_LABEL}
-echo REGISTRY_TAG:                       ${REGISTRY_TAG}
-echo REGISTRY_REPLICAS:                  ${REGISTRY_REPLICAS}
+    RESOURCE=$(jq -r .authentication.audiences[0] ${METADATA} | sed "s|https://management.|https://vault.|")
+    OAUTH=$(jq -r .authentication.loginEndpoint ${METADATA})
+    
+    #TODO ADFS
+    TOKEN_URL="${OAUTH}${TENANT_ID}/oauth2/token"
+
+    TOKEN=$(curl -s --retry 5 --retry-delay 10 --max-time 60 -f -X POST \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "grant_type=client_credentials" \
+        -d "client_id=${SPN_CLIENT_ID}" \
+        --data-urlencode "client_secret=${SPN_CLIENT_SECRET}" \
+        --data-urlencode "resource=${RESOURCE}" \
+        ${TOKEN_URL} | jq -r '.access_token')
+
+    KV_BASE="https://${KV_NAME}.vault.${REGISTRY_STORAGE_AZURE_REALM}/secrets"
+    SECRETS=$(curl -s "${KV_BASE}?api-version=2016-10-01" -H "Authorization: Bearer ${TOKEN}" | jq -r .value[].id)
+
+    rm .htpasswd
+    touch .htpasswd
+    for secret in ${SECRETS}
+    do 
+        SECRET_NAME_VERSION="${secret//$KV_BASE}"
+        SECRET_NAME=$(echo ${SECRET_NAME_VERSION} | cut -d '/' -f 2)
+        SECRET_VALUE=$(curl -s "${secret}?api-version=2016-10-01" -H "Authorization: Bearer ${TOKEN}" | jq -r .value)
+        #TODO password limit 256
+        htpasswd -Bb .htpasswd ${SECRET_NAME} ${SECRET_VALUE}
+    done
+}
+
+echo ADMIN_USER_NAME:                       ${ADMIN_USER_NAME}
+echo REGISTRY_STORAGE_AZURE_ACCOUNTNAME:    ${REGISTRY_STORAGE_AZURE_ACCOUNTNAME}
+echo REGISTRY_STORAGE_AZURE_ACCOUNTKEY:     ${REGISTRY_STORAGE_AZURE_ACCOUNTKEY}
+echo REGISTRY_STORAGE_AZURE_CONTAINER:      ${REGISTRY_STORAGE_AZURE_CONTAINER}
+echo CERT_THUMBPRINT:                       ${CERT_THUMBPRINT}
+echo FQDN:                                  ${FQDN}
+echo LOCATION:                              ${LOCATION}
+echo PIP_LABEL:                             ${PIP_LABEL}
+echo REGISTRY_TAG:                          ${REGISTRY_TAG}
+echo REGISTRY_REPLICAS:                     ${REGISTRY_REPLICAS}
+echo SPN_CLIENT_ID:                         ${SPN_CLIENT_ID}
+echo SPN_CLIENT_SECRET:                     ***
+echo TENANT_ID:                             ${TENANT_ID}
+echo KV_NAME:                               ${KV_NAME}
 
 EXTERNAL_FQDN="${FQDN//$PIP_LABEL.$LOCATION.cloudapp.}"
 REGISTRY_STORAGE_AZURE_REALM=${LOCATION}.${EXTERNAL_FQDN}
@@ -132,8 +168,8 @@ cp "/var/lib/waagent/${KEY_FILE}" "${STORE}/${KEY_FILE}"
 echo moving .htpasswd to mount point
 HTPASSWD_DIR="/root/auth"
 mkdir -p $HTPASSWD_DIR
-awk '{ sub("\r$", ""); print }' .htpasswd > .htpasswd.tmp
-cp .htpasswd.tmp $HTPASSWD_DIR/.htpasswd
+fetchCredentials
+cp .htpasswd $HTPASSWD_DIR/.htpasswd
 
 echo starting registry container
 cat <<EOF >> docker-compose.yml
@@ -146,7 +182,7 @@ services:
       replicas: ${REGISTRY_REPLICAS}
       restart_policy:
         condition: on-failure
-        delay: 5s          
+        delay: 5s
     ports:
       - "443:5000"
     volumes:

@@ -112,18 +112,31 @@
                 "description": "Download URL of the script to be executed by the template custom script extension."
             }
         },
-        "htpasswdLocation": {
+        "credentialsKeyVaultName": {
             "type": "string",
             "metadata": {
-                "description": "Download URL of the .htpasswd file."
+                "description": ""
+            }
+        },
+        "servicePrincipalClientId": {
+            "type": "securestring",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "servicePrincipalClientSecret": {
+            "type": "securestring",
+            "metadata": {
+                "description": ""
             }
         }
     },
     "variables": {
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', 'registry-vnet')]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
+        "tenantId": "[subscription().tenantId]",
         "location": "[resourceGroup().location]",
-        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainer'),' CERT_THUMBPRINT=', parameters('certificateThumbprint'),' PIP_LABEL=', parameters('domainNameLabel'),' REGISTRY_TAG=', parameters('registryTag'),' REGISTRY_REPLICAS=', parameters('registryReplicas'))]"
+        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainer'),' CERT_THUMBPRINT=', parameters('certificateThumbprint'),' PIP_LABEL=', parameters('domainNameLabel'),' REGISTRY_TAG=', parameters('registryTag'),' KV_NAME=',parameters('credentialsKeyVaultName'),' SPN_CLIENT_ID=',parameters('servicePrincipalClientId'),' SPN_CLIENT_SECRET=',parameters('servicePrincipalClientSecret'),' REGISTRY_REPLICAS=', parameters('registryReplicas'))]"
     },
     "resources": [
         {
@@ -200,10 +213,9 @@
             "properties": {
                 "protectedSettings": {
                     "fileUris": [
-                        "[parameters('cseLocation')]",
-                        "[parameters('htpasswdLocation')]"
+                        "[parameters('cseLocation')]"
                     ],
-                    "commandToExecute": "[concat(variables('provisionScriptParameters'),' LOCATION=',variables('location'),' FQDN=', '\"', reference(resourceId('Microsoft.Network/publicIPAddresses', 'registry-pip'),'2017-10-01').dnsSettings.fqdn,'\"',' ./script.sh >> /var/log/azure/docker-registry.log 2>&1')]"
+                    "commandToExecute": "[concat(variables('provisionScriptParameters'),' LOCATION=',variables('location'),' TENANT_ID=',variables('tenantId'),' FQDN=', '\"', reference(resourceId('Microsoft.Network/publicIPAddresses', 'registry-pip'),'2017-10-01').dnsSettings.fqdn,'\"',' ./script.sh >> /var/log/azure/docker-registry.log 2>&1')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {},

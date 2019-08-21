@@ -11,7 +11,6 @@ Make sure you take care of the following pre-requisites before you start the set
 - `Ubuntu Server 16.04-LTS` was syndicated from Azure Stack's Marketplace by the operator
 - `Custom Script Extensions for Linux 2.0` was syndicated from Azure Stack's Marketplace by the operator
 - You have access to a X.509 certificate in PFX format
-- You can execute [htpasswd](https://httpd.apache.org/docs/2.4/programs/htpasswd.html) to generate the authorized users credentials
 - You can [connect](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-powershell-configure-user) to the target Azure Stack instance using PowerShell
 
 ## Setup
@@ -20,27 +19,9 @@ The following section details the required steps to perform before you deploy th
 
 Once you went through the details, you should be able to tweak the [setup script](setup.ps1) and adjust it to your needs.
 
-### Basic Authentication using .htpasswd files
-
-`htpasswd` is a small command-line utility that creates and updates text files (usually named `.htpasswd`) used to store user credentials for basic HTTP authentication.
-
-An usage example is shown below (add flag `-c` to create file `.htpasswd`):
-
-```bash
-htpasswd -Bb .htpasswd my-user my-password
-```
-
-#### Anonymous access
-
-To allow anonymous access to the registry, update the `docker run` command executed by the [CSE script](script.sh) **before** you start the [storage configuration](#storage-configuration) step.
-
-Deleting the lines that set variables REGISTRY_AUTH, REGISTRY_AUTH_HTPASSWD_PATH AND REGISTRY_AUTH_HTPASSWD_REALM will disable basic authentication.
-
 ### Storage configuration
 
 The template instructs the container registry to use the [Azure storage driver](https://docs.docker.com/registry/storage-drivers/azure/) to persist the container images in a local storage account blob container.
-
-We will also store the `.htpasswd` file in the same storage account to keep it secure and readily available when you need to upgrade your registry or guest OS to a new version.
 
 You can use the PowerShell snipped below to automate the storage account setup process:
 
@@ -50,8 +31,8 @@ $location = "your-location"
 $resourceGroup = "registry-rg"
 $saName = "registry"
 $saContainer = "images"
-$tokenIni = Get-Date
-$tokenEnd = $tokenIni.AddYears(1.0)
+$saTokenIni = Get-Date
+$saTokenEnd = $tokenIni.AddYears(1.0)
 
 # Create resource group
 Write-Host "Creating resource group:" $resourceGroup
@@ -67,35 +48,33 @@ Write-Host "Creating blob container:" $saContainer
 Set-AzureRmCurrentStorageAccount -ResourceGroupName $resourceGroup -AccountName $saName | out-null
 $container = New-AzureStorageContainer -Name $saContainer
 
-# Upload the CSE script so the template can later fetch it during deployment
+# Upload configuration script
 Write-Host "Uploading configuration script"
 Set-AzureStorageBlobContent -Container $saContainer -File script.sh | out-null
-$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
+$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $saTokenIni -ExpiryTime $saTokenEnd
 $cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/script.sh" + $cseToken
-
-# The CSE script needs the .htpasswd file to configure the container registry
-Write-Host "Uploading .htpasswd file"
-Set-AzureStorageBlobContent -Container $saContainer -File .htpasswd | out-null
-# Get htpasswd download URL
-$htpasswdToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob .htpasswd -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
-$htpasswdUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/.htpasswd" + $htpasswdToken
 ```
 
 ## Key Vault configuration
 
-The deployment template will instruct Azure Resource Manager to drop your certificate in the virtual machine's file system.
+The deployment template will instruct Azure Resource Manager to drop your certificate in the virtual machine's file system. User credentials should be stored as secrets in the same Key Vault instance (details [here](#basic-authorization))
 
 The snippet below creates the Key Vault resource and uploads the .pfx certificate.
 
 ```powershell
-$kvName = "certs"
-$secretName = "registry"
+$kvName = ""
+$pfxSecret = "registry-cert"
 $pfxPath = "cert.pfx"
 $pfxPass = ""
+$spnName = ""
+$spnSecret = ""
 
 # Create key vault enabled for deployment
 Write-Host "Creating key vault:" $kvName
 $kv = New-AzureRmKeyVault -ResourceGroupName $resourceGroup -VaultName $kvName -Location $location -Sku standard -EnabledForDeployment
+
+Write-Host "Setting access polices"
+Set-AzureRmKeyVaultAccessPolicy -VaultName $kvName -ServicePrincipalName $spnName -PermissionsToSecrets GET,LIST
 
 # Serialize certificate
 $fileContentBytes = get-content $pfxPath -Encoding Byte
@@ -111,9 +90,9 @@ $jsonObjectBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonObject)
 $jsonEncoded = [System.Convert]::ToBase64String($jsonObjectBytes)
 $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText -Force
 
-# Upload certificate as secret
+# Store certificate as secret
 Write-Host "Storing certificate in key vault:" $pfxPath
-$kvSecret = Set-AzureKeyVaultSecret -VaultName $kvName -Name $secretName -SecretValue $secret
+$kvSecret = Set-AzureKeyVaultSecret -VaultName $kvName -Name $pfxSecret -SecretValue $secret -ContentType pfx
 ```
 
 ### Certificate thumbprint
@@ -126,6 +105,23 @@ Run the following snipped to generate the certificate thumbprint:
 Write-Host "Computing certificate thumbprint"
 $tp = Get-PfxCertificate -FilePath $pfxPath
 ```
+
+### Basic Authorization
+
+User credentials should be stored as secrets in the same Key Vault instance where the PFX certificate is stored. This can be achieved using the web UI or the SDK.
+
+```powershell
+Write-Host "Storing secret for sample user: admin"
+$userSecretName = "admin"
+$userSecretValue = ConvertTo-SecureString -String "password" -AsPlainText -Force
+$user = Set-AzureKeyVaultSecret -VaultName $kvName -Name $userSecretName -SecretValue $userSecretValue
+```
+
+#### Anonymous access
+
+To allow anonymous access to the registry, update the `docker run` command executed by the [CSE script](script.sh) **before** you start the [storage configuration](#storage-configuration) step.
+
+Deleting the lines that set variables `REGISTRY_AUTH`, `REGISTRY_AUTH_HTPASSWD_PATH` and `REGISTRY_AUTH_HTPASSWD_REALM` will disable basic authentication.
 
 ## Template deployment
 

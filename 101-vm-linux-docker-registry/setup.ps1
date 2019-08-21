@@ -1,23 +1,22 @@
-function Random-Name {
-  Param ([int]$length)
-  -join ((97..122) | Get-Random -Count $length | % {[char]$_})
-}
-
 # Set variables to match your environment
 #########################################
 
 $location = ""
 $resourceGroup = ""
-$saName = Random-Name 10
-$saContainer = Random-Name 10
-$tokenIni = Get-Date
-$tokenEnd = $tokenIni.AddYears(1.0)
 
-$kvName = Random-Name 10
-$secretName = Random-Name 10
+$saName = ""
+$saContainer = ""
+$saTokenIni = Get-Date
+$saTokenEnd = $saTokenIni.AddYears(1.0)
+
+$kvName = ""
+$pfxSecret = ""
 $pfxPath = ""
 $pfxPass = ""
-$dnsSubDomain = ""
+$spnName = ""
+$spnSecret = ""
+
+$dnsLabelName = ""
 $sshKey = ""
 
 # RESOURCE GROUP
@@ -44,14 +43,8 @@ $container = New-AzureStorageContainer -Name $saContainer
 # Upload configuration script
 Write-Host "Uploading configuration script"
 Set-AzureStorageBlobContent -Container $saContainer -File script.sh | out-null
-$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
+$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $saTokenIni -ExpiryTime $saTokenEnd
 $cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/script.sh" + $cseToken
-
-# Upload htpasswd
-Write-Host "Uploading htpasswd file"
-Set-AzureStorageBlobContent -Container $saContainer -File .htpasswd | out-null
-$htpasswdToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob .htpasswd -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
-$htpasswdUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/.htpasswd" + $htpasswdToken
 
 
 # KEY VAULT
@@ -60,6 +53,13 @@ $htpasswdUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/.htpasswd" + $h
 # Create key vault enabled for deployment
 Write-Host "Creating key vault:" $kvName
 $kv = New-AzureRmKeyVault -ResourceGroupName $resourceGroup -VaultName $kvName -Location $location -Sku standard -EnabledForDeployment
+
+Write-Host "Setting access polices"
+Set-AzureRmKeyVaultAccessPolicy -VaultName $kvName -ServicePrincipalName $spnName -PermissionsToSecrets GET,LIST
+
+Write-Host "Storing secret for sample user: admin"
+$userSecret = ConvertTo-SecureString -String admin -AsPlainText -Force
+$user = Set-AzureKeyVaultSecret -VaultName $kvName -Name admin -SecretValue $userSecret
 
 # Serialize certificate
 $fileContentBytes = get-content $pfxPath -Encoding Byte
@@ -75,9 +75,9 @@ $jsonObjectBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonObject)
 $jsonEncoded = [System.Convert]::ToBase64String($jsonObjectBytes)
 $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText -Force
 
-# Upload certificate as secret
+# Store certificate as secret
 Write-Host "Storing certificate in key vault:" $pfxPath
-$kvSecret = Set-AzureKeyVaultSecret -VaultName $kvName -Name $secretName -SecretValue $secret
+$kvSecret = Set-AzureKeyVaultSecret -VaultName $kvName -Name $pfxSecret -SecretValue $secret -ContentType pfx
 
 # Compute certificate thumbprint
 Write-Host "Computing certificate thumbprint"
@@ -117,16 +117,24 @@ $jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value $ss
 $jsonParameters | Add-Member -MemberType NoteProperty -Name adminPublicKey -Value $jsonAdminPublicKey
 
 $jsonDomainNameLabel = New-Object -TypeName PSObject
-$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $dnsSubDomain 
+$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $dnsLabelName 
 $jsonParameters | Add-Member -MemberType NoteProperty -Name domainNameLabel -Value $jsonDomainNameLabel
 
 $jsonCseLocation = New-Object -TypeName PSObject
 $jsonCseLocation | Add-Member -MemberType NoteProperty -Name value -Value $cseUrl
 $jsonParameters | Add-Member -MemberType NoteProperty -Name cseLocation -Value $jsonCseLocation
 
-$jsonHtpasswdLocation = New-Object -TypeName PSObject
-$jsonHtpasswdLocation | Add-Member -MemberType NoteProperty -Name value -Value $htpasswdUrl
-$jsonParameters | Add-Member -MemberType NoteProperty -Name htpasswdLocation -Value $jsonHtpasswdLocation
+$jsonSpnName = New-Object -TypeName PSObject
+$jsonSpnName | Add-Member -MemberType NoteProperty -Name value -Value $spnName
+$jsonParameters | Add-Member -MemberType NoteProperty -Name servicePrincipalClientId -Value $jsonSpnName
+
+$jsonSpnSecret = New-Object -TypeName PSObject
+$jsonSpnSecret | Add-Member -MemberType NoteProperty -Name value -Value $spnSecret
+$jsonParameters | Add-Member -MemberType NoteProperty -Name servicePrincipalClientSecret -Value $jsonSpnSecret
+
+$jsonKvName = New-Object -TypeName PSObject
+$jsonKvName | Add-Member -MemberType NoteProperty -Name value -Value $kvName
+$jsonParameters | Add-Member -MemberType NoteProperty -Name credentialsKeyVaultName -Value $jsonKvName
 
 $jsonRoot = New-Object -TypeName PSObject
 $jsonRoot | Add-Member -MemberType NoteProperty -Name schema -Value "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#"
