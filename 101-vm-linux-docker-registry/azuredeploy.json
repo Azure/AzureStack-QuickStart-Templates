@@ -115,19 +115,19 @@
         "credentialsKeyVaultName": {
             "type": "string",
             "metadata": {
-                "description": ""
+                "description": "Local Key Vault instance that stores user credentials as secrets"
             }
         },
         "servicePrincipalClientId": {
             "type": "securestring",
             "metadata": {
-                "description": ""
+                "description": "Client ID with access to list and get secrets from the credentials Key Vault instance"
             }
         },
         "servicePrincipalClientSecret": {
             "type": "securestring",
             "metadata": {
-                "description": ""
+                "description": "Secret of the client with access to list and get secrets from the credentials Key Vault instance"
             }
         }
     },

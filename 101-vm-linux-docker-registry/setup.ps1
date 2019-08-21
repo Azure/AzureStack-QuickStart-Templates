@@ -57,9 +57,9 @@ $kv = New-AzureRmKeyVault -ResourceGroupName $resourceGroup -VaultName $kvName -
 Write-Host "Setting access polices"
 Set-AzureRmKeyVaultAccessPolicy -VaultName $kvName -ServicePrincipalName $spnName -PermissionsToSecrets GET,LIST
 
-Write-Host "Storing secret for sample user: admin"
-$userSecret = ConvertTo-SecureString -String admin -AsPlainText -Force
-$user = Set-AzureKeyVaultSecret -VaultName $kvName -Name admin -SecretValue $userSecret
+# Write-Host "Storing secret for sample user: admin"
+# $userSecret = ConvertTo-SecureString -String "admin" -AsPlainText -Force
+# $user = Set-AzureKeyVaultSecret -VaultName $kvName -Name "admin" -SecretValue $userSecret
 
 # Serialize certificate
 $fileContentBytes = get-content $pfxPath -Encoding Byte
