@@ -120,18 +120,18 @@
         "CentOS"
       ],
       "metadata": {
-        "description": "The Image Offer, use centos for default Marketplace"
+        "description": "The Image Offer, use Centos for default Marketplace"
       }
     },
     "osImageSKU": {
       "type": "string",
-      "defaultValue": "7.4",
+      "defaultValue": "7.5",
       "allowedValues": [
         "Centos-7.4",
-        "7.4"
+        "7.5"
       ],
       "metadata": {
-        "description": "The Linux version for the VM. Use 7.4 for default Marketplace"
+        "description": "The Linux version for the VM. Use 7.5 for default Marketplace"
       }
     },
     "_artifactsLocation": {
@@ -177,18 +177,6 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageName')]",
-      "apiVersion": "2016-01-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      },
-      "dependsOn": [
-        "[variables('publiclbName')]"
-      ]
-    },
-    {
       "name": "[variables('diagnosticsStorageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2016-01-01",
@@ -226,9 +214,12 @@
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
-        "platformFaultDomainCount": 1,
-        "platformUpdateDomainCount": 1
-      }
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 2
+      },
+      "sku": {
+        "name": "Aligned"
+    } 
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
@@ -585,7 +576,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('vmNamePrefix'), copyIndex(1))]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "virtualMachineLoop",
@@ -616,9 +607,8 @@
             "version": "[variables('osImageVersion')]"
           },
           "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('vmNamePrefix'), copyIndex(1),'-osdisk.vhd')]"
+            "osDisk": {
+              "createOption": "FromImage"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -628,9 +618,6 @@
               "name": "dataDisks",
               "count": "[parameters('dataDiskCount')]",
               "input": {
-                "vhd": {
-                  "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmContainerName'),'/', parameters('vmNamePrefix'), copyIndex(1),'-data-', copyIndex('dataDisks'), '.vhd')]"
-                },
                 "name": "[concat(parameters('vmNamePrefix'), copyIndex(1),'-data-', copyIndex('dataDisks'), '.vhd')]",
                 "lun": "[copyIndex('dataDisks')]",
                 "createOption": "Empty",

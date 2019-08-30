@@ -4,7 +4,7 @@
   "apiProfile": "2018-03-01-hybrid",
   "parameters": { },
   "variables": {
-    "networkSecurityGroupName": "mySG"
+    "networkSecurityGroupName": "myNSG"
   },
   "resources": [
     {
@@ -17,7 +17,7 @@
       "properties": {
         "securityRules": [
           {
-            "name": "rule1",
+            "name": "Rule 1",
             "properties": {
               "protocol": "*",
               "sourcePortRange": "*",

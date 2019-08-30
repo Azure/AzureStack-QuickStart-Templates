@@ -1,0 +1,314 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "azureuser",
+            "metadata": {
+                "description": "The linux user name."
+            }
+        },
+        "adminPublicKey": {
+            "type": "string",
+            "metadata": {
+                "description": "User's RSA public key."
+            }
+        },
+        "virtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_F8s_v2",
+            "metadata": {
+                "description": "The VM size."
+            }
+        },
+        "virtualMachinePublisher": {
+            "type": "string",
+            "defaultValue": "Canonical",
+            "metadata": {
+                "description": "The guest OS image publisher."
+            }
+        },
+        "virtualMachineOffer": {
+            "type": "string",
+            "defaultValue": "UbuntuServer",
+            "metadata": {
+                "description": "The guest OS image offer."
+            }
+        },
+        "virtualMachineSku": {
+            "type": "string",
+            "defaultValue": "16.04-LTS",
+            "metadata": {
+                "description": "The guest OS image SKU."
+            }
+        },
+        "virtualMachineVersion": {
+            "type": "string",
+            "defaultValue": "latest",
+            "metadata": {
+                "description": "The guest OS image version."
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "An already existing storage account name."
+            }
+        },
+        "storageAccountContainer": {
+            "type": "string",
+            "metadata": {
+                "description": "An already existing storage account container name."
+            }
+        },
+        "storageAccountKey": {
+            "type": "string",
+            "metadata": {
+                "description": "The storage account access key."
+            }
+        },
+        "domainNameLabel": {
+            "type": "string",
+            "metadata": {
+                "description": "The public IP DNS label."
+            }
+        },
+        "keyVaultResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "The Key Vault resource identifier."
+            }
+        },
+        "keyVaultSecretUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "Absolute URL to the Key Vault secret that stores the pfx certificate."
+            }
+        },
+        "certificateThumbprint": {
+            "type": "string",
+            "metadata": {
+                "description": "The certificate thumbprint."
+            }
+        },
+        "registryTag": {
+            "type": "string",
+            "defaultValue": "2.7.1",
+            "metadata": {
+                "description": "Docker registry version (image tag)."
+            }
+        },
+        "registryReplicas": {
+            "type": "int",
+            "defaultValue": 20,
+            "metadata": {
+                "description": "Docker registry replicas."
+            }
+        },
+        "cseLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Download URL of the script to be executed by the template custom script extension."
+            }
+        },
+        "htpasswdLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Download URL of the .htpasswd file."
+            }
+        }
+    },
+    "variables": {
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', 'registry-vnet')]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
+        "location": "[resourceGroup().location]",
+        "provisionScriptParameters": "[concat('ADMIN_USER_NAME=', parameters('adminUsername'),' REGISTRY_STORAGE_AZURE_ACCOUNTNAME=', parameters('storageAccountName'),' REGISTRY_STORAGE_AZURE_ACCOUNTKEY=', parameters('storageAccountKey'),' REGISTRY_STORAGE_AZURE_CONTAINER=', parameters('storageAccountContainer'),' CERT_THUMBPRINT=', parameters('certificateThumbprint'),' PIP_LABEL=', parameters('domainNameLabel'),' REGISTRY_TAG=', parameters('registryTag'),' REGISTRY_REPLICAS=', parameters('registryReplicas'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "registry-vm",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "osProfile": {
+                    "computerName": "registry",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('adminPublicKey')]"
+                                }
+                            ]
+                        }
+                    },
+                    "secrets": [
+                        {
+                            "sourceVault": {
+                                "id": "[parameters('keyVaultResourceId')]"
+                            },
+                            "vaultCertificates": [
+                                {
+                                    "certificateUrl": "[parameters('keyVaultSecretUrl')]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('virtualMachinePublisher')]",
+                        "offer": "[parameters('virtualMachineOffer')]",
+                        "sku": "[parameters('virtualMachineSku')]",
+                        "version": "[parameters('virtualMachineVersion')]"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "diskSizeGB": 30,
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'registry-nic')]"
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', 'registry-nic')]"
+            ]
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', 'registry-vm')]"
+            ],
+            "location": "[resourceGroup().location]",
+            "name": "registry-vm/cse",
+            "properties": {
+                "protectedSettings": {
+                    "fileUris": [
+                        "[parameters('cseLocation')]",
+                        "[parameters('htpasswdLocation')]"
+                    ],
+                    "commandToExecute": "[concat(variables('provisionScriptParameters'),' LOCATION=',variables('location'),' FQDN=', '\"', reference(resourceId('Microsoft.Network/publicIPAddresses', 'registry-pip'),'2017-10-01').dnsSettings.fqdn,'\"',' ./script.sh >> /var/log/azure/docker-registry.log 2>&1')]"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "settings": {},
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions"
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "registry-vnet",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "172.16.0.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "172.16.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "registry-nic",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', 'registry-pip')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'registry-nsg')]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', 'registry-vnet')]",
+                "[concat('Microsoft.Network/publicIpAddresses/', 'registry-pip')]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', 'registry-nsg')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "sku": {
+                "name": "Basic"
+            },
+            "name": "registry-pip",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('domainNameLabel')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "registry-nsg",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "HTTPS",
+                        "properties": {
+                            "priority": 320,
+                            "protocol": "Tcp",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "443"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
+}

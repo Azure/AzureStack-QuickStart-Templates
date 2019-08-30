@@ -231,36 +231,6 @@
           "commandToExecute": "[concat('sh ', variables('scriptName'), '.sh')]"
         }
       }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),'/installospatching')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'),'/extensions/LinuxCustomScriptExtension')]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.OSTCExtensions",
-        "type": "OSPatchingForLinux",
-        "typeHandlerVersion": "2.0",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "disabled": false,
-          "stop": false,
-          "rebootAfterPatch": "Auto",
-          "category": "ImportantAndRecommended",
-          "installDuration": "01:00",
-          "oneoff": true,
-          "intervalOfWeeks": "1",
-          "dayOfWeek": "Sunday",
-          "startTime": "03:00",
-          "vmStatusTest": {
-            "local": false,
-            "idleTestScript": "",
-            "healthyTestScript": ""
-          }
-        }
-      }
     }
   ],
 
