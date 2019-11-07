@@ -201,7 +201,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-30",
+            "apiVersion": "2017-12-01",
             "name": "[variables('adVMName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
