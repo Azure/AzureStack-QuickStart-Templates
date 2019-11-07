@@ -232,7 +232,9 @@
                         "name": "[concat(variables('adVMName'),'_OSDisk')]",
                         "caching": "ReadOnly",
                         "createOption": "FromImage",
-                        "managedDisk": {}
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"   
+                        }
                     },
                     "dataDisks": [
                         {
@@ -240,7 +242,9 @@
                             "caching": "ReadWrite",
                             "createOption": "Empty",
                             "diskSizeGB": 20,
-                            "managedDisk": {},
+                            "managedDisk": {
+                                "storageAccountType": "StandardSSD_LRS"   
+                            },
                             "lun": 0
                         }
                     ]
