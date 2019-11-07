@@ -73,7 +73,7 @@
     "resources": [
         {
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "name": "[variables('publicIPAddressName')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -98,7 +98,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2016-09-01",
+            "apiVersion": "2018-09-01",
             "name": "VNet",
             "properties": {
                 "mode": "Incremental",
@@ -127,7 +127,7 @@
         },
         {
             "type": "Microsoft.Network/loadBalancers",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "name": "[variables('adLBName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -167,7 +167,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-10-01",
             "name": "[variables('adNicName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -260,7 +260,7 @@
             "resources": [
                 {
                     "type": "extensions",
-                    "apiVersion": "2016-03-30",
+                    "apiVersion": "2017-12-01",
                     "name": "CreateADForest",
                     "location": "[parameters('location')]",
                     "dependsOn": [
@@ -293,7 +293,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2016-09-01",
+            "apiVersion": "2018-09-01",
             "name": "UpdateVNetDNS",
             "dependsOn": [
                 "CreateADForest"
