@@ -85,7 +85,7 @@
         },
         {
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2016-03-30",
+            "apiVersion": "2017-12-01",
             "location": "[parameters('location')]",
             "name": "[variables('adAvailabilitySetName')]",
             "sku": {
