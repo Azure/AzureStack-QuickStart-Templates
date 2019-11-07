@@ -88,6 +88,9 @@
             "apiVersion": "2016-03-30",
             "location": "[parameters('location')]",
             "name": "[variables('adAvailabilitySetName')]",
+            "sku": {
+                "name": "Aligned"
+            },
             "properties": {
                 "PlatformUpdateDomainCount": 5,
                 "PlatformFaultDomainCount": 2
