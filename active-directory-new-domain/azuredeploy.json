@@ -228,10 +228,7 @@
                     "osDisk": {
                         "name": "[concat(variables('adVMName'),'_OSDisk')]",
                         "caching": "ReadOnly",
-                        "createOption": "FromImage",
-                        "managedDisk": {
-                            "storageAccountType": "Premium_LRS"
-                        }
+                        "createOption": "FromImage"
                     },
                     "dataDisks": [
                         {
@@ -239,9 +236,6 @@
                             "caching": "ReadWrite",
                             "createOption": "Empty",
                             "diskSizeGB": 20,
-                            "managedDisk": {
-                                "storageAccountType": "Premium_LRS"
-                            },
                             "lun": 0
                         }
                     ]
