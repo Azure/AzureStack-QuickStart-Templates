@@ -230,7 +230,7 @@
                         "caching": "ReadOnly",
                         "createOption": "FromImage",
                         "managedDisk": {
-                            "storageAccountType": "StandardSSD_LRS"
+                            "storageAccountType": "Premium_LRS"
                         }
                     },
                     "dataDisks": [
@@ -240,7 +240,7 @@
                             "createOption": "Empty",
                             "diskSizeGB": 20,
                             "managedDisk": {
-                                "storageAccountType": "StandardSSD_LRS"
+                                "storageAccountType": "Premium_LRS"
                             },
                             "lun": 0
                         }
