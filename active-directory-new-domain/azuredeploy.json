@@ -231,7 +231,8 @@
                     "osDisk": {
                         "name": "[concat(variables('adVMName'),'_OSDisk')]",
                         "caching": "ReadOnly",
-                        "createOption": "FromImage"
+                        "createOption": "FromImage",
+                        "managedDisk": {}
                     },
                     "dataDisks": [
                         {
@@ -239,6 +240,7 @@
                             "caching": "ReadWrite",
                             "createOption": "Empty",
                             "diskSizeGB": 20,
+                            "managedDisk": {},
                             "lun": 0
                         }
                     ]
