@@ -89,8 +89,8 @@
             "location": "[parameters('location')]",
             "name": "[variables('adAvailabilitySetName')]",
             "properties": {
-                "PlatformUpdateDomainCount": 2,
-                "PlatformFaultDomainCount": 5
+                "PlatformUpdateDomainCount": 5,
+                "PlatformFaultDomainCount": 2
             }
         },
         {
