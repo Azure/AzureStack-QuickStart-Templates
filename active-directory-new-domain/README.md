@@ -16,6 +16,7 @@ Last update on 2019/11/08.
 - 1 Virtual Network.
   - IP Range: 10.0.0.0/16
   - 1 subnet: 10.0.0.0/24
+  - DNS: 10.0.0.4
 - 1 Availability Set for virtual machine.
 
 
