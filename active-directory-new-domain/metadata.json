@@ -4,8 +4,8 @@
   "itemDisplayName": "Create an Azure VM with a new AD Forest",
   "description": "This template creates a new Azure VM, it configures the VM to be an AD DC for a new Forest",
   "summary": "This template creates an Azure VM with AD",
-  "githubUsername": "simongdavies",
-  "dateUpdated": "2019-04-06"
+  "githubUsername": "wellsluo",
+  "dateUpdated": "2019-11-08"
 }
 
 

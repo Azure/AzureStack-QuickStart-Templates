@@ -11,6 +11,7 @@ Last update on 2019/11/08.
   - Default VM size: Standard_DS2_v2
   - OS: Windows Server 2019 Datacenter
   - 1 Nic with static virtual network IP Address: 10.0.0.4
+  - 1 OS disk and 1 Data disk - Managed Disks. 
 - 1 Public Load Balancer.
 - 1 Public IP address (VIP).
 - 1 Virtual Network.
@@ -30,3 +31,6 @@ Click the button below to deploy
     <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.png"/>
 </a>
 
+## Known issue
+
++ No external FQDN resolving since the DNS server is currently pointed to the DNS Server in Domain Controller.  Workaround: manually add DNS forwarder in DNS Server management console, point to a DNS which can resolve external FQDN, Azure DNS is an option: 168.63.129.16.
