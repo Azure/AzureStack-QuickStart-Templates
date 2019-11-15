@@ -46,7 +46,7 @@ Click the button below to deploy
 
         Example:
         ```
-        https://portal.local.azurestack.contoso.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fwellsluo%2FAzureStack-QuickStart-Templates%2Fwellsluo-dev%2Factive-directory-new-domain-ha-2-dc%2Fazuredeploy.json        
+        https://portal.local.azurestack.contoso.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fwellsluo%2FAzureStack-QuickStart-Templates%2Fmaster%2Factive-directory-new-domain-ha-2-dc%2Fazuredeploy.json        
         ```
 
 
