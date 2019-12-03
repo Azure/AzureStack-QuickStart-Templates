@@ -12,7 +12,7 @@
         [Int]$RetryIntervalSec=30
     )
 
-    Import-DscResource -ModuleName xActiveDirectory, xPendingReboot
+    Import-DscResource -ModuleName xActiveDirectory, xDnsServer, xPendingReboot
 
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
 
@@ -59,9 +59,17 @@
             DependsOn = "[xADDomainController]BDC"
         }
 #>
-        xPendingReboot RebootAfterPromotion {
+        xDnsServerForwarder SetDNSForwarder
+        {
+            IsSingleInstance = 'Yes'
+            IPAddresses = '168.63.129.16'
+            UseRootHint = $false
+        }
+        
+        xPendingReboot RebootAfterPromotion 
+        {
             Name = "RebootAfterDCPromotion"
-            DependsOn = "[xADDomainController]BDC"
+            DependsOn = "[xDnsServerForwarder]SetDNSForwarder"
         }
 
     }
