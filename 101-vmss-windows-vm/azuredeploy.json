@@ -70,10 +70,6 @@
         "location": "[resourceGroup().location]",
         "vnetName": "[toLower(concat('vnet', uniqueString(resourceGroup().id)))]",
         "subnetName": "[toLower(concat('subnet', uniqueString(resourceGroup().id)))]",
-        "storageAccountName": "[toLower(concat('SA', uniqueString(resourceGroup().id)))]",
-        "storageAccountContainerName": "[toLower(concat('SC', uniqueString(resourceGroup().id)))]",
-        "storageAccountType": "Standard_LRS",
-        "OSDiskName": "osdisk",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('subnetName'))]",
         "publicIPAddressName": "[toLower(concat('pip', uniqueString(resourceGroup().id)))]",
@@ -85,15 +81,6 @@
         "loadBalancerNatPoolName": "[concat('LBNatPool', uniqueString(resourceGroup().id))]"
     },
   "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageAccountName')]",
-      "location": "[variables('location')]",
-      "sku": {
-        "name": "[variables('storageAccountType')]"
-      },
-      "kind": "Storage"
-    },
     {
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetName')]",
@@ -212,10 +199,6 @@
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
-              "vhdContainers": [
-                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('storageAccountContainerName'))]"
-              ],
-              "name": "[variables('OSDiskName')]",
               "caching": "ReadOnly",
               "createOption": "FromImage"
             },
@@ -264,7 +247,6 @@
         }
       },
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
         "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
       ]
