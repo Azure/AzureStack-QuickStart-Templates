@@ -32,7 +32,7 @@
     },
     "ScriptURI": {
       "type": "string",
-      "defaultValue": "https://github.com/Azure/AzureStack-QuickStart-Templates/blob/master/wsus/InstallWSUS.ps1",
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/wsus/InstallWSUS.ps1",
       "metadata": {
         "description": "URI to script"
       }
