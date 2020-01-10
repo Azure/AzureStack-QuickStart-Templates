@@ -9,7 +9,7 @@
             "value": "myvirtualnetwork"
         },
         "ScriptURI": {
-            "value": "https://temp.blob.redmond.azurestack.corp.microsoft.com/thomas/InstallWSUS.ps1"
+            "value": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/wsus/InstallWSUS.ps1"
         },
         "SyncHours": {
             "value": "2"
