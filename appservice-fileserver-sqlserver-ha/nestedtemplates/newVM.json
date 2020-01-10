@@ -1,11 +1,9 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmName": {
-      "type": "string"
-    },
-    "storageAccountUri": {
       "type": "string"
     },
     "vmAvailabilitySetName": {
@@ -38,10 +36,10 @@
     "imageVersion": {
       "type": "string"
     },
-    "_artifactsLocation": {
+    "artifactsLocation": {
       "type": "string"
     },
-    "_artifactsLocationSasToken": {
+    "artifactsLocationSasToken": {
       "type": "string"
     },
     "location": {
@@ -57,7 +55,6 @@
   "resources": [
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "name": "[parameters('vmName')]",
       "dependsOn": [
@@ -82,10 +79,7 @@
             "version": "[parameters('imageVersion')]"
           },
           "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat(parameters('storageAccountUri'), 'vhds/',parameters('vmName'),'-osdisk.vhd')]"
-            },
+            "name": "[concat(parameters('vmName'),'-osdisk')]",
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
@@ -94,14 +88,11 @@
               "name": "dataDisks",
               "count": "[parameters('vmDiskCount')]",
               "input": {
-                "name":"[concat('vmnam', '-data-disk',copyIndex('dataDisks'))]",
+                "name":"[concat(parameters('vmName'), '-data-disk',copyIndex('dataDisks'))]",
                 "lun": "[copyIndex('dataDisks')]",
                 "createOption": "Empty",
                 "caching":"None",
-                "diskSizeGB": "[parameters('vmDiskSize')]",
-                "vhd":{
-                  "uri":"[concat(parameters('storageAccountUri'),'vhds/',parameters('vmName'), '-data-disk',copyIndex('dataDisks'),'.vhd')]"
-                }
+                "diskSizeGB": "[parameters('vmDiskSize')]"
               }
             }
           ]

@@ -102,9 +102,10 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storage').storageAccounts.name]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storage').storageAccounts.type]"
-      }
+      "sku": {
+        "name": "[variables('storage').storageAccounts.type]"
+      },
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",

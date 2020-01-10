@@ -46,7 +46,7 @@
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
       },
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/active-directory-new-domain-ha-2-dc"
+      "defaultValue": "[deployment().properties.templateLink.uri]"
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
@@ -57,13 +57,12 @@
     }
   },
   "variables": {
-    "vhdStorageAccountName": "[concat('vhds', uniqueString(resourceGroup().id))]",
-    "storageAccountType": "Premium_LRS",
+    "storageAccountType": "Standard_LRS",
     "adPDCVMName": "adPDC",
     "adBDCVMName": "adBDC",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
-    "imageSKU": "2016-Datacenter",
+    "imageSKU": "2019-Datacenter",
     "adAvailabilitySetName": "adAvailabiltySet",
     "publicIPAddressName": "ad-lb-pip",
     "adVMSize": "Standard_DS2_v2",
@@ -86,35 +85,23 @@
     "adPDCRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',variables('adPDCRDPNAT'))]",
     "adBDCRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',variables('adBDCRDPNAT'))]",
     "adBEAddressPoolID": "[concat(variables('adlbID'),'/backendAddressPools/',variables('adLBBE'))]",
-    "adPDCDataDisk": "ADPDCDataDisk",
-    "adBDCDataDisk": "ADBDCDataDisk",
-    "adDataDiskSize": 1000,
-    "vnetTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/vnet.json', parameters('_artifactsLocationSasToken'))]",
-    "nicTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/nic.json', parameters('_artifactsLocationSasToken'))]",
-    "vnetwithDNSTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/vnet-with-dns-server.json', parameters('_artifactsLocationSasToken'))]",
-    "configureADBDCTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/configureADBDC.json', parameters('_artifactsLocationSasToken'))]",
-    "adPDCModulesURL": "[concat(parameters('_artifactsLocation'),'/DSC/CreateADPDC.zip', parameters('_artifactsLocationSasToken'))]",
+    "adDataDiskSize": 20,
+    "vnetTemplateUri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet.json', parameters('_artifactsLocationSasToken')))]",
+    "nicTemplateUri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/nic.json', parameters('_artifactsLocationSasToken')))]",
+    "vnetwithDNSTemplateUri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-with-dns-server.json', parameters('_artifactsLocationSasToken')))]",
+    "configureADBDCTemplateUri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/configureADBDC.json', parameters('_artifactsLocationSasToken')))]",
+    "adPDCModulesURL": "[uri(parameters('_artifactsLocation'), concat('DSC/CreateADPDC.zip', parameters('_artifactsLocationSasToken')))]",
     "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-    "adBDCPreparationModulesURL": "[concat(parameters('_artifactsLocation'),'/DSC/PrepareADBDC.zip', parameters('_artifactsLocationSasToken'))]",
+    "adBDCPreparationModulesURL": "[uri(parameters('_artifactsLocation'), concat('DSC/PrepareADBDC.zip', parameters('_artifactsLocationSasToken')))]",
     "adBDCPreparationFunction": "PrepareADBDC.ps1\\PrepareADBDC",
-    "adBDCConfigurationModulesURL": "[concat(parameters('_artifactsLocation'),'/DSC/ConfigureADBDC.zip', parameters('_artifactsLocationSasToken'))]",
+    "adBDCConfigurationModulesURL": "[uri(parameters('_artifactsLocation'), concat('DSC/ConfigureADBDC.zip', parameters('_artifactsLocationSasToken')))]",
     "adBDCConfigurationFunction": "ConfigureADBDC.ps1\\ConfigureADBDC"
   },
   "resources": [
     {
-      "name": "[variables('vhdStorageAccountName')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2016-01-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-      },
-      "sku":{"name":"[variables('storageAccountType')]"},
-      "kind":"Storage"
-    },
-    {
       "name": "[variables('publicIPAddressName')]",
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-10-01",
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
@@ -126,13 +113,20 @@
     {
       "name": "[variables('adAvailabilitySetName')]",
       "type": "Microsoft.Compute/availabilitySets",
-      "apiVersion": "2016-03-30",
-      "location": "[resourceGroup().location]"
+      "apiVersion": "2017-12-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+                "name": "Aligned"
+            },
+      "properties": {
+          "PlatformUpdateDomainCount": 5,
+          "PlatformFaultDomainCount": 2
+      }
     },
     {
       "name": "VNet",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2018-09-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -158,7 +152,7 @@
     {
       "name": "[variables('adLBName')]",
       "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-10-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
@@ -210,7 +204,7 @@
     {
       "name": "[variables('adPDCNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-10-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "Microsoft.Resources/deployments/VNet",
@@ -244,7 +238,7 @@
     {
       "name": "[variables('adBDCNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-10-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "Microsoft.Resources/deployments/VNet",
@@ -278,10 +272,9 @@
     {
       "name": "[variables('adPDCVMName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts',variables('vhdStorageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('adAvailabilitySetName'))]",
         "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]"
@@ -306,19 +299,19 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', variables('vhdStorageAccountName'))).primaryEndpoints.blob,'vhds0/','osdisk.vhd')]"
+            "name": "[concat(variables('adPDCVMName'),'_OSDisk')]",
+            "managedDisk": {
+                "storageAccountType": "[variables('storageAccountType')]"   
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
-              "vhd": {
-                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', variables('vhdStorageAccountName'))).primaryEndpoints.blob,'vhds0/', variables('adPDCDataDisk'),'-1.vhd')]"
-              },
-              "name": "[concat(variables('adPDCVMName'),'-data-disk1')]",
+              "name": "[concat(variables('adPDCVMName'),'_DataDisk1')]",
+              "managedDisk": {
+                  "storageAccountType": "[variables('storageAccountType')]"   
+              },              
               "caching": "None",
               "diskSizeGB": "[variables('adDataDiskSize')]",
               "lun": 0,
@@ -338,7 +331,7 @@
         {
           "name": "CreateADForest",
           "type": "extensions",
-          "apiVersion": "2016-03-30",
+          "apiVersion": "2017-12-01",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', variables('adPDCVMName'))]"
@@ -371,7 +364,7 @@
     {
       "name": "UpdateVNetDNS1",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2018-09-01",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', variables('adPDCVMName'),'/extensions/CreateADForest')]"
       ],
@@ -405,7 +398,7 @@
     {
       "name": "UpdateBDCNIC",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2018-09-01",
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/',variables('adBDCNicName'))]",
         "Microsoft.Resources/deployments/UpdateVNetDNS1"
@@ -455,13 +448,14 @@
     {
       "name": "[variables('adBDCVMName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts',variables('vhdStorageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces',variables('adBDCNicName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('adAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]"
+        "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]",
+        "[variables('adPDCVMName')]",
+        "UpdateBDCNIC"
       ],
       "properties": {
         "hardwareProfile": {
@@ -483,19 +477,19 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', variables('vhdStorageAccountName'))).primaryEndpoints.blob,'vhds1/','osdisk.vhd')]"
-            },
+            "name": "[concat(variables('adBDCVMName'),'_OSDisk')]",
+            "managedDisk": {
+                "storageAccountType": "[variables('storageAccountType')]"   
+            },              
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
-              "vhd": {
-                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', variables('vhdStorageAccountName'))).primaryEndpoints.blob,'vhds1/',variables('adBDCDataDisk'),'-1.vhd')]"
-              },
-              "name": "[concat(variables('adBDCVMName'),'-data-disk1')]",
+              "name": "[concat(variables('adBDCVMName'),'_DataDisk1')]",
+              "managedDisk": {
+                  "storageAccountType": "[variables('storageAccountType')]"   
+              },              
               "caching": "None",
               "diskSizeGB": "[variables('adDataDiskSize')]",
               "lun": 0,
@@ -515,7 +509,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('adBDCVMName'),'/PrepareBDC')]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', variables('adBDCVMName'))]"
@@ -537,7 +531,7 @@
     {
       "name": "ConfiguringBackupADDomainController",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2018-09-01",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/',variables('adBDCVMName'),'/extensions/PrepareBDC')]",
         "Microsoft.Resources/deployments/UpdateBDCNIC"
@@ -576,7 +570,7 @@
     {
       "name": "UpdateVNetDNS2",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2018-09-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/ConfiguringBackupADDomainController"
       ],

@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
@@ -123,17 +124,17 @@
       },
       "defaultValue": "WebSites"
     },
-    "_artifactsLocation": {
+    "artifactsLocation": {
       "type": "string",
       "metadata": {
         "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
       },
       "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/appservice-fileserver-sqlserver-ha"
     },
-    "_artifactsLocationSasToken": {
+    "artifactsLocationSasToken": {
       "type": "securestring",
       "metadata": {
-        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+        "description": "The sasToken required to access artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
       },
       "defaultValue": ""
     },
@@ -146,7 +147,6 @@
     }
   },
   "variables": {
-    "storageAccountType": "Premium_LRS",
     "names": {
       "adNsg": "[concat(parameters('namePrefix'), '-ad-Nsg')]",
       "sqlNsg": "[concat(parameters('namePrefix'), '-sql-Nsg')]",
@@ -160,11 +160,11 @@
     "sqlsubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('names').vnet,variables('names').sqlSubnetName)]",
     "fileserversubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('names').vnet,variables('names').fileServerSubnetName)]",
     "NestedTemplate": {
-      "deployNetwork": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/VirtualNetwork.json',parameters('_artifactsLocationSasToken'))]",
-      "deployNetworkDNS": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/VirtualNetworkDNS.json',parameters('_artifactsLocationSasToken'))]",
-      "deployAD": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/deploy-ad.json',parameters('_artifactsLocationSasToken'))]",
-      "deployS2D": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/deploy-s2d-cluster.json',parameters('_artifactsLocationSasToken'))]",
-      "deploySql": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/deploy-sql-cluster.json',parameters('_artifactsLocationSasToken'))]"
+      "deployNetwork": "[concat(parameters('artifactsLocation'),'/nestedtemplates/VirtualNetwork.json',parameters('artifactsLocationSasToken'))]",
+      "deployNetworkDNS": "[concat(parameters('artifactsLocation'),'/nestedtemplates/VirtualNetworkDNS.json',parameters('artifactsLocationSasToken'))]",
+      "deployAD": "[concat(parameters('artifactsLocation'),'/nestedtemplates/deploy-ad.json',parameters('artifactsLocationSasToken'))]",
+      "deployS2D": "[concat(parameters('artifactsLocation'),'/nestedtemplates/deploy-s2d-cluster.json',parameters('artifactsLocationSasToken'))]",
+      "deploySql": "[concat(parameters('artifactsLocation'),'/nestedtemplates/deploy-sql-cluster.json',parameters('artifactsLocationSasToken'))]"
     },
     "vnetPrefix": "10.0.0.0/16",
     "adSubnetPrefix": "10.0.0.0/24",
@@ -247,7 +247,6 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').adNsg]",
       "location": "[parameters('location')]",
@@ -256,7 +255,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').fsNsg]",
       "location": "[parameters('location')]",
@@ -265,7 +263,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('names').sqlNsg]",
       "location": "[parameters('location')]",
@@ -276,7 +273,6 @@
     {
       "name": "NetworkDeployment",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -301,7 +297,6 @@
     {
       "name": "deployAD",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeployment"
       ],
@@ -327,9 +322,6 @@
           "staticIP":{
             "value":"[variables('adStatipIP')]"
           },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
-          },
           "nicSubnetUri": {
             "value": "[variables('adsubnetRef')]"
           },
@@ -345,11 +337,11 @@
           "vmDiskCount": {
             "value": 1
           },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
           },
-          "_artifactsLocationSasToken": {
-            "value": "[parameters('_artifactsLocationSasToken')]"
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -360,7 +352,6 @@
     {
       "name": "NetworkDeploymentDNS",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -386,7 +377,6 @@
     {
       "name": "deployS2DCluster",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeploymentDNS"
       ],
@@ -421,9 +411,6 @@
           "fileShareUserPassword": {
             "value": "[parameters('fileShareUserPassword')]"
           },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
-          },
           "nicSubnetUri": {
             "value": "[variables('fileserversubnetRef')]"
           },
@@ -445,11 +432,11 @@
           "shareName": {
             "value": "[parameters('shareName')]"
           },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
           },
-          "_artifactsLocationSasToken": {
-            "value": "[parameters('_artifactsLocationSasToken')]"
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -460,7 +447,6 @@
     {
       "name": "DeploySQL",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
       "dependsOn": [
         "NetworkDeploymentDNS"
       ],
@@ -498,9 +484,6 @@
           "SqlListenerIP":{
             "value":"[variables('sqllistenerip')]"
           },
-          "storageAccountType": {
-            "value": "[variables('storageAccountType')]"
-          },
           "nicSubnetUri": {
             "value": "[variables('sqlsubnetRef')]"
           },
@@ -516,11 +499,11 @@
           "vmDiskCount": {
             "value": 1
           },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
           },
-          "_artifactsLocationSasToken": {
-            "value": "[parameters('_artifactsLocationSasToken')]"
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
           },
           "location": {
             "value": "[parameters('location')]"

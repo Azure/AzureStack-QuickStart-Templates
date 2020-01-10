@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
@@ -67,18 +68,6 @@
         "description": "Password of the fileshareuser account"
       }
     },
-    "storageAccountType": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ],
-      "metadata": {
-        "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
-      }
-    },
     "nicSubnetUri": {
       "type": "string",
       "metadata": {
@@ -131,10 +120,10 @@
       "type": "string",
       "defaultValue": "latest"
     },
-    "_artifactsLocation": {
+    "artifactsLocation": {
       "type": "string"
     },
-    "_artifactsLocationSasToken": {
+    "artifactsLocationSasToken": {
       "type": "string"
     },
     "location": {
@@ -147,30 +136,33 @@
   },
   "variables": {
     "apiVersionStorage": "2016-01-01",
-    "storageNamePrefix": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'fsvm')]",
     "witnessStorageName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'fscw')]",
     "witnessStorageType": "Standard_LRS",
     "vmNamePrefix": "[concat(parameters('namePrefix'),'-s2d-')]",
     "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
     "clusterName": "[concat(variables('vmNamePrefix'),'c')]",
-    "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
-    "s2dPrepModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/prep-s2d.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "vmLoopTemplateURL": "[concat(parameters('artifactsLocation'),'/nestedtemplates/newVM.json',parameters('artifactsLocationSasToken'))]",
+    "s2dPrepModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/prep-s2d.ps1.zip',parameters('artifactsLocationSasToken'))]",
     "s2dPrepFunction": "PrepS2D.ps1\\PrepS2D",
-    "s2dConfigModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-s2d.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "s2dConfigModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/config-s2d.ps1.zip',parameters('artifactsLocationSasToken'))]",
     "s2dConfigFunction": "ConfigS2D.ps1\\ConfigS2D"
   },
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('vmAvailabilitySetName')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "properties": {}
+      "properties": {
+        "platformUpdateDomainCount": "[parameters('vmCount')]",
+        "platformFaultDomainCount": "[parameters('vmCount')]"
+      },
+      "sku": {
+        "name": "Aligned"
+      }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('witnessStorageName')]",
-      "apiVersion": "2016-01-01",
       "location": "[parameters('location')]",
       "sku": {
         "name": "[variables('witnessStorageType')]"
@@ -178,24 +170,9 @@
       "kind": "Storage"
     },
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[concat(variables('storageNamePrefix'),copyindex())]",
-      "apiVersion": "2016-01-01",
-      "copy": {
-        "name": "storageAccountLoop",
-        "count": "[parameters('vmCount')]"
-      },
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('storageAccountType')]"
-      },
-      "kind": "Storage"
-    },
-    {
       "name": "[concat(variables('vmNamePrefix'), copyindex(), '-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('location')]",
-      "apiVersion": "2015-06-15",
       "copy": {
         "name": "nicLoop",
         "count": "[parameters('vmCount')]"
@@ -216,15 +193,13 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('vmCount')]"
       },
       "name": "[concat(variables('vmNamePrefix'),copyindex(),'-newVM')]",
       "dependsOn": [
-        "storageAccountLoop",
-        "nicLoop",
+       "nicLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
       ],
       "properties": {
@@ -235,9 +210,6 @@
         "parameters": {
           "vmName": {
             "value": "[concat(variables('vmNamePrefix'), copyindex())]"
-          },
-          "storageAccountUri": {
-            "value": "[reference(concat('Microsoft.Storage/storageAccounts/',variables('StorageNamePrefix'),copyIndex()),variables('apiVersionStorage')).primaryEndpoints.blob]"
           },
           "vmAvailabilitySetName": {
             "value": "[variables('vmAvailabilitySetName')]"
@@ -257,11 +229,11 @@
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
           },
-          "_artifactsLocationSasToken": {
-            "value": "[parameters('_artifactsLocationSasToken')]"
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
           },
           "imagePublisher": {
             "value": "[parameters('imagePublisher')]"
@@ -281,7 +253,6 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmNamePrefix'),copyindex(1),'/s2dPrep')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "dependsOn": [
         "virtualMachineLoop"
@@ -316,7 +287,6 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmNamePrefix'),'0/s2dConfig')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "dependsOn": [
         "virtualMachineLoop",

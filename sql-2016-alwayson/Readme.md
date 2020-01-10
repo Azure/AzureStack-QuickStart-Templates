@@ -5,12 +5,12 @@ This template deploys two SQL Server Enterprise, Standard or Developer instances
 * A network security group
 * A virtual network
 * Four storage accounts (One for AD, One for SQL, One for File Share witness and One for VM diagnostic)
-* Four public IP address (One for AD, Two for each SQL VM and One for Public LB bound to SQL Always On Listener)
+* Four public IP address (One for AD, One for each SQL VM and One for Public LB bound to SQL Always On Listener)
 * One external load balancer for SQL VMs with Public IP bound to the SQL Always On listener
 * One VM (WS2016) configured as Domain Controller for a new forest with a single domain
-* Two VM (WS2016) configured as SQL Server 2016 SP1 or SP2 Enterprise/Standard/Developer and clustered (must use the marketplace images)
+* Two VM (WS2016) configured as SQL Server 2016 SP1 or SP2 Enterprise/Standard/Developer (must use the marketplace images)
 * One VM (WS2016) configured as File Share Witness for the cluster
-* One Availability Set containing the SQL and FSW 2016 VMs
+* Two Availability Sets, one containing the SQL and FSW 2016 VMs, the other containing the Domain Controller VM.
 
 ## Notes
 

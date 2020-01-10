@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "domainName": {
-            "value": "contoso.local"
+            "value": "fabrikam.local"
         },
         "sqlServerServiceAccountUserName": {
             "value": "sqlservice"
         },
         "adminUsername": {
-            "value": "locladmin"
+            "value": "localadmin"
         }
     }
 }

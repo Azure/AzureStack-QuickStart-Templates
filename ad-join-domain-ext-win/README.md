@@ -1,5 +1,14 @@
 # A template that creates a simple Windows VM and joins it to an existing domain using VM extension 
 
+
+## Changes
+
+    Updates in 2019-11:
+        - Update VM name convention. 
+        - Update VM with managed disk. 
+        - Rename original template to azuredeploy-unmanagedDisk.json.
+
+
 ## Prerequisites
 1. Template requires a pre-existing domain to join.A domain controller can be deployed using the template located at: 
 https://github.com/Azure/AzureStack-QuickStart-Templates/tree/master/ad-non-ha

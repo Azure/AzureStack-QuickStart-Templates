@@ -1,0 +1,63 @@
+{
+    "schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": ""
+        },
+        "adminPublicKey": {
+            "value": ""
+        },
+        "virtualMachineSize": {
+            "value": ""
+        },
+        "virtualMachinePublisher": {
+            "value": ""
+        },
+        "virtualMachineOffer": {
+            "value": ""
+        },
+        "virtualMachineSku": {
+            "value": ""
+        },
+        "virtualMachineVersion": {
+            "value": ""
+        },
+        "pipName": {
+            "value": ""
+        },
+        "pipDomainNameLabel": {
+            "value": ""
+        },
+        "pipAllocationMethod": {
+            "value": ""
+        },
+        "storageAccountResourceId": {
+            "value": ""
+        },
+        "storageAccountContainer": {
+            "value": ""
+        },
+        "pfxKeyVaultResourceId": {
+            "value": ""
+        },
+        "pfxKeyVaultSecretUrl": {
+            "value": ""
+        },
+        "pfxThumbprint": {
+            "value": ""
+        },
+        "registryTag": {
+            "value": ""
+        },
+        "registryReplicas": {
+            "value": ""
+        },
+        "servicePrincipalClientId": {
+            "value": ""
+        },
+        "servicePrincipalClientSecret": {
+            "value": ""
+        }
+    }
+}

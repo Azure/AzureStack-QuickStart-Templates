@@ -187,7 +187,7 @@ Section 9.1**
 This section details the reference architecture that can be used as a
 guidance to implement the offer.
 
-<img src="Hybrid-Deployment\ref_architecture.jpg" />
+<img src="Hybrid-Deployment/ref_architecture.jpg" />
 
 This architecture consists of the following components:
 
@@ -412,8 +412,7 @@ resources deployed are as follows:
 <tr class="odd">
 <td>2</td>
 <td><p>Now run the <strong>Deploy-SolutionAzureStack.ps1</strong> with the following parameters</p>
-<p>.\Deploy-SolutionAzureStack.ps1 -rg {enterValue} -presharedkey {enterValue} -storageAccount<span id="Resourcegroup_4_2" class="anchor"></span>Name {enterValue} -targetStorageContainer {enterValue} -location {enterValue} -tenantID {enterValue} -azureStackArmEndpoint {enterValue} -Verbose</p>
-<p>.\Deploy-SolutionAzureStack.ps1 -rg {enterValue} -presharedkey {enterValue} -storageAccountName {enterValue} -targetStorageContainer {enterValue} -AADTenantName {enterValue} -azureStackArmEndpoint {enterValue} -Verbose</p></td>
+<p>.\Deploy-SolutionAzureStack.ps1 -rg {enterValue} -presharedkey {enterValue} -storageAccountName {enterValue} -targetStorageContainer {enterValue} -location {enterValue} -tenantID {enterValue} -azureStackArmEndpoint https://management.{region.fqdn} -Verbose</p>
 </tr>
 <tr class="even">
 <td>3</td>

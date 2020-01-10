@@ -95,8 +95,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
-      "properties": {}
+      "kind": "Storage"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",

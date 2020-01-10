@@ -12,7 +12,7 @@
         [Int]$RetryIntervalSec=30
     )
 
-    Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, PSDesiredStateConfiguration, xPendingReboot
+    Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, PSDesiredStateConfiguration, xDnsServer, xPendingReboot
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
     $Interface=Get-NetAdapter|Where Name -Like "Ethernet*"|Select-Object -First 1
     $InterfaceAlias=$($Interface.Name)
@@ -101,10 +101,17 @@
             DependsOn = @("[WindowsFeature]ADDSInstall", "[xDisk]ADDataDisk")
         }
 
-        xPendingReboot RebootAfterPromotion{
-            Name = "RebootAfterPromotion"
-            DependsOn = "[xADDomain]FirstDS"
+        xDnsServerForwarder SetDNSForwarder
+        {
+            IsSingleInstance = 'Yes'
+            IPAddresses = '168.63.129.16'
+            UseRootHint = $false
         }
 
+        xPendingReboot RebootAfterPromotion
+        {
+            Name = "RebootAfterPromotion"
+            DependsOn = "[xDnsServerForwarder]SetDNSForwarder"
+        }
    }
 }
