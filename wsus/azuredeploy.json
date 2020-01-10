@@ -1,0 +1,299 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2019-03-01-hybrid",
+  "parameters": {
+    "AdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin user's password to login to the VM"
+      }
+    },
+    "AdminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin Username to login to the VM"
+      }
+    },
+    "customScriptFileToRun": {
+      "type": "string",
+      "defaultValue": "InstallWSUS.ps1",
+      "metadata": {
+        "description": "Name of the script to be run to install WSUS role"
+      }
+    },
+    "existingVirtualNetworkName": {
+      "type": "string"
+    },
+      "networkSecurityGroupName": {
+        "type": "string",
+        "defaultValue": "wsus_NSG"
+  
+    },
+    "ScriptURI": {
+      "type": "string",
+      "metadata": {
+        "description": "URI to script"
+      }
+    },
+    "SyncHours": {
+      "type": "string",
+      "metadata": {
+        "description": "The schedule for the daily sync in Hours"
+      }
+    },
+    "SyncMinutes": {
+      "type": "string",
+      "metadata": {
+        "description": "The schedule for the daily sync in Minutes"
+      }
+      
+    },
+    "publicIpAddressName": {
+        "type": "string",
+        "defaultValue": "wsus_ip"
+    },
+    "publicIpAddressType": {
+        "type": "string",
+        "defaultValue": "dynamic"
+    },
+    "publicIpAddressSku": {
+        "type": "string",
+        "defaultValue": "basic"
+    }
+
+  },
+  "variables": {
+    "vnetID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('existingVirtualNetworkName'))]",
+    "virtualMachines_name": "[concat('VM', '-WSUS01')]",
+    "availabilitySets_name": "[concat('VM', '-AS-WSUS')]",
+    "networkInterfaces_name": "[concat(variables('virtualMachines_name') ,'-NIC01')]",
+    "subnetName": "default",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('subnetName'))]",
+    "vmExtensionName_WSUS": "WSUS_Deployment",
+    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File', ' ', parameters('customScriptFileToRun'), ' ','-SyncHours ','\"', parameters('SyncHours'),'\"', ' ', '-SyncMinutes ','\"', parameters('SyncMinutes'),'\"')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('availabilitySets_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Aligned"
+        },
+      "properties": {
+        "platformUpdateDomainCount": 5,
+        "platformFaultDomainCount": 2
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('virtualMachines_name')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySets_name'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "Standard_D1_v2"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter",
+            "version": "latest"
+          },
+          "osDisk": {
+             "createOption": "fromImage"           
+          },
+          "dataDisks": [
+            {
+              "lun": 0,
+              "createOption": "Empty",
+              "diskSizeGB": "500"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachines_name')]",
+          "adminUsername": "[parameters('AdminUsername')]",
+          "adminPassword": "[parameters('AdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+      ],
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySets_name'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
+        
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('networkInterfaces_name')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+            {
+                "name": "ipconfig1",
+                "properties": {
+                    "subnet": {
+                        "id": "[variables('subnetRef')]"
+                    },
+                    "privateIPAllocationMethod": "Dynamic",
+                    "publicIpAddress": {
+                        "id": "[resourceId('WSUSRG','Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                    }
+                }
+            }
+        ],
+        "networkSecurityGroup": {
+            "id": "[resourceId('WSUSRG', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+        }
+      },
+      "resources": [],
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+      ]
+    },
+    {
+        "name": "[parameters('publicIpAddressName')]",
+        "type": "Microsoft.Network/publicIpAddresses",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+        },
+        "sku": {
+            "name": "[parameters('publicIpAddressSku')]"
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupName')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "securityRules": [
+                {
+                    "name": "RDP",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceApplicationSecurityGroups": [],
+                        "destinationApplicationSecurityGroups": [],
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "3389"
+                    }
+                },
+                {
+                    "name": "HTTP",
+                    "properties": {
+                        "priority": 320,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceApplicationSecurityGroups": [],
+                        "destinationApplicationSecurityGroups": [],
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "80"
+                    }
+                },
+                {
+                    "name": "HTTPS",
+                    "properties": {
+                        "priority": 340,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceApplicationSecurityGroups": [],
+                        "destinationApplicationSecurityGroups": [],
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "443"
+                    }
+                },
+                {
+                  "name": "WSUS1",
+                  "properties": {
+                      "priority": 360,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "8530"
+                  }
+              },
+              {
+                "name": "WSUS2",
+                "properties": {
+                    "priority": 380,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceApplicationSecurityGroups": [],
+                    "destinationApplicationSecurityGroups": [],
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "8531"
+                }
+            }
+            ]
+        }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('virtualMachines_name'),'/', variables('vmExtensionName_WSUS'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachines_name'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[parameters('scripturi')]"
+          ],
+          "timestamp": 201703271222
+        },
+        "protectedSettings": {
+          "commandToExecute": "[variables('commandToExecute')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "VMProperties": {
+      "value": "[reference(resourceId('Microsoft.Compute/virtualMachines', concat(variables('virtualMachines_name'))) )]",
+      "type": "object"
+    }
+  }
+}
