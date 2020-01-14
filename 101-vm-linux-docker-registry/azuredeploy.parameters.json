@@ -2,34 +2,61 @@
     "schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "storageAccountName": {
-            "value": ""
-        },
-        "storageAccountContainer": {
-            "value": ""
-        },
-        "storageAccountKey": {
-            "value": ""
-        },
-        "keyVaultResourceId": {
-            "value": ""
-        },
-        "keyVaultSecretUrl": {
-            "value": ""
-        },
-        "certificateThumbprint": {
+        "adminUsername": {
             "value": ""
         },
         "adminPublicKey": {
             "value": ""
         },
-        "domainNameLabel": {
+        "virtualMachineSize": {
             "value": ""
         },
-        "cseLocation": {
+        "virtualMachinePublisher": {
             "value": ""
         },
-        "htpasswdLocation": {
+        "virtualMachineOffer": {
+            "value": ""
+        },
+        "virtualMachineSku": {
+            "value": ""
+        },
+        "virtualMachineVersion": {
+            "value": ""
+        },
+        "pipName": {
+            "value": ""
+        },
+        "pipDomainNameLabel": {
+            "value": ""
+        },
+        "pipAllocationMethod": {
+            "value": ""
+        },
+        "storageAccountResourceId": {
+            "value": ""
+        },
+        "storageAccountContainer": {
+            "value": ""
+        },
+        "pfxKeyVaultResourceId": {
+            "value": ""
+        },
+        "pfxKeyVaultSecretUrl": {
+            "value": ""
+        },
+        "pfxThumbprint": {
+            "value": ""
+        },
+        "registryTag": {
+            "value": ""
+        },
+        "registryReplicas": {
+            "value": ""
+        },
+        "servicePrincipalClientId": {
+            "value": ""
+        },
+        "servicePrincipalClientSecret": {
             "value": ""
         }
     }

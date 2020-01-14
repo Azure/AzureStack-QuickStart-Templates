@@ -1,24 +1,25 @@
-function Random-Name {
-  Param ([int]$length)
-  -join ((97..122) | Get-Random -Count $length | % {[char]$_})
-}
-
-# Set variables to match your environment
-#########################################
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
 
 $location = ""
 $resourceGroup = ""
-$saName = Random-Name 10
-$saContainer = Random-Name 10
-$tokenIni = Get-Date
-$tokenEnd = $tokenIni.AddYears(1.0)
+$saName = ""
+$saContainer = ""
 
-$kvName = Random-Name 10
-$secretName = Random-Name 10
+$kvName = ""
+$pfxSecret = ""
 $pfxPath = ""
 $pfxPass = ""
-$dnsSubDomain = ""
+$spnName = ""
+$spnSecret = ""
+$userName = ""
+$userPass = ""
+
+$dnsLabelName = ""
 $sshKey = ""
+$vmSize = ""
+$registryTag = "2.7.1"
+$registryReplicas = "5"
 
 # RESOURCE GROUP
 # =============================================
@@ -34,25 +35,16 @@ New-AzureRmResourceGroup -Name $resourceGroup -Location $location | out-null
 # Create storage account
 Write-Host "Creating storage account:" $saName
 $sa = New-AzureRmStorageAccount -ResourceGroupName $resourceGroup -AccountName $saName -Location $location -SkuName Premium_LRS -EnableHttpsTrafficOnly 1
-$saKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $resourceGroup -AccountName $saName)[0].Value
 
 # Create container
 Write-Host "Creating blob container:" $saContainer
 Set-AzureRmCurrentStorageAccount -ResourceGroupName $resourceGroup -AccountName $saName | out-null
-$container = New-AzureStorageContainer -Name $saContainer
+New-AzureStorageContainer -Name $saContainer | out-null
 
-# Upload configuration script
-Write-Host "Uploading configuration script"
-Set-AzureStorageBlobContent -Container $saContainer -File script.sh | out-null
-$cseToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob "script.sh" -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
-$cseUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/script.sh" + $cseToken
+Write-Host "=> Storage Account Resource ID:" $sa.Id
 
-# Upload htpasswd
-Write-Host "Uploading htpasswd file"
-Set-AzureStorageBlobContent -Container $saContainer -File .htpasswd | out-null
-$htpasswdToken = New-AzureStorageBlobSASToken -Container $saContainer -Blob .htpasswd -Permission r -StartTime $tokenIni -ExpiryTime $tokenEnd
-$htpasswdUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/.htpasswd" + $htpasswdToken
-
+Write-Host "Assigning contributor role to" $spnName
+New-AzureRMRoleAssignment -ApplicationId $spnName -RoleDefinitionName "Contributor" -Scope $sa.Id
 
 # KEY VAULT
 # =============================================
@@ -60,8 +52,13 @@ $htpasswdUrl = $container.CloudBlobContainer.Uri.AbsoluteUri + "/.htpasswd" + $h
 # Create key vault enabled for deployment
 Write-Host "Creating key vault:" $kvName
 $kv = New-AzureRmKeyVault -ResourceGroupName $resourceGroup -VaultName $kvName -Location $location -Sku standard -EnabledForDeployment
+Write-Host "=> Key Vault Resource ID:" $kv.ResourceId
 
-# Serialize certificate
+Write-Host "Setting access polices for client" $spnName
+Set-AzureRmKeyVaultAccessPolicy -VaultName $kvName -ServicePrincipalName $spnName -PermissionsToSecrets GET,LIST
+
+# Store certificate as secret
+Write-Host "Storing certificate in key vault:" $pfxPath
 $fileContentBytes = get-content $pfxPath -Encoding Byte
 $fileContentEncoded = [System.Convert]::ToBase64String($fileContentBytes)
 $jsonObject = @"
@@ -74,59 +71,75 @@ $jsonObject = @"
 $jsonObjectBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonObject)
 $jsonEncoded = [System.Convert]::ToBase64String($jsonObjectBytes)
 $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText -Force
-
-# Upload certificate as secret
-Write-Host "Storing certificate in key vault:" $pfxPath
-$kvSecret = Set-AzureKeyVaultSecret -VaultName $kvName -Name $secretName -SecretValue $secret
+$kvSecret = Set-AzureKeyVaultSecret -VaultName $kvName -Name $pfxSecret -SecretValue $secret -ContentType pfx
 
 # Compute certificate thumbprint
 Write-Host "Computing certificate thumbprint"
 $tp = Get-PfxCertificate -FilePath $pfxPath
+
+Write-Host "=> Certificate URL:" $kvSecret.Id
+Write-Host "=> Certificate thumbprint:" $tp.Thumbprint
+
+Write-Host "Storing secret for sample user: $userName"
+$userSecret = ConvertTo-SecureString -String $userPass -AsPlainText -Force
+Set-AzureKeyVaultSecret -VaultName $kvName -Name $userName -SecretValue $userSecret -ContentType "user credentials" | out-null
 
 
 # BUILD TEMPLATE PARAMETERS JSON
 # =============================================
 $jsonParameters = New-Object -TypeName PSObject
 
-$jsonStorageAccountName = New-Object -TypeName PSObject
-$jsonStorageAccountName | Add-Member -MemberType NoteProperty -Name value -Value $saName
-$jsonParameters | Add-Member -MemberType NoteProperty -Name storageAccountName -Value $jsonStorageAccountName
+$jsonAdminPublicKey = New-Object -TypeName PSObject
+$jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value $sshKey
+$jsonParameters | Add-Member -MemberType NoteProperty -Name adminPublicKey -Value $jsonAdminPublicKey
+
+$jsonVirtualMachineSize = New-Object -TypeName PSObject
+$jsonVirtualMachineSize | Add-Member -MemberType NoteProperty -Name value -Value $vmSize
+$jsonParameters | Add-Member -MemberType NoteProperty -Name virtualMachineSize -Value $jsonVirtualMachineSize
+
+$jsonPipName = New-Object -TypeName PSObject
+$jsonPipName | Add-Member -MemberType NoteProperty -Name value -Value $dnsLabelName
+$jsonParameters | Add-Member -MemberType NoteProperty -Name pipName -Value $jsonPipName
+
+$jsonPipDomainNameLabel = New-Object -TypeName PSObject
+$jsonPipDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $dnsLabelName
+$jsonParameters | Add-Member -MemberType NoteProperty -Name pipDomainNameLabel -Value $jsonPipDomainNameLabel
+
+$jsonStorageAccountResourceId = New-Object -TypeName PSObject
+$jsonStorageAccountResourceId | Add-Member -MemberType NoteProperty -Name value -Value $sa.Id
+$jsonParameters | Add-Member -MemberType NoteProperty -Name storageAccountResourceId -Value $jsonStorageAccountResourceId
 
 $jsonStorageAccountContainerName = New-Object -TypeName PSObject
 $jsonStorageAccountContainerName | Add-Member -MemberType NoteProperty -Name value -Value $saContainer
 $jsonParameters | Add-Member -MemberType NoteProperty -Name storageAccountContainer -Value $jsonStorageAccountContainerName
 
-$jsonStorageAccountKey = New-Object -TypeName PSObject
-$jsonStorageAccountKey | Add-Member -MemberType NoteProperty -Name value -Value $saKey
-$jsonParameters | Add-Member -MemberType NoteProperty -Name storageAccountKey -Value $jsonStorageAccountKey
-
 $jsonKeyVaultResourceId = New-Object -TypeName PSObject
 $jsonKeyVaultResourceId | Add-Member -MemberType NoteProperty -Name value -Value $kv.ResourceId
-$jsonParameters | Add-Member -MemberType NoteProperty -Name keyVaultResourceId -Value $jsonKeyVaultResourceId
+$jsonParameters | Add-Member -MemberType NoteProperty -Name pfxKeyVaultResourceId -Value $jsonKeyVaultResourceId
 
 $jsonKeyVaultSecretUrl = New-Object -TypeName PSObject
 $jsonKeyVaultSecretUrl | Add-Member -MemberType NoteProperty -Name value -Value $kvSecret.Id
-$jsonParameters | Add-Member -MemberType NoteProperty -Name keyVaultSecretUrl -Value $jsonKeyVaultSecretUrl
+$jsonParameters | Add-Member -MemberType NoteProperty -Name pfxKeyVaultSecretUrl -Value $jsonKeyVaultSecretUrl
 
 $jsonCertificateThumbprint = New-Object -TypeName PSObject
 $jsonCertificateThumbprint | Add-Member -MemberType NoteProperty -Name value -Value $tp.Thumbprint
-$jsonParameters | Add-Member -MemberType NoteProperty -Name certificateThumbprint -Value $jsonCertificateThumbprint
+$jsonParameters | Add-Member -MemberType NoteProperty -Name pfxThumbprint -Value $jsonCertificateThumbprint
 
-$jsonAdminPublicKey = New-Object -TypeName PSObject
-$jsonAdminPublicKey | Add-Member -MemberType NoteProperty -Name value -Value $sshKey
-$jsonParameters | Add-Member -MemberType NoteProperty -Name adminPublicKey -Value $jsonAdminPublicKey
+$jsonRegistryTag = New-Object -TypeName PSObject
+$jsonRegistryTag | Add-Member -MemberType NoteProperty -Name value -Value $registryTag 
+$jsonParameters | Add-Member -MemberType NoteProperty -Name registryTag -Value $jsonRegistryTag
 
-$jsonDomainNameLabel = New-Object -TypeName PSObject
-$jsonDomainNameLabel | Add-Member -MemberType NoteProperty -Name value -Value $dnsSubDomain 
-$jsonParameters | Add-Member -MemberType NoteProperty -Name domainNameLabel -Value $jsonDomainNameLabel
+$jsonRegistryReplicas = New-Object -TypeName PSObject
+$jsonRegistryReplicas | Add-Member -MemberType NoteProperty -Name value -Value $registryReplicas 
+$jsonParameters | Add-Member -MemberType NoteProperty -Name registryReplicas -Value $jsonRegistryReplicas
 
-$jsonCseLocation = New-Object -TypeName PSObject
-$jsonCseLocation | Add-Member -MemberType NoteProperty -Name value -Value $cseUrl
-$jsonParameters | Add-Member -MemberType NoteProperty -Name cseLocation -Value $jsonCseLocation
+$jsonSpnName = New-Object -TypeName PSObject
+$jsonSpnName | Add-Member -MemberType NoteProperty -Name value -Value $spnName
+$jsonParameters | Add-Member -MemberType NoteProperty -Name servicePrincipalClientId -Value $jsonSpnName
 
-$jsonHtpasswdLocation = New-Object -TypeName PSObject
-$jsonHtpasswdLocation | Add-Member -MemberType NoteProperty -Name value -Value $htpasswdUrl
-$jsonParameters | Add-Member -MemberType NoteProperty -Name htpasswdLocation -Value $jsonHtpasswdLocation
+$jsonSpnSecret = New-Object -TypeName PSObject
+$jsonSpnSecret | Add-Member -MemberType NoteProperty -Name value -Value $spnSecret
+$jsonParameters | Add-Member -MemberType NoteProperty -Name servicePrincipalClientSecret -Value $jsonSpnSecret
 
 $jsonRoot = New-Object -TypeName PSObject
 $jsonRoot | Add-Member -MemberType NoteProperty -Name schema -Value "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#"
