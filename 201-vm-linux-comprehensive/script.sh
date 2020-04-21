@@ -25,7 +25,7 @@ echo "Upgrading Python PIP."
 pip install --upgrade pip
 
 echo "Install AzureCLI."
-sudo pip install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/bundled/azure-cli_bundle_0.2.10-1.tar.gz
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 # Run simple command to test availablity AzureCLI
 echo "Running: az --version"
