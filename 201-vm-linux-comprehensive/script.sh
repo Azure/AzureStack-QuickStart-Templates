@@ -25,7 +25,7 @@ echo "Upgrading Python PIP."
 pip install --upgrade pip
 
 echo "Install AzureCLI."
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+curl -sL https://aka.ms/InstallAzureCLI | sudo bash
 
 # Run simple command to test availablity AzureCLI
 echo "Running: az --version"
