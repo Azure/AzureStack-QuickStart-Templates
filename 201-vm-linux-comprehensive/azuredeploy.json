@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "apiProfile": "2018-03-01-hybrid",
+  "apiProfile": "2019-03-01-hybrid",
   "parameters": {
     "adminUsername": {
       "type": "string",
