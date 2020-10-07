@@ -33,7 +33,7 @@
     },
     "imageSku": {
       "type": "string",
-      "defaultValue": "16.04-LTS",
+      "defaultValue": "19",
       "metadata": {
         "description": "Maps to the sku in the Azure Stack Platform Image Repository manifest file Eg: 16.04-LTS, 14.04.5-LTS."
       }
