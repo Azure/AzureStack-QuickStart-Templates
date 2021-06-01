@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Simple Windows VM with Diagnostic Settings",
+  "description": "Deploys a simple Windows VM with Diagnostic Settings. This template also deploys a Virtual Network (with DNS), Network Security Group, and a Network Interface.",
+  "summary": "",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

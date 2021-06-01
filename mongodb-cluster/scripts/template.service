@@ -1,0 +1,32 @@
+[Unit]
+Description=Hadoop service
+After=syslog.target network.target remote-fs.target nss-lookup.target network-online.target
+Requires=network-online.target
+
+[Service]
+# Who is running this process?
+User=SED_USER
+Group=hadoop
+Type=forking
+
+# Script location
+ExecStart=SED_START
+ExecStop=SED_STOP
+WorkingDirectory=SED_HADOOP_HOME
+
+# Environment Variables
+Environment=JAVA_HOME=SED_JAVA_HOME
+Environment=HADOOP_HOME=SED_HADOOP_HOME
+
+# Failure if we don't start in 2 minutes
+TimeoutStartSec=2min
+
+# Restart failed services, 2 minutes to make sure we don't spam
+Restart=on-failure
+RestartSec=1min
+
+# pid information
+PIDFile=SED_PID
+
+[Install]
+WantedBy=multi-user.target

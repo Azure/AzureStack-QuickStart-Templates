@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Multiple Windows VMs Availability Set - managed disks",
+  "description": "This template deploys a set of Windows VMs as part of the same availability set. This template template also deploys an availability set, a virtual Network (with DNS), a load balancer with a front end Public IP address, and a Network Security Group. The disks are managed disks",
+  "summary": "This template deploys a set of Windows VMs as part of the same availability set.",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

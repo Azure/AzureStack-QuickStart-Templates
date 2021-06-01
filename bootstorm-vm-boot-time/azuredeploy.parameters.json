@@ -1,0 +1,21 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
+  "contentVersion": "1.16.08.15",
+  "parameters": {
+	"azureAccountUsername": {
+      "value": "AZURE-AD-ACCOUNT-USERNAME"
+    },
+    "azureAccountPassword": {
+      "value": "AZURE-AD-ACCOUNT-PASSWORD"
+    },
+    "tenantId": {
+      "value": "AZURE-AD-ACCOUNT-TENANT-ID"
+    },
+    "vmCount": {
+      "value": 2
+    },
+    "vmSize": {
+      "value": "Standard_A1"
+    }
+  }
+}

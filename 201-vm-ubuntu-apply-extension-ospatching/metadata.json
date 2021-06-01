@@ -1,0 +1,8 @@
+{
+  "itemDisplayName": "Deploy a Linux Ubuntu VM and OSpatching extension to Azure Stack",
+  "description": "Deploys a Linux Ubuntu VM and OSpatching extension",
+  "summary": "This template has default values for all the parameters and deploys a Linux Ubuntu VM and OSPatching extension",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}
+

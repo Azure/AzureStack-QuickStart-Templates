@@ -1,0 +1,66 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "type": "string"
+        },
+        "userName": {
+            "type": "string"
+        },
+        "password": {
+            "type": "securestring"
+        },
+        "maxSizeMB": {
+            "type": "string",
+            "defaultValue": "100"
+        },
+        "collation": {
+            "type": "string",
+            "defaultValue": "utf8_general_ci"
+        },
+        "skuName": {
+            "type": "string"
+        },
+        "skuTier": {
+            "type": "string"
+        },	
+        "skuFamily": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-02-15-preview",
+            "type": "Microsoft.MySQLAdapter/logins",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('userName')]",
+            "properties": {
+                "userName": "[parameters('userName')]",
+                "password": "[parameters('password')]",
+                "skuName": "[parameters('skuName')]"
+                }
+            },
+        {
+            "apiVersion": "2017-02-15-preview",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('databaseName')]",
+            "dependsOn": [
+            "[concat('Microsoft.MySQLAdapter/logins/', parameters('userName'))]"
+            ],
+            "properties": {
+                "databaseName": "[parameters('databaseName')]",
+                "loginUserName": "[parameters('userName')]",
+                "maxSizeMB": "[parameters('maxSizeMB')]",
+                "collation": "[parameters('collation')]"
+            },
+            "type": "Microsoft.MySqlAdapter/databases",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]",
+                "family": "[parameters('skuFamily')]"
+            }
+        }
+    ],
+    "variables": {}
+}

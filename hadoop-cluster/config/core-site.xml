@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <description>
+            The name of the default file system. A URI whose scheme and authority determine the FileSystem
+            implementation. The uri's scheme determines the config property (fs.SCHEME.impl) naming the FileSystem
+            implementation class. The uri's authority is used to determine the host, port, etc. for a filesystem.
+        </description>
+        <name>fs.defaultFS</name>
+        <value>hdfs://CLUSTER_NAMENameNode</value>
+    </property>
+    <property>
+        <description>
+            The size of buffer for use in sequence files. The size of this buffer should probably be a multiple of
+            hardware page size (4096 on Intel x86), and it determines how much data is buffered during read and write
+            operations.
+        </description>
+        <name>io.file.buffer.size</name>
+        <value>32768</value>
+    </property>
+    <property>
+        <description>
+            A base for other temporary directories.
+        </description>
+        <name>hadoop.tmp.dir</name>
+        <value>MOUNT_LOCATION</value>
+    </property>
+</configuration>

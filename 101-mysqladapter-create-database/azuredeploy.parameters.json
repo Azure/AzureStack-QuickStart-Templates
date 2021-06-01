@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "value": "mynewdatabase"
+        },
+        "userName": {
+            "value": "mynewdatabasesa"
+        },
+        "password": {
+            "value": ""
+        },
+        "maxSizeMB": {
+            "value": "100"
+        },
+        "collation": {
+            "value": "utf8_general_ci"
+        },
+        "skuName": {
+            "value": "MySQLSKU"
+        },
+        "skuTier": {
+            "value": "Standalone"
+        },
+        "skuFamily": {
+            "value": "Enterprise"
+        }
+    }
+}

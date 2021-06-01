@@ -1,0 +1,12 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "scriptFile": {
+        "value": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/101-vm-windows-apply-extension-customscript-sf/VMCustomScriptExtension.ps1"
+    },  
+    "scriptName": {
+        "value": "VMCustomScriptExtension.ps1"
+    }  
+  }
+}

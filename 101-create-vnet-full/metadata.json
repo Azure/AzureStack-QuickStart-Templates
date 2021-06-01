@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Create a Virtual Network (full)",
+  "description": "Creates a Virtual Network with variables (no parameters)",
+  "summary": "This template creates a Virtual Network (with DNS), Public IP address, Network Security Group, and a Network Interface in the Azure Stack POC environment.",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

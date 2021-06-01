@@ -1,0 +1,195 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
+	"parameters": {
+		"regionCount": {
+			"type": "int"
+		},
+		"locationArray": {
+			"type": "array"
+		},
+		"suffixArray": {
+			"type": "array"
+		},
+		"publicRPCEndpoint": {
+			"type": "bool"
+		},
+		"loadBalancerName": {
+			"type": "string"
+		},
+		"lbFrontEndIpConfigName": {
+			"type": "string"
+		},
+		"backendAddressPoolName": {
+			"type": "string"
+		},
+		"FrontendPort1": {
+			"type": "int"
+		},
+		"BackendPort1": {
+			"type": "int"
+		},
+		"FrontendPort2": {
+			"type": "int"
+		},
+		"BackendPort2": {
+			"type": "int"
+		},
+		"inboundNATRuleNamePrefix": {
+			"type": "string"
+		},
+		"inboundNATRuleFrontendStartingPort": {
+			"type": "int"
+		},
+		"inboundNATRuleFrontendEndingPort": {
+			"type": "int"
+		},
+		"inboundNATRuleBackendPort": {
+			"type": "int"
+		},
+		"publicIPResourceId": {
+			"type": "string"
+		},
+		"privateIPResouceId": {
+			"type": "string"
+		},
+		"subnetId": {
+			"type": "string"
+		},
+		"currentRegionCount": {
+			"type": "int"
+		},
+		"ethNetworkPort": {
+			"type": "int"
+		}
+	},
+	"variables": {
+		"loadBalancerPublicIPProps": {
+			"publicIPAddress": {
+				"id": "[parameters('publicIPResourceId')]"
+			}
+		},
+		"loadBalancerPrivateIPProps": {
+			"privateIPAddress": "[parameters('privateIPResouceId')]",
+			"privateIPAllocationMethod": "Static",
+			"subnet": {
+				"id": "[parameters('subnetId')]"
+			}
+		},
+		"loadBalancerFrontEndIPProps": "[if(parameters('publicRPCEndpoint'), variables('loadBalancerPublicIPProps'), variables('loadBalancerPrivateIPProps'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])]",
+			"type": "Microsoft.Network/loadBalancers",
+			"location": "[parameters('locationArray')[parameters('currentRegionCount')]]",
+			"properties": {
+				"frontendIPConfigurations": [
+					{
+						"name": "[parameters('lbFrontEndIpConfigName')]",
+						"properties": "[variables('loadBalancerFrontEndIPProps')]"
+					}
+				],
+				"backendAddressPools": [
+					{
+						"name": "[parameters('backendAddressPoolName')]"
+					}
+				],
+				"loadBalancingRules": [
+					{
+						"name": "LB-Rule1",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/frontendIPConfigurations/',parameters('lbFrontEndIpConfigName'))]"
+							},
+							"backendAddressPool": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/backendAddressPools/', parameters('backendAddressPoolName'))]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": "[parameters('FrontendPort1')]",
+							"backendPort": "[parameters('BackendPort1')]",
+							"idleTimeoutInMinutes": 5,
+							"probe": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe1')]"
+							}
+						}
+					},
+					{
+						"name": "LB-Rule2",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/frontendIPConfigurations/',parameters('lbFrontEndIpConfigName'))]"
+							},
+							"backendAddressPool": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/backendAddressPools/', parameters('backendAddressPoolName'))]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": "[parameters('FrontendPort2')]",
+							"backendPort": "[parameters('BackendPort2')]",
+							"loadDistribution": "SourceIPProtocol",
+							"idleTimeoutInMinutes": 5,
+							"probe": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe2')]"
+							},
+							"loadDistribution": "SourceIPProtocol"
+						}
+					},
+					{
+						"name": "LB-Rule3",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/frontendIPConfigurations/',parameters('lbFrontEndIpConfigName'))]"
+							},
+							"backendAddressPool": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/backendAddressPools/', parameters('backendAddressPoolName'))]"
+							},
+							"protocol": "Tcp",
+							"frontendPort": "[parameters('ethNetworkPort')]",
+							"backendPort": "[parameters('ethNetworkPort')]",
+							"idleTimeoutInMinutes": 5,
+							"probe": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/probes/lbProbe1')]"
+							}
+						}
+					}
+				],
+				"probes": [
+					{
+						"name": "lbProbe1",
+						"properties": {
+							"protocol": "Tcp",
+							"port": "[parameters('BackendPort1')]",
+							"intervalInSeconds": 5,
+							"numberOfProbes": 2
+						}
+					},
+					{
+						"name": "lbProbe2",
+						"properties": {
+							"protocol": "Tcp",
+							"port": "[parameters('BackendPort2')]",
+							"intervalInSeconds": 5,
+							"numberOfProbes": 2
+						}
+					}
+				],
+				"inboundNatPools": [
+					{
+						"name": "[parameters('inboundNATRuleNamePrefix')]",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(parameters('loadBalancerName'),'-',parameters('suffixArray')[parameters('currentRegionCount')])),'/frontendIPConfigurations/',parameters('lbFrontEndIpConfigName'))]"
+							},
+							"protocol": "Tcp",
+							"frontendPortRangeStart": "[parameters('inboundNATRuleFrontendStartingPort')]",
+							"frontendPortRangeEnd": "[parameters('inboundNATRuleFrontendEndingPort')]",
+							"backendPort": "[parameters('inboundNATRuleBackendPort')]"
+						}
+					}
+				]
+			}
+		}
+	],
+	"outputs": {}
+}

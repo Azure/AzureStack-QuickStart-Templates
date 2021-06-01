@@ -1,0 +1,310 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Naming prefix for each new resource created. 3-char min, 8-char max, lowercase alphanumeric"
+            }
+        },
+        "VMPrefix": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Naming prefix for each VM created. 3-char min, 8-char max, lowercase alphanumeric"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Type of new Storage Accounts (Standard_LRS, Standard_GRS, Standard_RAGRS or Premium_LRS) to be created to store VM disks"
+            },
+            "defaultValue": "Premium_LRS"
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "Size of the Skype for Business front-end VMs to be created"
+            },
+            "defaultValue": "Standard_DS5_v2"
+        },
+        "domainName": {
+            "type": "string",
+            "metadata": {
+                "description": "DNS domain name for existing Active Directory domain"
+            },
+            "defaultValue": "contoso.com"
+        },
+        "domainNetbiosName": {
+            "type": "string",
+            "metadata": {
+                "description": "Netbios name for existing Active Directory domain"
+            },
+            "defaultValue": "contoso"
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Administrator of the existing Active Directory Domain"
+            },
+            "defaultValue": "lcladmin"
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Administrator account of the existing Active Directory Domain"
+            },
+            "defaultValue": "MySecurePassword"
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing VNET."
+            },
+            "defaultValue": "ADVNETdeploy"
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing subnet in the existing VNET to which the S2D VMs should be deployed"
+            },
+            "defaultValue": "ADStaticSubnetdeploy"
+        },
+        "shareServerFQDN": {
+            "type": "String",
+            "metadata": {
+                "description": "The share server FQDN"
+            },
+            "defaultValue": "fs01.contoso.com"
+        },
+        "shareName": {
+            "type": "String",
+            "metadata": {
+                "description": "The share name"
+            },
+            "defaultValue": "data"
+        },
+        "workloadsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
+            },
+            "defaultValue": "https://colab.blob.local.azurestack.external/workload"
+        },
+        "feLbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The ip address of load balancer for SfB front-end"
+            },
+            "defaultValue": "10.0.0.250"
+        },
+        "SqlServerFQDN": {
+            "type": "string",
+            "metadata": {
+                "description": "The FQDN of one of the SQL servers in the cluster"
+            },
+            "defaultValue": "srv-sql-0.contoso.com"
+        },
+        "SqlAG": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the SQL always-on availability group"
+            },
+            "defaultValue": "alwayson-ag"
+        },
+        "CA": {
+            "type": "string",
+            "metadata": {
+                "description": "The certificate authority path. Should be in the form of: 'srvdc-dc-1.contoso.com\\contoso-srvdc-dc-1-CA'"
+            },
+            "defaultValue": "srv-dc-1.contoso.com\\contoso-srv-dc-1-CA"
+        },
+        "DNSserver": {
+            "type": "string",
+            "metadata": {
+                "description": "The IP or fqdn of the DNS server you want to update. Typically, this is one of your AD servers."
+            },
+            "defaultValue": "srv-dc-1.contoso.com"
+        },
+        "SfBISOName": {
+            "type": "string",
+            "metadata": {
+                "description": "Skype for business ISO name"
+            },
+            "defaultValue": "SfB-E-9319.0-enUS.ISO"
+        },
+        "SfbCMUName": {
+            "type": "string",
+            "metadata": {
+                "description": "Skype for business cumulative update installer name"
+            },
+            "defaultValue": "SkypeServerUpdateInstaller.exe"
+        },
+        "modRewriteName": {
+            "type": "string",
+            "metadata": {
+                "description": "IIS mod rewrite installer name"
+            },
+            "defaultValue": "rewrite_amd64_en-US.msi"
+        },
+        "edgeNetworkSubnet": {
+            "defaultValue": "10.0.1.0/24",
+            "type": "string",
+            "metadata": {
+                "description": "The subnet for the Edge VM network"
+            }
+        },
+        "sfbDSCResourcesArchiveName": {
+            "defaultValue": "SfBWorkload.zip",
+            "type": "string",
+            "metadata": {
+                "description": "Filename for the SFB DSC resources that will be used to deploy SFB."
+            }
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of diagnostic storage account"
+            }
+        },
+        "storageAccountEndPoint": {
+            "type": "string",
+            "defaultValue": "local.azurestack.external",
+            "metadata": {
+                "description": "Endpoint domain"
+            }
+        }
+    },
+    "variables": {
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "feStaticSubnetID": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
+        "frontEndServerTemplateURL": "[concat(parameters('workloadsLocation'),'/deploy-sfb-fe-servers.json')]",
+        "sfbFe01": "[concat(parameters('VMPrefix'), '-fe-0')]",
+        "sfbFe02": "[concat(parameters('VMPrefix'), '-fe-1')]",
+        "sfbFe03": "[concat(parameters('VMPrefix'), '-fe-2')]",
+        "sfbEdge01": "[concat(parameters('VMPrefix'), '-edg-0')]",
+        "sfbEdge02": "[concat(parameters('VMPrefix'), '-edg-1')]",
+        "deploySfBTopology": "deploySfBTopology.ps1\\Deploy_SkypeForBusinessTopology",
+        "deployFrontEndComponents": "deployFrontEndComponents.ps1\\Deploy_SkypeForBusinessFrontEndComponents",
+        "installScriptURL": "[concat(parameters('workloadsLocation'),'/installSkypeForBusiness.ps1')]",
+        "edgeNodePrepScriptURL": "[concat(parameters('workloadsLocation'),'/ConfigureEdgeServerPrereq.ps1')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[concat(parameters('namePrefix'), 'deploySfBFEServers')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('frontEndServerTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "edgeNodePrepScriptURL": {
+                        "value": "[variables('edgeNodePrepScriptURL')]"
+                    },
+                    "installScriptURL": {
+                        "value": "[variables('installScriptURL')]"
+                    },
+                    "workloadsLocation": {
+                        "value": "[parameters('workloadsLocation')]"
+                    },
+                    "shareServerFQDN": {
+                        "value": "[parameters('shareServerFQDN')]"
+                    },
+                    "domainNetbiosName": {
+                        "value": "[parameters('domainNetbiosName')]"
+                    },
+                    "edgeNetworkSubnet": {
+                        "value": "[parameters('edgeNetworkSubnet')]"
+                    },
+                    "shareName": {
+                        "value": "[parameters('shareName')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[parameters('storageAccountType')]"
+                    },
+                    "feStaticSubnetID": {
+                        "value": "[variables('feStaticSubnetID')]"
+                    },
+                    "feStaticNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "namePrefix": {
+                        "value": "[parameters('namePrefix')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSize')]"
+                    },
+                    "feNodes": {
+                        "value": [
+                            "[variables('sfbFe01')]",
+                            "[variables('sfbFe02')]",
+                            "[variables('sfbFe03')]"
+                        ]
+                    },
+                    "edgeNodes": {
+                        "value": [
+                            "[variables('sfbEdge01')]",
+                            "[variables('sfbEdge02')]"
+                        ]
+                    },
+                    "sfbIsoFileName": {
+                        "value": "[parameters('SfBISOName')]"
+                    },
+                    "sfbPrereqModulesFileName": {
+                        "value": "[parameters('sfbDSCResourcesArchiveName')]"
+                    },
+                    "sfbCMUPackageName": {
+                        "value": "[parameters('SfbCMUName')]"
+                    },
+                    "domainName": {
+                        "value": "[parameters('domainName')]"
+                    },
+                    "feLbIpAddress": {
+                        "value": "[parameters('feLbIpAddress')]"
+                    },
+                    "SqlServerFQDN": {
+                        "value": "[parameters('SqlServerFQDN')]"
+                    },
+                    "SqlAG": {
+                        "value": "[parameters('SqlAG')]"
+                    },
+                    "DNSserver": {
+                        "value": "[parameters('DNSserver')]"
+                    },
+                    "CA": {
+                        "value": "[parameters('CA')]"
+                    },
+                    "modRewriteMSIName": {
+                        "value": "[parameters('modRewriteName')]"
+                    },
+                    "diagnosticsStorageAccountName": {
+                        "value": "[parameters('diagnosticsStorageAccountName')]"
+                    },
+                    "storageAccountEndPoint": {
+                        "value": "[parameters('storageAccountEndPoint')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        }
+    ]
+}

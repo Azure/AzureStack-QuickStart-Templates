@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "type": "string"
+        },
+        "keyVaultLocation": {
+            "type": "string"
+        },
+        "settings": {
+            "type": "object"
+        },
+        "tenantId": {
+            "type": "string",
+            "defaultValue": "[subscription().tenantId]"
+        }
+    },
+    "variables": {
+        "ids": "[parameters('settings').accessPolicies]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2016-10-01",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[parameters('keyVaultLocation')]",
+            "dependsOn": [],
+            "properties": {
+                "enabledForDeployment": true,
+                "enabledForTemplateDeployment": true,
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "[parameters('tenantId')]",
+                "accessPolicies": "[variables('ids')]"                
+            }
+        }
+    ],
+    "outputs": {
+        "KeyVaultUrl": {
+            "type": "string",
+            "value": "[reference(parameters('keyVaultName')).vaultUri]"
+        }
+    }
+}

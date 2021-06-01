@@ -1,0 +1,39 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "domainName": {
+            "value": "contoso.com"
+        },
+        "adminUsername": {
+            "value": "thoroetadm"
+        },
+        "workloadsLocation": {
+            "value": "https://colab.blob.local.azurestack.external/workload"
+        },
+        "ADAvailabilitySetName": {
+            "value": "adhaavset"
+        },
+        "vmNetworkSubnet": {
+            "value": "10.0.0.0/24"
+        },
+        "virtualNetworkAddressRange": {
+            "value": "10.0.0.0/16"
+        },
+        "vmPrefix": {
+            "value": "srv"
+        },
+        "primaryAdIpAddress": {
+            "value": "10.0.0.11"
+        },
+        "additionalAdIpAddress": {
+            "value": "10.0.0.12"
+        },
+        "DnsForwarder": {
+            "value": "8.8.8.8"
+        },
+        "NtpServer": {
+            "value": "192.53.103.108"
+        }
+    }
+}

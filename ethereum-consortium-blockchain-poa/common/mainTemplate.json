@@ -1,0 +1,761 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "Resource group location for current deployment"
+			}
+		},
+		"isJoiningExistingNetwork": {
+			"type": "bool",
+			"defaultValue": false,
+			"metadata": {
+				"description": "Will this deployment be joining an existing ethereum network?"
+			}
+		},
+		"authType": {
+			"type": "string",
+			"defaultValue": "password",
+			"allowedValues": [
+				"password",
+				"sshPublicKey"
+			],
+			"metadata": {
+				"description": "Authorization type for SSH access to VMs"
+			}
+		},
+		"adminUsername": {
+			"type": "string",
+			"defaultValue": "adminuser",
+			"metadata": {
+				"description": "Administrator username of each deployed VM (alphanumeric characters only)"
+			}
+		},
+		"adminPassword": {
+			"type": "securestring",
+			"defaultValue": "",
+			"metadata": {
+				"description": "Administrator password for each deployed VM"
+			}
+		},
+		"adminSSHKey": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "SSH RSA public key file as a string"
+			}
+		},
+		"ethereumNetworkID": {
+			"type": "int",
+			"defaultValue": 10101010,
+			"metadata": {
+				"description": "Private Ethereum network ID to which to connect (max 9 digit number)"
+			},
+			"maxValue": 2147483647
+		},
+		"consortiumMemberId": {
+			"type": "int",
+			"minValue": 0,
+			"maxValue": 255,
+			"defaultValue": 0,
+			"metadata": {
+				"description": "Unique Identifier for the current member of this consortium."
+			}
+		},
+		"ethereumAdminPublicKey": {
+			"type": "string",
+			"minLength": 42,
+			"maxLength": 42,
+			"defaultValue": "0x0000000000000000000000000000000000000001",
+			"metadata": {
+				"description": "Ethereum account address that is used for participating in PoA member management"				
+			}
+		},
+		"numVLNodesRegion": {
+			"type": "int",
+			"defaultValue": 2,
+			"metadata": {
+				"description": "Number of load balanced validator nodes"
+			},
+			"allowedValues": [
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15
+			],
+			"minValue": 2,
+			"maxValue": 15
+		},
+		"vlNodeVMSize": {
+			"type": "string",
+			"defaultValue": "Standard_D1_v2",
+			"metadata": {
+				"description": "Size of the virtual machine for transaction nodes"
+			}
+		},
+		"vlStorageAccountType": {
+			"type": "string",
+			"defaultValue": "",
+			"allowedValues": [
+				"Standard_LRS",
+				"Premium_LRS"
+			],
+			"metadata": {
+				"description": "Type of managed disks to create"
+			}
+		},
+		"consortiumDataURL": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "The URL pointing to the consortium configuration data provided by another member's deployment"
+			}
+		},		
+		"publicRPCEndpoint": {
+			"type": "bool",
+			"defaultValue": true,
+			"metadata": {
+				"description": "Should RPC endpoint be exposed over public IP?"
+			}
+		},
+		"enableSshAccess":
+		{
+			"type": "bool",
+			"defaultValue": false,
+			"metadata": {
+				"description": "Enables or Disables the Network Security Group rule to allow SSH port access"
+			}
+		},
+		"servicePrincipalId": 
+		{
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "Optional - Service principal ID for environments that do not support MSI."
+			}
+		},
+		"servicePrincipalSecret": 
+		{
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "Optional - Service principal secret for environments that do not support MSI."
+			}
+		},
+		"endpointFqdn": 
+		{
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "The FQDN of the Azure Stack environemt. (e.g. local.azurestack.external)."
+			}
+		},
+		"tenantId": 
+		{
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "The name or ID or the AAD tenant. (e.g. mydomain.onmicrosoft.com)."
+			}
+		},
+		"deployUsingPublicIP": {
+			"type": "bool",
+			"defaultValue": true
+		},
+		"isAdfs": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"certKeyVaultId": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "The ID of the KeyVault that holds ADFS service principal certificate"
+			}
+		},
+		"certSecretUrl": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "The URL of the secret that holds ADFS service principal certificate"
+			}
+		}
+	},
+	"variables": {
+		"regionCount": 1,
+		"transactionPermissioningContract": "",
+		"dockerRepository": "ethererumregistry.azurecr.io",
+		"dockerLogin": "ethererumregistry",
+		"dockerPassword": "yn0SK6sDw/FvP2Rg9FlaqYbuB6OPrMoZ",
+		"dockerImagePoaOrchestrator": "orchestrator:hybrid",
+		"dockerImageEtheradmin": "etheradmin:hybrid",
+		"dockerImageEthstat": "ethstat:hybrid",
+		"dockerImageValidator": "validator:hybrid",
+		"baseUrl": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/ethereum-consortium-blockchain-poa/common/",
+		"accessType": "SPN",
+		"vmssDeploymentNames": "vmss-deploy",
+		"deploymentMode": "[if(parameters('isJoiningExistingNetwork'),'Member', 'Leader')]",
+		"deploymentGuid": "[if(parameters('isJoiningExistingNetwork'),'pid-fff6cb36-716f-46e8-bd34-10b25aabce22', 'pid-a5842b51-d2c6-486a-82e7-2bc2257ff545')]",
+		"poaScriptUrl": "[concat(variables('baseUrl'),'/scripts/configure-poa.sh')]",
+		"poaScriptFilename": "configure-poa.sh",
+		"namePrefix": "eth",
+		"namingInfix": "[toLower(take(concat(variables('namePrefix'),uniqueString(resourceGroup().id),parameters('location')), 9))]",
+		"maxPeers": 30,
+		"httpPort": 80,
+		"adminSitePort": 3000,
+		"sshPort": 22,
+		"sshNATFrontEndStartingPort": 4000,
+		"sshNATFrontEndEndingPort": 4050,
+		"ethRpcPort": 8540,
+		"ethNetworkPort": 30300,
+		"linkedUrls": {
+			"vmssSetupUrl": "[concat(variables('baseUrl'),'/nested/vmss.json')]",
+			"networkResourcesUrl": "[concat(variables('baseUrl'),'/nested/network-resources.json')]",
+			"loadBalancerUrl": "[concat(variables('baseUrl'),'/nested/network-resources.loadBalancer.json')]",
+			"keyVaultDeployUrl": "[concat(variables('baseUrl'),'/nested/createKeyVault.json')]",
+			"storageDeployUrl": "[concat(variables('baseUrl'),'/nested/storage.json')]"
+		},
+		"vnetName": "[concat(variables('namingInfix'), '-vnet')]",
+		"vlSubnetName": "snet-vl",
+		"vlNsgName": "[concat(variables('namingInfix'), '-vlNsg')]",
+		"mustDeployVnetGateway": "[not(parameters('deployUsingPublicIP'))]",
+		"numSubnets": "[if(variables('mustDeployVnetGateway'), 2, 1)]",
+		"lbSettings": {
+			"lbPublicIPAddressName": "[concat(variables('namingInfix'), '-lbpip')]",
+			"publicIPAllocationMethod": "Dynamic",
+			"dnsHostName": "[concat(variables('namingInfix'), '-dns')]",
+			"loadBalancerName": "[concat(variables('namingInfix'), '-vlLb')]",
+			"lbFrontEndIpConfigName": "LBFrontEnd",
+			"backendAddressPoolName": "LBBackendPool",
+			"FrontendPort1": "[variables('httpPort')]",
+			"BackendPort1": "[variables('adminSitePort')]",
+			"FrontendPort2": "[variables('ethRpcPort')]",
+			"BackendPort2": "[variables('ethRpcPort')]",
+			"inboundNATRuleNamePrefix": "SSH-vlVM",
+			"inboundNATRuleFrontendStartingPort": "[variables('sshNATFrontEndStartingPort')]",
+			"inboundNATRuleFrontendEndingPort": "[variables('sshNATFrontEndEndingPort')]",
+			"inboundNATRuleBackendPort": "[variables('sshPort')]"
+		},
+		"gatewaySettings": {
+			"gatewayPublicIPName": "[concat(variables('namingInfix'), '-gate-pip')]",
+			"gatewayName": "[concat(variables('namingInfix'),'-gateway')]",
+			"gatewaySubnetName": "GatewaySubnet",
+			"gatewaySku": "Standard",
+			"mustDeployVnetGateway": "[variables('mustDeployVnetGateway')]"
+		},
+		"ubuntuImage": {
+			"publisher": "Canonical",
+			"offer": "UbuntuServer",
+			"sku": "16.04-LTS",
+			"version": "latest"
+		},
+		"keyVaultSettings": {
+			"name": "[concat(variables('namingInfix'),'-akv')]"
+		},
+		"storageSettings": {
+			"name": "[concat(variables('namingInfix'),'store')]"
+		},
+		"authenticationSettings": {
+			"adminUsername": "[parameters('adminUsername')]",
+			"adminPassword": "[parameters('adminPassword')]",
+			"sshPublicKey": "[parameters('adminSSHKey')]",
+			"authenticationType": "[parameters('authType')]",
+			"adminId": "[parameters('ethereumAdminPublicKey')]",
+			"accessType": "[variables('accessType')]",
+			"servicePrincipalId": "[parameters('servicePrincipalId')]",
+			"servicePrincipalSecret": "[parameters('servicePrincipalSecret')]",
+			"endpointFqdn": "[parameters('endpointFqdn')]",
+			"tenantId": "[parameters('tenantId')]"
+		},
+		"vlVmssSettings": {
+			"vmssName": "[concat('vl-', variables('namingInfix'))]",
+			"vlCapacity": "[parameters('numVLNodesRegion')]",
+			"nicName": "vl-nic",
+			"storageAccountType": "[parameters('vlStorageAccountType')]",
+			"nodeVMSize": "[parameters('vlNodeVMSize')]",
+			"ipConfigName": "vl-ipconfig",
+			"subnetName": "[variables('vlSubnetName')]",
+			"internalDnsName": "[concat('vl-idns-',variables('namingInfix'))]",
+			"loadBalancerName": "[variables('lbSettings').loadBalancerName]",
+			"loadBalancerBackendAddressPoolName": "[variables('lbSettings').backendAddressPoolName]",
+			"loadBalancerInboundNatRuleNamePrefix": "[variables('lbSettings').inboundNATRuleNamePrefix]"
+		},
+		"extensionSettings": {
+			"artifactsLocationURL": "[variables('baseUrl')]",
+			"ethereumNetworkID": "[parameters('ethereumNetworkID')]",
+			"maxPeers": "[variables('maxPeers')]",
+			"ethNetworkPort": "[variables('ethNetworkPort')]",
+			"numBootNodes": "[if(lessOrEquals(mul(parameters('numVLNodesRegion'), variables('regionCount')),2),1,2)]",
+			"numVLNodes": "[mul(parameters('numVLNodesRegion'), variables('regionCount'))]",
+			"vlVMNamePrefix": "vl",
+			"adminSitePort": "[variables('adminSitePort')]",
+			"consortiumId": "[parameters('consortiumMemberId')]"
+		},
+		"vnetSettings": [
+			{
+				"vnetName": "[concat(variables('vnetName'),'-',variables('suffixArray')[0])]",
+				"vlSubnetName": "[variables('vlSubnetName')]",
+				"addressSpacePrefix": "[replace('10._.16.0/20','_',string(parameters('consortiumMemberId')))]",
+				"loadBalancerPrivateIP": "[replace('10._.17.9','_',string(parameters('consortiumMemberId')))]",
+				"numSubnets": "[variables('numSubnets')]",
+				"vlNsgName": "[concat(variables('vlNsgName'),'-',variables('suffixArray')[0])]",
+				"gatewayAsn": "[add(mul(parameters('consortiumMemberId'), 5),65000)]",
+				"subnetPropertiesArray": [
+					{
+						"name": "[variables('vlSubnetName')]",
+						"properties": {
+							"addressPrefix": "[replace('10._.17.0/24','_',string(parameters('consortiumMemberId')))]",
+							"networkSecurityGroup": {
+								"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('vlNsgName'),'-',variables('suffixArray')[0]))]"
+							}
+						}
+					},
+					{
+						"name": "GatewaySubnet",
+						"properties": {
+							"addressPrefix": "[replace('10._.19.0/24','_',string(parameters('consortiumMemberId')))]"
+						}
+					}
+				]
+			},
+			{
+				"vnetName": "[concat(variables('vnetName'),'-',variables('suffixArray')[1])]",
+				"vlSubnetName": "[variables('vlSubnetName')]",
+				"addressSpacePrefix": "[replace('10._.32.0/20','_',string(parameters('consortiumMemberId')))]",
+				"loadBalancerPrivateIP": "[replace('10._.33.9','_',string(parameters('consortiumMemberId')))]",
+				"numSubnets": "[variables('numSubnets')]",
+				"vlNsgName": "[concat(variables('vlNsgName'),'-',variables('suffixArray')[1])]",
+				"gatewayAsn": "[add(mul(parameters('consortiumMemberId'), 5),65001)]",
+				"subnetPropertiesArray": [
+					{
+						"name": "[variables('vlSubnetName')]",
+						"properties": {
+							"addressPrefix": "[replace('10._.33.0/24','_',string(parameters('consortiumMemberId')))]",
+							"networkSecurityGroup": {
+								"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('vlNsgName'),'-',variables('suffixArray')[1]))]"
+							}
+						}
+					},
+					{
+						"name": "GatewaySubnet",
+						"properties": {
+							"addressPrefix": "[replace('10._.35.0/24','_',string(parameters('consortiumMemberId')))]"
+						}
+					}
+				]
+			},
+			{
+				"vnetName": "[concat(variables('vnetName'),'-',variables('suffixArray')[2])]",
+				"vlSubnetName": "[variables('vlSubnetName')]",
+				"addressSpacePrefix": "[replace('10._.48.0/20','_',string(parameters('consortiumMemberId')))]",
+				"loadBalancerPrivateIP": "[replace('10._.49.9','_',string(parameters('consortiumMemberId')))]",
+				"numSubnets": "[variables('numSubnets')]",
+				"vlNsgName": "[concat(variables('vlNsgName'),'-',variables('suffixArray')[2])]",
+				"gatewayAsn": "[add(mul(parameters('consortiumMemberId'), 5),65002)]",
+				"subnetPropertiesArray": [
+					{
+						"name": "[variables('vlSubnetName')]",
+						"properties": {
+							"addressPrefix": "[replace('10._.49.0/24','_',string(parameters('consortiumMemberId')))]",
+							"networkSecurityGroup": {
+								"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('vlNsgName'),'-',variables('suffixArray')[2]))]"
+							}
+						}
+					},
+					{
+						"name": "GatewaySubnet",
+						"properties": {
+							"addressPrefix": "[replace('10._.51.0/24','_',string(parameters('consortiumMemberId')))]"
+						}
+					}
+				]
+			},
+			{
+				"vnetName": "[concat(variables('vnetName'),'-',variables('suffixArray')[3])]",
+				"vlSubnetName": "[variables('vlSubnetName')]",
+				"addressSpacePrefix": "[replace('10._.64.0/20','_',string(parameters('consortiumMemberId')))]",
+				"loadBalancerPrivateIP": "[replace('10._.65.9','_',string(parameters('consortiumMemberId')))]",
+				"numSubnets": "[variables('numSubnets')]",
+				"vlNsgName": "[concat(variables('vlNsgName'),'-',variables('suffixArray')[3])]",
+				"gatewayAsn": "[add(mul(parameters('consortiumMemberId'), 5),65003)]",
+				"subnetPropertiesArray": [
+					{
+						"name": "[variables('vlSubnetName')]",
+						"properties": {
+							"addressPrefix": "[replace('10._.65.0/24','_',string(parameters('consortiumMemberId')))]",
+							"networkSecurityGroup": {
+								"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('vlNsgName'),'-',variables('suffixArray')[3]))]"
+							}
+						}
+					},
+					{
+						"name": "GatewaySubnet",
+						"properties": {
+							"addressPrefix": "[replace('10._.67.0/24','_',string(parameters('consortiumMemberId')))]"
+						}
+					}
+				]
+			},
+			{
+				"vnetName": "[concat(variables('vnetName'),'-',variables('suffixArray')[4])]",
+				"vlSubnetName": "[variables('vlSubnetName')]",
+				"addressSpacePrefix": "[replace('10._.80.0/20','_',string(parameters('consortiumMemberId')))]",
+				"loadBalancerPrivateIP": "[replace('10._.81.9','_',string(parameters('consortiumMemberId')))]",
+				"numSubnets": "[variables('numSubnets')]",
+				"vlNsgName": "[concat(variables('vlNsgName'),'-',variables('suffixArray')[4])]",
+				"gatewayAsn": "[add(mul(parameters('consortiumMemberId'), 5),65004)]",
+				"subnetPropertiesArray": [
+					{
+						"name": "[variables('vlSubnetName')]",
+						"properties": {
+							"addressPrefix": "[replace('10._.81.0/24','_',string(parameters('consortiumMemberId')))]",
+							"networkSecurityGroup": {
+								"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('vlNsgName'),'-',variables('suffixArray')[4]))]"
+							}
+						}
+					},
+					{
+						"name": "GatewaySubnet",
+						"properties": {
+							"addressPrefix": "[replace('10._.83.0/24','_',string(parameters('consortiumMemberId')))]"
+						}
+					}
+				]
+			}
+		],
+		"locationArray": [
+			"[parameters('location')]"
+		],
+		"suffixArray": [
+			"reg1",
+			"reg2",
+			"reg3",
+			"reg4",
+			"reg5"
+		],
+		"scriptReqVmss": 
+		{
+			"fileUri": "[variables('poaScriptUrl')]",
+			"filename": "[variables('poaScriptFilename')]",
+			"consortiumData": "[parameters('consortiumDataURL')]",
+			"mode": "[variables('deploymentMode')]"
+		}
+	},
+	"resources": [
+		{
+			"name": "[variables('deploymentGuid')]",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"template": {
+					"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+					"contentVersion": "1.0.0.0",
+					"resources": []
+				}
+			}
+		},
+		{
+			"name": "keyVaultDeploy",
+			"type": "Microsoft.Resources/deployments",
+			"dependsOn": [],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('linkedUrls').keyVaultDeployUrl]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"keyVaultName": {
+						"value": "[variables('keyVaultSettings').name]"
+					},
+					"keyVaultLocation": {
+						"value": "[parameters('location')]"
+					},
+					"settings": {
+						"value": {
+							"Copy": [
+								{
+									"name": "accessPolicies",
+									"count": "[variables('regionCount')]",
+									"input": {
+										"objectId": "[parameters('servicePrincipalId')]",
+										"tenantId": "[subscription().tenantId]",
+										"permissions": {
+											"keys": [
+												"All"
+											],
+											"secrets": [
+												"All"
+											]
+										}
+									}
+								}
+							]
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "network-resources-deploy",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('linkedUrls').networkResourcesUrl]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"vnetSettings": {
+						"value": "[variables('vnetSettings')]"
+					},
+					"regionCount": {
+						"value": "[variables('regionCount')]"
+					},
+					"locationArray": {
+						"value": "[variables('locationArray')]"
+					},
+					"suffixArray": {
+						"value": "[variables('suffixArray')]"
+					},
+					"mustDeployVnetGateway": {
+						"value": "[variables('gatewaySettings').mustDeployVnetGateway]"
+					},
+					"numSubnets": {
+						"value": "[variables('vnetSettings')[0].numSubnets]"
+					},
+					"publicRPCEndpoint": {
+						"value": "[parameters('publicRPCEndpoint')]"
+					},
+					"lbPublicIPAddressName": {
+						"value": "[variables('lbSettings').lbPublicIPAddressName]"
+					},
+					"publicIPAllocationMethod": {
+						"value": "[variables('lbSettings').publicIPAllocationMethod]"
+					},
+					"dnsHostName": {
+						"value": "[variables('lbSettings').dnsHostName]"
+					},
+					"loadBalancerName": {
+						"value": "[variables('lbSettings').loadBalancerName]"
+					},
+					"lbFrontEndIpConfigName": {
+						"value": "[variables('lbSettings').lbFrontEndIpConfigName]"
+					},
+					"backendAddressPoolName": {
+						"value": "[variables('lbSettings').backendAddressPoolName]"
+					},
+					"FrontendPort1": {
+						"value": "[variables('lbSettings').FrontendPort1]"
+					},
+					"BackendPort1": {
+						"value": "[variables('lbSettings').BackendPort1]"
+					},
+					"FrontendPort2": {
+						"value": "[variables('lbSettings').FrontendPort2]"
+					},
+					"BackendPort2": {
+						"value": "[variables('lbSettings').BackendPort2]"
+					},
+					"gatewayPublicIPName": {
+						"value": "[variables('gatewaySettings').gatewayPublicIPName]"
+					},
+					"inboundNATRuleNamePrefix": {
+						"value": "[variables('lbSettings').inboundNATRuleNamePrefix]"
+					},
+					"inboundNATRuleFrontendStartingPort": {
+						"value": "[variables('lbSettings').inboundNATRuleFrontendStartingPort]"
+					},
+					"inboundNATRuleFrontendEndingPort": {
+						"value": "[variables('lbSettings').inboundNATRuleFrontendEndingPort]"
+					},
+					"inboundNATRuleBackendPort": {
+						"value": "[variables('lbSettings').inboundNATRuleBackendPort]"
+					},
+					"ethNetworkPort":
+					{
+						"value": "[variables('ethNetworkPort')]"
+					},
+					"ethRpcPort": {
+						"value": "[variables('ethRpcPort')]"
+					},
+					"loadBalancerUrl": {
+						"value": "[variables('linkedUrls').loadBalancerUrl]"
+					},
+					"enableSshAccess":{
+						"value": "[parameters('enableSshAccess')]"
+					}
+				}
+			}
+		},
+		{
+			"name": "[variables('vmssDeploymentNames')]",
+			"type": "Microsoft.Resources/deployments",
+			"dependsOn": [
+				"network-resources-deploy"
+			],
+			"copy": {
+				"name": "vmssDeployLoop",
+				"count": "[variables('regionCount')]"
+			},
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('linkedUrls').vmssSetupUrl]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"authenticationSettings": {
+						"value": "[variables('authenticationSettings')]"
+					},
+					"vlVmssSettings": {
+						"value": "[variables('vlVmssSettings')]"
+					},
+					"ubuntuImage": {
+						"value": "[variables('ubuntuImage')]"
+					},
+					"location": {
+						"value": "[variables('locationArray')[copyIndex()]]"
+					},
+					"suffix": {
+						"value": "[variables('suffixArray')[copyIndex()]]"
+					},
+					"vnetName": {
+						"value": "[variables('vnetSettings')[copyIndex()].vnetName]"
+					},
+					"mustDeployVnetGateway":{
+						"value": "[variables('mustDeployVnetGateway')]"
+					},
+					"scriptReq": {
+						"value": "[variables('scriptReqVmss')]"
+					},
+					"extensionSettings": {
+						"value": "[variables('extensionSettings')]"
+					},
+					"keyVaultUrl": {
+						"value": "[reference('keyVaultDeploy').outputs.KeyVaultUrl.value]"
+					},
+					"storageAccountName": {
+						"value": "[reference('storageDeploy').outputs.StorageAccountName.value]"
+					},
+					"storagePrimaryKey": {
+						"value": "[reference('storageDeploy').outputs.StoragePrimaryKey.value]"
+					},
+					"ethRpcPort": {
+						"value": "[variables('ethRpcPort')]"
+					},
+					"transactionPermissioningContract": {
+						"value": "[variables('transactionPermissioningContract')]"
+					},
+					"dockerRepository": {
+						"value": "[variables('dockerRepository')]"
+					},
+					"dockerLogin": {
+						"value": "[variables('dockerLogin')]"
+					},
+					"dockerPassword": {
+						"value": "[variables('dockerPassword')]"
+					},
+					"dockerImagePoaOrchestrator": {
+						"value": "[variables('dockerImagePoaOrchestrator')]"
+					},
+					"dockerImageEtheradmin": {
+						"value": "[variables('dockerImageEtheradmin')]"
+					},
+					"dockerImageEthstat": {
+						"value": "[variables('dockerImageEthstat')]"
+					},
+					"dockerImageValidator": {
+						"value": "[variables('dockerImageValidator')]"
+					},
+					"rgName": {
+						"value": "[resourceGroup().name]"
+					},
+					"keyVaultName": {
+						"value": "[variables('keyVaultSettings').name]"
+					},
+					"isAdfs": {
+						"value": "[parameters('isAdfs')]"
+					},
+					"certKeyVaultId": {
+						"value": "[parameters('certKeyVaultId')]"
+					},
+					"certSecretUrl": {
+						"value": "[parameters('certSecretUrl')]"
+					},
+					"consortiumDataUrl": {
+						"value": "[if(parameters('isJoiningExistingNetwork'), parameters('consortiumDataURL'), concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value))]"
+					}
+				}
+			}
+		},
+		{
+			"name": "storageDeploy",
+			"type": "Microsoft.Resources/deployments",
+			"dependsOn": [],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('linkedUrls').storageDeployUrl]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"storageAccountName": {
+						"value": "[variables('storageSettings').name]"
+					},
+					"location": {
+						"value": "[parameters('location')]"
+					}
+				}
+			}
+		}
+	],
+	"outputs": {
+		"admin_site": {
+			"type": "string",
+			"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value)]"
+		},
+		"ethereum_rpc_endpoint": {
+			"type": "string",
+			"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value, ':', variables('ethRpcPort'))]"
+		},
+		"ssh_to_first_vl_node_region1": {
+			"type": "string",
+			"value": "[concat('ssh -p ', variables('sshNATFrontEndStartingPort'), ' ', parameters('adminUsername'), '@', reference('network-resources-deploy').outputs.lbFqdnReg1.value)]"
+		},
+		"consortium_data_URL": {
+			"type": "string",
+			"value": "[concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value)]"
+		},
+		"consortium_member_gateway_id_region1": {
+			"type": "string",
+			"value": "[if(variables('mustDeployVnetGateway'), resourceId('Microsoft.Network/virtualNetworkGateways', concat(variables('gatewaySettings').gatewayName, '-', variables('suffixArray')[0])), 'NA')]"
+		},
+		"pair_Gateway_PS_Module": {
+			"type": "string",
+			"value": "[if(variables('mustDeployVnetGateway'), concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value,'/ConsortiumBridge.psm1'), 'NA')]"
+		},
+		"pair_Gateway_Azure_CLI_Script": {
+			"type": "string",
+			"value": "[if(variables('mustDeployVnetGateway'), concat('http://',reference('network-resources-deploy').outputs.lbFqdnReg1.value,'/ConsortiumBridge.sh'), 'NA')]"
+		},
+		"regionOneVnet": {
+			"type": "string",
+			"value": "[variables('vnetSettings')[0].vnetName]"
+		}
+	}
+}

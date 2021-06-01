@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Northwind Insurance";
+    DateTime enrollmentEnd = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month));
+}
+
+<!-- Section: intro -->
+<section id="intro" class="intro">
+    <div class="intro-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="wow fadeInDown" data-wow-offset="0" data-wow-delay="0.1s">
+                        <h2 class="h-ultra">Open enrollment is here!</h2>
+                    </div>
+                    <div class="wow fadeInUp" data-wow-offset="0" data-wow-delay="0.1s">
+                        <h4 class="h-light">Sign up for insurance or change your benefits.</h4>
+                    </div>
+
+
+
+                </div>
+                <div class="col-lg-6">
+                    <div class="well well-trans">
+                        <div class="wow fadeInRight" data-wow-delay="0.1s">
+
+                            <ul class="lead-list">
+                                <li><span class="fa fa-plus fa-2x icon-info"></span> <span class="list"><strong>Insurance that fits your needs</strong><br />Keep your family and your budget healthy.</span></li>
+                                <li><span class="fa fa-plus fa-2x icon-info"></span> <span class="list"><strong>Subsidies available</strong><br />See if you qualify for a subsidy from the Affordable Care Act.</span></li>
+                                <li><span class="fa fa-plus fa-2x icon-info"></span> <span class="list"><strong>Open enrollment ends July 31st</strong><br />Make all benefit elections by 11:59 PM @(enrollmentEnd.ToString("MM/dd/yyyy")).</span></li>
+                            </ul>
+                            <p class="text-right wow bounceIn" data-wow-delay="0.4s">
+                                <a asp-route="applynow" class="btn btn-skin btn-lg">Apply Now <i class="fa fa-angle-right"></i></a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="wow fadeInUp" data-wow-duration="2s" data-wow-delay="0.2s">
+                        <!--<img src="img/dummy/img-1.png" class="img-responsive" alt="" />-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- /Section: intro -->
+<!-- Section: boxes -->
+<section id="boxes" class="home-section paddingtop-80">
+    <div class="row">
+        <div class="col-lg-6">
+
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3 col-md-3">
+                <div class="wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="box text-center">
+
+                        <i class="fa fa-at fa-3x circled bg-skin"></i>
+                        <h4 class="h-bold">Online patient portal</h4>
+                        <p>
+                            Schedule appointments and communicate with providers anytime, anywhere.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3 col-md-3">
+                <div class="wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="box text-center">
+
+                        <i class="fa fa-dollar fa-3x circled bg-skin"></i>
+                        <h4 class="h-bold">HSA Rollover</h4>
+                        <p>
+                            Don't forget to bring your HSA with you!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3 col-md-3">
+                <div class="wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="box text-center">
+                        <i class="fa fa-user-md fa-3x circled bg-skin"></i>
+                        <h4 class="h-bold">24/7 Nurse Line</h4>
+                        <p>
+                            We're there, even if you can't make it out of the house.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3 col-md-3">
+                <div class="wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="box text-center">
+
+                        <i class="fa fa-plane fa-3x circled bg-skin"></i>
+                        <h4 class="h-bold">Travel insurance included</h4>
+                        <p>
+                            Take a vacation!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<!-- /Section: boxes -->
+
+
+<section id="callaction" class="home-section paddingtop-40">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="callaction bg-gray">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="wow fadeInUp" data-wow-delay="0.1s">
+                                <div class="cta-text">
+                                    <h3>Already started an application?</h3>
+                                    <p>Login and continue an already started quote or application.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="wow lightSpeedIn" data-wow-delay="0.1s">
+                                <div class="cta-btn">
+                                    <a href="#" class="btn btn-skin btn-lg">Pick up where I left off</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+            </div>
+        </div>
+    </div>
+</section>	

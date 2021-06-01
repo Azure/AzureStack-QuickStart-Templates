@@ -1,0 +1,133 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "sqlStorageAccountName": {
+      "type": "string"
+    },
+    "dcStorageAccountName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "SqlStorageAccountType": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string"
+    },
+    "virtualNetworkAddressRange": {
+      "type": "string"
+    },
+    "subnets": {
+      "type": "array"
+    },
+    "primaryDCIPAddressNameWithSuffix": {
+      "type": "string"
+    },
+    "sqlVMName": {
+      "type": "string"
+    },
+    "sql1AddressNameWithSuffix": {
+      "type": "string"
+    },
+    "sql0AddressNameWithSuffix": {
+      "type": "string"
+    },
+    "nsgID": {
+      "type": "string"
+    },
+    "dnsSuffix": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('sqlStorageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('SqlStorageAccountType')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('dcStorageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('SqlStorageAccountType')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('SqlStorageAccountType')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('SqlStorageAccountType')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('primaryDCIPAddressNameWithSuffix')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('sql1AddressNameWithSuffix')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('sqlVMName'), '1')]",
+          "reverseFqdn": "[concat(parameters('sqlVMName'), '1.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('sql0AddressNameWithSuffix')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('sqlVMName'), '0')]",
+          "reverseFqdn": "[concat(parameters('sqlVMName'), '0.', resourceGroup().location, '.cloudapp.', parameters('dnsSuffix'))]"
+        }
+      }
+    },
+    {
+      "name": "[parameters('virtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('virtualNetworkAddressRange')]"
+          ],
+          "networkSecurityGroup": {
+            "id": "[parameters('nsgID')]"
+          }
+        },
+        "subnets": "[parameters('subnets')]"
+      }
+    }
+  ],
+  "outputs": {}
+}

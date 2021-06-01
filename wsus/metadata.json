@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "Template that does deploy a WSUS Server",
+    "description": "Template that does deploy & Configure WSUS",
+    "summary": "Template that does deploy and configure WSUS",
+    "githubUsername": "azurestack",
+    "dateUpdated": "2020-10-01"
+}

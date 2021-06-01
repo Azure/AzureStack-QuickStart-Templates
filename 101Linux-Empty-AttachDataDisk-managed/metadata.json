@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a Linux VM and attach a data disk - uses managed disks",
+  "description": "This template deploys a linux VM and attach a data disk. The VM is set with 2 managed disks; the OS disk and a data disk of 10 GB",
+  "summary": "Deploy a Linux VM and attach a data disk - uses managed disks",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

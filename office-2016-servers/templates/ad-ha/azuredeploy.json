@@ -1,0 +1,535 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "workloadsLocation": {
+            "defaultValue": "https://colab.blob.local.azurestack.external/workload",
+            "type": "String",
+            "metadata": {
+                "description": "Location of workloads"
+            }
+        },
+        "ADAvailabilitySetName": {
+            "defaultValue": "ADAvailabilitySet",
+            "type": "String",
+            "metadata": {
+                "description": "Availability Set for AD"
+            }
+        },
+        "domainName": {
+            "defaultValue": "contoso.com",
+            "type": "String",
+            "metadata": {
+                "description": "The domain name needs to be consisting of one or more labels separated by . E.g. contoso.com"
+            }
+        },
+        "vmNetworkSubnet": {
+            "defaultValue": "10.0.0.0/24",
+            "type": "String",
+            "metadata": {
+                "description": "The subnet for the VM network"
+            }
+        },
+        "virtualNetworkAddressRange": {
+            "defaultValue": "10.0.0.0/16",
+            "type": "String",
+            "metadata": {
+                "description": "Addresses range for VM network"
+            }
+        },
+		"vmPrefix": {
+            "defaultValue": "srv",
+            "type": "String",
+            "metadata": {
+                "description": "Prefix per vms name"
+            }
+        },
+        "primaryAdIpAddress": {
+            "defaultValue": "10.0.0.11",
+            "type": "String",
+            "metadata": {
+                "description": "Address of Primary DC"
+            }
+        },
+        "additionalAdIpAddress": {
+            "defaultValue": "10.0.0.12",
+            "type": "String",
+            "metadata": {
+                "description": "Address of Additional DC"
+            }
+        },
+        "adminUsername": {
+            "defaultValue": "lcladmin",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Administrator of the new VMs and Domain"
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "The password for the Administrator account of the new VMs and Domain"
+            }
+        },
+		"DnsForwarder": {
+            "type": "String",
+            "metadata": {
+                "description": "The IP of DNS Forwarder"
+            }
+        },
+		"NtpServer": {
+            "type": "String",
+            "metadata": {
+                "description": "The IP of NTP Server"
+            }
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of diagnostic storage account"
+            }
+        },
+        "storageAccountEndPoint": {
+            "type": "string",
+            "defaultValue": "local.azurestack.external",
+            "metadata": {
+                "description": "Endpoint domain"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "metadata": {
+                "description": "The size of the VMs."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "[concat('ADStaticSubnet',resourceGroup().name)]",
+            "metadata": {
+                "description": "The subnet name."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "[concat('ADVNET',resourceGroup().name)]",
+            "metadata": {
+                "description": "The virtual network name"
+              }
+        }
+    },
+    "variables": {
+        "assetLocation": "[parameters('workloadsLocation')]",
+        "storageAccountType": "Standard_LRS",
+        "adTemplateURL": "[concat(variables('assetLocation'),'/adVmTemplate.json')]",
+        "adStorageName": "[tolower(concat('adsa',resourceGroup().name))]",
+        "dnsPrefix": "[concat('addns',resourceGroup().name)]",
+		"dnsPrefix2": "[concat('addns2',resourceGroup().name)]",
+        "adVmDeployment": "CreateADVMs",
+        "adVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment'))]",
+        "adVmDeployment2": "CreateADVM2s",
+        "adVmDeployment2Id": "[concat('Microsoft.Resources/deployments/', variables('adVmDeployment2'))]",
+        "adPDCVMName": "[concat(parameters('vmPrefix'),'-dc-0')]",
+        "adADCVMName": "[concat(parameters('vmPrefix'),'-dc-1')]",
+        "deployPrimaryAdTemplateURL": "[concat(variables('assetLocation'),'/deployPrimaryAD.json')]",
+        "deployAdditionalAdTemplateURL": "[concat(variables('assetLocation'),'/deployAdditionalAd.json')]",
+        "deployPrimaryAd": "ConfigureAD",
+        "deployAdditionalAd": "ConfigureAddAD",
+        "deployPrimaryAdId": "[concat('Microsoft.Resources/deployments/', variables('deployPrimaryAd'))]",
+        "deployAdditionalAdId": "[concat('Microsoft.Resources/deployments/', variables('deployAdditionalAd'))]",
+        "updateVNetDNS1": "UpdateVNetDNS",
+        "updateVNetDNS2": "UpdateVNetDNS2",
+        "vnetwithDNSTemplateURL": "[concat(variables('assetLocation'),'/vnet-with-dns-server.json')]",
+        "publicLBName": "[concat('PADPLB',resourceGroup().name)]",
+        "publicLBName2": "[concat('AADPLB',resourceGroup().name)]",
+        "publicIPAddressName": "[concat('PADlbPublicIP',resourceGroup().name)]",
+        "publicIPAddressName2": "[concat('AADlbPublicIP',resourceGroup().name)]",
+        "lbFE": "[concat('adlbfe',resourceGroup().name)]",
+        "lbBE": "[concat('adlbbe',resourceGroup().name)]",
+        "lbFE2": "[concat('adlbfe2',resourceGroup().name)]",
+        "lbBE2": "[concat('adlbbe2',resourceGroup().name)]",
+        "rpdNAT": "[concat('padrdpnat',resourceGroup().name)]",
+        "rpdNAT2": "[concat('aadrdpnat',resourceGroup().name)]",
+        "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+        "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
+        "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
+        "rdpPort": 3389,
+        "publicBEAddressPoolID": "[concat(variables('publiclbID'),'/backendAddressPools/',variables('lbBE'))]",
+        "adRDPNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
+        "nsgName": "[concat('ADNsg',resourceGroup().name)]",
+        "publicIPAddressID2": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName2'))]",
+        "publiclbID2": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName2'))]",
+        "publiclbFEConfigID2": "[concat(variables('publiclbID2'),'/frontendIPConfigurations/',variables('lbFE2'))]",
+        "publicBEAddressPoolID2": "[concat(variables('publiclbID2'),'/backendAddressPools/',variables('lbBE2'))]",
+        "adRDPNATRuleID2": "[concat(variables('publiclbID2'),'/inboundNatRules/',variables('rpdNAT2'))]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+        "adNICName1": "ADNic1",
+        "adNICName2": "ADNic2",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "staticSubnetID": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+        "subnets": [
+            {
+                "name": "[parameters('subnetName')]",
+                "properties": {
+                    "addressPrefix": "[parameters('vmNetworkSubnet')]",
+                    "networkSecurityGroup": {
+                        "id": "[variables('nsgID')]"
+                    }
+                }
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "[variables('adStorageName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('ADAvailabilitySetName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "rule1",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('virtualNetworkName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworkAddressRange')]"
+                    ],
+                    "networkSecurityGroup": {
+                        "id": "[variables('nsgID')]"
+                    }
+                },
+                "subnets": "[variables('subnets')]"
+            },
+            "dependsOn": [
+                "[variables('nsgID')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('adVmDeployment')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('adTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmAvailabilitySetName": {
+                        "value": "[parameters('ADAvailabilitySetName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "adRDPNATRuleID": {
+                        "value": "[variables('adRDPNATRuleID')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('adStorageName')]"
+                    },
+                    "subnetResourceID": {
+                        "value": "[variables('staticSubnetID')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('adPDCVMName')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSize')]"
+                    },
+                    "adDNicName": {
+                        "value": "[variables('adNICName1')]"
+                    },
+                    "primaryAdIpAddress": {
+                        "value": "[parameters('primaryAdIpAddress')]"
+                    },
+                    "diagnosticsStorageAccountName": {
+                        "value": "[parameters('diagnosticsStorageAccountName')]"
+                    },
+                    "storageAccountEndPoint": {
+                        "value": "[parameters('storageAccountEndPoint')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('adStorageName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]"
+            ]
+        },
+        { 
+            "type": "Microsoft.Compute/virtualMachines/extensions", 
+            "name": "[concat(variables('adPDCVMName'),'/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [ 
+                "[variables('adVmDeploymentId')]" 
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('adVmDeployment2')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('adTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmAvailabilitySetName": {
+                        "value": "[parameters('ADAvailabilitySetName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "adRDPNATRuleID": {
+                        "value": "[variables('adRDPNATRuleID2')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('adStorageName')]"
+                    },
+                    "subnetResourceID": {
+                        "value": "[variables('staticSubnetID')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('adADCVMName')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSize')]"
+                    },
+                    "adDNicName": {
+                        "value": "[variables('adNICName2')]"
+                    },
+                    "primaryAdIpAddress": {
+                        "value": "[parameters('additionalAdIpAddress')]"
+                    },
+                    "diagnosticsStorageAccountName": {
+                        "value": "[parameters('diagnosticsStorageAccountName')]"
+                    },
+                    "storageAccountEndPoint": {
+                        "value": "[parameters('storageAccountEndPoint')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/',variables('adStorageName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]"
+            ]
+        },
+        { 
+            "type": "Microsoft.Compute/virtualMachines/extensions", 
+            "name": "[concat(variables('adADCVMName'),'/', 'IaaSAntimalware')]", 
+            "location": "[resourceGroup().location]", 
+            "dependsOn": [ 
+                "[variables('adVmDeployment2Id')]" 
+            ], 
+            "properties": { 
+                "publisher": "Microsoft.Azure.Security", 
+                "type": "IaaSAntimalware", 
+                "typeHandlerVersion": "1.4", 
+                "autoUpgradeMinorVersion": true, 
+                "settings": { 
+                    "AntimalwareEnabled": true, 
+                    "RealtimeProtectionEnabled": "true", 
+                    "ScheduledScanSettings": { 
+                        "isEnabled": "true", 
+                        "scanType": "Quick", 
+                        "day": "7", 
+                        "time": "120" 
+                     } 
+                } 
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('deployPrimaryAd')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deployPrimaryAdTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "primaryADName": {
+                        "value": "[variables('adPDCVMName')]"
+                    },
+                    "domainName": {
+                        "value": "[parameters('domainName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "assetLocation": {
+                        "value": "[variables('assetLocation')]"
+                    },
+					"dnsForwarder": {
+                        "value": "[parameters('DnsForwarder')]"
+                    },
+					"ntpServer": {
+                        "value": "[parameters('NtpServer')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('adVmDeploymentId')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('adPDCVMName'),'/extensions/','IaaSAntimalware')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('updateVNetDNS1')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vnetwithDNSTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkAddressRange": {
+                        "value": "[parameters('virtualNetworkAddressRange')]"
+                    },
+                    "subnets": {
+                        "value": "[variables('subnets')]"
+                    },
+                    "dnsServerAddress": {
+                        "value": [
+                            "[parameters('primaryAdIpAddress')]"
+                        ]
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('deployPrimaryAdId')]"
+
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('deployAdditionalAd')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deployAdditionalAdTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "additionalADName": {
+                        "value": "[variables('adADCVMName')]"
+                    },
+                    "domainName": {
+                        "value": "[parameters('domainName')]"
+                    },
+					"primaryIpAddress": {
+                        "value": "[parameters('primaryAdIpAddress')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "assetLocation": {
+                        "value": "[variables('assetLocation')]"
+                    },
+					"dnsForwarder": {
+                        "value": "[parameters('DnsForwarder')]"
+                    },
+					"ntpServer": {
+                        "value": "[parameters('NtpServer')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('updateVNetDNS1')]",
+                "[concat('Microsoft.Compute/virtualMachines/',variables('adADCVMName'),'/extensions/','IaaSAntimalware')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('updateVNetDNS2')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vnetwithDNSTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkAddressRange": {
+                        "value": "[parameters('virtualNetworkAddressRange')]"
+                    },
+                    "subnets": {
+                        "value": "[variables('subnets')]"
+                    },
+                    "dnsServerAddress": {
+                        "value": [
+                            "[parameters('primaryAdIpAddress')]",
+                            "[parameters('additionalAdIpAddress')]"
+                        ]
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('deployAdditionalAdId')]"
+            ]
+        }
+    ]
+}

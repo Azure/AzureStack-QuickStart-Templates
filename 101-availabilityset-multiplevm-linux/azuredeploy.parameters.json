@@ -1,0 +1,28 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+    "parameters": {
+      "adminUsername": {
+        "value": "ecsadmin"
+      },
+      "adminPassword": {
+        "value": "GEN-PASSWORD"
+      },
+      "vmNamePrefix": {
+        "value": "ECS"
+      },
+      "osImagePublisher": {
+        "value": "Centos"
+      },
+      "vmSize": {
+        "value": "Standard_D3"
+      },
+      "dataDiskSIze": {
+        "value": 500
+      },
+      "numberOfInstances": {
+        "value": 4
+      }
+        }
+    }
+

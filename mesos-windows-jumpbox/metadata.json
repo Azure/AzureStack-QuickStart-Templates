@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy Ubuntu Mesos cluster on Azure Stack",
+  "description": "Deploy Ubuntu Mesos cluster with Marathon, Chronos framework and Docker engine",
+  "summary": "This template has default values for all the parameters and deploys Ubuntu Mesos cluster with Marathon, Chronos framework and Docker engine",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2016-09-20"
+}

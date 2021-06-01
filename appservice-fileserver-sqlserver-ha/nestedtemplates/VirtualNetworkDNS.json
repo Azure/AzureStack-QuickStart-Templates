@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "apiProfile": "2018-03-01-hybrid",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkSettings": {
+            "type": "object"
+        },
+        "staticIP":{
+            "type": "array"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('networkSettings').vnetName]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName": "[parameters('networkSettings').vnetName]"
+            },
+            "dependsOn": [],
+            "properties": {
+                "addressSpace": "[parameters('networkSettings').addressSpace]",
+                "subnets": "[parameters('networkSettings').subnets]",
+                "dhcpOptions": {
+                    "dnsServers": "[parameters('staticIP')]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

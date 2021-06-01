@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "value": "mynewdatabase"
+        },
+        "databaseLoginName": {
+            "value": "mynewdatabasesa"
+        },
+        "databaseLoginPassword": {
+            "value": "GEN-PASSWORD"
+        },
+        "collation": {
+            "value": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "databaseSizeMB": {
+            "value": 256
+        },
+        "skuName": {
+            "value": "SQL2014"
+        },
+        "skuTier": {
+            "value": "Standalone"
+        },
+        "skuFamily": {
+            "value": "SQL Server 2014"
+        }
+    }
+}

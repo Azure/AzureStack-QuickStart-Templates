@@ -1,0 +1,33 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "AddressPrefix": {
+      "value": "10.100.104.0/22"
+    },
+    "Subnet": {
+      "value": "10.100.104.0/24"
+    },
+    "GatewaySubnet": {
+      "value": "10.100.105.0/24"
+    },
+    "LocalGatewayIPAddress": {
+      "value": "1.2.3.4"
+    },
+    "LocalGatewayAddressPrefix": {
+      "value": "10.100.100.0/22"
+    },
+    "siteName": {
+      "value": ""
+    },
+    "hostingPlanName": {
+      "value": ""
+    },
+	"EnvironmentName": {
+      "value": ""
+    },
+	"repoURL":{
+      "value": "to be updated"
+    }
+  }
+}

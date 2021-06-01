@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "101-vm-linux-create-with-extension-diagnostic",
+    "description": "Deploys a simple Linux VM with Linux Diagnostic Extension (LAD)",
+    "summary": "LAD extension is used to monitor Linux VM metrics and logs on Azure Stack. This template adds LAD installation after VM creation. User can adjust inside settings for different data requirements.",
+    "githubUsername": "GTMer",
+    "dateUpdated": "2019-10-11"
+  }

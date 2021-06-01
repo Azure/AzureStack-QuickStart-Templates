@@ -1,0 +1,273 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
+	"parameters": {
+		"authenticationSettings": {
+			"type": "object"
+		},
+		"vlVmssSettings": {
+			"type": "object"
+		},
+		"ubuntuImage": {
+			"type": "object"
+		},
+		"location": {
+			"type": "string"
+		},
+		"suffix": {
+			"type": "string"
+		},
+		"vnetName": {
+			"type": "string"
+		},
+		"mustDeployVnetGateway": {
+			"type": "bool"
+		},
+		"scriptReq": {
+			"type": "object"
+		},
+		"extensionSettings": {
+			"type": "object"
+		},
+		"keyVaultUrl": {
+			"type": "string"
+		},
+		"storageAccountName": {
+			"type": "string"
+		},
+		"storagePrimaryKey": {
+			"type": "string"
+		},
+		"ethRpcPort": {
+			"type": "int"
+		},
+		"transactionPermissioningContract": {
+			"type": "string"
+		},
+		"dockerRepository": {
+			"type": "string"
+		},
+		"dockerLogin": {
+			"type": "string"
+		},
+		"dockerPassword": {
+			"type": "string"
+		},
+		"dockerImagePoaOrchestrator": {
+			"type": "string"
+		},
+		"dockerImageEtheradmin": {
+			"type": "string"
+		},
+		"dockerImageEthstat": {
+			"type": "string"
+		},
+		"dockerImageValidator": {
+			"type": "string"
+		},
+		"rgName": {
+			"type": "string"
+		},
+		"keyVaultName": {
+			"type": "string"
+		},
+		"isAdfs": {
+			"type": "bool"
+		},
+		"certKeyVaultId": {
+			"type": "string"
+		},
+		"certSecretUrl": {
+			"type": "string"
+		},
+		"consortiumDataUrl": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"linuxConfiguration": {
+			"disablePasswordAuthentication": true,
+			"ssh": {
+				"publicKeys": [
+					{
+						"path": "[concat('/home/',variables('adminUsername'),'/.ssh/authorized_keys')]",
+						"keyData": "[variables('sshPublicKey')]"
+					}
+				]
+			}
+		},
+		"vlOsProfileAad": {
+			"computerNamePrefix": "[variables('vlVmssName')]",
+			"adminUsername": "[variables('adminUsername')]",
+			"adminPassword": "[variables('adminPassword')]",
+			"customData": "[base64(concat('#cloud-config\n\nwrite_files:\n- path: \"/opt/azure/containers/script.sh\"\n  permissions: \"0744\"\n  encoding: gzip\n  owner: \"root\"\n  content: !!binary |\n    H4sIAAAAAAAA/5yOwUrDUBBF9/mKoQhdJfMFLmrMQhBBa3dCGSejefDy5jEzqeLXi3VhydL9Oede4UlhezdXtYCYBEw1oN9BKHioSbdtfBkVuAKeyDCnV/wgepcS2ItFektMId5VmQEXN8zKlNEnMkGmli8gpC+/kDq2+K0vdaSQdoU3jXyejz0Nj4dh/7w/9rvjzeHh9n64RglG94w/gq+H/souI7QJWoHNyxX9K7SBMyPllEzLLCW+AwAA//8nbcUONgEAAA==\n\nruncmd:\n  - /opt/azure/containers/script.sh'))]",
+			"linuxConfiguration": "[if(equals(variables('authenticationType'), 'sshPublicKey'), variables('linuxConfiguration'), json('null'))]"
+		},
+		"vlOsProfileAdfs": {
+			"computerNamePrefix": "[variables('vlVmssName')]",
+			"adminUsername": "[variables('adminUsername')]",
+			"adminPassword": "[variables('adminPassword')]",
+			"secrets": [
+				{
+					"sourceVault": {
+						"id": "[parameters('certKeyVaultId')]"
+					},
+					"vaultCertificates": [
+						{
+							"certificateUrl": "[parameters('certSecretUrl')]"
+						}
+					]
+				}
+			],
+			"customData": "[base64(concat('#cloud-config\n\nwrite_files:\n- path: \"/opt/azure/containers/script.sh\"\n  permissions: \"0744\"\n  encoding: gzip\n  owner: \"root\"\n  content: !!binary |\n    H4sIAAAAAAAA/5yOwUrDUBBF9/mKoQhdJfMFLmrMQhBBa3dCGSejefDy5jEzqeLXi3VhydL9Oede4UlhezdXtYCYBEw1oN9BKHioSbdtfBkVuAKeyDCnV/wgepcS2ItFektMId5VmQEXN8zKlNEnMkGmli8gpC+/kDq2+K0vdaSQdoU3jXyejz0Nj4dh/7w/9rvjzeHh9n64RglG94w/gq+H/souI7QJWoHNyxX9K7SBMyPllEzLLCW+AwAA//8nbcUONgEAAA==\n\nruncmd:\n  - /opt/azure/containers/script.sh'))]",
+			"linuxConfiguration": "[if(equals(variables('authenticationType'), 'sshPublicKey'), variables('linuxConfiguration'), json('null'))]"
+		},
+		"isADFS": "[if(parameters('isAdfs'), 'adfs', '')]",
+		"vlOsProfile": "[if(parameters('isAdfs'), variables('vlOsProfileAdfs'), variables('vlOsProfileAad'))]",
+		"authenticationType": "[parameters('authenticationSettings').authenticationType]",
+		"sshPublicKey": "[parameters('authenticationSettings').sshPublicKey]",
+		"adminUsername": "[parameters('authenticationSettings').adminUsername]",
+		"adminPassword": "[parameters('authenticationSettings').adminPassword]",
+		"vlVmssName": "[concat(parameters('vlVmssSettings').vmssName, '-',parameters('suffix'))]",
+		"vlNodeVMSize": "[parameters('vlVmssSettings').nodeVMSize]",
+		"vlCapacity": "[parameters('vlVmssSettings').vlCapacity]",
+		"vlStorageAccountType": "[parameters('vlVmssSettings').storageAccountType]",
+		"vlNicName": "[parameters('vlVmssSettings').nicName]",
+		"vlIpConfigName": "[parameters('vlVmssSettings').ipConfigName]",
+		"vnetName": "[parameters('vnetName')]",
+		"vlSubnetName": "[parameters('vlVmssSettings').subnetName]",
+		"loadBalancerName": "[concat(parameters('vlVmssSettings').loadBalancerName,'-',parameters('suffix'))]",
+		"lbBackendAddressPoolName": "[parameters('vlVmssSettings').loadBalancerBackendAddressPoolName]",
+		"lbInboundNatRuleNamePrefix": "[parameters('vlVmssSettings').loadBalancerInboundNatRuleNamePrefix]",
+		"publicIpConfiguration": [
+			{
+				"name": "[variables('vlIpConfigName')]",
+				"properties": {
+					"subnet": {
+						"id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vlSubnetName'))]"
+					},
+					"loadBalancerBackendAddressPools": [
+						{
+							"id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/',variables('lbBackendAddressPoolName'))]"
+						}
+					],
+					"loadBalancerInboundNatPools": [
+						{
+							"id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/inboundNatPools/',variables('lbInboundNatRuleNamePrefix'))]"
+						}
+					]
+				}
+			}
+		],
+		"gatewayIpConfiguration":[
+			{
+				"name": "[variables('vlIpConfigName')]",
+				"properties": {
+					"subnet": {
+						"id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vlSubnetName'))]"
+					},
+					"loadBalancerBackendAddressPools": [
+						{
+							"id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/',variables('lbBackendAddressPoolName'))]"
+						}
+					],
+					"loadBalancerInboundNatPools": [
+						{
+							"id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/inboundNatPools/',variables('lbInboundNatRuleNamePrefix'))]"
+						}
+					]
+				}
+			}
+		],
+		"mode": "[parameters('scriptReq').mode]",
+		"artifactsLocationURL": "[parameters('extensionSettings').artifactsLocationURL]",
+		"ethereumNetworkID": "[parameters('extensionSettings').ethereumNetworkID]",
+		"numBootNodes": "[parameters('extensionSettings').numBootNodes]",
+		"numVLNodes": "[parameters('extensionSettings').numVLNodes]",
+		"adminSitePort": "[parameters('extensionSettings').adminSitePort]",
+		"consortiumMemberId": "[parameters('extensionSettings').consortiumId]",
+		"adminId": "[parameters('authenticationSettings').adminId]",
+		"accessType": "[parameters('authenticationSettings').accessType]",
+		"servicePrincipalId": "[parameters('authenticationSettings').servicePrincipalId]",
+		"servicePrincipalSecret": "[parameters('authenticationSettings').servicePrincipalSecret]",
+		"endpointFqdn": "[parameters('authenticationSettings').endpointFqdn]",
+		"tenantId": "[parameters('authenticationSettings').tenantId]",
+		"consortium-data": "[parameters('consortiumDataUrl')]",
+		"omsWorkspaceId": "",
+		"omsPrimaryKey": ""
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Compute/virtualMachineScaleSets",
+			"name": "[variables('vlVmssName')]",
+			"location": "[parameters('location')]",
+			"sku": {
+				"name": "[variables('vlNodeVMSize')]",
+				"tier": "Standard",
+				"capacity": "[variables('vlCapacity')]"
+			},
+			"properties": {
+				"singlePlacementGroup": true,
+				"overprovision": false,
+				"upgradePolicy": {
+					"mode": "Automatic"
+				},
+				"virtualMachineProfile": {
+					"storageProfile": {
+						"osDisk": {
+							"createOption": "FromImage",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"storageAccountType": "[variables('vlStorageAccountType')]"
+							}
+						},
+						"imageReference": "[parameters('ubuntuImage')]"
+					},
+					"osProfile": "[variables('vlOsProfile')]",
+					"networkProfile": {
+						"networkInterfaceConfigurations": [
+							{
+								"name": "[variables('vlNicName')]",
+								"properties": {
+									"primary": true,
+									"ipConfigurations": "[if(parameters('mustDeployVnetGateway'), variables('gatewayIpConfiguration'), variables('publicIpConfiguration'))]"
+								}
+							}
+						]
+					},
+					"extensionProfile": {
+						"extensions": [
+							{
+								"name": "[concat(variables('vlVmssName'),'-config')]",
+								"properties": {
+									"publisher": "Microsoft.Azure.Extensions",
+									"type": "CustomScript",
+									"settings": {
+										"fileUris" : [
+											"[parameters('scriptReq').fileUri]"
+										]
+									},
+									"typeHandlerVersion": "2.0",
+									"autoUpgradeMinorVersion": true,
+									"protectedSettings": {
+										"commandToExecute": "[concat('/bin/bash ', parameters('scriptReq').filename, ' \"', variables('adminUsername'), '\" \"', variables('artifactsLocationURL'), '\" \"', variables('numBootNodes'), '\" \"', variables('numVLNodes'), '\" \"', variables('mode'), '\" \"', variables('omsWorkspaceId'), '\" \"', variables('omsPrimaryKey'), '\" \"', parameters('keyVaultUrl'), '\" \"', parameters('storageAccountName'), '\" \"', parameters('storagePrimaryKey'), '\" \"', parameters('ethRpcPort'), '\" \"', variables('adminSitePort'), '\" \"', variables('consortiumMemberId'), '\" \"', variables('ethereumNetworkID'),'\" \"', variables('adminId'),'\" \"', parameters('transactionPermissioningContract'),'\" \"',variables('consortium-data'),'\" \"',parameters('dockerRepository'),'\" \"',parameters('dockerLogin'),'\" \"',parameters('dockerPassword'),'\" \"',parameters('dockerImagePoaOrchestrator'),'\" \"',parameters('dockerImageEtheradmin'),'\" \"',parameters('dockerImageEthstat'),'\" \"',parameters('dockerImageValidator'), '\" \"',parameters('mustDeployVnetGateway'), '\" \"',variables('accessType'), '\" \"',variables('servicePrincipalId'), '\" \"',variables('servicePrincipalSecret'), '\" \"',variables('endpointFqdn'), '\" \"',variables('tenantId'), '\" \"',parameters('rgName'), '\" \"',parameters('keyVaultName'), '\" \"',variables('isADFS'), '\"')]"
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+		}
+	],
+	"outputs": {
+		"Result": {
+			"type": "object",
+			"value": {
+				"name": "[variables('vlVmssName')]",
+				"vmssPrincipalId": ""
+			}
+		}
+	}
+}

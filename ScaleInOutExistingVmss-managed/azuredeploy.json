@@ -1,0 +1,42 @@
+{
+
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "existingVMSSName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of existing VM Scale Set"
+      }
+    },
+
+    "newCapacity": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of desired VM instances"
+      }
+    },
+
+    "vmSku": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "metadata": {
+        "description": "Size of VMs in the VM Scale Set."
+      }
+    }
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "name": "[parameters('existingVMSSName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "[parameters('vmSku')]",
+        "tier": "Standard",
+        "capacity": "[parameters('newCapacity')]"
+      }
+    }
+  ]
+}

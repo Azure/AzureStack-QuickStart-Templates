@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmPrefix": {
+      "value": "srv"
+    },
+    
+    "adminUsername": {
+      "value": "thoroetadm"
+    },
+    "workloadsLocation": {
+      "value": "https://colab.blob.local.azurestack.external/workload"  
+  },
+  "WitnessName": {
+    "value": "FS01"
+},
+"exchangeIsoUrl": {
+  "value": "https://colab.blob.local.azurestack.external/workload/ExchangeServer2016-x64-cu9.iso"
+},
+"DagName": {
+  "value": "DAG1"
+},
+"primaryAD": {
+  "value": "srv-dc-1.contoso.com"
+},
+"licensekey": {
+  "value": "EnterpriseKey"
+}
+  }
+}

@@ -1,0 +1,284 @@
+@model Northwind.Insurance.Website.Models.Subscriber
+
+@{
+    Random rand = new Random();
+    int investmentIncome= rand.Next(10000, 15000);
+
+    int ssn1 = rand.Next(100, 999);
+    int ssn2 = rand.Next(10,99);
+    int ssn3 = rand.Next(1000, 9999);
+
+    string ssn = ssn1.ToString() + "-" + ssn2.ToString() + "-" + ssn3.ToString();
+
+}
+
+<section id="intro" class="intro">
+    <div class="intro-content intro-nobg paddingbot-0" style="background:#0d8ebd;padding:140px">
+        <div class="form-wrapper container" style="background:#FFFFFF;padding:50px;">
+            <div class="row paddingtop-25 paddingbot-0">
+                <div class="col-lg-12">
+                    <h2 class="h-bold">Step 3</h2><h3 class="h-medium">Apply for a Plan</h3>
+                </div>
+            </div>
+            <form class="contactForm lead" id="applicationForm" name="applicationForm" asp-action="PurchasePlan" autocomplete="off">
+                <input type="hidden" name="SubscriberID" value="@ViewData["SubscriberId"]" id="subscriberId" />
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p class="light">Let's get some information about you and your dependents.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="well h4" style="border-radius:0px">
+                            Contact Information
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="FirstName">
+                                First Name
+                            </label>
+                            <input asp-for="FirstName" class="form-control input-md" value="Mandy" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="MiddleName">
+                                Middle Name
+                            </label>
+                            <input asp-for="MiddleName" class="form-control input-md"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="LastName">
+                                Last Name
+                            </label>
+                            <input asp-for="LastName" class="form-control input-md" value="Moss"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="AddressLine1">
+                                Home Address
+                            </label>
+                            <input asp-for="AddressLine1" class="form-control input-md" value="123 Mockingbird Ln"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="AddressLine2">
+                                Apt./Suite No.
+                            </label>
+                            <input asp-for="AddressLine2" class="form-control input-md" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="City">
+                                City
+                            </label>
+                            <input  asp-for="City" class="form-control input-md" value="Seattle"/>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="State">
+                                State
+                            </label>
+                            <input asp-for="State" class="form-control input-md" value="WA"/>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="ZipCode">
+                                ZIP Code
+                            </label>
+                            <input asp-for="ZipCode" class="form-control input-md"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="County">
+                                County
+                            </label>
+                            <input asp-for="County" class="form-control input-md" value="King" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="PhoneNumber">
+                                Phone Number
+                            </label>
+                            <input asp-for="PhoneNumber" class="form-control input-md" value="555-555-5555"/>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="EmailAddress">
+                                Email Address
+                            </label>
+                            <input asp-for="EmailAddress" class="form-control input-md" value="mandy.moss@example.com" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="well h4" style="border-radius:0px">
+                            Health & Income Information. All information is kept secure according to federal and local laws.
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label for="SocialSecurityNumber">
+                                Social Security Number
+                            </label>
+                            <input asp-for="SocialSecurityNumber" class="form-control input-md" value="@ssn"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <fieldset>
+                                <label asp-for="IsUSCitizen">
+                                    Are you a United States citizen?
+                                </label><br />
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsUSCitizen, true)Yes
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsUSCitizen, false)No
+                                </label>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <fieldset>
+                                <label asp-for="IsMilitary">
+                                    Are you an veteran or active-duty member of the military?
+                                </label><br />
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsMilitary, true)Yes
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsMilitary, false)No
+                                </label>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <fieldset>
+                                <label asp-for="IsStudent">
+                                    Are you a full-time student?
+                                </label><br />
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsStudent, true)Yes
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsStudent, false)No
+                                </label>
+                            </fieldset>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <fieldset>
+                                <label asp-for="IsOnMedicare">
+                                    Are you or any member of your family on Medicaid or Medicare?
+                                </label><br />
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsOnMedicare, true)Yes
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsOnMedicare, false)No
+                                </label>
+                            </fieldset>
+
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <fieldset>
+                                <label asp-for="IsOnDisability">
+                                    Does any member of your family claim Disability Insurance?
+                                </label><br />
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsOnDisability, true)Yes
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(Model => Model.IsOnDisability, false)No
+                                </label>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="EmploymentIncome">
+                                Annual Employment Income
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-addon">$</div>
+
+                                <input asp-for="EmploymentIncome" class="form-control input-md">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="InvestmentIncome">
+                                Annual Investment Income
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-addon">$</div>
+                                <input asp-for="InvestmentIncome" class="form-control input-md" value="@investmentIncome">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="margin:0px 0px 10px 10px">
+                            <label asp-for="AlimonyChildSupport">
+                                Annual Alimony or Child Support
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-addon">$</div>
+                                <input asp-for="AlimonyChildSupport" class="form-control input-md" value="0">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row paddingtop-30">
+                    <div class="col-lg-12">
+                        <p style="font-size:20px;">By submitting this application I certify under the penalty of perjury that the above information is true to the best of my knowledge.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <button type="submit" class="pull-right btn btn-skin btn-lg">Submit Application <i class="fa fa-angle-right"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+

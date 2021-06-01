@@ -1,0 +1,90 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the SQL database to be created."
+            }
+        },
+        "databaseLoginName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the SQL login to be created for connecting to the new database."
+            }
+        },
+        "databaseLoginPassword": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Password of the SQL login to be created for connecting to the new database."
+            }
+        },
+        "collation": {
+            "type": "string",
+            "metadata": {
+              "description": "Collation of the new SQL database."
+            },
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "databaseSizeMB": {
+            "type": "int",
+            "metadata": {
+              "description": "Size in MB of the SQL database to be created."
+            }
+        },
+        "skuName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the requested database SKU."
+            }
+            
+        },
+        "skuTier": {
+            "type": "string",
+            "metadata": {
+              "description": "Tier of the requested database SKU."
+            }
+            
+        },
+        "skuFamily": {
+            "type": "string",
+            "metadata": {
+              "description": "Family of the requested database SKU."
+            }
+        }
+    },
+    "resources": [
+    {
+      "apiVersion": "2017-02-15-preview",
+      "type": "Microsoft.SQLAdapter/logins",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('databaseLoginName')]",
+      "properties": {
+        "userName": "[parameters('databaseLoginName')]",
+        "password": "[parameters('databaseLoginPassword')]",
+        "skuName": "[parameters('skuName')]"
+      }
+    }, 
+    {
+        "apiVersion": "2017-02-15-preview",
+        "type": "Microsoft.SQLAdapter/databases",
+        "dependsOn": [
+          "[concat('Microsoft.SQLAdapter/logins/', parameters('databaseLoginName'))]"
+        ],
+        "location": "[resourceGroup().location]",
+        "name": "[parameters('databaseName')]",
+        "properties": {
+          "databaseName": "[parameters('databaseName')]",
+          "loginUserName": "[parameters('databaseLoginName')]",
+          "collation": "[parameters('collation')]",            
+          "maxSizeMb": "[parameters('databaseSizeMB')]"
+        },
+      "sku": {
+            "name": "[parameters('skuName')]",
+            "tier": "[parameters('skuTier')]",
+            "family": "[parameters('skuFamily')]"
+          }
+      }
+    ]
+}

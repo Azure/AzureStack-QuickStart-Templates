@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "sfb"
+    },
+    "adminUsername": {
+      "value": "thoroetadm"
+    },
+    "VMPrefix": {
+      "value": "srv"
+    },
+    "workloadsLocation": {
+      "value": "https://colab.blob.local.azurestack.external/workload"  
+  },
+"domainName": {
+  "value": "contoso.com"
+},
+"domainNetbiosName": {
+  "value": "contoso"
+},
+"virtualNetworkName": {
+  "value": "ADVNETvalirg"
+},
+"subnetName": {
+  "value": "ADStaticSubnetvalirg"
+},
+"shareServerFQDN": {
+  "value": "fs01.contoso.com"
+},
+"shareName": {
+  "value": "data"
+},
+"feLbIpAddress": {
+  "value": "10.0.0.250"
+},
+"SqlServerFQDN": {
+  "value": "srv-sql-0.contoso.com"
+},
+"SqlAG": {
+  "value": "alwayson-ag"
+},
+"CA": {
+  "value": "srv-adcs.contoso.com\\contoso-srv-ADCS-CA"
+},
+"DNSserver": {
+  "value": "srv-dc-1.contoso.com"
+},
+"SfBISOName": {
+  "value": "en_skype_for_business_server_2015_x64_dvd_6622058.iso"
+}
+  }
+}

@@ -1,0 +1,318 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
+	"parameters": {
+		"vnetSettings": {
+			"type": "array"
+		},
+		"regionCount": {
+			"type": "int"
+		},
+		"locationArray": {
+			"type": "array"
+		},
+		"suffixArray": {
+			"type": "array"
+		},
+		"mustDeployVnetGateway": {
+			"type": "bool"
+		},
+		"numSubnets": {
+			"type": "int"
+		},
+		"publicRPCEndpoint": {
+			"type": "bool"
+		},
+		"lbPublicIPAddressName": {
+			"type": "string"
+		},
+		"publicIPAllocationMethod": {
+			"type": "string"
+		},
+		"dnsHostName": {
+			"type": "string"
+		},
+		"loadBalancerName": {
+			"type": "string"
+		},
+		"lbFrontEndIpConfigName": {
+			"type": "string"
+		},
+		"backendAddressPoolName": {
+			"type": "string"
+		},
+		"FrontendPort1": {
+			"type": "int"
+		},
+		"BackendPort1": {
+			"type": "int"
+		},
+		"FrontendPort2": {
+			"type": "int"
+		},
+		"BackendPort2": {
+			"type": "int"
+		},
+		"gatewayPublicIPName": {
+			"type": "string"
+		},
+		"inboundNATRuleNamePrefix": {
+			"type": "string"
+		},
+		"inboundNATRuleFrontendStartingPort": {
+			"type": "int"
+		},
+		"inboundNATRuleFrontendEndingPort": {
+			"type": "int"
+		},
+		"inboundNATRuleBackendPort": {
+			"type": "int"
+		},
+		"ethNetworkPort":
+		{
+			"type": "int"
+		},
+		"ethRpcPort":
+		{
+			"type": "int"
+		},
+		"loadBalancerUrl":
+		{
+			"type": "string"
+		},
+		"enableSshAccess":
+		{
+			"type": "bool",
+			"defaultValue": false
+		}
+	},
+	"variables": {},
+	"resources": [
+		{
+			"type": "Microsoft.Network/networkSecurityGroups",
+			"name": "[parameters('vnetSettings')[copyIndex()].vlNsgName]",
+			"location": "[parameters('locationArray')[copyIndex()]]",
+			"copy": {
+				"name": "loop",
+				"count": "[parameters('regionCount')]"
+			},
+			"properties": {
+				"securityRules": [
+					{
+						"name": "allow-ssh",
+						"properties": {
+							"description": "Allow SSH",
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "22",
+							"sourceAddressPrefix": "*",
+							"destinationAddressPrefix": "*",
+							"access": "[if(parameters('enableSshAccess'),'Allow','Deny')]",
+							"priority": 100,
+							"direction": "Inbound"
+						}
+					},
+					{
+						"name": "allow-eth-rpc",
+						"properties": {
+							"description": "Allow Ethereum RPC",
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "[parameters('ethRpcPort')]",
+							"sourceAddressPrefix": "*",
+							"destinationAddressPrefix": "*",
+							"access": "Allow",
+							"priority": 101,
+							"direction": "Inbound"
+						}
+					},
+					{
+						"name": "allow-etheradmin",
+						"properties": {
+							"description": "Allow etheradmin web service",
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "3000",
+							"sourceAddressPrefix": "*",
+							"destinationAddressPrefix": "*",
+							"access": "Allow",
+							"priority": 102,
+							"direction": "Inbound"
+						}
+					},
+					{
+						"name": "parity-client-port-inbound",
+						"properties": {
+							"description": "Parity Client Port",
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "[parameters('ethNetworkPort')]",
+							"sourceAddressPrefix": "[if(parameters('mustDeployVnetGateway'), 'VirtualNetwork', '*')]",
+							"destinationAddressPrefix": "[if(parameters('mustDeployVnetGateway'), 'VirtualNetwork', '*')]",
+							"access": "Allow",
+							"priority": 103,
+							"direction": "Inbound"
+						}
+					},
+					{
+						"name": "parity-client-port-outbound",
+						"properties": {
+							"description": "Parity Client Port",
+							"protocol": "*",
+							"sourcePortRange": "*",
+							"destinationPortRange": "[parameters('ethNetworkPort')]",
+							"sourceAddressPrefix": "[if(parameters('mustDeployVnetGateway'), 'VirtualNetwork', '*')]",
+							"destinationAddressPrefix": "[if(parameters('mustDeployVnetGateway'), 'VirtualNetwork', '*')]",
+							"access": "Allow",
+							"priority": 100,
+							"direction": "Outbound"
+						}
+					}
+				]
+			}
+		},
+		{
+			"type": "Microsoft.Network/virtualNetworks",
+			"name": "[parameters('vnetSettings')[copyIndex()].vnetName]",
+			"location": "[parameters('locationArray')[copyIndex()]]",
+			"copy": {
+				"name": "loop",
+				"count": "[parameters('regionCount')]",
+				"mode": "Serial",
+				"batchSize": 1
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Network/networkSecurityGroups', parameters('vnetSettings')[copyIndex()].vlNsgName)]"
+			],
+			"properties": {
+				"addressSpace": {
+					"addressPrefixes": [
+						"[parameters('vnetSettings')[copyIndex()].addressSpacePrefix]"
+					]
+				},
+				"subnets": "[take(parameters('vnetSettings')[copyIndex()].subnetPropertiesArray, parameters('numSubnets'))]"
+			}
+		},
+		{
+			"apiVersion": "2017-10-01",
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[concat(parameters('lbPublicIPAddressName'),'-',parameters('suffixArray')[copyIndex()])]",
+			"location": "[parameters('locationArray')[copyIndex()]]",
+			"copy": {
+				"name": "loop",
+				"count": "[parameters('regionCount')]",
+				"mode": "Serial",
+				"batchSize": 1
+			},
+			"properties": {
+				"publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]",
+				"dnsSettings": {
+					"domainNameLabel": "[concat(parameters('dnsHostName'),'-',parameters('suffixArray')[copyIndex()])]"
+				}
+			}
+		},
+		{
+			"name": "[concat('network-resources-lb', copyIndex())]",
+			"type": "Microsoft.Resources/deployments",
+			"copy": {
+				"name": "loop",
+				"count": "[parameters('regionCount')]",
+				"mode": "Serial",
+				"batchSize": 1
+			},
+			"dependsOn": [
+				"[concat(parameters('lbPublicIPAddressName'),'-',parameters('suffixArray')[copyIndex()])]",
+				"[parameters('vnetSettings')[copyIndex()].vnetName]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[parameters('loadBalancerUrl')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"regionCount": {
+						"value": "[parameters('regionCount')]"
+					},
+					"locationArray": {
+						"value": "[parameters('locationArray')]"
+					},
+					"suffixArray": {
+						"value": "[parameters('suffixArray')]"
+					},
+					"publicRPCEndpoint": {
+						"value": "[parameters('publicRPCEndpoint')]"
+					},
+					"loadBalancerName": {
+						"value": "[parameters('loadBalancerName')]"
+					},
+					"lbFrontEndIpConfigName": {
+						"value": "[parameters('lbFrontEndIpConfigName')]"
+					},
+					"backendAddressPoolName": {
+						"value": "[parameters('backendAddressPoolName')]"
+					},
+					"FrontendPort1": {
+						"value": "[parameters('FrontendPort1')]"
+					},
+					"BackendPort1": {
+						"value": "[parameters('BackendPort1')]"
+					},
+					"FrontendPort2": {
+						"value": "[parameters('FrontendPort2')]"
+					},
+					"BackendPort2": {
+						"value": "[parameters('BackendPort2')]"
+					},
+					"inboundNATRuleNamePrefix": {
+						"value": "[parameters('inboundNATRuleNamePrefix')]"
+					},
+					"inboundNATRuleFrontendStartingPort": {
+						"value": "[parameters('inboundNATRuleFrontendStartingPort')]"
+					},
+					"inboundNATRuleFrontendEndingPort": {
+						"value": "[parameters('inboundNATRuleFrontendEndingPort')]"
+					},
+					"inboundNATRuleBackendPort": {
+						"value": "[parameters('inboundNATRuleBackendPort')]"
+					},
+					"publicIPResourceId": {
+						"value": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('lbPublicIPAddressName'),'-',parameters('suffixArray')[copyIndex()]))]"
+					},
+					"privateIPResouceId": {
+						"value": "[parameters('vnetSettings')[copyIndex()].loadBalancerPrivateIP]"
+					},
+					"subnetId": {
+						"value": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('vnetSettings')[copyIndex()].vnetName), '/subnets/', parameters('vnetSettings')[copyIndex()].vlSubnetName)]"
+					},
+					"currentRegionCount":{
+						"value": "[copyIndex()]"
+					},
+					"ethNetworkPort":{
+						"value": "[parameters('ethNetworkPort')]"
+					}
+				}
+			}
+		},
+		{
+			"condition": "[parameters('mustDeployVnetGateway')]",
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[concat(parameters('gatewayPublicIPName'),'-',parameters('suffixArray')[copyIndex()])]",
+			"location": "[parameters('locationArray')[copyIndex()]]",
+			"copy": {
+				"name": "loop",
+				"count": "[parameters('regionCount')]"
+			},
+			"properties": {
+				"publicIPAllocationMethod": "Dynamic"
+			}
+		}
+	],
+	"outputs": {
+		"lbFqdnReg1": {
+			"type": "string",
+			"value": "[if(parameters('publicRPCEndpoint'), reference(concat(parameters('lbPublicIPAddressName'),'-',parameters('suffixArray')[0])).dnsSettings.fqdn, parameters('vnetSettings')[0].loadBalancerPrivateIP)]"
+		}		
+	}
+}

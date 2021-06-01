@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "SQL Adapter create database",
+  "description": "This template creates a new SQL database of the specified size and SKU",
+  "summary": "Creates a new SQL database of the specified size and SKU",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2017-07-10"
+}

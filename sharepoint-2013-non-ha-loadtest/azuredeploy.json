@@ -1,0 +1,192 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.16.8.5",
+    "parameters": {
+        "TestControllerVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing test controller VM resource to use"
+            },
+            "defaultValue": "[concat(resourceGroup().name,'-tc-0')]"
+        },
+        "TestControllerServiceUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "User name of the account under which the test controller service is running on the test controller machine"
+            },
+            "defaultValue": "tcserv"
+        },
+        "TargetSharePointServerVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing SharePoint server VM resource to test"
+            },
+            "defaultValue": "[concat('SP',resourceGroup().name)]"
+        },
+        "TargetSQLServerVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing SQL server VM resource to test"
+            },
+            "defaultValue": "[concat('SPSQL',resourceGroup().name)]"
+        },
+        "TargetSharePointServerAdminUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the SharePoint administrator account"
+            },
+            "defaultValue": "lcladmin"
+        },
+        "TargetSharePointServerUserPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of the SharePoint administrator account"
+            },            
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+        },
+        "TargetSharePointSiteURL": {
+            "type": "string",
+            "metadata": {
+                "description": "URL of the SharePoint end point to test."
+            },
+            "defaultValue": "[concat('http://SP',resourceGroup().name,'.contoso.com')]"
+        },
+        "NumberOfLoadTestUsers": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of users to create on the SharePoint farm for load testing"
+            },
+            "defaultValue": 15
+        },
+        "LoadTestToRun": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the load test file to run"
+            },
+            "allowedValues": [ "CSOMListRW.loadtest", "MySiteHostRW.loadtest", "MySiteRW.loadtest" ],
+            "defaultValue": "MySiteHostRW.loadtest"
+        },
+        "VisualStudioVersionNumber": {
+            "type": "int",
+            "metadata": {
+                "description": "The version number of Visual Studio installed on the test controller. For example, if Visual Studio 2013 is installed the version number is 12"
+            },
+            "defaultValue": 12
+        }
+    },
+    "variables": {
+        "assetLocation": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-non-ha-loadtest",
+        "PrepareSQLDeployment": "PrepareSQLForLoadTest",
+        "PrepareSQLDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('PrepareSQLDeployment'))]",
+        "PrepareSQLTemplateURL": "[concat(variables('assetLocation'),'/azuredeploy.SQLPrepareForLoadTest.json')]",
+        "PrepareSPDeployment": "PrepareSharePointForLoadTest",
+        "PrepareSPDeploymentID": "[concat('Microsoft.Resources/deployments/', variables('PrepareSPDeployment'))]",
+        "PrepareSPTemplateURL": "[concat(variables('assetLocation'),'/azuredeploy.SharePointFarmPrepareForLoadTest.json')]",
+        "RunLoadTestDeployment": "RunLoadTest",
+        "RunLoadTestTemplateURL": "[concat(variables('assetLocation'),'/azuredeploy.TestControllerRunLoadTest.json')]"
+    },
+    "resources": [
+        {
+            "name": "[variables('PrepareSQLDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [ ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('PrepareSQLTemplateURL')]",
+                    "contentVersion": "1.16.8.5"
+                },
+                "parameters": {
+                    "TestControllerServiceUserName": {
+                        "value": "[parameters('TestControllerServiceUserName')]"
+                    },
+                    "TargetSQLServerVMName": {
+                        "value": "[parameters('TargetSQLServerVMName')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('PrepareSPDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[variables('PrepareSQLDeploymentID')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('PrepareSPTemplateURL')]",
+                    "contentVersion": "1.16.8.5"
+                },
+                "parameters": {
+                    "TestControllerServiceUserName": {
+                        "value": "[parameters('TestControllerServiceUserName')]"
+                    },
+                    "TargetSharePointServerVMName": {
+                        "value": "[parameters('TargetSharePointServerVMName')]"
+                    },
+                    "TargetSharePointServerAdminUserName": {
+                        "value": "[parameters('TargetSharePointServerAdminUserName')]"
+                    },
+                    "TargetSharePointServerUserPassword": {
+                        "value": "[parameters('TargetSharePointServerUserPassword')]"
+                    },
+                    "TargetSharePointSiteURL": {
+                        "value": "[parameters('TargetSharePointSiteURL')]"
+                    },
+                    "TargetSQLServerVMName": {
+                        "value": "[parameters('TargetSQLServerVMName')]"
+                    },
+                    "NumberOfLoadTestUsers": {
+                        "value": "[parameters('NumberOfLoadTestUsers')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('RunLoadTestDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[variables('PrepareSQLDeploymentID')]",
+                "[variables('PrepareSPDeploymentID')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('RunLoadTestTemplateURL')]",
+                    "contentVersion": "1.16.8.5"
+                },
+                "parameters": {
+                    "TestControllerVMName": {
+                        "value": "[parameters('TestControllerVMName')]"
+                    },
+                    "TargetSharePointServerVMName": {
+                        "value": "[parameters('TargetSharePointServerVMName')]"
+                    },
+                    "TargetSQLServerVMName": {
+                        "value": "[parameters('TargetSQLServerVMName')]"
+                    },
+                    "NumberOfLoadTestUsers": {
+                        "value": "[parameters('NumberOfLoadTestUsers')]"
+                    },
+                    "LoadTestToRun": {
+                        "value": "[parameters('LoadTestToRun')]"
+                    },
+                    "TargetSharePointServerAdminUserName": {
+                        "value": "[parameters('TargetSharePointServerAdminUserName')]"
+                    },
+                    "TargetSharePointServerUserPassword": {
+                        "value": "[parameters('TargetSharePointServerUserPassword')]"
+                    },
+                    "VisualStudioVersionNumber": { 
+                        "value": "[parameters('VisualStudioVersionNumber')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

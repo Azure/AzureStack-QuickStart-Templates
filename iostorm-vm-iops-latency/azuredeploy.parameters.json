@@ -1,0 +1,12 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentParameters.json#",
+  "contentVersion": "1.16.07.29",
+  "parameters": {
+    "vmCount": {
+      "value": 2
+    },
+    "vmSize": {
+      "value": "Standard_A1"
+    }
+  }
+}

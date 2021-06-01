@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "fileServerVirtualMachineSize": {
+            "value": "Standard_A2"
+        },
+        "imageReference": {
+            "value": "MicrosoftWindowsServer | WindowsServer | 2016-Datacenter | latest"
+        },
+        "dnsNameForPublicIP": {
+            "value": "appservicefileshare"
+        },
+        "adminUsername": {
+            "value": "fileshareowner"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "fileShareOwner": {
+            "value": "fileshareowner"
+        },
+        "fileShareOwnerPassword": {
+            "value": null
+        },
+        "fileShareUser": {
+            "value": "fileshareuser"
+        },
+        "fileShareUserPassword": {
+            "value": null
+        }
+    }
+}

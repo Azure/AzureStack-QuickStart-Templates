@@ -1,0 +1,201 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2017-03-09-profile",
+    "parameters": {
+        "clusterName": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "vmSize": {
+            "type": "string"
+        },
+        "numberWorkerNodes": {
+            "type": "int"
+        },
+        "dataDiskSize": {
+            "type": "int"
+        },
+        "numberDataDisks": {
+            "type": "int"
+        },
+        "storageAccountName": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "_artifactsLocation": {
+            "type": "string"
+        },
+        "batchSize": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 40
+        },
+        "replication": {
+            "type": "int"
+        }
+    },
+    "variables": {
+        "defaultName": "[parameters('clusterName')]",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "imageSku": "16.04-LTS",
+        "location": "[resourceGroup().location]",
+        "nicName": "[concat(variables('defaultName'),'nic')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+        "sizeOfBatch": "[max(1,min(parameters('batchSize'),parameters('numberWorkerNodes')))]"
+    },
+    "resources": [
+        {
+            "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicName'),'Worker',copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[parameters('numberWorkerNodes')]"
+            },
+            "properties": {
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgID')]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "workerIpConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "Worker nodes.",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('defaultName'),'Worker',copyIndex())]",
+            "location": "[variables('location')]",
+            "copy": {
+                "name": "workerNodes",
+                "mode": "Serial",
+                "count": "[parameters('numberWorkerNodes')]",
+                "batchSize": "[variables('sizeOfBatch')]"
+            },
+            "dependsOn": [
+                "nicLoop"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets','hadoop')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(parameters('clusterName'),'Worker',copyIndex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    }
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('imageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat('osworkerdisk',copyIndex())]",
+                        "vhd": {
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'os.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "copy": [
+                        {
+                            "name": "dataDisks",
+                            "count": "[parameters('numberDataDisks')]",
+                            "input": {
+                                "name": "[concat('workerdatadisk_',copyIndex('workerNodes'),'_',copyIndex('dataDisks'))]",
+                                "diskSizeGB": "[parameters('dataDiskSize')]",
+                                "vhd": {
+                                    "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex('workerNodes'),'/')),'data-',copyIndex('datadisks'),'.vhd')]"
+                                },
+                                "lun": "[copyIndex('dataDisks')]",
+                                "caching": "ReadWrite",
+                                "createOption": "Empty"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),'Worker',copyIndex()))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": "true",
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[concat(variables('defaultName'),'Worker',copyIndex(),'/workerCustomScript')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "workerNodes"
+            ],
+            "copy": {
+                "name": "workerHadoopSetup",
+                "count": "[parameters('numberWorkerNodes')]"
+            },
+            "tags": {
+                "displayName": "hadoopSetup"
+            },
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "fileUris": [
+                        "[concat(parameters('_artifactsLocation'),'/scripts/hadoopSetup.sh')]",
+                        "[concat(parameters('_artifactsLocation'),'/scripts/template.service')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/sources.txt')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/core-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/hdfs-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('_artifactsLocation'),'/config/yarn-site.xml')]"
+                    ],
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'),' ',parameters('replication'))]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

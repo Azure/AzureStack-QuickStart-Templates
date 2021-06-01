@@ -1,0 +1,482 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.16.07.29",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "vmCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of VMs to create and run IO simulation in determining the maximum IOPS reached without exceeding specified latency thresholds as acceptable performance limit."
+      }
+    },
+    "vmAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]",
+      "metadata": {
+        "description": "Admin password for the VMs"
+      }
+    },
+    "vmOsSku": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A2",
+      "allowedValues": [
+        "Standard_A0",
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A5",
+        "Standard_A6",
+        "Standard_A7",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D11",
+        "Standard_D12",
+        "Standard_D13",
+        "Standard_D14",
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D11_v2",
+        "Standard_D12_v2",
+        "Standard_D13_v2",
+        "Standard_D14_v2",
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2"
+      ],
+      "metadata": {
+        "description": "VM size supported by Azure Stack."
+      }
+    },
+    "vmDataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 5,
+      "metadata": {
+        "description": "VM IO workload target data disk size in GB."
+      }
+    },
+    "vmDataDiskCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of data disks per VM to perform IO on."
+      }
+    },
+    "WaitForIoStormCompletion": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If true template will not complete deployment until IO test is complete."
+      }
+    },
+    "vmIoLatencyThresholdInMS": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "VM IO workload latency threshold in milliseconds."
+      }
+    },
+    "vmIoStartOperations": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Operations per file per thread to start goal seeking at."
+      }
+    },
+    "vmIoDurationInSec": {
+      "type": "int",
+      "defaultValue": 60,
+      "metadata": {
+        "description": "VM IO workload duration in seconds."
+      }
+    },
+    "vmIoBlockSizeInBytes": {
+      "type": "int",
+      "defaultValue": 4096,
+      "metadata": {
+        "description": "VM IO workload block size in bytes."
+      }
+    },
+    "vmIoReadPercentage": {
+      "type": "int",
+      "defaultValue": 70,
+      "metadata": {
+        "description": "VM IO workload read percentage."
+      }
+    },
+    "vmFixedIops": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "If non-0 each VM will perform vmFixedIops indefinitely."
+      }
+    },
+    "vmRunFixedIoLatencyTestAfterGoalSeek": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Run fixed IO test after goalseek using vmFixedIops per VM."
+      }
+    }
+  },
+  "variables": {
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "addressPrefix": "10.0.0.0/16",
+    "location": "[resourceGroup().location]",
+    "subnetName": "[tolower(concat('sn', resourceGroup().name))]",
+    "subnetPrefix": "10.0.0.0/24",
+    "storageAccountType": "Standard_LRS",
+    "uniqueStorageAccountName": "[tolower(concat('sa', resourceGroup().name))]",
+    "uniqueStorageAccountContainerName": "[tolower(concat('sc', resourceGroup().name))]",
+    "vmAdminUsername": "vmadministrator",
+    "vmName": "[concat('vm', resourceGroup().name)]",
+    "vmOsDiskName": "[concat('od', resourceGroup().name)]",
+    "vmDataDiskName": "[concat('dd', resourceGroup().name)]",
+    "vmNicName": "[tolower(concat('nc', resourceGroup().name))]",
+    "virtualNetworkName": "[tolower(concat('vn', resourceGroup().name))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "nsgName": "[tolower(concat('ng', resourceGroup().name))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/iostorm-vm-iops-latency/",
+    "moduleVMIOController": "VMIOWorkloadController.zip",
+    "moduleVMIOWorkload": "VMIOWorkload.zip",
+    "modulesUrlVMIOController": "[concat(variables('modulesPath'),variables('moduleVMIOController'))]",
+    "modulesUrlVMIOWorkload": "[concat(variables('modulesPath'),variables('moduleVMIOWorkload'))]",
+    "configurationFunctionVMIOController": "VMIOWorkloadController.ps1\\ConfigureVMIO",
+    "configurationFunctionVMIOWorkload": "VMIOWorkload.ps1\\ConfigureVMIO",
+    "publicIPAddressName": "[tolower(concat('vmpip',resourceGroup().name))]",
+    "dnsPrefix": "[tolower(concat('vmdns', resourceGroup().name))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[tolower(variables('uniqueStorageAccountName'))]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "nsgsrule",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]" ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgID')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsPrefix')]"
+        }
+      },
+      "dependsOn": [
+        "[variables('vnetID')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('vmNicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfigpri",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('vmNicName'),copyIndex())]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "nicLoop",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfigprivate",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[variables('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('vmOsSku')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName')))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('vmName'),copyIndex())]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "vmLoop",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'),copyIndex())]",
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[variables('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('vmOsSku')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "copy": [
+            {
+              "name": "dataDisks",
+              "count": "[parameters('vmDataDiskCount')]",
+              "input": {
+                "diskSizeGB": "[parameters('vmDataDiskSizeInGB')]",
+                "lun": "[copyIndex('dataDisks')]",
+                "createOption": "Empty",
+                "caching": "None"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNicName'),copyIndex()))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),'/dscExtension')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.15",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "modulesUrl": "[variables('modulesUrlVMIOController')]",
+          "configurationFunction": "[variables('configurationFunctionVMIOController')]",
+          "properties": {
+            "VMName": "[variables('vmName')]",
+            "VMCount": "[parameters('vmCount')]",
+            "VMAdminUserName": "[variables('vmAdminUsername')]",
+            "VMAdminPassword": "[parameters('vmAdminPassword')]",
+            "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
+            "VMIoStartOperations": "[parameters('vmIoStartOperations')]",
+            "Location": "[variables('location')]",
+            "AzureStorageAccount": "[variables('uniqueStorageAccountName')]",
+            "AzureStorageAccessKey": "[listKeys(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageAccountName')), '2015-06-15').key1]",
+            "AzureStorageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]",
+            "WaitForIoStormCompletion": "[parameters('WaitForIoStormCompletion')]",
+            "FixedIops": "[parameters('vmFixedIops')]",
+            "RunFixedIoLatencyTestAfterGoalSeek": "[parameters('vmRunFixedIoLatencyTestAfterGoalSeek')]",
+            "DataDisks": "[parameters('vmDataDiskCount')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),copyIndex(),'/dscExtension')]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "vmLoop",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.15",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "modulesUrl": "[variables('modulesUrlVMIOWorkload')]",
+          "configurationFunction": "[variables('configurationFunctionVMIOWorkload')]",
+          "properties": {
+            "ControllerVMName": "[variables('vmName')]",
+            "ControllerVMPrivateIP": "[reference(variables('vmNicName')).ipConfigurations[0].properties.privateIPAddress]",
+            "VMName": "[concat(variables('vmName'),copyIndex())]",
+            "VMAdminUserName": "[variables('vmAdminUsername')]",
+            "VMAdminPassword": "[parameters('vmAdminPassword')]",
+            "VMIoBlockSize": "[parameters('vmIoBlockSizeInBytes')]",
+            "VMIoDuration": "[parameters('vmIoDurationInSec')]",
+            "VMIoReadPercentage": "[parameters('vmIoReadPercentage')]",
+            "VMIoMaxLatency": "[parameters('vmIoLatencyThresholdInMS')]",
+            "FixedIops": "[parameters('vmFixedIops')]",
+            "RunFixedIoLatencyTestAfterGoalSeek": "[parameters('vmRunFixedIoLatencyTestAfterGoalSeek')]",
+            "DataDisks": "[parameters('vmDataDiskCount')]"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "Template that deploys a windows VM and configures it for AD",
+    "description": "Tempate that deploys a windows VM and configures it for AD",
+    "summary": "This template has default values for all the parameters",
+    "githubUsername": "azurestack",
+    "dateUpdated": "2018-11-06"
+}

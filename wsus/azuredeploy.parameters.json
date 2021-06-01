@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AdminUsername": {
+            "value": "myadmaccount"
+        },
+        "existingVirtualNetworkName": {
+            "value": "myvirtualnetwork"
+        },
+        "ScriptURI": {
+            "value": "https://raw.githubusercontent.com/Azure/azurestack-quickstart-templates/master/wsus/InstallWSUS.ps1"
+        },
+        "SyncHours": {
+            "value": "2"
+        },
+        "SyncMinutes": {
+            "value": "120"
+        }
+    }
+}

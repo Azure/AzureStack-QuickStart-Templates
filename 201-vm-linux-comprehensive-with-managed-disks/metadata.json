@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a Linux Ubuntu VM and VM extensions to Azure Stack",
+  "description": "This template deploys a Linux VM and also uses Customscript and OSPatchingforLinux Extensions. The VM is set with 2 managed disks; the OS disk and a data disk of 1 GB.",
+  "summary": "This template deploys a Linux VM and also uses Customscript and OSPatchingforLinux Extensions.",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

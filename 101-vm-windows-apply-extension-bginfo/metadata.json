@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy BGInfo VM Extension to existing VM",
+  "description": "Deploys the BGInfo VM Extension with one paremeter: vmName",
+  "summary": "This template deploys the BGInfo VM Extension to an existing VM in an Azure Stack environment.",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

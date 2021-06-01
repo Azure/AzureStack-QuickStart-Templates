@@ -1,0 +1,102 @@
+﻿{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"testConsoleVMName": {
+			"type": "string"
+		},
+		"domainName": {
+			"type": "string"
+		},
+		"adminUserName": {
+			"type": "string"
+		},
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "sqlInstallationISOUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The Uri to the SQL Server installation ISO. E.g http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+            },
+            "defaultValue": "http://care.dlservice.microsoft.com/dl/download/2/F/8/2F8F7165-BB21-4D1E-B5D8-3BD3CE73C77D/SQLServer2014SP1-FullSlipstream-x64-ENU.iso"
+        },
+        "vsInstallationISOUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The Uri to the Visual Studio installation ISO. E.g http://download.microsoft.com/download/E/2/A/E2ADF1BE-8FA0-4436-A260-8780444C8355/vs2013.5_ult_enu.iso"
+            },
+            "defaultValue": "http://download.microsoft.com/download/E/2/A/E2ADF1BE-8FA0-4436-A260-8780444C8355/vs2013.5_ult_enu.iso"
+        },
+        "vsaInstallationISOUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The Uri to the Visual Studio test agents installation ISO. E.g https://download.microsoft.com/download/B/E/3/BE3CD572-E8B4-48C5-B2C6-D038CB6B1E93/vs2013.5_agts_enu.iso"
+            },
+            "defaultValue": "https://download.microsoft.com/download/B/E/3/BE3CD572-E8B4-48C5-B2C6-D038CB6B1E93/vs2013.5_agts_enu.iso"
+        },
+		"controllerServiceUserName": {
+			"type": "string"
+		},
+		"controllerServicePassword": {
+			"type": "securestring"
+		},
+		"assetLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "The location of resources that the script is dependent on such as linked templates and DSC modules"
+			}
+		},
+		"VisualStudioProductKey": {
+			"type": "string",
+			"metadata": {
+				"description": "Product key (25 characters no spaces) for Visual Studio activation"
+			}
+		}
+	},
+	"variables": {
+		"deployConsoleModulesURL": "[concat(parameters('assetLocation'),'/deployTestConsole.ps1.zip')]",
+		"deployConsoleConfigurationFunction": "deployTestConsole.ps1\\deployTestConsole"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"name": "[concat(parameters('testConsoleVMName'),'/ConfigureConsoleVM')]",
+			"apiVersion": "2015-06-15",
+			"dependsOn": [
+			],
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publisher": "Microsoft.Powershell",
+				"type": "DSC",
+				"typeHandlerVersion": "2.13",
+				"autoUpgradeMinorVersion": "true",
+				"settings": {
+					"ModulesUrl": "[variables('deployConsoleModulesURL')]",
+					"ConfigurationFunction": "[variables('deployConsoleConfigurationFunction')]",
+					"Properties": {
+						"DomainName": "[parameters('domainName')]",
+						"AdminCreds": {
+							"UserName": "[parameters('adminUserName')]",
+							"Password": "PrivateSettingsRef:AdminPassword"
+						},
+                        "SQLServicecreds": {
+                            "UserName": "[parameters('controllerServiceUserName')]",
+                            "Password": "PrivateSettingsRef:ControllerPassword"
+                        },
+                        "sqlInstallationISOUri": "[parameters('sqlInstallationISOUri')]",
+                        "vsInstallationISOUri": "[parameters('vsInstallationISOUri')]",
+                        "vsaInstallationISOUri": "[parameters('vsaInstallationISOUri')]",
+						"VSProductKey": "[parameters('VisualStudioProductKey')]" 
+					}
+				},
+				"protectedSettings": {
+					"Items": {
+						"AdminPassword": "[parameters('adminPassword')]",
+						"ControllerPassword": "[parameters('controllerServicePassword')]"
+					}
+				}
+			}
+		}
+	]
+}

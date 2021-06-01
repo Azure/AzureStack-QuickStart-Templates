@@ -1,0 +1,44 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "hostingServerName": {
+            "type": "string",
+            "metadata": {
+                "description": "MySQL Server FQDN or IPv4 of an existing MySQL server to be added as a MySQL Adapter hosting server."
+            }
+        },
+        "port": {
+            "type": "string",
+            "defaultValue": "3306"
+        },
+        "username": {
+            "type": "string"
+        },
+        "password": {
+            "type": "securestring"
+        },
+        "totalSpaceMB": {
+            "type": "int"
+        },
+        "skuName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-08-28",
+            "type": "Microsoft.MySqlAdapter.Admin/hostingServers",
+            "name": "[parameters('hostingServerName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[parameters('hostingServerName')]",
+                "port": "[parameters('port')]",
+                "username": "[parameters('username')]",
+                "password": "[parameters('password')]",
+                "skuName": "[parameters('skuName')]",
+                "totalSpaceMB": "[parameters('totalSpaceMB')]"
+            }
+        }
+    ]
+}

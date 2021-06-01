@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Modify an existing Linux VM with a custom script",
+  "description": "Deploys the Linux Custom Script extension on an existing Linux VM",
+  "summary": "This template deploys the Linux Custom Script extension to an existing VM in the Azure Stack POC environment.",
+  "githubUsername": "azurestack",
+  "dateUpdated": "2018-11-06"
+}

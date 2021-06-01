@@ -1,0 +1,38 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {
+        "nicName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the NIC to Create or Update"
+            }
+        },
+        "ipConfigurations": {
+            "type": "array",
+            "metadata": {
+                "description": "The IP configurations of the NIC"
+            }
+        },
+        "dnsServers": {
+            "type": "array",
+            "metadata": {
+                "description": "The DNS Servers of the NIC"
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('nicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourcegroup().location]",
+            "properties": {
+                "ipConfigurations": "[parameters('ipConfigurations')]",
+                "dnsSettings": {
+                    "dnsServers": "[parameters('dnsServers')]"
+                }
+            }
+        }
+    ]
+}

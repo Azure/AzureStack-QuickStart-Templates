@@ -1,0 +1,121 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.16.8.5",
+    "parameters": {
+        "TestControllerVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing test controller VM resource to use"
+            },
+            "defaultValue": "[concat(resourceGroup().name,'-tc-0')]"
+        },
+        "TestControllerServiceUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "User name of the account under which the test controller service is running on the test controller machine"
+            },
+            "defaultValue": "tcserv"
+        },
+        "TargetSPServerVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the existing SharePoint server VM resource to test"
+            },
+            "defaultValue": "[concat('SP',resourceGroup().name)]"
+        },
+        "TargetSPSiteURL": {
+            "type": "string",
+            "metadata": {
+                "description": "URL of the SharePoint end point to test."
+            },
+            "defaultValue": "[concat('http://SP',resourceGroup().name,'.contoso.com')]"
+        },
+        "TargetSPTestUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "User name an existing user account to be used for load testing. User must have access to the target SharePoint endpoint."
+            },
+            "defaultValue": "lcladmin@contoso.com"
+        },
+        "TargetSPTestUserPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of the user account to be used for lad testing."
+            },
+            "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+        },
+        "assetLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of resources that the template is dependent on such as scripts and load test package"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/sharepoint-2013-sample-loadtest"
+        }
+    },
+    "variables": {
+        "PrepareTargetDeployment": "PrepareTargetSPForLT",
+        "PrepareTargetTemplateURL": "[concat(parameters('assetLocation'),'/SharePointFarmPrepareForLoadTest.json')]",
+        "RunLoadTestDeployment": "RunLoadTest",
+        "RunLoadTestTemplateURL": "[concat(parameters('assetLocation'),'/TestControllerRunLoadTest.json')]"
+    },
+    "resources": [
+        {
+            "name": "[variables('PrepareTargetDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('PrepareTargetTemplateURL')]",
+                    "contentVersion": "1.16.8.5"
+                },
+                "parameters": {
+                    "TestControllerServiceUserName": {
+                        "value": "[parameters('TestControllerServiceUserName')]"
+                    },
+                    "TargetSPServerVMName": {
+                        "value": "[parameters('TargetSPServerVMName')]"
+                    },
+                    "assetLocation": {
+                        "value": "[parameters('assetLocation')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('RunLoadTestDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('RunLoadTestTemplateURL')]",
+                    "contentVersion": "1.16.8.5"
+                },
+                "parameters": {
+                    "TestControllerVMName": {
+                        "value": "[parameters('TestControllerVMName')]"
+                    },
+                    "TargetSPServerVMName": {
+                        "value": "[parameters('TargetSPServerVMName')]"
+                    },
+                    "TargetSPSiteURL": {
+                        "value": "[parameters('TargetSPSiteURL')]"
+                    },
+                    "TargetSPTestUserName": {
+                        "value": "[parameters('TargetSPTestUserName')]"
+                    },
+                    "TargetSPTestUserPassword": {
+                        "value": "[parameters('TargetSPTestUserPassword')]"
+                    },
+                    "assetLocation": {
+                        "value": "[parameters('assetLocation')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
