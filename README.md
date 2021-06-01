@@ -1,6 +1,11 @@
 # Microsoft Azure Stack Quickstart Templates
 
+<<<<<<< HEAD
 Latest version of README file - v1
+=======
+Latest version of README file. 
+New addition
+>>>>>>> f6ed546c93d7f6c3c435a4e55c07c6a5e2d2afad
 
 This repository contains Azure Resource Manager deployment templates that have been tested with Microsoft Azure Stack Development Kit. 
 
