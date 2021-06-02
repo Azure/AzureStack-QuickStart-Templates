@@ -3,6 +3,8 @@
 
 Feature version - 2nd June
 
+This is the second line aded on 2nd June
+
 This repository contains Azure Resource Manager deployment templates that have been tested with Microsoft Azure Stack Development Kit. 
 
 ## What repository?
