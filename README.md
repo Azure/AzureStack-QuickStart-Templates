@@ -1,7 +1,11 @@
 # Microsoft Azure Stack Quickstart Templates
 
 
+<<<<<<< HEAD
 Feature2 - Updated from Master Branch
+=======
+Feature2 
+>>>>>>> feature2
 
 This repository contains Azure Resource Manager deployment templates that have been tested with Microsoft Azure Stack Development Kit. 
 
