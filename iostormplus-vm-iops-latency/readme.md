@@ -57,7 +57,7 @@ They are used to specify the size of the workload VM/disk. Most of them can be c
 | :-----:| :----: | :---- | :---- |
 | VMCount | int | 20 | The number of workload VMs, if you set it to 0 (default), it will be calculated automatically. |
 | VMSize | string | Standard_DS3_v2 (default)  | The size of the workload VM. |
-| DataDisks | int | 12 (default) | The number of data disks per worload VM, should less than the max number of data disks for the VM size. |
+| DataDisks | int | 16 (default) | The number of data disks per worload VM, should less than the max number of data disks for the VM size. |
 | DataDiskSizeInGB | int | 128 | The data disk size, if you set it to 0 (default), it will be calculated automatically. |
 | StorageUsagePercentage | int | 60 (default) | The percentage of remaining storage used to create data disks. (10 % - 90 %) |
 | VMOsSku | string | 2016-Datacenter (default) | The OS Sku of the workload VM, only support `2016-Datacenter` and `2019-Datacenter` |
@@ -93,7 +93,7 @@ $ARMEndpoint = "https://management.DomainFqdn"
 $AdminCredential = Get-Credential
 $TenantId = "xxx-xxx-xxx-xxx-xxx"
 
-Import-Module .\IoStorm.psm1
+Import-Module .\IoStorm\IoStorm.psm1
 
 # GoalSeek mode
 Start-IoStorm -ARMEndpoint $ARMEndpoint -AdminCredential $AdminCredential -TenantId $TenantId

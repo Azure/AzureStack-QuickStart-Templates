@@ -753,7 +753,7 @@ function Start-IoStorm {
         [Parameter(Mandatory = $false)]
         [String]$VMOsSku = "2016-Datacenter",
         [Parameter(Mandatory = $false)]
-        [int]$DataDisks = 12, # Should less than the max number of data disks for the VM size
+        [int]$DataDisks = 16, # Should less than the max number of data disks for the VM size
         [Parameter(Mandatory = $false)]
         [ValidateRange(0, 1023)]
         [int]$DataDiskSizeInGB = 0, # If you set it to 0, it will be calculated automatically
@@ -900,10 +900,11 @@ function Start-IoStorm {
 
             $volUsage = $StorageUsagePercentage / 100
             $maxDataDisksPerRG = 700
+            $defaultDataDiskSizeInGB = 256
             $adjustDataDiskSize = $false
             if ($DataDiskSizeInGB -eq 0) {
                 $adjustDataDiskSize = $true
-                $DataDiskSizeInGB = 256
+                $DataDiskSizeInGB = $defaultDataDiskSizeInGB
             }
 
             $totDisks = [math]::Ceiling(($totRemainingCapacityGB * $volUsage) / $DataDiskSizeInGB)
@@ -917,13 +918,14 @@ function Start-IoStorm {
                 $totDisks = $maxDataDisksPerRG
             }
 
-            $minVMs = [math]::Ceiling(($totDisks / $DataDisks))
-            if (($minVMs -gt ($allObjStoreVols.Count * 3)) -and ($VMCount -eq 0)) {
-                $VMCount = $minVMs
+            $defaultVMCount = $allObjStoreVols.Count * 5 # equals to (the number of nodes) * 5
+            $minVMCount = [math]::Ceiling(($totDisks / $DataDisks))
+            if (($minVMCount -gt $defaultVMCount) -and ($VMCount -eq 0)) {
+                $VMCount = $minVMCount
                 Log-Info -Message "Adjust VMCount to $VMCount to meet minimum data disk requirement ($($totDisks) * $($DataDiskSizeInGB) GB)."
             } else {
                 if ($VMCount -eq 0) {
-                    $VMCount = $allObjStoreVols.Count * 3 # equals to (the number of nodes) * 3
+                    $VMCount = $defaultVMCount
                     Log-Info -Message "Adjust VMCount to $VMCount"
                 }
 
@@ -975,9 +977,6 @@ function Start-IoStorm {
                 -Verbose -ErrorAction Stop | Out-Null
 
             Log-Info -Message "ARM deployment completed successfully."
-            # Wait 2 mins for background task on the VMs
-            Log-Info -Message "Wait 2 minutes for the background task on the VMs."
-            Start-Sleep -Seconds 120
         } else {
             $allVMs = Get-AzureRmVM -ResourceGroupName $ResourceGroup -Status -ErrorAction Stop
             $VMCount = ($allVMs | Where-Object {($_.Name -ne "vm$ResourceGroup") -and ($_.PowerState -like "*running*")}).Count
@@ -998,10 +997,11 @@ function Start-IoStorm {
             } else {
                 Log-Warning -Message "Failed to restart VMs, please double check or redeploy." -Throw
             }
-
-            Log-Info -Message "Wait 2 minutes for the background task on the VMs."
-            Start-Sleep -Seconds 120
         }
+
+        # Wait 2 mins for background task on the VMs
+        Log-Info -Message "Wait 2 minutes for the background task on the VMs."
+        Start-Sleep -Seconds 120
 
         # Get Controller VM Ip and create PS remote session.
         $ioStormControllerVMName = "vm" + $ResourceGroup
@@ -1219,8 +1219,9 @@ function Start-IoStorm {
         # as the stamp may experience non-test related load from
         # infra at any point in time
         $minQD = $IoMinQueueDepth
+        $defaultMaxQD = [math]::Max(512, $IoMinQueueDepth * 100)
         if ($ioStormMode -ne "FixedIops") {
-            $maxQD = [math]::Max(128, $IoMinQueueDepth * 3)
+            $maxQD = $defaultMaxQD
         } else {
             $bestQD = $IoMinQueueDepth
             $maxQD = $IoMinQueueDepth
@@ -1309,7 +1310,7 @@ function Start-IoStorm {
                 Log-Info -Message "Latency of $avg95thLat exceeded threshhold of VMIoMaxLatency $VMIoMaxLatency. This has occured $realFailureCount times"
             } else {
                 $latencyFailureCount = 0
-                if ($minQD -ge [math]::Max(128, $IoMinQueueDepth * 3)) {
+                if ($minQD -ge $defaultMaxQD) {
                     $minQD = $qd + 2
                 } else {
                     $minQD = $qd + 1
