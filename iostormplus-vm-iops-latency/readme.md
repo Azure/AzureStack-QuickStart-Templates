@@ -10,6 +10,8 @@ To avoid conflicts or breaking changes, we recommend that you reinstall them fro
 $packagePath = "The path to PowershellRepo_AzureStack_2.5.0_RC" # e.g."C:\TestArtifacts\Workloads\PowershellRepo_AzureStack_2.5.0_RC"
 
 # Register repository
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Install-PackageProvider -Name "NuGet" -Force
 Register-PSRepository -Name AzureStackHubAzureRM250 -SourceLocation $packagePath -InstallationPolicy Trusted
 
 # Uninstall the existing Azure Resource Manager and Az PowerShell modules
@@ -57,7 +59,7 @@ They are used to specify the size of the workload VM/disk. Most of them can be c
 | :-----:| :----: | :---- | :---- |
 | VMCount | int | 20 | The number of workload VMs, if you set it to 0 (default), it will be calculated automatically. |
 | VMSize | string | Standard_DS3_v2 (default)  | The size of the workload VM. |
-| DataDisks | int | 16 (default) | The number of data disks per worload VM, should less than the max number of data disks for the VM size. |
+| DataDisks | int | 16 | The number of data disks per worload VM, should less than the max number of data disks for the VM size, if you set it to 0 (default), it will be calculated automatically. |
 | DataDiskSizeInGB | int | 128 | The data disk size, if you set it to 0 (default), it will be calculated automatically. |
 | StorageUsagePercentage | int | 60 (default) | The percentage of remaining storage used to create data disks. (10 % - 90 %) |
 | VMOsSku | string | 2016-Datacenter (default) | The OS Sku of the workload VM, only support `2016-Datacenter` and `2019-Datacenter` |

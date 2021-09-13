@@ -753,7 +753,8 @@ function Start-IoStorm {
         [Parameter(Mandatory = $false)]
         [String]$VMOsSku = "2016-Datacenter",
         [Parameter(Mandatory = $false)]
-        [int]$DataDisks = 16, # Should less than the max number of data disks for the VM size
+        [ValidateRange(0, 1023)]
+        [int]$DataDisks = 0, # Should less than the max number of data disks for the VM size, if you set it to 0, it will be calculated automatically
         [Parameter(Mandatory = $false)]
         [ValidateRange(0, 1023)]
         [int]$DataDiskSizeInGB = 0, # If you set it to 0, it will be calculated automatically
@@ -794,7 +795,10 @@ function Start-IoStorm {
     
     $ProgressPreference = 'SilentlyContinue'
     $ErrorActionPreference = 'Stop'
-
+    
+    # Use TLS 1.2
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+    
     $startDate = Get-Date
     # Log file
     $logFileName = "IoStormController.log"
@@ -889,6 +893,18 @@ function Start-IoStorm {
 
         # Deploy workload
         Login-AdminARM -AdminARMEndpoint $AdminARMEndpoint -AdminCredential $AdminCredential -TenantId $TenantId
+
+        $vmSizeConfig = Get-AzureRmVMSize -Location (Get-AzureRmLocation).Location -ErrorAction Stop | Where-Object {$_.Name -eq $VMSize} | Select-Object -First 1
+
+        Log-Info "Using $($VMSize) VM, which has $($vmSizeConfig.NumberOfCores) cores and up to $($vmSizeConfig.MaxDataDiskCount) data disks."
+        if ($DataDisks -gt $vmSizeConfig.MaxDataDiskCount) {
+            Log-Warning -Message "Unable to deploy $($DataDisks) data disks on $($VMSize) VM." -Throw
+        }
+
+        if ($DataDisks -eq 0) {
+            $DataDisks = $vmSizeConfig.MaxDataDiskCount
+            Log-Info -Message "Adjust DataDisks to $($DataDisks)"
+        }
 
         if ($RestartRun -eq $false) {
             $scaleUnitName = "s-cluster"
@@ -1023,10 +1039,6 @@ function Start-IoStorm {
 
         Log-Info -Message "Connected to controller share $smbshare"
 
-        $controllerVmCred = New-Object PSCredential($controllerVmAdmin, $(ConvertTo-SecureString -AsPlainText $controllerVmPW -Force))
-        $controllerVmSession = New-PSSession -ComputerName $controllerVmPipAddress -Credential $controllerVmCred
-        Log-Info -Message "Created remote session for $ioStormControllerVMName"
-
         # Setup storage for output
         if (-not (Get-AzureRmResourceGroup -Name $OutputResourceGroup -Location (Get-AzureRmLocation).Location -ErrorAction SilentlyContinue)) {
             New-AzureRMResourceGroup -Name $OutputResourceGroup -Location (Get-AzureRmLocation).Location -Force -Verbose -ErrorAction Stop | Out-Null
@@ -1116,9 +1128,6 @@ function Start-IoStorm {
         $outputStorageTable = $null
         $executionId = $($startDate.ToString('yyyyMMdd_HHmm'))
         try {
-            # Use TLS 1.2
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-
             $outputStorageContext = New-AzureStorageContext -StorageAccountName $OutputStorageAccountName -StorageAccountKey $outputStorageAccountKey -Endpoint $outputStorageEndpoint -ErrorAction Stop
             if ($outputStorageContext -eq $null) {
                 Log-Warning -Message "Azure storage context is null." -Throw
@@ -1159,7 +1168,7 @@ function Start-IoStorm {
         # logical disks as the divisor.
         # switch to using logfical disks in thread computation once dependants are altered
         $logicalDisks = 1
-        $lps = Invoke-Command -Session $controllerVmSession -ScriptBlock { (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors }
+        $lps = $vmSizeConfig.NumberOfCores
         if ($IoThreads -eq 0) {
             $threads =[math]::Ceiling($lps / $logicalDisks)
         } else {
@@ -1419,8 +1428,10 @@ function Start-IoStorm {
         if ($fixedResTxt) {
             "Fixed IOPS Iteration: $fixedResTxt" | Tee-Object -FilePath $statusFilePath -Append
         }
+    } catch {
+        Log-Warning "IoStorm test failed: $_"
+        throw
     } finally {
-        $controllerVmSession | Remove-PSSession -ErrorAction SilentlyContinue
         if ($smbshare) {
             try { net use /delete $smbshare | Out-Null } catch { Log-Warning -Message "Failed to remove network path: $_" }
         }
