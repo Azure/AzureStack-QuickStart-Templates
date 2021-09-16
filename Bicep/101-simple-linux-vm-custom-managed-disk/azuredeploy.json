@@ -46,14 +46,12 @@
     },
     "variables": {
         "PublicIPName": "[concat('PublicIP_', parameters('vmName'))]",
-        "dnsNameForPublicIP": "[tolower(concat('dns', uniquestring(resourceGroup().id)))]",
         "location": "[resourceGroup().location]",
         "nicName": "[tolower(concat('nic',uniquestring(resourceGroup().id)))]",
         "addressPrefix": "10.0.0.0/24",
         "subnetName": "[tolower(concat('subnet',uniquestring(resourceGroup().id)))]",
         "subnetPrefix": "10.0.0.0/24",
-        "diagnosticsStorageAccountName": "[concat('diag', uniquestring(resourceGroup().id))]",
-        "storageAccountType": "Standard_LRS",
+        "diagnosticsStorageAccountName": "[toLower(concat('diag', uniquestring(resourceGroup().id)))]",
         "virtualNetworkName": "[tolower(concat('vnet',uniquestring(resourceGroup().id)))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
@@ -85,11 +83,9 @@
         {
             "apiVersion": "2017-10-01",
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[toLower(variables('diagnosticsStorageAccountName'))]",
+            "name": "[variables('diagnosticsStorageAccountName')]",
             "location": "[variables('location')]",
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
-            },
+            "properties": {},
             "sku": {
                 "name": "Standard_LRS"
               },
@@ -225,7 +221,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob)]"
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }
             }

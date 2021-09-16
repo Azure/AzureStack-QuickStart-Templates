@@ -1,0 +1,238 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.613.9944",
+      "templateHash": "17848823021747493143"
+    }
+  },
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VM"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "ubuntu",
+      "metadata": {
+        "description": "Username for the Virtual Machine. Default value is localadmin"
+      }
+    },
+    "sshkeyData": {
+      "type": "secureString",
+      "metadata": {
+        "description": "ssh key for vm"
+      }
+    },
+    "imageName": {
+      "type": "string",
+      "defaultValue": "myimage",
+      "metadata": {
+        "description": "Maps to the Image Name"
+      }
+    },
+    "imageUri": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "uri of the Image "
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "metadata": {
+        "description": "The size of the Virtual Machine."
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "publicIPName": "[format('PublicIP_{0}', parameters('vmName'))]",
+    "location": "[resourceGroup().location]",
+    "nicName": "[toLower(format('nic{0}', uniqueString(resourceGroup().id)))]",
+    "addressPrefix": "10.0.0.0/24",
+    "subnetName": "[toLower(format('subnet{0}', uniqueString(resourceGroup().id)))]",
+    "subnetPrefix": "10.0.0.0/24",
+    "diagnosticsStorageAccountName": "[toLower(format('diag{0}', uniqueString(resourceGroup().id)))]",
+    "virtualNetworkName": "[toLower(format('vnet{0}', uniqueString(resourceGroup().id)))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "subnetRef": "[format('{0}/subnets/{1}', variables('vnetID'), variables('subnetName'))]",
+    "networkSecurityGroupName": "[toLower(format('nsg{0}', uniqueString(resourceGroup().id)))]",
+    "sshKeyPath": "[format('/home/{0}/.ssh/authorized_keys', parameters('adminUsername'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/images",
+      "apiVersion": "2017-03-30",
+      "name": "[parameters('imageName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "provisioner": "Image_Deploy"
+      },
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Linux",
+            "osState": "Generalized",
+            "blobUri": "[parameters('imageUri')]",
+            "storageAccountType": "Standard_LRS",
+            "caching": "ReadWrite",
+            "diskSizeGB": 127
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2017-10-01",
+      "name": "[variables('diagnosticsStorageAccountName')]",
+      "location": "[variables('location')]",
+      "properties": {},
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-10-01",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ssh",
+            "properties": {
+              "description": "Allow ssh",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-10-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2017-10-01",
+      "name": "[variables('publicIPName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "provisioner": "image_deploy"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2017-10-01",
+      "name": "[variables('nicName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2017-03-30",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+              "publicKeys": [
+                {
+                  "path": "[variables('sshKeyPath')]",
+                  "keyData": "[parameters('sshkeyData')]"
+                }
+              ]
+            }
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "id": "[resourceId('Microsoft.Compute/images', parameters('imageName'))]"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticsStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticsStorageAccountName'))]",
+        "[resourceId('Microsoft.Compute/images', parameters('imageName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+      ]
+    }
+  ]
+}

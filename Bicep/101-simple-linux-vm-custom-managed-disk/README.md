@@ -44,12 +44,11 @@ Deploy the Image using the Quickstart templates from Template Deployment
 Upload the Image to a Storage Account, with Public read Access
 During Deployment, Specify the imageUri Parameter of the vhd
 use the azuredeploy.json and azuredeploy.parameters.json to deploy
-3. Deploy the solution from PowerShell with the following PowerShell script 
 
+3. Deploy the solution from PowerShell with the following PowerShell script 
 Follow the below link to configure the Azure Stack environment with Add-AzureRmEnvironment cmdlet and authenticate a user to the environment
 https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-powershell-configure
   
-
 the [ExampleScript](deploy_image.ps1)  will create
 - a Storage Account and Image Resource Group ( Default: image in image_rg)
 - upload the Linux Image
@@ -59,5 +58,13 @@ the [ExampleScript](deploy_image.ps1)  will create
 .\deploy_image.ps1 -sshKeyFile $HOME/key.pub -Image $HOME\Downloads\MyLinuxVM.vhd
 ```
 
-
-
+4. Deploy using Az CLI
+```Powershell
+# update parameters values in azuredeploy.parametrs.json file and run below commands
+# create resource group if it doesn't exist
+az group create --name testrg --location "local"
+# ARM template deployment
+az deployment group create --resource-group testrg --template-file .\azuredeploy.json --parameters .\azuredeploy.parameters.json
+# Bicep deployment
+az deployment group create --resource-group testrg --template-file .\azuredeploy.bicep --parameters .\azuredeploy.parameters.json  
+```
