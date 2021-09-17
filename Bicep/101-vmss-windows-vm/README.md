@@ -7,3 +7,15 @@ PARAMETER RESTRICTIONS
 
 vmssName must be 3-10 characters in length. It should also be globally unique across all of AzureStack. If it isn't globally unique, it is possible that this template will still deploy properly, but we don't recommend relying on this pseudo-probabilistic behavior.
 InstanceCount must be 20 or less. VM Scale Set supports upto 100 VMs and one should add more storage accounts to support this number.
+
+
+Deploy using Az CLI
+```Powershell
+# update parameters values in azuredeploy.parametrs.json file and run below commands
+# create resource group if it doesn't exist
+az group create --name testrg --location "local"
+# ARM template deployment
+az deployment group create --resource-group testrg --template-file .\azuredeploy.json
+# Bicep deployment
+az deployment group create --resource-group testrg --template-file .\azuredeploy.bicep 
+```
