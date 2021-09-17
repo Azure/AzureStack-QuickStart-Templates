@@ -1,40 +1,46 @@
-﻿{
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "apiProfile": "2020-09-01-hybrid",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.613.9944",
+      "templateHash": "13430676828626038130"
+    }
+  },
   "parameters": {
     "vmSku": {
+      "type": "string",
       "defaultValue": "Standard_D1",
-      "type": "String",
       "metadata": {
         "description": "Size of VMs in the VM Scale Set."
       }
     },
     "vmssName": {
-      "type": "String",
-      "defaultValue": "[substring(concat('vmss', uniquestring(replace(resourceGroup().Id,'-',''))), 0, 8)]",
+      "type": "string",
+      "defaultValue": "[substring(format('vmss{0}', uniqueString(replace(resourceGroup().id, '-', ''))), 0, 8)]",
       "metadata": {
         "description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure Stack. A hash is prepended to this string for some resources, and resource-specific information is appended."
       }
     },
     "instanceCount": {
+      "type": "int",
       "defaultValue": 2,
       "maxValue": 20,
-      "type": "Int",
       "metadata": {
         "description": "Number of VM instances (20 or less)."
       }
     },
     "adminUsername": {
-      "type": "String",
+      "type": "string",
       "defaultValue": "azureuser",
       "metadata": {
         "description": "Admin username on all VMs."
       }
     },
     "adminPassword": {
-      "type": "SecureString",
-      "defaultValue": "[concat('Subscription#', subscription().subscriptionId)]",
+      "type": "secureString",
+      "defaultValue": "[format('Subscription#{0}', subscription().subscriptionId)]",
       "metadata": {
         "description": "Admin password on all VMs."
       }
@@ -61,23 +67,24 @@
       }
     }
   },
+  "functions": [],
   "variables": {
     "location": "[resourceGroup().location]",
-    "vnetName": "[toLower(concat('vnet', uniqueString(resourceGroup().id)))]",
-    "subnetName": "[toLower(concat('subnet', uniqueString(resourceGroup().id)))]",
-    "storageAccountName": "[toLower(concat('SA', uniqueString(resourceGroup().id)))]",
-    "storageAccountContainerName": "[toLower(concat('SC', uniqueString(resourceGroup().id)))]",
+    "vnetName": "[toLower(format('vnet{0}', uniqueString(resourceGroup().id)))]",
+    "subnetName": "[toLower(format('subnet{0}', uniqueString(resourceGroup().id)))]",
+    "storageAccountName": "[toLower(format('SA{0}', uniqueString(resourceGroup().id)))]",
+    "storageAccountContainerName": "[toLower(format('SC{0}', uniqueString(resourceGroup().id)))]",
     "storageAccountType": "Standard_LRS",
     "OSDiskName": "osdisk",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('subnetName'))]",
-    "publicIPAddressName": "[toLower(concat('pip', uniqueString(resourceGroup().id)))]",
-    "vmssDomainName": "[toLower(concat('pubdns', uniqueString(resourceGroup().id)))]",
-    "loadBalancerName": "[concat('LB', uniqueString(resourceGroup().id))]",
-    "loadBalancerFrontEndName": "[concat('LBFrontEnd', uniqueString(resourceGroup().id))]",
-    "loadBalancerBackEndName": "[concat('LBBackEnd', uniqueString(resourceGroup().id))]",
-    "loadBalancerProbeName": "[concat('LBHttpProbe', uniqueString(resourceGroup().id))]",
-    "loadBalancerNatPoolName": "[concat('LBNatPool', uniqueString(resourceGroup().id))]"
+    "subnetRef": "[format('{0}/subnets/{1}', variables('vnetID'), variables('subnetName'))]",
+    "publicIPAddressName": "[toLower(format('pip{0}', uniqueString(resourceGroup().id)))]",
+    "vmssDomainName": "[toLower(format('pubdns{0}', uniqueString(resourceGroup().id)))]",
+    "loadBalancerName": "[format('LB{0}', uniqueString(resourceGroup().id))]",
+    "loadBalancerFrontEndName": "[format('LBFrontEnd{0}', uniqueString(resourceGroup().id))]",
+    "loadBalancerBackEndName": "[format('LBBackEnd{0}', uniqueString(resourceGroup().id))]",
+    "loadBalancerProbeName": "[format('LBHttpProbe{0}', uniqueString(resourceGroup().id))]",
+    "loadBalancerNatPoolName": "[format('LBNatPool{0}', uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -141,7 +148,7 @@
         ],
         "backendAddressPools": [
           {
-            "name": "[variables('loadBalancerBackendName')]"
+            "name": "[variables('loadBalancerBackEndName')]"
           }
         ],
         "loadBalancingRules": [
@@ -152,9 +159,9 @@
                 "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('loadBalancerName'), variables('loadBalancerFrontEndName'))]"
               },
               "backendAddressPool": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('loadBalancerBackendName'))]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('loadBalancerBackEndName'))]"
               },
-              "protocol": "tcp",
+              "protocol": "Tcp",
               "frontendPort": 80,
               "backendPort": 80,
               "enableFloatingIP": false,
@@ -169,7 +176,7 @@
           {
             "name": "[variables('loadBalancerProbeName')]",
             "properties": {
-              "protocol": "tcp",
+              "protocol": "Tcp",
               "port": 80,
               "intervalInSeconds": 5,
               "numberOfProbes": 2
@@ -183,7 +190,7 @@
               "frontendIPConfiguration": {
                 "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('loadBalancerName'), variables('loadBalancerFrontEndName'))]"
               },
-              "protocol": "tcp",
+              "protocol": "Tcp",
               "frontendPortRangeStart": 50000,
               "frontendPortRangeEnd": 50019,
               "backendPort": 3389
@@ -198,12 +205,12 @@
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
       "apiVersion": "2020-06-01",
+      "name": "[parameters('vmssName')]",
       "sku": {
         "name": "[parameters('vmSku')]",
         "tier": "Standard",
         "capacity": "[parameters('instanceCount')]"
       },
-      "name": "[parameters('vmssName')]",
       "location": "[variables('location')]",
       "properties": {
         "upgradePolicy": {
@@ -246,12 +253,12 @@
                         },
                         "loadBalancerBackendAddressPools": [
                           {
-                            "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('loadBalancerBackendName'))]"
+                            "id": "[reference(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))).backendAddressPools[0].id]"
                           }
                         ],
                         "loadBalancerInboundNatPools": [
                           {
-                            "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('loadBalancerNatPoolName'))]"
+                            "id": "[reference(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))).inboundNatPools[0].id]"
                           }
                         ]
                       }
@@ -265,7 +272,7 @@
             "extensions": [
               {
                 "type": "Microsoft.Compute/virtualMachines/extensions",
-                "name": "[concat(parameters('vmssName'),'-LinuxCustomScriptExtension')]",
+                "name": "[format('{0}-LinuxCustomScriptExtension', parameters('vmssName'))]",
                 "properties": {
                   "publisher": "Microsoft.OSTCExtensions",
                   "type": "CustomScriptForLinux",
@@ -282,9 +289,9 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-        "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
       ]
     }
   ]
