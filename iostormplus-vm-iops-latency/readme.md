@@ -61,7 +61,7 @@ They are used to specify the size of the workload VM/disk. Most of them can be c
 | VMSize | string | Standard_DS3_v2 (default)  | The size of the workload VM. |
 | DataDisks | int | 16 | The number of data disks per worload VM, should less than the max number of data disks for the VM size, if you set it to 0 (default), it will be calculated automatically. |
 | DataDiskSizeInGB | int | 128 | The data disk size, if you set it to 0 (default), it will be calculated automatically. |
-| StorageUsagePercentage | int | 60 (default) | The percentage of remaining storage used to create data disks. (10 % - 90 %) |
+| StorageUsagePercentage | int | 80 (default) | The percentage of remaining storage used to create data disks. (10 % - 90 %) |
 | VMOsSku | string | 2016-Datacenter (default) | The OS Sku of the workload VM, only support `2016-Datacenter` and `2019-Datacenter` |
 #### Workload
 They are used to control the IO workload. 
@@ -71,7 +71,7 @@ They are used to control the IO workload.
 | FixedIops | int | 4000 | The fixed IOPS (per VM), if you set it to 0 (default), the fixed IOPS mode will not run. |
 | IoMinQueueDepth | int | 1 (default) | The lowest queue depth value used for DiskSpd, it will be automatically adjusted in GoalSeek mode. |
 | IoThreads | int | 4 | The number of threads value used for DiskSpd, if you set it to 0 (default), it will be calculated automatically. |
-| IoDurationInSec | int | 600 (default) | The IO Duration used for DiskSpd, it determines how long an iteration takes. |
+| IoDurationInSec | int | 1200 (default) | The IO Duration used for DiskSpd, it determines how long an iteration takes. |
 | IoBlockSizeInBytes | int | 4096 (default) | The IO block size used for DiskSpd. |
 | IoWritePercentage | int | 50 (default) | The percentage of write IO used for DiskSpd. |
 | IoRandomIoPercentage | int | 70 (default) | The percentage of random IO (others are sequential) used for DiskSpd. |
