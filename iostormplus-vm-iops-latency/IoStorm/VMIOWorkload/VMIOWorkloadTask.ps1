@@ -162,7 +162,7 @@ function VMIOWorkload {
             $testFileList = BuildFileList -NumDisks $DataDisks -FileName "iobw.tst"
             Log-Info -Message "Test file list: $testFileList"
                         
-            $diskspdCmd = "$diskspdDestination -t2 -b512K -w90 -d1200 -W0 -C0 -o8 -Sh -n -r -c$($fileSizeGB)G $testFileList"
+            $diskspdCmd = "$diskspdDestination -t2 -b512K -w70 -d1800 -W0 -C0 -o8 -Sh -n -r -c$($fileSizeGB)G $testFileList"
             Log-Info -Message "Starting diskspd workload $diskspdCmd"
             cmd /c $diskspdCmd | Out-Null
         } else {
@@ -171,7 +171,7 @@ function VMIOWorkload {
             }
             
             $testFileList = BuildFileList -NumDisks $DataDisks -FileName "iobw.tst"
-            $diskspdCmd = "$diskspdDestination -t2 -b512K -w90 -d1200 -W0 -C0 -o8 -Sh -n -r $testFileList"
+            $diskspdCmd = "$diskspdDestination -t2 -b512K -w70 -d1800 -W0 -C0 -o8 -Sh -n -r $testFileList"
             Log-Info -Message "Starting diskspd workload $diskspdCmd"
             cmd /c $diskspdCmd | Out-Null
         }
@@ -462,9 +462,19 @@ function InitializeDiskPool
         throw "Unexpected number of data disk found. Expected value: $DiskPoolSize. Actual value: $($physicalDisk.Count)."
     }
 
-    $diskPool = Get-StorageSubSystem | New-StoragePool -FriendlyName "testDiskPool" -PhysicalDisks $physicalDisk -ResiliencySettingNameDefault Simple
-    New-Volume -FriendlyName "TestVolume" -FileSystem NTFS -ProvisioningType "Fixed" -Size $($diskPool.Size * 0.95) -StoragePoolUniqueId $($diskPool.UniqueId) -AccessPath "$($DriveLetter):"
-    Format-Volume -DriveLetter $DriveLetter -Force -Confirm:$false
+    $poolName = "TestDiskPool"
+    $vdName = "TestVD"
+    $volName = "TestVolume"
+    $storage = Get-StorageSubSystem
+    New-StoragePool -FriendlyName $poolName -PhysicalDisks $physicalDisk -StorageSubSystemName $storage.Name
+    New-VirtualDisk -FriendlyName $vdName `
+                    -ResiliencySettingName Simple `
+                    -NumberOfColumns $physicalDisk.Count `
+                    -UseMaximumSize -Interleave 65536 -StoragePoolFriendlyName $poolName
+    $vdiskNumber = (Get-Disk -FriendlyName $vdName).Number
+    Initialize-Disk -FriendlyName $vdName -PartitionStyle GPT -PassThru
+    New-Partition -UseMaximumSize -DiskNumber $vdiskNumber -DriveLetter $DriveLetter
+    Format-Volume -DriveLetter $DriveLetter -FileSystem NTFS -NewFileSystemLabel $volName -AllocationUnitSize 65536 -Force -Confirm:$false
 
     return $true
 }
@@ -531,8 +541,9 @@ function InitializeAllDisks
                 WaitForDisk -DiskNumber $diskNumber
             }
 
+            ++$diskNumber
             if (InitializeDiskPool -DiskPoolSize $NumDisks -DriveLetter $driveLetter) {
-                Log-Info -Message "Initializing disk $(++$diskNumber) at $driveLetter with a pool of $NumDisks disks"
+                Log-Info -Message "Initializing disk $diskNumber at $driveLetter with a pool of $NumDisks disks"
             }
         }
     }

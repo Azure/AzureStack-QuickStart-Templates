@@ -85,11 +85,11 @@ function Setup-IoStormControllerShare
     )
 
     # Setup connection to smb share of a controller VM, if net use fails retry until timeout
-    Log-Info -Message "Waiting for a share $ControllerShare to get online by a controller VM"
+    Log-Info -Message "Waiting for a share $ControllerShare to get online by a controller VM."
     $startTime = Get-Date
     $elapsedTime = $(Get-Date) - $startTime
     while($elapsedTime.TotalSeconds -lt $TimeoutInSeconds) {
-        try { net use $ControllerShare /user:$VMAdminUserName $VMAdminPassword | Out-Null } catch { Log-Warning "Failed to connect $($ControllerShare): $_"}
+        try { net use $ControllerShare /user:"testvm\$VMAdminUserName" $VMAdminPassword | Out-Null } catch { Log-Warning "Failed to connect $($ControllerShare): $_"}
         if ((Test-Path $ControllerShare) -eq $false) {
             Log-Info -Message "SMB share $ControllerShare is not accessible."
             Start-Sleep -Seconds 30
@@ -763,7 +763,7 @@ function Start-IoStorm {
         [int]$VMIoMaxLatency = 30,
         [Parameter(Mandatory = $false)]
         [ValidateRange(10, 90)]
-        [int]$StorageUsagePercentage = 60,
+        [int]$StorageUsagePercentage = 80,
         [Parameter(Mandatory = $false)]
         [int]$FixedIops = 0,
         [Parameter(Mandatory = $false)]
@@ -780,7 +780,7 @@ function Start-IoStorm {
         [ValidateRange(0, 1024)]
         [int]$IoThreads = 0, # If you set it to 0, it will be calculated automatically
         [Parameter(Mandatory = $false)]
-        [int]$IoDurationInSec = 600,
+        [int]$IoDurationInSec = 1200,
         [Parameter(Mandatory = $false)]
         [int]$IoBlockSizeInBytes = 4096,
         [Parameter(Mandatory = $false)]
@@ -915,7 +915,6 @@ function Start-IoStorm {
             Log-Info -Message "Found $($allObjStoreVols.Count) Objstore volumes, total remaining capacity $($totRemainingCapacityGB) GB"
 
             $volUsage = $StorageUsagePercentage / 100
-            $maxDataDisksPerRG = 700
             $defaultDataDiskSizeInGB = 256
             $adjustDataDiskSize = $false
             if ($DataDiskSizeInGB -eq 0) {
@@ -924,17 +923,8 @@ function Start-IoStorm {
             }
 
             $totDisks = [math]::Ceiling(($totRemainingCapacityGB * $volUsage) / $DataDiskSizeInGB)
-            if ($totDisks -gt $maxDataDisksPerRG) {
-                if ($adjustDataDiskSize -eq $true) {
-                    $DataDiskSizeInGB = [math]::Min(1023, [math]::Ceiling(($totRemainingCapacityGB * $volUsage) / $maxDataDisksPerRG))
-                    Log-Info -Message "Adjust DataDiskSizeInGB to $DataDiskSizeInGB to meet the resource group policy."
-                    $adjustDataDiskSize = $false
-                }
 
-                $totDisks = $maxDataDisksPerRG
-            }
-
-            $defaultVMCount = $allObjStoreVols.Count * 5 # equals to (the number of nodes) * 5
+            $defaultVMCount = $allObjStoreVols.Count * [math]::Ceiling(112 / $DataDisks) # equals to (the number of nodes) * (112 / (the number of data disks per VM))
             $minVMCount = [math]::Ceiling(($totDisks / $DataDisks))
             if (($minVMCount -gt $defaultVMCount) -and ($VMCount -eq 0)) {
                 $VMCount = $minVMCount
@@ -1090,7 +1080,7 @@ function Start-IoStorm {
         $diskSpdSummaryResults = @()
         # Start signal for all VMs to start IO pre-sync
         "Start IO pre-sync" | Out-File $ioPreSyncStartSignalFile -Encoding ASCII -Force
-        Log-Info -Message "Start IO pre-sync and warm up. ETA: $((Get-Date).AddMinutes(30))."
+        Log-Info -Message "Start IO pre-sync and warm up. ETA: $((Get-Date).AddMinutes(35))."
 
         if ($RestartRun -eq $true) {
             Get-ChildItem -Path "$ioPreSyncShare\" -Recurse | Remove-Item -Force -ErrorAction Stop
