@@ -1,0 +1,7 @@
+{
+    "itemDisplayName": "101-simple-linux-vm-custom-managed-disk",
+    "description": "create linux vm using managed disk ad custom image",
+    "summary": "this example creates a linux vm using custom image and managed disk",
+    "githubUsername": "bottkars",
+    "dateUpdated": "2019-02-18"
+  }
