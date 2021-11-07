@@ -19,10 +19,10 @@
     },
     "vmOsSku": {
       "type": "string",
-      "defaultValue": "2012-R2-Datacenter",
+      "defaultValue": "2016-Datacenter",
       "allowedValues": [
-        "2012-R2-Datacenter",
-        "Windows-Server-Technical-Preview"
+        "2016-Datacenter",
+        "2019-Datacenter"
       ],
       "metadata": {
         "description": "The Windows version for the VM."
@@ -131,7 +131,7 @@
     },
     "vmIoDurationInSec": {
       "type": "int",
-      "defaultValue": 60,
+      "defaultValue": 300,
       "metadata": {
         "description": "VM IO workload duration in seconds."
       }
