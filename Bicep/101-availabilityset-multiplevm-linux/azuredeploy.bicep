@@ -1,9 +1,9 @@
 @description('The name of the Administrator of the new VMs')
 param adminUsername string = 'vmadmin'
 
-@description('The password for the Administrator account of the new VMs. Default value is subscription id')
+@description('ssh key for vm')
 @secure()
-param adminPassword string = 'Subscription#${substring(resourceGroup().id, 15, 36)}'
+param sshkeyData string
 
 @description('Number of VMs to deploy, limit 5 since this sample is using a single storage account')
 @allowed([
@@ -69,6 +69,7 @@ var lbFE = toLower('external-lb-fe-${resourceGroup().name}')
 var publicIPAddressName = toLower('public-ip${resourceGroup().name}')
 var nsgName = toLower('vmnsg${resourceGroup().name}')
 var vmContainerName = 'vhds'
+var sshKeyPath = '/home/${adminUsername}/.ssh/authorized_keys'
 
 resource storage 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   name: storageName
@@ -229,7 +230,17 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2020-06-01' = [for i 
     osProfile: {
       computerName: '${vmNamePrefix}${i}'
       adminUsername: adminUsername
-      adminPassword: adminPassword
+      linuxConfiguration: {
+        disablePasswordAuthentication: true
+        ssh: {
+          publicKeys: [
+            {
+              path: sshKeyPath
+              keyData: sshkeyData
+            }
+          ]
+        }
+      }
     }
     storageProfile: {
       imageReference: {

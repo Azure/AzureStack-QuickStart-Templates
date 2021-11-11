@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
     "parameters": {
       "adminUsername": {
-        "value": "ecsadmin"
+        "value": "azureuser"
       },
-      "adminPassword": {
-        "value": "GEN-PASSWORD"
+      "sshkeyData": {
+        "value": null
       },
       "vmNamePrefix": {
         "value": "ECS"
       },
       "osImagePublisher": {
-        "value": "Centos"
+        "value": "Canonical"
       },
       "vmSize": {
         "value": "Standard_D3"
