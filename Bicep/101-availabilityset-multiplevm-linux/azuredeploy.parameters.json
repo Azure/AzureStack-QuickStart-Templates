@@ -6,13 +6,13 @@
         "value": "ecsadmin"
       },
       "adminPassword": {
-        "value": "GEN-PASSWORD"
+        "value": "Aa1234"
       },
       "vmNamePrefix": {
         "value": "ECS"
       },
       "osImagePublisher": {
-        "value": "Centos"
+        "value": "Canonical"
       },
       "vmSize": {
         "value": "Standard_D3"

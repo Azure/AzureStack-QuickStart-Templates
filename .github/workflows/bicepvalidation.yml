@@ -1,0 +1,116 @@
+name: Validation
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      identity_provider:
+        description: '[Optional] Select an identity provider, "aad" or "adfs", to run on the selected ASH environment type. By default runs all samples in an AAD and ADFS environment.'
+        required: false
+      samples:
+        description: 'Bicep'
+        required: false
+
+jobs:
+  Prepare_CI:
+    runs-on: org
+    steps:
+      - name: Checkout ${{ github.repository }}.
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Resolve environment and samples.
+        id: resolve_environment_and_samples
+        shell: pwsh
+        run: |
+          Import-Module ([System.IO.Path]::Combine($env:AZURESTACK_SDK_CI_REPO,"common.psm1"))
+          $config = Import-ConfigFile
+
+          # Get a random AAD and ADFS environment
+          $inputIdProvider = "${{ github.event.inputs.identity_provider }}" 
+          $environmentJsonArray = Resolve-IdProviderToEnvironmentJSONArray -Config $config -InputIdentityProvider $inputIdProvider
+          echo "::set-output name=ENVIRONMENT_JSON_ARRAY::${environmentJsonArray}"
+
+          # Create JSON string output of samples to run.
+          $branch = ""
+          if ("${{ github.head_ref }}")
+          {
+            $branch  = "${{ github.head_ref }}"
+          }
+          else
+          {
+            $branch = ("${{ github.ref }}" -split "/")[-1]
+          }
+          $inputSamples = ""
+          if ("${{ github.event.inputs.samples }}")
+          {
+            $inputSamples = "bicep:${branch}:[${{ github.event.inputs.samples }}]"
+          }
+          else
+          {
+            $inputSamples = "bicep:${branch}"
+          }
+          $inputJsonArrayString = Resolve-SamplesInputToSamplesJsonArray -Config $config `
+            -Samples $inputSamples
+          echo "::set-output name=INPUT_JSON_ARRAY::${inputJsonArrayString}"
+
+    outputs:
+      ENVIRONMENT_JSON_ARRAY: ${{ steps.resolve_environment_and_samples.outputs.ENVIRONMENT_JSON_ARRAY }}
+      INPUT_JSON_ARRAY: ${{ steps.resolve_environment_and_samples.outputs.INPUT_JSON_ARRAY }}
+
+  Samples_CI:
+    runs-on: org
+    needs: Prepare_CI
+    strategy:
+      fail-fast: false
+      matrix:
+        ENVIRONMENT_JSON_ARRAY: ${{ fromJson(needs.Prepare_CI.outputs.ENVIRONMENT_JSON_ARRAY) }}
+        INPUT_JSON_ARRAY: ${{ fromJson(needs.Prepare_CI.outputs.INPUT_JSON_ARRAY) }}
+    steps:
+      - name: Checkout ${{ github.repository }}.
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Log in with Azure.
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_SP_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Run Azure Stack SDK Samples.
+        shell: pwsh
+        run: |
+          Import-Module ([System.IO.Path]::Combine($env:AZURESTACK_SDK_CI_REPO,"common.psm1"))
+          $config = Import-ConfigFile
+
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
+          $clonedFolderName =  "${{ matrix.ENVIRONMENT_JSON_ARRAY }}-${{ matrix.INPUT_JSON_ARRAY }}" -replace ":","-"
+          $samplesPath = [System.IO.Path]::Combine($config.supplementaryWorkspace, "samples", "azurestack-quickstart-templates-bicep", "run${{ github.run_id }}", $clonedFolderName)
+          if ((Test-Path -Path $samplesPath))
+          {
+            Remove-Item -Path $samplesPath -Force -Recurse
+          }
+          & "$($env:AZURESTACK_SDK_CI_REPO)\invoke-samplesinparallel.ps1" -Sample "${{ matrix.INPUT_JSON_ARRAY }}" `
+            -EnvironmentName "${{ matrix.ENVIRONMENT_JSON_ARRAY }}" `
+            -SamplesPath $samplesPath
+
+  Cleanup:
+    runs-on: org
+    needs: Samples_CI
+    if: always()
+    steps:
+      - name: Clean up samples.
+        if: always()
+        shell: pwsh
+        run: |
+          Import-Module ([System.IO.Path]::Combine($env:AZURESTACK_SDK_CI_REPO,"common.psm1"))
+          $config = Import-ConfigFile
+          $samplesPath = [System.IO.Path]::Combine($config.supplementaryWorkspace, "samples", "azurestack-quickstart-templates-bicep", "run${{ github.run_id }}")
+          if ((Test-Path -Path $samplesPath))
+          {
+            Remove-Item -Path $samplesPath -Force -Recurse
+          }
