@@ -1,10 +1,17 @@
+---
+page_type: sample
+languages: 
+- bicep
+products: 
+- templates
+description: "Sample Bicep templates to deploy resources on AzureStackHub"
+urlFragment: AzureStack-QuickStart-Templates
+---
+
 # This directory contains Bicep samples for AzureStackHub
 
-
 ## Project Bicep - an ARM DSL
-
 Please visit the [Project Bicep](https://github.com/Azure/bicep/blob/main/README.md) main page for full information and links.
-
 
 ## What is Bicep?
 

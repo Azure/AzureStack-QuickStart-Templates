@@ -11,9 +11,9 @@ param instanceCount int = 2
 @description('Admin username on all VMs.')
 param adminUsername string = 'azureuser'
 
-@description('Admin password on all VMs.')
+@description('ssh key for vm')
 @secure()
-param adminPassword string = 'Subscription#${subscription().subscriptionId}'
+param sshkeyData string
 
 @description('Maps to the publisher in the Azure Stack Platform Image Repository manifest file.')
 param osImagePublisher string = 'Canonical'
@@ -40,6 +40,7 @@ var loadBalancerFrontEndName = 'LBFrontEnd${uniqueString(resourceGroup().id)}'
 var loadBalancerBackEndName = 'LBBackEnd${uniqueString(resourceGroup().id)}'
 var loadBalancerProbeName = 'LBHttpProbe${uniqueString(resourceGroup().id)}'
 var loadBalancerNatPoolName = 'LBNatPool${uniqueString(resourceGroup().id)}'
+var sshKeyPath = '/home/${adminUsername}/.ssh/authorized_keys'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   name: storageAccountName
@@ -181,7 +182,17 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2020-06-01' = {
       osProfile: {
         computerNamePrefix: vmssName
         adminUsername: adminUsername
-        adminPassword: adminPassword
+        linuxConfiguration: {
+          disablePasswordAuthentication: true
+          ssh: {
+            publicKeys: [
+              {
+                path: sshKeyPath
+                keyData: sshkeyData
+              }
+            ]
+          }
+        }
       }
       networkProfile: {
         networkInterfaceConfigurations: [

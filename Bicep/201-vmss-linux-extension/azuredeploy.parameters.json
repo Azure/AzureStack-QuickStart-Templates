@@ -12,10 +12,10 @@
       "value": 2
     },
     "adminUsername": {
-      "value": "GEN-UNIQUE-admin"
+      "value": "azureuser"
     },
-    "adminPassword": {
-      "value": "GEN-PASSWORD"
+    "sshkeyData": {
+      "value": null
     },
     "osImagePublisher": {
       "value": "Canonical"
