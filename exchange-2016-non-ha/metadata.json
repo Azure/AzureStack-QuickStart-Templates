@@ -1,7 +1,0 @@
-{
-    "itemDisplayName": "Deploy Exchange on a Windows Server VM on Azure Stack",
-    "description": "Deploy Exchange on a Windows Server VM on Azure Stack",
-    "summary": "This template has default values for all the parameters",
-    "githubUsername": "azurestack",
-    "dateUpdated": "2016-09-20"
-}

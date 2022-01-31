@@ -1,8 +1,0 @@
-{
-    "itemDisplayName": "Template that deploys a load test for personal sites on a given SharePoint 2013 farm",
-    "description": "Template that deploys a load test for personal sites on a given SharePoint 2013 farm",
-    "summary": "This template has default values for all the parameters which works with Sharepoint-non-ha template of Azure stack github",
-    "githubUsername": "azurestack",
-    "dateUpdated": "2016-09-22"
-}
-
