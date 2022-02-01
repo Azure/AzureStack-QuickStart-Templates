@@ -1,8 +1,0 @@
-{
-    "itemDisplayName": "Template that creates a SharePoint 2013 Farm on Windows VMs",
-    "description": "Template that creates a SharePoint 2013 Farm on Windows VMs",
-    "summary": "This template has default values for all the parameters. It request the download path for Sharepoint ISO and corresponding product key",
-    "githubUsername": "azurestack",
-    "dateUpdated": "2016-09-22"
-}
-
