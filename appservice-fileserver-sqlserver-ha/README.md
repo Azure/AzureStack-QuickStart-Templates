@@ -27,17 +27,54 @@ As stated the goal of this template is to deploy the infrastructure needed to su
 
 ## Notes
 
+UPDATE: 2022-10-23
+* This template was updated to support selecting Windows 2016 Server, Windows 2019 Server or Windows 2022 Server for AD and SOFS cluster and SQL2019 on Windows 2019 Server or SQL2016 on Windows 2016 Server for the SQL cluster
+* Files modified:
+  * azuredeploy.json
+    * To add the new SKU selection parameter for AD and SOFS cluster
+    * To add the new Offer selection parameter for SQL cluster
+  * azuredeploy.parameters.json
+    * To add the new SKU parameter for AD and SOFS cluster
+    * To add the new Offer parameter for SQL cluster
+  * nestedtemplates\deploy-ad.json
+    * To change the SKU parameter to allow selection
+  * nestedtemplates\deploy-s2d-cluster.json
+    * To change the SKU parameter to allow selection
+  * nestedtemplates\deploy-sql-cluster.json
+    * To change the ImageOffer parameter to allow selection
+  * dsc\config-s2d.ps1\ConfigS2D.ps1
+    * Changed EnableS2D to a DSCResource and added DSCResource with logic to retry when running the Enable-ClusterStorageSpacesDirect command (the command was changed from Enable-ClusterS2D)
+    * The command Enable-ClusterS2D was changed to Enable-ClusterStorageSpacesDirect due to Enable-ClusterS2D deprecation
+  * dsc\config-s2d.ps1\xFailOverCluster\DSCResources\MicrosoftAzure_xCluster\MicrosoftAzure_xCluster.psm1
+    * On Set-TargetResource function to hande multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster
+  * dsc\config-sql.ps1\xSQL\DSCResources\MicrosoftAzure_xSqlServer\MicrosoftAzure_xSqlServer.psm1
+    * Added support for SQL 2019 (MSSQL15) when settings the data and log files registry keys and setting the variables with the data and log files path
+  * dsc\config-sql.ps1\xSQL\DSCResources\MicrosoftAzure_xSQLServerSettings\MicrosoftAzure_xSQLServerSettings.psm1
+    * Added support for SQL 2019 (MSSQL15) when settings the data and log files registry keys and setting the variables with the data and log files path
+  * dsc\config-sql.ps1\xFailOverCluster\DSCResources\MicrosoftAzure_xCluster\MicrosoftAzure_xCluster.psm1
+    * On Set-TargetResource function to hande multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster
+
 This template uses Azure Stack Marketplace images. These need to be available on your Azure Stack instance:
 
-* Windows Server 2016 Datacenter Core Image (for AD and File Server VMs)
-* SQL Server 2016 SP2 on Windows Server 2016 (Enterprise)
-* Latest SQL IaaS Extension 1.2.x (currently 1.2.30)
-* Latest PowerShell Desired State Configuration Extension (currently 2.76.0)
+* One of the possible Windows images (for AD and File Server VMs):
+  * Windows Server 2016 Datacenter Core
+  * Windows Server 2016 Datacenter
+  * Windows Server 2019 Datacenter Core
+  * Windows Server 2019 Datacenter
+  * Windows Server 2022 Datacenter Core
+  * Windows Server 2022 Datacenter
+* One of the accepted SQL Server images (For SQL Cluster):
+  * SQL Server 2016 SP2 on Windows Server 2016 (Enterprise)
+  * SQL Server 2019 on Windows Server 2019 (Enterprise)
+* Latest SQL IaaS Extension 1.3.x (currently 1.3.20710)
+* Latest PowerShell Desired State Configuration Extension (currently 2.77.0.0)
 
 ## Parameters
 
 | Parameter Name | Description | Type | Default Value
 | --- | --- | --- | ---
+| OSBaseVersion | SKU for AD and SOFS cluster Windows images | string | 2019-Datacenter-Core
+| OSSQLVersion | Offer SQL cluster images | string | sql2019-ws2019
 | namePrefix | prefix to be used in resource naming | string | aps
 | domainVmSize | VM size for AD VMs | string | Standard_DS1_v2
 | filServerVmSize | VM size for file server VMs | string | Standard_DS2_v2

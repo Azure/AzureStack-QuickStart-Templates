@@ -30,19 +30,19 @@
         "description": "Password for the Administrator account of the existing Active Directory Domain"
       }
     },
-    "sqlServerServiceAccountUserName":{
+    "sqlServerServiceAccountUserName": {
       "type": "string"
     },
-    "sqlServerServiceAccountPassword":{
+    "sqlServerServiceAccountPassword": {
       "type": "securestring"
     },
-    "sqlLogin":{
+    "sqlLogin": {
       "type": "string"
     },
-    "sqlLoginPassword":{
+    "sqlLoginPassword": {
       "type": "securestring"
     },
-    "SqlListenerIP":{
+    "SqlListenerIP": {
       "type": "string"
     },
     "nicSubnetUri": {
@@ -86,8 +86,15 @@
       "defaultValue": "MicrosoftSQLServer"
     },
     "imageOffer": {
+      "allowedValues": [
+        "sql2019-ws2019",
+        "SQL2016SP2-WS2016"
+      ],
       "type": "string",
-      "defaultValue": "SQL2016SP2-WS2016"
+      "metadata": {
+        "description": "OS and SQL version on SQL Cluster"
+      },
+      "defaultValue": "sql2019-ws2019"
     },
     "imageSKU": {
       "type": "string",
@@ -118,25 +125,25 @@
     "vmNamePrefix": "[concat(parameters('namePrefix'),'-sql-')]",
     "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
     "vmLoopTemplateURL": "[concat(parameters('artifactsLocation'),'/nestedtemplates/newVM.json',parameters('artifactsLocationSasToken'))]",
-    "sqllbName":"[concat(parameters('namePrefix'),'-sql-lb')]",
-    "sqlLBFE":"[concat(parameters('namePrefix'),'-sql-lbfe')]",
-    "sqlLBBE":"[concat(parameters('namePrefix'),'-sql-lbbe')]",
-    "SQLAOProbe":"[concat(parameters('namePrefix'),'-sql-probe')]",
-    "SqlLBID":"[resourceId('Microsoft.Network/loadBalancers',variables('sqllbName'))]",
-    "sqlLBBEID":"[concat(variables('SqlLBID'),'/backendAddressPools/',variables('sqlLBBE'))]",
-    "sqllbFEConfigID":"[concat(variables('SqlLBID'),'/frontendIPConfigurations/',variables('sqlLBFE'))]",
-    "sqllbProbeID":"[concat(variables('SqlLBID'),'/probes/',variables('SQLAOProbe'))]",
-    "createClusterModulesURL":"[concat(parameters('artifactsLocation'),'/dsc/config-sql.ps1.zip',parameters('artifactsLocationSasToken'))]",
-    "createClusterConfigurationFunction":"config-sql.ps1\\config-sql",
-    "sqlAOPrepareModulesURL":"[concat(parameters('artifactsLocation'),'/dsc/prep-sql.ps1.zip',parameters('artifactsLocationSasToken'))]",
-    "sqlAOPrepareConfigurationFunction":"prep-sql.ps1\\prep-sql",
-    "sqlAOEPName":"aodns-hadr",
-    "clusterName":"aodns-fc",
-    "sqlAOAGName":"alwayson-ag",
-    "sqlAOListenerName":"aon-listener-lensqlhademo",
-    "sqlAOListenerPort":1433,
-    "sqlLBIPAddress":"[parameters('SqlListenerIP')]",
-    "adPDCVMName":"[concat(parameters('namePrefix'),'-ad-0')]"
+    "sqllbName": "[concat(parameters('namePrefix'),'-sql-lb')]",
+    "sqlLBFE": "[concat(parameters('namePrefix'),'-sql-lbfe')]",
+    "sqlLBBE": "[concat(parameters('namePrefix'),'-sql-lbbe')]",
+    "SQLAOProbe": "[concat(parameters('namePrefix'),'-sql-probe')]",
+    "SqlLBID": "[resourceId('Microsoft.Network/loadBalancers',variables('sqllbName'))]",
+    "sqlLBBEID": "[concat(variables('SqlLBID'),'/backendAddressPools/',variables('sqlLBBE'))]",
+    "sqllbFEConfigID": "[concat(variables('SqlLBID'),'/frontendIPConfigurations/',variables('sqlLBFE'))]",
+    "sqllbProbeID": "[concat(variables('SqlLBID'),'/probes/',variables('SQLAOProbe'))]",
+    "createClusterModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/config-sql.ps1.zip',parameters('artifactsLocationSasToken'))]",
+    "createClusterConfigurationFunction": "config-sql.ps1\\config-sql",
+    "sqlAOPrepareModulesURL": "[concat(parameters('artifactsLocation'),'/dsc/prep-sql.ps1.zip',parameters('artifactsLocationSasToken'))]",
+    "sqlAOPrepareConfigurationFunction": "prep-sql.ps1\\prep-sql",
+    "sqlAOEPName": "aodns-hadr",
+    "clusterName": "aodns-fc",
+    "sqlAOAGName": "alwayson-ag",
+    "sqlAOListenerName": "aon-listener-lensqlhademo",
+    "sqlAOListenerPort": 1433,
+    "sqlLBIPAddress": "[parameters('SqlListenerIP')]",
+    "adPDCVMName": "[concat(parameters('namePrefix'),'-ad-0')]"
   },
   "resources": [
     {
@@ -197,7 +204,7 @@
               },
               "protocol": "Tcp",
               "frontendPort": "[variables('sqlAOListenerPort')]",
-              "backendPort":  "[variables('sqlAOListenerPort')]",
+              "backendPort": "[variables('sqlAOListenerPort')]",
               "enableFloatingIP": true
             }
           }
@@ -237,9 +244,9 @@
               },
               "loadBalancerBackendAddressPools": [
                 {
-                    "id": "[variables('sqlLBBEID')]"
+                  "id": "[variables('sqlLBBEID')]"
                 }
-            ]
+              ]
             }
           }
         ]
@@ -343,109 +350,109 @@
         }
       }
     },
-    {  
-      "type":"Microsoft.Compute/virtualMachines/extensions",
-      "name":"[concat(variables('vmNamePrefix'),'0/sqlAOPrepare')]",
-      "location":"[parameters('location')]",
-      "dependsOn":[
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmNamePrefix'),'0/sqlAOPrepare')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
         "virtualMachineExtensionLoop"
-              ],
-      "properties":{  
-         "publisher":"Microsoft.Powershell",
-         "type":"DSC",
-         "typeHandlerVersion":"2.19",
-         "autoUpgradeMinorVersion":true,
-         "settings":{  
-            "modulesURL":"[variables('sqlAOPrepareModulesURL')]",
-            "configurationFunction":"[variables('sqlAOPrepareConfigurationFunction')]",
-            "properties":{  
-               "domainName":"[parameters('domainName')]",
-               "sqlAlwaysOnEndpointName":"[variables('sqlAOEPName')]",
-               "adminCreds":{  
-                  "userName":"[parameters('adminUserName')]",
-                  "password":"privateSettingsRef:AdminPassword"
-               },
-               "sqlServiceCreds":{  
-                  "userName":"[parameters('sqlServerServiceAccountUserName')]",
-                  "password":"privateSettingsRef:SqlServerServiceAccountPassword"
-               },
-               "NumberOfDisks":"[parameters('vmDiskCount')]",
-               "WorkloadType":"GENERAL"
-            }
-         },
-         "protectedSettings":{  
-            "items":{  
-               "adminPassword":"[parameters('adminPassword')]",
-               "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]"
-            }
-         }
-      }
-   },
-   {  
-    "type":"Microsoft.Compute/virtualMachines/extensions",
-    "name":"[concat(variables('vmNamePrefix'),'1/configuringAlwaysOn')]",
-    "location":"[parameters('location')]",
-    "dependsOn": [
-      "[resourceId('Microsoft.Compute/virtualMachines/extensions',  concat(variables('vmNamePrefix'),'0'), 'sqlAOPrepare')]"
-    ],
-    "properties":{  
-       "publisher":"Microsoft.Powershell",
-       "type":"DSC",
-       "typeHandlerVersion":"2.19",
-       "autoUpgradeMinorVersion":true,
-       "settings":{  
-          "modulesURL":"[variables('createClusterModulesURL')]",
-          "configurationFunction":"[variables('createClusterConfigurationFunction')]",
-          "properties":{  
-             "domainName":"[parameters('domainName')]",
-             "clusterName":"[variables('clusterName')]",
-             "witnessStorageName": "[variables('witnessStorageName')]",
-             "witnessStorageEndpoint": "[replace(split(reference(concat('Microsoft.Storage/storageAccounts/', variables('witnessStorageName'))).primaryEndpoints.blob, 'blob.')[1], '/', '')]",
-             "witnessStorageKey": {
-               "userName": "PLACEHOLDER-DO-NOT-USE",
-               "password": "PrivateSettingsRef:witnessStorageKey"
-             },             
-             "nodes":[  
-                "[concat(variables('vmNamePrefix'),'0')]",
-                "[concat(variables('vmNamePrefix'),'1')]"
-             ],
-             "sqlAlwaysOnEndpointName":"[variables('sqlAOEPName')]",
-             "sqlAlwaysOnAvailabilityGroupName":"[variables('sqlAOAGName')]",
-             "sqlAlwaysOnAvailabilityGroupListenerName":"[variables('sqlAOListenerName')]",
-             "SqlAlwaysOnAvailabilityGroupListenerPort":"[variables('sqlAOListenerPort')]",
-             "databaseNames":"AutoHa-sample",
-             "lbName":"[variables('sqlLBName')]",
-             "lbAddress":"[variables('sqlLBIPAddress')]",
-             "primaryReplica":"[concat(variables('vmNamePrefix'),'1')]",
-             "secondaryReplica":"[concat(variables('vmNamePrefix'),'0')]",
-             "dnsServerName":"[variables('adPDCVMName')]",
-             "adminCreds":{  
-                "userName":"[parameters('adminUserName')]",
-                "password":"privateSettingsRef:adminPassword"
-             },
-             "sqlServiceCreds":{  
-                "userName":"[parameters('sqlServerServiceAccountUserName')]",
-                "password":"privateSettingsRef:sqlServerServiceAccountPassword"
-             },
-             "SQLAuthCreds":{  
-                "userName":"sqlsa",
-                "password":"privateSettingsRef:sqlAuthPassword"
-             },
-             "NumberOfDisks":"[parameters('vmDiskCount')]",
-             "WorkloadType":"GENERAL"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.19",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "modulesURL": "[variables('sqlAOPrepareModulesURL')]",
+          "configurationFunction": "[variables('sqlAOPrepareConfigurationFunction')]",
+          "properties": {
+            "domainName": "[parameters('domainName')]",
+            "sqlAlwaysOnEndpointName": "[variables('sqlAOEPName')]",
+            "adminCreds": {
+              "userName": "[parameters('adminUserName')]",
+              "password": "privateSettingsRef:AdminPassword"
+            },
+            "sqlServiceCreds": {
+              "userName": "[parameters('sqlServerServiceAccountUserName')]",
+              "password": "privateSettingsRef:SqlServerServiceAccountPassword"
+            },
+            "NumberOfDisks": "[parameters('vmDiskCount')]",
+            "WorkloadType": "GENERAL"
           }
-       },
-       "protectedSettings":{  
-          "items":{  
-             "adminPassword":"[parameters('adminPassword')]",
-             "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]",
-             "sqlAuthPassword":"[parameters('sqlServerServiceAccountPassword')]",
-             "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"
+        },
+        "protectedSettings": {
+          "items": {
+            "adminPassword": "[parameters('adminPassword')]",
+            "sqlServerServiceAccountPassword": "[parameters('sqlServerServiceAccountPassword')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmNamePrefix'),'1/configuringAlwaysOn')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/extensions',  concat(variables('vmNamePrefix'),'0'), 'sqlAOPrepare')]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.19",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "modulesURL": "[variables('createClusterModulesURL')]",
+          "configurationFunction": "[variables('createClusterConfigurationFunction')]",
+          "properties": {
+            "domainName": "[parameters('domainName')]",
+            "clusterName": "[variables('clusterName')]",
+            "witnessStorageName": "[variables('witnessStorageName')]",
+            "witnessStorageEndpoint": "[replace(split(reference(concat('Microsoft.Storage/storageAccounts/', variables('witnessStorageName'))).primaryEndpoints.blob, 'blob.')[1], '/', '')]",
+            "witnessStorageKey": {
+              "userName": "PLACEHOLDER-DO-NOT-USE",
+              "password": "PrivateSettingsRef:witnessStorageKey"
+            },
+            "nodes": [
+              "[concat(variables('vmNamePrefix'),'0')]",
+              "[concat(variables('vmNamePrefix'),'1')]"
+            ],
+            "sqlAlwaysOnEndpointName": "[variables('sqlAOEPName')]",
+            "sqlAlwaysOnAvailabilityGroupName": "[variables('sqlAOAGName')]",
+            "sqlAlwaysOnAvailabilityGroupListenerName": "[variables('sqlAOListenerName')]",
+            "SqlAlwaysOnAvailabilityGroupListenerPort": "[variables('sqlAOListenerPort')]",
+            "databaseNames": "AutoHa-sample",
+            "lbName": "[variables('sqlLBName')]",
+            "lbAddress": "[variables('sqlLBIPAddress')]",
+            "primaryReplica": "[concat(variables('vmNamePrefix'),'1')]",
+            "secondaryReplica": "[concat(variables('vmNamePrefix'),'0')]",
+            "dnsServerName": "[variables('adPDCVMName')]",
+            "adminCreds": {
+              "userName": "[parameters('adminUserName')]",
+              "password": "privateSettingsRef:adminPassword"
+            },
+            "sqlServiceCreds": {
+              "userName": "[parameters('sqlServerServiceAccountUserName')]",
+              "password": "privateSettingsRef:sqlServerServiceAccountPassword"
+            },
+            "SQLAuthCreds": {
+              "userName": "sqlsa",
+              "password": "privateSettingsRef:sqlAuthPassword"
+            },
+            "NumberOfDisks": "[parameters('vmDiskCount')]",
+            "WorkloadType": "GENERAL"
+          }
+        },
+        "protectedSettings": {
+          "items": {
+            "adminPassword": "[parameters('adminPassword')]",
+            "sqlServerServiceAccountPassword": "[parameters('sqlServerServiceAccountPassword')]",
+            "sqlAuthPassword": "[parameters('sqlServerServiceAccountPassword')]",
+            "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"
 
           }
-       }
+        }
+      }
     }
- }
   ],
   "outputs": {}
 }

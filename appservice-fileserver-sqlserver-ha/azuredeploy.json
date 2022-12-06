@@ -3,6 +3,33 @@
   "apiProfile": "2018-03-01-hybrid",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "OSBaseVersion": {
+      "allowedValues": [
+        "2022-Datacenter-core",
+        "2022-Datacenter",
+        "2019-Datacenter-Core",
+        "2019-Datacenter",
+        "2016-Datacenter-Server-Core",
+        "2016-Datacenter"
+      ],
+      "type": "string",
+      "metadata": {
+        "description": "OS for S2D and DCs"
+      },
+      "defaultValue": "2019-Datacenter-Core"
+
+    },
+    "OSSQLVersion": {
+      "allowedValues": [
+        "sql2019-ws2019",
+        "SQL2016SP2-WS2016"
+      ],
+      "type": "string",
+      "metadata": {
+        "description": "OS and SQL version on SQL Cluster"
+      },
+      "defaultValue": "sql2019-ws2019"
+    },
     "namePrefix": {
       "type": "string",
       "minLength": 3,
@@ -175,8 +202,8 @@
     "publisherSubnetPrefix": "10.0.5.0/24",
     "frontendadSubnetPrefix": "10.0.6.0/24",
     "workerSubnetPrefix": "10.0.8.0/21",
-    "adStatipIP":["10.0.0.100","10.0.0.101"],
-    "sqllistenerip":"10.0.1.100",
+    "adStatipIP": [ "10.0.0.100", "10.0.0.101" ],
+    "sqllistenerip": "10.0.1.100",
     "networkSettings": {
       "vnetName": "[variables('names').vnet]",
       "addressSpace": {
@@ -307,6 +334,10 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+
+          "imageSKU": {
+            "value": "[parameters('OSBaseVersion')]"
+          },
           "namePrefix": {
             "value": "[parameters('namePrefix')]"
           },
@@ -319,8 +350,8 @@
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
-          "staticIP":{
-            "value":"[variables('adStatipIP')]"
+          "staticIP": {
+            "value": "[variables('adStatipIP')]"
           },
           "nicSubnetUri": {
             "value": "[variables('adsubnetRef')]"
@@ -362,8 +393,8 @@
           "networkSettings": {
             "value": "[variables('networkSettings')]"
           },
-          "staticIP":{
-            "value":"[variables('adStatipIP')]"
+          "staticIP": {
+            "value": "[variables('adStatipIP')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -387,6 +418,9 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "imageSKU": {
+            "value": "[parameters('OSBaseVersion')]"
+          },
           "namePrefix": {
             "value": "[parameters('namePrefix')]"
           },
@@ -457,6 +491,10 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+
+          "imageOffer": {
+            "value": "[parameters('OSSQLVersion')]"
+          },
           "namePrefix": {
             "value": "[parameters('namePrefix')]"
           },
@@ -475,14 +513,14 @@
           "sqlServerServiceAccountPassword": {
             "value": "[parameters('sqlServerServiceAccountPassword')]"
           },
-          "sqlLogin":{
-            "value":"[parameters('sqlLogin')]"
+          "sqlLogin": {
+            "value": "[parameters('sqlLogin')]"
           },
-          "sqlLoginPassword":{
-            "value":"[parameters('sqlLoginPassword')]"
+          "sqlLoginPassword": {
+            "value": "[parameters('sqlLoginPassword')]"
           },
-          "SqlListenerIP":{
-            "value":"[variables('sqllistenerip')]"
+          "SqlListenerIP": {
+            "value": "[variables('sqllistenerip')]"
           },
           "nicSubnetUri": {
             "value": "[variables('sqlsubnetRef')]"
@@ -517,19 +555,19 @@
       "type": "string",
       "value": "[concat('\\\\',reference('deployS2DCluster').outputs.sofsName.value,'.',parameters('domainName'),'\\',reference('deployS2DCluster').outputs.shareName.value)]"
     },
-    "FileShareOwner":{
+    "FileShareOwner": {
       "type": "string",
       "value": "[concat(parameters('domainName'),'\\',parameters('fileShareOwnerUserName'))]"
     },
-    "FileShareUser":{
+    "FileShareUser": {
       "type": "string",
       "value": "[concat(parameters('domainName'),'\\',parameters('fileShareUserUserName'))]"
     },
-    "SQLserver":{
+    "SQLserver": {
       "type": "string",
       "value": "[variables('sqllistenerip')]"
     },
-    "SQLUser":{
+    "SQLUser": {
       "type": "string",
       "value": "[parameters('sqlLogin')]"
     }

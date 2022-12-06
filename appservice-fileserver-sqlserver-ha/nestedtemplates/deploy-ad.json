@@ -30,7 +30,7 @@
                 "description": "Password for the Administrator account of the existing Active Directory Domain"
             }
         },
-        "staticIP":{
+        "staticIP": {
             "type": "array"
         },
         "nicSubnetUri": {
@@ -78,8 +78,20 @@
             "defaultValue": "WindowsServer"
         },
         "imageSKU": {
+            "allowedValues": [
+                "2019-Datacenter-Core",
+                "2019-Datacenter",
+                "2016-Datacenter-Server-Core",
+                "2016-Datacenter",
+                "2022-Datacenter-core",
+                "2022-Datacenter"
+            ],
             "type": "string",
-            "defaultValue": "2016-Datacenter-Server-Core"
+            "metadata": {
+                "description": "OS for S2D and DCs"
+            },
+            "defaultValue": "2019-Datacenter-Core"
+
         },
         "imageVersion": {
             "type": "string",
@@ -250,7 +262,7 @@
                     "ConfigurationFunction": "[variables('adBDCConfigurationFunction')]",
                     "Properties": {
                         "DomainName": "[parameters('domainName')]",
-                        "DNSServer":"[parameters('staticIP')[0]]",
+                        "DNSServer": "[parameters('staticIP')[0]]",
                         "AdminCreds": {
                             "UserName": "[parameters('adminUsername')]",
                             "Password": "PrivateSettingsRef:AdminPassword"
