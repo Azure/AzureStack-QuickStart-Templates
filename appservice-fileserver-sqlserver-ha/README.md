@@ -8,8 +8,8 @@ This template will deploy all the infrastructure required for Azure Stack AppSer
 * Network security groups for file server, SQL server and AD subnets
 * Storage accounts for VM disks and cluster cloud witness
 * One internal load balancer for SQL VMs with private IP bound to the SQL Always On listener
-* Two VM (WS2016Core) configured as Domain Controllers for a new forest with a single domain
-* Two VM (WS2016Core) configured as Storage Spaces Direct File share cluster 
+* Two VM configured as Domain Controllers for a new forest with a single domain
+* Two VM configured as Storage Spaces Direct File share cluster 
 * Three Availability Sets, for AD, Fileserver cluster and SQL cluster 
 
 # Deploying the AppService Resource Provider
@@ -28,7 +28,7 @@ As stated the goal of this template is to deploy the infrastructure needed to su
 ## Notes
 
 UPDATE: 2022-10-23
-* This template was updated to support selecting Windows 2016 Server, Windows 2019 Server or Windows 2022 Server for AD and SOFS cluster and SQL2019 on Windows 2019 Server or SQL2016 on Windows 2016 Server for the SQL cluster
+* This template was updated to support selecting Windows 2019 Server or Windows 2022 Server for AD and SOFS cluster and SQL2019 on Windows 2019 Server for the SQL cluster
 * Files modified:
   * azuredeploy.json
     * To add the new SKU selection parameter for AD and SOFS cluster
