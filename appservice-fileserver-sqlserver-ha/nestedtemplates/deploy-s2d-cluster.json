@@ -113,8 +113,18 @@
       "defaultValue": "WindowsServer"
     },
     "imageSKU": {
+      "allowedValues": [
+        "2019-Datacenter-Core",
+        "2019-Datacenter",
+        "2022-Datacenter-core",
+        "2022-Datacenter"
+      ],
       "type": "string",
-      "defaultValue": "2016-Datacenter-Server-Core"
+      "metadata": {
+        "description": "OS for S2D and DCs"
+      },
+      "defaultValue": "2019-Datacenter-Core"
+
     },
     "imageVersion": {
       "type": "string",
@@ -199,7 +209,7 @@
       },
       "name": "[concat(variables('vmNamePrefix'),copyindex(),'-newVM')]",
       "dependsOn": [
-       "nicLoop",
+        "nicLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
       ],
       "properties": {
@@ -333,8 +343,8 @@
           "items": {
             "adminPassword": "[parameters('adminPassword')]",
             "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]",
-            "fileShareOwnerAccountPassword" :"[parameters('fileShareOwnerPassword')]",
-            "fileShareUserPassword" : "[parameters('fileShareUserPassword')]"
+            "fileShareOwnerAccountPassword": "[parameters('fileShareOwnerPassword')]",
+            "fileShareUserPassword": "[parameters('fileShareUserPassword')]"
           }
         }
       }
