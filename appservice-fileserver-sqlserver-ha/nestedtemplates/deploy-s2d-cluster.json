@@ -116,8 +116,6 @@
       "allowedValues": [
         "2019-Datacenter-Core",
         "2019-Datacenter",
-        "2016-Datacenter-Server-Core",
-        "2016-Datacenter",
         "2022-Datacenter-core",
         "2022-Datacenter"
       ],

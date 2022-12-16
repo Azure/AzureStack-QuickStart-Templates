@@ -57,14 +57,11 @@ UPDATE: 2022-10-23
 This template uses Azure Stack Marketplace images. These need to be available on your Azure Stack instance:
 
 * One of the possible Windows images (for AD and File Server VMs):
-  * Windows Server 2016 Datacenter Core
-  * Windows Server 2016 Datacenter
   * Windows Server 2019 Datacenter Core
   * Windows Server 2019 Datacenter
   * Windows Server 2022 Datacenter Core
   * Windows Server 2022 Datacenter
 * One of the accepted SQL Server images (For SQL Cluster):
-  * SQL Server 2016 SP2 on Windows Server 2016 (Enterprise)
   * SQL Server 2019 on Windows Server 2019 (Enterprise)
 * Latest SQL IaaS Extension 1.3.x (currently 1.3.20710)
 * Latest PowerShell Desired State Configuration Extension (currently 2.77.0.0)

@@ -87,8 +87,7 @@
     },
     "imageOffer": {
       "allowedValues": [
-        "sql2019-ws2019",
-        "SQL2016SP2-WS2016"
+        "sql2019-ws2019"
       ],
       "type": "string",
       "metadata": {
