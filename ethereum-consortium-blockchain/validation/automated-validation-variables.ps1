@@ -13,6 +13,6 @@ $MARKETPLACE_TEMPLATE_URI = $MARKETPLACE_BASE_URL+"\mainTemplate.json";
 $QUICKSTART_TEMPLATE_URI  = "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/ethereum-consortium-blockchain-network/azuredeploy.json";
 
 $NOTIFICATION_ENABLED     = "TRUE"; # Any value other than "TRUE" will disable notification
-$NOTIFICATION_USER_NAME   = "azure_bc8d0746cc32dcb3aceee23ddb70a0f7@azure.com"; # Username of sendgrid account
+$NOTIFICATION_USER_NAME   = ""; # Username of sendgrid account
 $NOTIFICATION_PASSWORD    = ""; # Password of sendgrid account (Stored in Key Vault of Runner subscription)
 $NOTIFICATION_ALIAS       = "";
