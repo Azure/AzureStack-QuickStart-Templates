@@ -12,9 +12,9 @@
 #####
 
 # Constants
-$SERVICE_PRINCIPAL_NAME     = "http://blockchain-app-dev";
-$CLIENT_ID                  = "ff15344d-ba38-4088-b9e3-42558a3a3d23"; # blockchain dev service principle username (password is retrieved from key vault)
-$TENANT_ID                  = "72f988bf-86f1-41af-91ab-2d7cd011db47"; # @microsoft.com tenant
+$SERVICE_PRINCIPAL_NAME     = "";
+$CLIENT_ID                  = ""; # blockchain dev service principle username (password is retrieved from key vault)
+$TENANT_ID                  = ""; # @microsoft.com tenant
 $PRE_VALIDATION_SLEEP_SEC   = 90;
 $CONNECTION_SLEEP_SEC       = 300;
 
