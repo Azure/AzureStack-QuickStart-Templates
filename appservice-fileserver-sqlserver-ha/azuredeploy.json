@@ -14,7 +14,7 @@
       "metadata": {
         "description": "OS for S2D and DCs"
       },
-      "defaultValue": "2019-Datacenter-Core"
+      "defaultValue": "2022-Datacenter-Core"
 
     },
     "OSSQLVersion": {
