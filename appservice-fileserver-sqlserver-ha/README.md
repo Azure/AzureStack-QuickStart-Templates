@@ -27,7 +27,68 @@ As stated the goal of this template is to deploy the infrastructure needed to su
 
 ## Notes
 
-UPDATE: 2022-10-23
+⚠️ **2025-06-12 - Fixed and issue that caused a failure while deploying Active Directory**
+
+This template uses Azure Stack Marketplace images. These need to be available on your Azure Stack instance:
+
+* One of the possible Windows images (for AD and File Server VMs):
+  * Windows Server 2022 Datacenter Core
+  * Windows Server 2022 Datacenter
+  * Windows Server 2019 Datacenter Core
+  * Windows Server 2019 Datacenter
+* One of the accepted SQL Server images (For SQL Cluster):
+  * SQL Server 2019 on Windows Server 2019 (Enterprise)
+* Latest SQL IaaS Extension 1.3.x (currently 1.3.20710)
+* Latest PowerShell Desired State Configuration Extension (currently 2.77.0.0)
+
+## Parameters
+
+| Parameter Name | Description | Type | Default Value |
+| --- | --- | --- | --- |
+| OSBaseVersion | SKU for AD and SOFS cluster Windows images | string | 2019-Datacenter-Core |
+| OSSQLVersion | Offer SQL cluster images | string | sql2019-ws2019 |
+| namePrefix | prefix to be used in resource naming | string | aps |
+| domainVmSize | VM size for AD VMs | string | Standard_DS1_v2 |
+| filServerVmSize | VM size for file server VMs | string | Standard_DS2_v2 |
+| sqlVmSize | VM size for SQL VMs | string | Standard_DS2_v2 |
+| domainName | dns domain name of new domain | string | appsvc.local |
+| adminUsername | Username for domain admin account | string | appsvcadmin |
+| adminPassword | password for domain admin account | secure string | |
+| fileShareOwnerUserName | Username for the file share owner account | string | FileShareOwner |
+| fileShareOwnerPassword | password for file share owner account | secure string | |
+| fileShareUserUserName | Username for the file share user account | string | FileShareUser |
+| fileShareUserPassword | password for domain admin account | secure string | |
+| sqlServerServiceAccountUserName | Username for SQL service account | string | svcSQL |
+| sqlServerServiceAccountPassword | password for SQL service account | secure string | |
+| sqlLogin | Username for the SQL login | string | sqlsa |
+| sqlLoginPassword | password for SQL login account | secure string | |
+| sofsName | Name of the Scale-out File Server | string | sofs01 |
+| shareName | Name of the Fileshare | string | WebSites |
+| artifactsLocation | Blob store where all deployment artifacts are stored | string |  https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/appservice-fileserver-sqlserver-ha  |
+| artifactsLocationSasToken | SAS token for artifact location if required | secure string | |
+| location | location to be used for the deployment | string | |
+
+## Outputs
+
+| Parameter Name | Description |
+| --- | --- |
+| FileSharePath | FQDN of the file server |
+| FileShareOwner | Name of File Share Owner Account |
+| FileShareUser | Name of File Share User Account |
+| SQLserver | Name of SQL account |
+| SQLUser | Name of SQL Server |
+
+## Change Log
+
+### UPDATE: 2025-06-12
+
+* In dsc\config-second-dc.ps1.zip updated DSC modules:
+  * xActiveDirectory 2.16.0.0 updated to ActiveDirectoryDsc 6.6.0
+    * This fixes an issue reported by some users where the PDC or BDC deployment would fail while installiing and configuring the Active Directory windows role
+* Changed the default value for parameter *OSBaseVersion* from *2019-Datacenter-Core* to *2022-Datacenter-Core*
+
+### UPDATE: 2022-10-23
+
 * This template was updated to support selecting Windows 2019 Server or Windows 2022 Server for AD and SOFS cluster and SQL2019 on Windows 2019 Server for the SQL cluster
 * Files modified:
   * azuredeploy.json
@@ -53,52 +114,3 @@ UPDATE: 2022-10-23
     * Added support for SQL 2019 (MSSQL15) when settings the data and log files registry keys and setting the variables with the data and log files path
   * dsc\config-sql.ps1\xFailOverCluster\DSCResources\MicrosoftAzure_xCluster\MicrosoftAzure_xCluster.psm1
     * On Set-TargetResource function to hande multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster
-
-This template uses Azure Stack Marketplace images. These need to be available on your Azure Stack instance:
-
-* One of the possible Windows images (for AD and File Server VMs):
-  * Windows Server 2019 Datacenter Core
-  * Windows Server 2019 Datacenter
-  * Windows Server 2022 Datacenter Core
-  * Windows Server 2022 Datacenter
-* One of the accepted SQL Server images (For SQL Cluster):
-  * SQL Server 2019 on Windows Server 2019 (Enterprise)
-* Latest SQL IaaS Extension 1.3.x (currently 1.3.20710)
-* Latest PowerShell Desired State Configuration Extension (currently 2.77.0.0)
-
-## Parameters
-
-| Parameter Name | Description | Type | Default Value
-| --- | --- | --- | ---
-| OSBaseVersion | SKU for AD and SOFS cluster Windows images | string | 2019-Datacenter-Core
-| OSSQLVersion | Offer SQL cluster images | string | sql2019-ws2019
-| namePrefix | prefix to be used in resource naming | string | aps
-| domainVmSize | VM size for AD VMs | string | Standard_DS1_v2
-| filServerVmSize | VM size for file server VMs | string | Standard_DS2_v2
-| sqlVmSize | VM size for SQL VMs | string | Standard_DS2_v2
-| domainName | dns domain name of new domain | string | Appsvc.local
-| adminUsername | Username for domain admin account | string | appsvcadmin
-| adminPassword | password for domain admin account | secure string |
-| fileShareOwnerUserName | Username for the file share owner account | string | FileShareOwner
-| fileShareOwnerPassword | password for file share owner account | secure string |
-| fileShareUserUserName | Username for the file share user account | string | FileShareUser
-| fileShareUserPassword | password for domain admin account | secure string |
-| sqlServerServiceAccountUserName | Username for SQL service account | string | svcSQL
-| sqlServerServiceAccountPassword | password for SQL service account | secure string |
-| sqlLogin | Username for the SQL login | string | sqlsa
-| sqlLoginPassword | password for SQL login account | secure string |
-| sofsName | Name of the Scale-out File Server | string | sofs01
-| shareName | Name of the Fileshare | string | WebSites
-| artifactsLocation | Blob store where all deployment artifacts are stored | string |  https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/appservice-fileserver-sqlserver-ha  
-| artifactsLocationSasToken | SAS token for artifact location if required | secure string |  
-| location | location to be used for the deployment | string |
-
-## Outputs
-
-| Parameter Name | Description 
-| --- | --- 
-| FileSharePath | FQDN of the file server 
-| FileShareOwner | Name of File Share Owner Account 
-| FileShareUser | Name of File Share User Account 
-| SQLserver | Name of SQL account 
-| SQLUser | Name of SQL Server 
