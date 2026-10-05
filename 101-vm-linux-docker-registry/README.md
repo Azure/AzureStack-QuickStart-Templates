@@ -73,7 +73,7 @@ docker push my-registry.com/hello-world:latest
 
 ### Can I use a self-signed certificate?
 
-Yes. You can use this PowerShell snipped to generate a self-signed certificate. 
+Yes. You can use this PowerShell snippet to generate a self-signed certificate. 
 
 ```powershell
 $PASSWORD=""

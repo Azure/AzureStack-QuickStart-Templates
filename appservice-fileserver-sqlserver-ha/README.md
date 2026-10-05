@@ -22,12 +22,12 @@ As stated the goal of this template is to deploy the infrastructure needed to su
 * Make a note of the outputs from this template they will be needed when installing AppService
 * When installing AppService be sure to select the option to deploy to an existing VNET
 * Details of File Server and SQL server endpoints & accounts can be found in the outputs noted 
-* After AppService deployment is complete manually back up bot the metering and hosting databases and add them to the availability group. 
+* After AppService deployment is complete manually back up both the metering and hosting databases and add them to the availability group. 
 * By default, the AppService Controller VM(s) have public IP addresses update the Controller NSG to allow RDP access, the SQL servers can be accessed from here on default IP addresses of 10.0.1.4 and 10.0.1.5
 
 ## Notes
 
-⚠️ **2025-06-12 - Fixed and issue that caused a failure while deploying Active Directory**
+⚠️ **2025-06-12 - Fixed an issue that caused a failure while deploying Active Directory**
 
 This template uses Azure Stack Marketplace images. These need to be available on your Azure Stack instance:
 
@@ -84,7 +84,7 @@ This template uses Azure Stack Marketplace images. These need to be available on
 
 * In dsc\config-second-dc.ps1.zip updated DSC modules:
   * xActiveDirectory 2.16.0.0 updated to ActiveDirectoryDsc 6.6.0
-    * This fixes an issue reported by some users where the PDC or BDC deployment would fail while installiing and configuring the Active Directory windows role
+    * This fixes an issue reported by some users where the PDC or BDC deployment would fail while installing and configuring the Active Directory windows role
 * Changed the default value for parameter *OSBaseVersion* from *2019-Datacenter-Core* to *2022-Datacenter-Core*
 
 ### UPDATE: 2022-10-23
@@ -107,10 +107,10 @@ This template uses Azure Stack Marketplace images. These need to be available on
     * Changed EnableS2D to a DSCResource and added DSCResource with logic to retry when running the Enable-ClusterStorageSpacesDirect command (the command was changed from Enable-ClusterS2D)
     * The command Enable-ClusterS2D was changed to Enable-ClusterStorageSpacesDirect due to Enable-ClusterS2D deprecation
   * dsc\config-s2d.ps1\xFailOverCluster\DSCResources\MicrosoftAzure_xCluster\MicrosoftAzure_xCluster.psm1
-    * On Set-TargetResource function to hande multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster
+    * On Set-TargetResource function to handle multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster
   * dsc\config-sql.ps1\xSQL\DSCResources\MicrosoftAzure_xSqlServer\MicrosoftAzure_xSqlServer.psm1
-    * Added support for SQL 2019 (MSSQL15) when settings the data and log files registry keys and setting the variables with the data and log files path
+    * Added support for SQL 2019 (MSSQL15) when setting the data and log files registry keys and setting the variables with the data and log files path
   * dsc\config-sql.ps1\xSQL\DSCResources\MicrosoftAzure_xSQLServerSettings\MicrosoftAzure_xSQLServerSettings.psm1
-    * Added support for SQL 2019 (MSSQL15) when settings the data and log files registry keys and setting the variables with the data and log files path
+    * Added support for SQL 2019 (MSSQL15) when setting the data and log files registry keys and setting the variables with the data and log files path
   * dsc\config-sql.ps1\xFailOverCluster\DSCResources\MicrosoftAzure_xCluster\MicrosoftAzure_xCluster.psm1
-    * On Set-TargetResource function to hande multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster
+    * On Set-TargetResource function to handle multiple executions of the Set-TargetResource and to prevent DSC from trying to execute Start-Cluster

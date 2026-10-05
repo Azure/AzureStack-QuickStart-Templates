@@ -1,5 +1,5 @@
 # Minikube on AzureStack
-This template deploys a Ubuntu 16.04 virtual machine on AzureStack running Minikube to manage kubenetes cluster.
+This template deploys a Ubuntu 16.04 virtual machine on AzureStack running Minikube to manage Kubernetes cluster.
 
 ## Prerequisites
 Follow the below links to create/download an Ubuntu 16.04 LTS Image and upload the same to Azure Stack's Platform Image Repository(PIR)

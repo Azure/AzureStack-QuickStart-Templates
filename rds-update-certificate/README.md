@@ -59,7 +59,7 @@ For information on managing certificates with Azure Key Vault see:  [Get started
 	```
 
 	Note: Certificates stored in Key Vault as secrets with content type 'application/x-pkcs12', this is why 
-    `Set-AzureRmKeyVaultAccessPolivy` cmdlet grants `-PremissionsToSecrets` (rather than `-PermissionsToCertificates`).
+    `Set-AzureRmKeyVaultAccessPolicy` cmdlet grants `-PermissionsToSecrets` (rather than `-PermissionsToCertificates`).
     
     You will need 1) application id (`$app.ApplicationId`), and 2) the password from above step supplied as input parameters to the Template.  
 	You will also need your tenant Id. To get tenant Id run the following powershell:

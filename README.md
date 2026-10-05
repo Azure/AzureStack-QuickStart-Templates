@@ -8,7 +8,7 @@ The primary Azure Resource Manager templates repository on GitHub is the azure-q
 
 Over time many GitHub users have contributed to the repository, resulting in a huge collection of more than 400 deployment templates. This repository is a great starting point to get a better understanding of how you can deploy various kinds of environment to Microsoft Azure. If you scroll through the templates in the azure-quickstart-templates repository, you will notice that there are templates that reference services (resource providers) that are not part of Microsoft Azure Stack Development Kit, such as ExpressRoute or CDN. 
 
-To ensure the successful deployment of templates to both Microsoft Azure and Microsoft Azure Stack Development Kit, this temporary GitHub repository AzureStack-quickstart-templates was created. This repository contains samples to test your Microsoft Azure Stack Development Kit environment. Over time, some templates from this temporary repository will be moved to the azure-quickstart-templates repository and this temporary AzureStack-quickstart-templates repository will be depreacated.
+To ensure the successful deployment of templates to both Microsoft Azure and Microsoft Azure Stack Development Kit, this temporary GitHub repository AzureStack-quickstart-templates was created. This repository contains samples to test your Microsoft Azure Stack Development Kit environment. Over time, some templates from this temporary repository will be moved to the azure-quickstart-templates repository and this temporary AzureStack-quickstart-templates repository will be deprecated.
 
 **If you want to contribute your Azure Resource Manager templates to GitHub, you should make your contribution to the azure-quickstart-templates repository.**
 
@@ -19,7 +19,7 @@ The azure-quickstart-templates repository contains a contribution guide and best
  * [Contribution-Guide](https://github.com/Azure/azure-quickstart-templates/blob/master/1-CONTRIBUTION-GUIDE/README.md#contribution-guide)
  * [Best-Practices](https://github.com/Azure/azure-quickstart-templates/blob/master/1-CONTRIBUTION-GUIDE/best-practices.md#best-practices)
 
-Familiarizing yourself with these documentes, improves the contribution experience.
+Familiarizing yourself with these documents, improves the contribution experience.
 
 The contribution guide also explains how to ensure that your deployment template complies with the requirements for it to show up on the gallery in the public Microsoft Azure website.
 
@@ -36,7 +36,7 @@ The following template functions are not available in Microsoft Azure Stack Deve
 
 ### API Versions for Resource Providers
 
-Each resource provider in Microsoft Azure has its own API version. Microsoft Azure Stack Development Kit supports the current API versions for the available resource providers, with some minor exceptions. To ensure your template will succesfully deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, use the latest API versions that are available in Microsoft Azure Stack Development Kit for all resources in your template. To retrieve a list of the available API versions connect to your Microsoft Azure Stack Development Kit environment by following the **Authenticate PowerShell with Microsoft Azure Stack** procedure described in this article.
+Each resource provider in Microsoft Azure has its own API version. Microsoft Azure Stack Development Kit supports the current API versions for the available resource providers, with some minor exceptions. To ensure your template will successfully deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, use the latest API versions that are available in Microsoft Azure Stack Development Kit for all resources in your template. To retrieve a list of the available API versions connect to your Microsoft Azure Stack Development Kit environment by following the **Authenticate PowerShell with Microsoft Azure Stack** procedure described in this article.
 
 https://azure.microsoft.com/en-us/documentation/articles/azure-stack-deploy-template-powershell/
 
@@ -60,4 +60,4 @@ Please note that this cmdlet does not verify the resource provider specific prop
 
 ## Next steps
 
-Start with creating deployment templates in your own repository. Make sure they deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, they are in line with the guidelines in the azure-quickstart-templates contribution guide and the guidelines described here. Fork the azure-quickstart-templates repository, add or update and send pull requests to the azure-quickstart-templates. If your templates comply with the requirments they will even show up in the gallery on the public Microsoft Azure website.
+Start with creating deployment templates in your own repository. Make sure they deploy to both Microsoft Azure and Microsoft Azure Stack Development Kit, they are in line with the guidelines in the azure-quickstart-templates contribution guide and the guidelines described here. Fork the azure-quickstart-templates repository, add or update and send pull requests to the azure-quickstart-templates. If your templates comply with the requirements they will even show up in the gallery on the public Microsoft Azure website.

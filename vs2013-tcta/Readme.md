@@ -17,7 +17,7 @@ The components are connected to an existing virtual network to allow connectivit
 +	domainName: Name of the existing domain to which the new VMs will join
 +	targetResourceGroupName: Name of the resource group that contains the virtual network to which the new VMs will connect to
 +	targetVMNetworkName: Name of the existing VM network to connect to
-+	targetVMNetworkSubnetName: Name of the exsisting subnet to connect to
++	targetVMNetworkSubnetName: Name of the existing subnet to connect to
 +	adminUsername: The name of the Administrator of the new VMs and Domain
 +	adminPassword: The password for the Administrator account of the new VMs and Domain
 +	serviceAccountUserName: The name of the user account under which the test controller and test agent services will run
@@ -43,7 +43,7 @@ The components are connected to an existing virtual network to allow connectivit
 # If you do not know the prefix of your <prefix>.onmicrosoft.com AzureAD account use option 2)
 
 # Option 1) If you know the prefix of your <prefix>.onmicrosoft.com AzureAD namespace.
-# You need to set that in the $AadTenantId varibale (e.g. contoso.onmicrosoft.com).
+# You need to set that in the $AadTenantId variable (e.g. contoso.onmicrosoft.com).
     $AadTenantId = "contoso"
 
 # Option 2) If you don't know the prefix of your AzureAD namespace, run the following cmdlets. 
@@ -51,7 +51,7 @@ The components are connected to an existing virtual network to allow connectivit
     $AadTenant = Login-AzureRmAccount
     $AadTenantId = $AadTenant.Context.Tenant.TenantId
 
-## Configure the environment with the Add-AzureRmEnvironment cmdlt
+## Configure the environment with the Add-AzureRmEnvironment cmdlet
     Add-AzureRmEnvironment -Name 'Azure Stack' `
         -ActiveDirectoryEndpoint ("https://login.windows.net/$AadTenantId/") `
         -ActiveDirectoryServiceEndpointResourceId "https://azurestack.local-api/"`

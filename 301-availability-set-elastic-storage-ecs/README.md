@@ -1,4 +1,4 @@
-# Deploy Multinode DELLEMC ECS Elastic Storage S3 Community Edition in an AzureStack Availabilty Set
+# Deploy Multinode DELLEMC ECS Elastic Storage S3 Community Edition in an AzureStack Availability Set
 
 <a href="https://portal.local.azurestack.external/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazurestack-quickstart-templates%2Fmaster%2F301-availability-set-elastic-storage-ecs%2Fazuredeploy.json" target="_blank">
 <img src="images/deploytoasdk.png"/>
@@ -12,10 +12,10 @@
 
 ## Prerequisites
 The required VM Types need to have at least 4vCPU and 16GB memory.
-With the current AzureStrack VM Sizes, this would be 28G Memory per machine, so make sure you ASDK has enough Memory...
+With the current AzureStack VM Sizes, this would be 28G Memory per machine, so make sure you ASDK has enough Memory...
 
-To depoloy to an ASDK Admin Tenant, just click on "ASDK Admin Tenant"   
-To depoloy to an ASDK User Tenant, just click on "Deploy to ASDK"  
+To deploy to an ASDK Admin Tenant, just click on "ASDK Admin Tenant"   
+To deploy to an ASDK User Tenant, just click on "Deploy to ASDK"  
 
 To deploy this template using the scripts from the root of this repo: (change the folder name below to match the folder name for this sample)
 
@@ -45,7 +45,7 @@ Storage ressources provided per vm
 
 #### Supported OSimage Publisher / SKU /Versions
 the following images are supported:
-+ **CentOS** this is based on the RogueWave Centos Image using Publicher OpenLogic, SKU CentOS, Version 7.4
++ **CentOS** this is based on the RogueWave Centos Image using Publisher OpenLogic, SKU CentOS, Version 7.4
 + **CentOS-7** this is based on the original Centos CloudImage using Publisher CentOS, SKU Centos-7, Version Centos-7.4 
 The Centos-7 must be loaded manually or using [Azurestack-Kickstart](https://github.com/bottkars/Azurestack-Kickstart)
 
@@ -92,7 +92,7 @@ fill in all parameters to you need and make sure the dns prefix is not used
 ### quickstart template 
 
 
-Also, you can use Visual Studio to deploy the template. If you have installed the ressourcegroup extensions creater a new deployment and select '301-availability-set-elastic-storage-ecs' from the quickstart templates
+Also, you can use Visual Studio to deploy the template. If you have installed the ressourcegroup extensions create a new deployment and select '301-availability-set-elastic-storage-ecs' from the quickstart templates
 
 
 ### visual studio example
@@ -102,7 +102,7 @@ Also, you can use Visual Studio to deploy the template. If you have installed th
 #### parameters of resource group
 ![deploy](images/rg_parameter.png "parameters for resource group")
 
-The ressource group deployment will take between 10 and 15 Minutes, depneding on VM Types
+The ressource group deployment will take between 10 and 15 Minutes, depending on VM Types
 
 ![rg](images/rg_done.png "parameters for resource group")
 
@@ -129,7 +129,7 @@ tail -f /root/install.log
 
 #### Connect
 
-once the installation has finished step2, you can connect to port 443 of your externa DNS from a webbrowser. 
+once the installation has finished step2, you can connect to port 443 of your external DNS from a webbrowser. 
 the initial user / password is root:ChangeMe
 
 ![log](images/dashboard.png "ECS Dashboard")
@@ -147,6 +147,6 @@ and
 
 future improvement´s
 + feedback of installation logs to arm
-+ ubntu based install ( pending verification )
++ ubuntu based install ( pending verification )
 + singlenode from same deployment
 + nested template for loadbalancer as copy set
